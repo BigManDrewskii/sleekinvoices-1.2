@@ -47,7 +47,7 @@ export function UpgradePromoBanner() {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-2">
               {benefits.map((benefit, index) => (
                 <div key={index} className="flex items-center gap-2 text-sm">
-                  <div className="flex-shrink-0 w-5 h-5 rounded-full bg-primary/10 flex items-center justify-center">
+                  <div className="flex-shrink-0 w-5 h-5 rounded-full bg-primary/20 flex items-center justify-center">
                     <Check className="h-3 w-3 text-primary" />
                   </div>
                   <span className="text-foreground/90">{benefit}</span>

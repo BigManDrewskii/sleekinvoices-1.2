@@ -20,7 +20,7 @@ export default function Landing() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-12 items-center max-w-7xl mx-auto">
           {/* Left Column - Content */}
           <div className="space-y-8 text-center lg:text-left">
-            <div className="inline-block px-4 py-2 bg-primary/10 text-primary rounded-full text-sm font-medium">
+            <div className="inline-block px-4 py-2 bg-primary/20 text-primary rounded-full text-sm font-medium">
               ✨ Professional Invoicing Made Simple
             </div>
             
@@ -74,7 +74,7 @@ export default function Landing() {
                 <div className="p-6 space-y-4 bg-card">
                   <div className="flex items-center justify-between">
                     <div className="text-sm font-medium">Invoice #INV-001</div>
-                    <div className="px-3 py-1 bg-primary/10 text-primary text-xs rounded-full">Draft</div>
+                    <div className="px-3 py-1 bg-primary/20 text-primary text-xs rounded-full">Draft</div>
                   </div>
                   <div className="space-y-2">
                     <div className="h-3 bg-muted rounded w-3/4"></div>
