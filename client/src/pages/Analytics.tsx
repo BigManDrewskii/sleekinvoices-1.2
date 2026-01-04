@@ -58,6 +58,26 @@ export default function Analytics() {
     { months: 6 },
     { enabled: isAuthenticated }
   );
+  
+  const { data: agingReport } = trpc.analytics.getAgingReport.useQuery(
+    undefined,
+    { enabled: isAuthenticated }
+  );
+  
+  const { data: clientProfitability } = trpc.analytics.getClientProfitability.useQuery(
+    undefined,
+    { enabled: isAuthenticated }
+  );
+  
+  const { data: cashFlowProjection } = trpc.analytics.getCashFlowProjection.useQuery(
+    { months: 6 },
+    { enabled: isAuthenticated }
+  );
+  
+  const { data: revenueVsExpenses } = trpc.analytics.getRevenueVsExpenses.useQuery(
+    { year: new Date().getFullYear() },
+    { enabled: isAuthenticated }
+  );
 
   if (loading || isLoading) {
     return (
@@ -390,6 +410,151 @@ export default function Analytics() {
               ) : (
                 <div className="h-[300px] flex items-center justify-center text-muted-foreground">
                   No data available for the selected period
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Aging Report */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Accounts Receivable Aging</CardTitle>
+              <CardDescription>Outstanding invoices by days overdue</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {agingReport ? (
+                <div className="space-y-4">
+                  <div className="grid grid-cols-5 gap-4">
+                    <div className="text-center p-4 border rounded-lg">
+                      <div className="text-sm text-muted-foreground mb-1">Current</div>
+                      <div className="text-2xl font-bold">{agingReport.current.count}</div>
+                      <div className="text-sm text-green-600">{formatCurrency(agingReport.current.amount)}</div>
+                    </div>
+                    <div className="text-center p-4 border rounded-lg">
+                      <div className="text-sm text-muted-foreground mb-1">0-30 Days</div>
+                      <div className="text-2xl font-bold">{agingReport.days_0_30.count}</div>
+                      <div className="text-sm text-yellow-600">{formatCurrency(agingReport.days_0_30.amount)}</div>
+                    </div>
+                    <div className="text-center p-4 border rounded-lg">
+                      <div className="text-sm text-muted-foreground mb-1">31-60 Days</div>
+                      <div className="text-2xl font-bold">{agingReport.days_31_60.count}</div>
+                      <div className="text-sm text-orange-600">{formatCurrency(agingReport.days_31_60.amount)}</div>
+                    </div>
+                    <div className="text-center p-4 border rounded-lg">
+                      <div className="text-sm text-muted-foreground mb-1">61-90 Days</div>
+                      <div className="text-2xl font-bold">{agingReport.days_61_90.count}</div>
+                      <div className="text-sm text-red-600">{formatCurrency(agingReport.days_61_90.amount)}</div>
+                    </div>
+                    <div className="text-center p-4 border rounded-lg">
+                      <div className="text-sm text-muted-foreground mb-1">90+ Days</div>
+                      <div className="text-2xl font-bold">{agingReport.days_90_plus.count}</div>
+                      <div className="text-sm text-red-800 font-semibold">{formatCurrency(agingReport.days_90_plus.amount)}</div>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="h-[150px] flex items-center justify-center text-muted-foreground">
+                  Loading aging report...
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Client Profitability */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Client Profitability</CardTitle>
+              <CardDescription>Revenue and profit by client</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {clientProfitability && clientProfitability.length > 0 ? (
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead>
+                      <tr className="border-b">
+                        <th className="text-left p-2">Client</th>
+                        <th className="text-right p-2">Revenue</th>
+                        <th className="text-right p-2">Expenses</th>
+                        <th className="text-right p-2">Profit</th>
+                        <th className="text-right p-2">Margin</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {clientProfitability.slice(0, 10).map((client: any) => (
+                        <tr key={client.clientId} className="border-b hover:bg-muted/50">
+                          <td className="p-2 font-medium">{client.clientName}</td>
+                          <td className="text-right p-2">{formatCurrency(client.revenue)}</td>
+                          <td className="text-right p-2">{formatCurrency(client.expenses)}</td>
+                          <td className={`text-right p-2 font-semibold ${client.profit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                            {formatCurrency(client.profit)}
+                          </td>
+                          <td className={`text-right p-2 ${client.margin >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                            {client.margin.toFixed(1)}%
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              ) : (
+                <div className="h-[200px] flex items-center justify-center text-muted-foreground">
+                  No client data available
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Cash Flow Projection */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Cash Flow Projection</CardTitle>
+              <CardDescription>Expected income and expenses for next 6 months</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {cashFlowProjection && cashFlowProjection.length > 0 ? (
+                <ResponsiveContainer width="100%" height={300}>
+                  <LineChart data={cashFlowProjection}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="month" />
+                    <YAxis />
+                    <Tooltip formatter={(value: any) => formatCurrency(value)} />
+                    <Legend />
+                    <Line type="monotone" dataKey="expectedIncome" stroke="#22c55e" strokeWidth={2} name="Expected Income" />
+                    <Line type="monotone" dataKey="expectedExpenses" stroke="#ef4444" strokeWidth={2} name="Expected Expenses" />
+                    <Line type="monotone" dataKey="netCashFlow" stroke="#3b82f6" strokeWidth={2} name="Net Cash Flow" />
+                  </LineChart>
+                </ResponsiveContainer>
+              ) : (
+                <div className="h-[300px] flex items-center justify-center text-muted-foreground">
+                  Loading cash flow projection...
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Revenue vs Expenses */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Revenue vs Expenses</CardTitle>
+              <CardDescription>Monthly profit & loss for {new Date().getFullYear()}</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {revenueVsExpenses && revenueVsExpenses.length > 0 ? (
+                <ResponsiveContainer width="100%" height={300}>
+                  <BarChart data={revenueVsExpenses}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="month" />
+                    <YAxis />
+                    <Tooltip formatter={(value: any) => formatCurrency(value)} />
+                    <Legend />
+                    <Bar dataKey="revenue" fill="#22c55e" name="Revenue" />
+                    <Bar dataKey="expenses" fill="#ef4444" name="Expenses" />
+                    <Bar dataKey="netProfit" fill="#3b82f6" name="Net Profit" />
+                  </BarChart>
+                </ResponsiveContainer>
+              ) : (
+                <div className="h-[300px] flex items-center justify-center text-muted-foreground">
+                  Loading revenue vs expenses...
                 </div>
               )}
             </CardContent>

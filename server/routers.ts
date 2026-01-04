@@ -448,6 +448,26 @@ export const appRouter = router({
       .query(async ({ ctx, input }) => {
         return await db.getMonthlyRevenue(ctx.user.id, input.months);
       }),
+    
+    getAgingReport: protectedProcedure.query(async ({ ctx }) => {
+      return await db.getAgingReport(ctx.user.id);
+    }),
+    
+    getClientProfitability: protectedProcedure.query(async ({ ctx }) => {
+      return await db.getClientProfitability(ctx.user.id);
+    }),
+    
+    getCashFlowProjection: protectedProcedure
+      .input(z.object({ months: z.number().default(6) }))
+      .query(async ({ ctx, input }) => {
+        return await db.getCashFlowProjection(ctx.user.id, input.months);
+      }),
+    
+    getRevenueVsExpenses: protectedProcedure
+      .input(z.object({ year: z.number().default(new Date().getFullYear()) }))
+      .query(async ({ ctx, input }) => {
+        return await db.getRevenueVsExpensesByMonth(ctx.user.id, input.year);
+      }),
   }),
 
   recurringInvoices: router({

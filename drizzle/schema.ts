@@ -250,7 +250,21 @@ export const expenses = mysqlTable("expenses", {
   
   // Receipt and payment
   receiptUrl: text("receiptUrl"),
-  paymentMethod: varchar("paymentMethod", { length: 50 }), // cash, card, bank transfer, etc.
+  receiptKey: text("receiptKey"), // S3 key for deletion
+  paymentMethod: mysqlEnum("paymentMethod", [
+    "cash",
+    "credit_card",
+    "debit_card",
+    "bank_transfer",
+    "check",
+    "other",
+  ]),
+  
+  // Tax and billable
+  taxAmount: decimal("taxAmount", { precision: 10, scale: 2 }).default("0").notNull(),
+  isBillable: int("isBillable").default(0).notNull(), // 1 = billable, 0 = not billable
+  clientId: int("clientId"), // If billable, which client
+  invoiceId: int("invoiceId"), // If billed, which invoice
   
   // Recurring flag
   isRecurring: boolean("isRecurring").default(false).notNull(),
@@ -392,3 +406,4 @@ export const reminderLogs = mysqlTable("reminderLogs", {
 
 export type ReminderLog = typeof reminderLogs.$inferSelect;
 export type InsertReminderLog = typeof reminderLogs.$inferInsert;
+
