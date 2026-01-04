@@ -20,6 +20,7 @@ import {
 import { StatusBadge } from "@/components/shared/StatusBadge";
 import { PaymentStatusBadge } from "@/components/shared/PaymentStatusBadge";
 import { DeleteConfirmDialog } from "@/components/shared/DeleteConfirmDialog";
+import { InvoiceListSkeleton } from "@/components/skeletons/InvoiceListSkeleton";
 import { getLoginUrl } from "@/const";
 import { trpc } from "@/lib/trpc";
 import { formatCurrency, formatDateShort } from "@/lib/utils";
@@ -261,7 +262,7 @@ export default function Invoices() {
           </CardHeader>
           <CardContent>
             {invoicesLoading ? (
-              <div className="text-center py-8 text-muted-foreground">Loading invoices...</div>
+              <InvoiceListSkeleton />
             ) : !invoices || invoices.length === 0 ? (
               <div className="text-center py-12">
                 <File className="h-12 w-12 text-muted-foreground mx-auto mb-4" />

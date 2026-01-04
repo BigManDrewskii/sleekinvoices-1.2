@@ -10,9 +10,10 @@ import { ClientSelector } from "@/components/invoices/ClientSelector";
 import { LineItemRow, LineItem } from "@/components/invoices/LineItemRow";
 import { BillableExpenseDialog } from "@/components/invoices/BillableExpenseDialog";
 import { InvoiceFormCalculations } from "@/components/invoices/InvoiceFormCalculations";
+import { InvoicePreviewModal } from "@/components/invoices/InvoicePreviewModal";
 import { getLoginUrl } from "@/const";
 import { trpc } from "@/lib/trpc";
-import { FileText, Plus, Save, Send } from "lucide-react";
+import { FileText, Plus, Save, Send, Eye } from "lucide-react";
 import { useState, useMemo } from "react";
 import { Link, useLocation } from "wouter";
 import { toast } from "sonner";
@@ -45,6 +46,9 @@ export default function CreateInvoice() {
   // Billable expenses dialog
   const [showExpenseDialog, setShowExpenseDialog] = useState(false);
   const [linkedExpenseIds, setLinkedExpenseIds] = useState<number[]>([]);
+  
+  // Preview modal
+  const [showPreview, setShowPreview] = useState(false);
 
   // Fetch next invoice number
   const { data: nextNumber } = trpc.invoices.getNextNumber.useQuery(undefined, {
@@ -280,37 +284,52 @@ export default function CreateInvoice() {
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div className="space-y-2">
-                    <Label>Invoice Number</Label>
-                    <Input value={nextNumber || 'Loading...'} disabled />
+                    <Label htmlFor="invoice-number">Invoice Number</Label>
+                    <Input 
+                      id="invoice-number"
+                      value={nextNumber || 'Loading...'} 
+                      disabled 
+                      aria-label="Invoice number (auto-generated)"
+                    />
                   </div>
 
                   <div className="space-y-2">
-                    <Label>
+                    <Label htmlFor="issue-date">
                       Issue Date <span className="text-red-500">*</span>
                     </Label>
                     <Input
+                      id="issue-date"
                       type="date"
                       value={issueDate}
                       onChange={(e) => setIssueDate(e.target.value)}
                       className={errors.issueDate ? "border-red-500" : ""}
+                      aria-label="Invoice issue date"
+                      aria-required="true"
+                      aria-invalid={!!errors.issueDate}
+                      aria-describedby={errors.issueDate ? "issue-date-error" : undefined}
                     />
                     {errors.issueDate && (
-                      <p className="text-sm text-red-500">{errors.issueDate}</p>
+                      <p id="issue-date-error" className="text-sm text-red-500" role="alert">{errors.issueDate}</p>
                     )}
                   </div>
 
                   <div className="space-y-2">
-                    <Label>
+                    <Label htmlFor="due-date">
                       Due Date <span className="text-red-500">*</span>
                     </Label>
                     <Input
+                      id="due-date"
                       type="date"
                       value={dueDate}
                       onChange={(e) => setDueDate(e.target.value)}
                       className={errors.dueDate ? "border-red-500" : ""}
+                      aria-label="Invoice due date"
+                      aria-required="true"
+                      aria-invalid={!!errors.dueDate}
+                      aria-describedby={errors.dueDate ? "due-date-error" : undefined}
                     />
                     {errors.dueDate && (
-                      <p className="text-sm text-red-500">{errors.dueDate}</p>
+                      <p id="due-date-error" className="text-sm text-red-500" role="alert">{errors.dueDate}</p>
                     )}
                   </div>
                 </div>
@@ -429,6 +448,14 @@ export default function CreateInvoice() {
               </Link>
               <Button
                 variant="outline"
+                onClick={() => setShowPreview(true)}
+                type="button"
+              >
+                <Eye className="h-4 w-4 mr-2" />
+                Preview
+              </Button>
+              <Button
+                variant="outline"
                 onClick={handleSaveDraft}
                 disabled={createInvoice.isPending}
               >
@@ -483,6 +510,27 @@ export default function CreateInvoice() {
           toast.success(`Added ${expenses.length} expense(s) to invoice`);
         }}
       />
+      
+      {/* Invoice Preview Modal */}
+      {clientId && (
+        <InvoicePreviewModal
+          open={showPreview}
+          onClose={() => setShowPreview(false)}
+          invoiceNumber={nextNumber || 'INV-0001'}
+          clientName={"Client Name"}
+          issueDate={new Date(issueDate)}
+          dueDate={new Date(dueDate)}
+          lineItems={lineItems}
+          subtotal={calculations.subtotal}
+          discountAmount={calculations.discountAmount}
+          taxAmount={calculations.taxAmount}
+          total={calculations.total}
+          notes={notes}
+          paymentTerms={paymentTerms}
+          companyName={user?.companyName || undefined}
+          companyAddress={user?.companyAddress || undefined}
+        />
+      )}
     </div>
   );
 }

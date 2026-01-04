@@ -1131,3 +1131,109 @@ See TODO_PHASE6A_FRONTEND.md for detailed implementation plan
 - [x] Fix nested anchors in Analytics page
 - [x] Fix nested anchors in CreateInvoice, EditInvoice, ViewInvoice pages
 - [x] Verify all fixes compile without errors
+
+
+## 🎨 FEATURE REFINEMENT - Create Invoice
+
+### Critical Fixes
+- [ ] Add client selection validation (prevent creating invoice without client)
+- [ ] Add rate field validation (require non-zero rate)
+- [ ] Show error messages for invalid form inputs
+- [ ] Fix duplicate Cancel buttons in navigation
+
+### UX Improvements
+- [ ] Add line item delete button
+- [ ] Add invoice preview before save
+- [ ] Clarify Save as Draft vs Save & Send difference
+- [ ] Add currency symbols to amount fields
+- [ ] Improve discount/tax input clarity (percentage vs decimal)
+- [ ] Add field help text/tooltips
+- [ ] Add client quick-create modal from invoice form
+- [ ] Make invoice number editable with auto-increment option
+
+### Polish
+- [ ] Add keyboard shortcuts (Tab navigation, Enter to submit)
+- [ ] Add autosave for drafts
+- [ ] Improve date picker UX
+- [ ] Add loading states for all actions
+- [ ] Add success/error toast notifications
+
+
+## 🎨 PHASE 1: High-Impact Refinements
+
+### Currency Display
+- [ ] Add currency symbols to all amount fields in LineItemRow
+- [ ] Add currency symbols to InvoiceFormCalculations totals
+- [ ] Add currency formatting to ViewInvoice page
+- [ ] Ensure thousand separators are consistent
+
+### Loading States
+- [ ] Add skeleton loaders to invoice list
+- [ ] Add loading spinners to form submit buttons
+- [ ] Disable buttons during async operations
+- [ ] Add loading state to client selector
+
+### Success Feedback
+- [ ] Enhance success toast messages with more context
+- [ ] Add visual feedback after invoice creation
+- [ ] Add celebration animation for first invoice milestone
+
+### Mobile Responsiveness
+- [ ] Audit all pages on mobile viewport (375px)
+- [ ] Improve line item layout on small screens
+- [ ] Make invoice table horizontally scrollable
+- [ ] Ensure touch targets are minimum 44x44px
+- [ ] Test navigation menu on mobile
+
+### Accessibility
+- [ ] Add ARIA labels to all form inputs
+- [ ] Ensure keyboard navigation works (Tab, Enter, Escape)
+- [ ] Add visible focus styles to interactive elements
+- [ ] Add screen reader announcements for dynamic updates
+- [ ] Test with screen reader (VoiceOver/NVDA)
+
+
+## 🚀 SYSTEMATIC HIGH-IMPACT REFINEMENTS
+
+### 1. Skeleton Loaders
+- [x] Create Skeleton component (reusable)
+- [x] Add InvoiceListSkeleton component
+- [x] Add ClientListSkeleton component
+- [x] Add AnalyticsSkeleton component
+- [x] Replace empty states with skeletons during initial load
+
+### 2. Accessibility
+- [x] Add ARIA labels to all form inputs
+- [x] Add ARIA live regions for toast notifications (using role="alert")
+- [x] Improve Tab key navigation order
+- [x] Add visible focus styles (ring-2 ring-primary)
+- [x] Add skip-to-content link
+- [ ] Test with keyboard-only navigation (manual testing needed)
+
+### 3. Invoice Preview
+- [x] Create InvoicePreviewModal component
+- [x] Add "Preview" button to CreateInvoice
+- [ ] Add "Preview" button to EditInvoice
+- [x] Format invoice display in modal
+- [x] Add "Edit" and "Continue" buttons in preview
+
+### 4. Mobile Navigation
+- [ ] Create MobileNav component with hamburger menu
+- [ ] Add slide-out drawer animation
+- [ ] Make all touch targets 44x44px minimum
+- [ ] Test on mobile viewport (375px, 414px)
+
+### 5. Bulk Actions
+- [ ] Add checkbox column to invoice table
+- [ ] Add "Select All" functionality
+- [ ] Create BulkActionToolbar component
+- [ ] Implement bulk delete with confirmation
+- [ ] Implement bulk "Mark as Paid"
+- [ ] Show selection count badge
+
+### 6. Export Functionality
+- [ ] Add PDF export button to ViewInvoice
+- [ ] Add CSV export button to Invoices list
+- [ ] Implement batch PDF export for selected invoices
+- [ ] Add loading spinner during export
+- [ ] Add success toast after export completes

@@ -49,14 +49,18 @@ export function LineItemRow({ item, onChange, onDelete, canDelete }: LineItemRow
 
       {/* Rate */}
       <div className="col-span-4 md:col-span-2">
-        <Input
-          type="number"
-          placeholder="Rate"
-          min="0"
-          step="0.01"
-          value={item.rate || ''}
-          onChange={(e) => handleChange('rate', parseFloat(e.target.value) || 0)}
-        />
+        <div className="relative">
+          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">$</span>
+          <Input
+            type="number"
+            placeholder="0.00"
+            min="0"
+            step="0.01"
+            value={item.rate || ''}
+            onChange={(e) => handleChange('rate', parseFloat(e.target.value) || 0)}
+            className="pl-7"
+          />
+        </div>
       </div>
 
       {/* Amount (calculated, read-only) */}
