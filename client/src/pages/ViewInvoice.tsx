@@ -465,22 +465,41 @@ export default function ViewInvoice() {
                   {invoice.stripePaymentLinkUrl && (
                     <div>
                       <h3 className="text-sm font-medium text-muted-foreground mb-2">
-                        Payment Link
+                        Online Payment
                       </h3>
-                      <div className="flex items-center gap-2">
-                        <code className="flex-1 p-2 bg-muted rounded text-xs break-all">
-                          {invoice.stripePaymentLinkUrl}
-                        </code>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => {
-                            navigator.clipboard.writeText(invoice.stripePaymentLinkUrl!);
-                            toast.success("Payment link copied to clipboard");
-                          }}
-                        >
-                          Copy
-                        </Button>
+                      <div className="space-y-3">
+                        <div className="flex items-center gap-2">
+                          <Button
+                            className="flex-1"
+                            onClick={() => {
+                              window.open(invoice.stripePaymentLinkUrl!, '_blank');
+                              toast.info("Opening payment page in new tab");
+                            }}
+                          >
+                            <svg className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                            </svg>
+                            Pay Now with Stripe
+                          </Button>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <code className="flex-1 p-2 bg-muted rounded text-xs break-all">
+                            {invoice.stripePaymentLinkUrl}
+                          </code>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => {
+                              navigator.clipboard.writeText(invoice.stripePaymentLinkUrl!);
+                              toast.success("Payment link copied to clipboard");
+                            }}
+                          >
+                            Copy
+                          </Button>
+                        </div>
+                        <p className="text-xs text-muted-foreground">
+                          Secure payment powered by Stripe. Share this link with your client to accept online payments.
+                        </p>
                       </div>
                     </div>
                   )}

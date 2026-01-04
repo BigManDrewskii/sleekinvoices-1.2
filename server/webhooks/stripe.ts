@@ -13,9 +13,38 @@ import {
  */
 export async function handleStripeWebhook(req: Request, res: Response) {
   try {
-    const event = req.body;
+    // Verify webhook signature
+    const signature = req.headers['stripe-signature'];
+    if (!signature) {
+      console.error('[Stripe Webhook] No signature header found');
+      return res.status(400).json({ error: 'No signature header' });
+    }
     
-    console.log(`[Stripe Webhook] Received event: ${event.type}`);
+    const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+    if (!webhookSecret) {
+      console.error('[Stripe Webhook] STRIPE_WEBHOOK_SECRET not set');
+      return res.status(500).json({ error: 'Webhook secret not configured' });
+    }
+    
+    // Construct and verify event
+    const { verifyWebhookSignature } = await import('../stripe');
+    let event;
+    
+    try {
+      const sig = Array.isArray(signature) ? signature[0] : signature;
+      event = verifyWebhookSignature(req.body, sig, webhookSecret);
+    } catch (err: any) {
+      console.error('[Stripe Webhook] Signature verification failed:', err.message);
+      return res.status(400).json({ error: 'Invalid signature' });
+    }
+    
+    console.log(`[Stripe Webhook] Received verified event: ${event.type}`);
+    
+    // Handle test events (required for webhook verification)
+    if (event.id.startsWith('evt_test_')) {
+      console.log('[Stripe Webhook] Test event detected, returning verification response');
+      return res.json({ verified: true });
+    }
     
     // Check if event already processed (idempotency)
     if (await isWebhookEventProcessed(event.id)) {
@@ -30,10 +59,6 @@ export async function handleStripeWebhook(req: Request, res: Response) {
     switch (event.type) {
       case "payment_intent.succeeded":
         await handlePaymentSucceeded(event);
-        break;
-      
-      case "payment_intent.failed":
-        await handlePaymentFailed(event);
         break;
       
       case "charge.refunded":
