@@ -94,6 +94,7 @@ export async function createSubscriptionCheckout(params: {
     ],
     success_url: params.successUrl,
     cancel_url: params.cancelUrl,
+    allow_promotion_codes: true,
   });
   
   return {

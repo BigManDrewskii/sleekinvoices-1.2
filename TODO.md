@@ -1036,3 +1036,24 @@ See TODO_PHASE6A_FRONTEND.md for detailed implementation plan
 - [ ] User tests: Verify Pro tier activation (Unlimited usage)
 - [ ] User tests: Create 4+ invoices to confirm no limit
 - [ ] User tests: Check webhook events in Stripe Dashboard
+
+
+---
+
+## 🐛 UPGRADE BUTTON NOT WORKING (Jan 4, 2026)
+- [x] Investigate why Upgrade to Pro button doesn't redirect
+- [x] Found error: No such customer 'cus_TjNHdQPm10GP8r'
+- [x] Root cause: TEST mode customer ID in database, but LIVE keys active
+- [ ] Clear invalid Stripe customer ID from database
+- [ ] Test checkout creates new LIVE customer
+- [ ] Verify redirect to Stripe checkout works
+
+
+---
+
+### 🎫 PROMO CODE SUPPORT (Jan 4, 2026)
+- [x] Add allow_promotion_codes: true to checkout session
+- [ ] Publish changes to production
+- [ ] Test checkout shows promo code input field
+- [ ] Apply Manus promo code and complete payment
+- [ ] Verify subscription activates correctly with promo code
