@@ -3,6 +3,7 @@ import {
   Sheet,
   SheetContent,
   SheetTrigger,
+  SheetTitle,
 } from "@/components/ui/sheet";
 import {
   DropdownMenu,
@@ -132,6 +133,7 @@ export function Navigation() {
                 </Button>
               </SheetTrigger>
               <SheetContent side="right" className="w-64">
+                <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
                 <div className="flex flex-col gap-4 mt-8">
                   <NavLinks mobile onItemClick={() => setMobileMenuOpen(false)} />
                   <div className="border-t pt-4 mt-4">
