@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { getLoginUrl } from "@/const";
 import { 
   FileText, Send, DollarSign, BarChart3, CheckCircle, Clock, Shield,
-  Zap, CreditCard, Bell, Users, Mail, Sparkles, ArrowRight, Star
+  Zap, CreditCard, Bell, Users, Mail, Sparkles, ArrowRight
 } from "lucide-react";
 import { Link } from "wouter";
 import { Navigation } from "@/components/Navigation";
@@ -34,20 +34,6 @@ export default function Landing() {
               Get paid faster with beautiful invoices, built-in Stripe payments, and automated reminders.
             </p>
 
-            {/* Trust Indicators */}
-            <div className="flex flex-col sm:flex-row items-center lg:items-start gap-4 text-sm text-muted-foreground">
-              <div className="flex items-center gap-1">
-                <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" />
-                <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" />
-                <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" />
-                <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" />
-                <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" />
-                <span className="ml-2 font-medium">5.0 Rating</span>
-              </div>
-              <div className="hidden sm:block text-muted-foreground/40">•</div>
-              <span>Trusted by 500+ freelancers</span>
-            </div>
-
             {/* CTAs */}
             <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start pt-4">
               <Button size="lg" asChild className="text-lg px-8 py-6">
@@ -55,9 +41,6 @@ export default function Landing() {
                   Start Free Trial
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </a>
-              </Button>
-              <Button size="lg" variant="outline" className="text-lg px-8 py-6 border-2">
-                Watch Demo
               </Button>
             </div>
 
@@ -123,20 +106,6 @@ export default function Landing() {
                 <Zap className="h-5 w-5" />
               </div>
             </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Social Proof Bar */}
-      <section className="border-y border-border bg-secondary/30">
-        <div className="container mx-auto px-4 py-8">
-          <div className="text-center">
-            <p className="text-sm text-muted-foreground mb-4">
-              Join freelancers and businesses who've created
-            </p>
-            <p className="text-3xl md:text-4xl font-bold text-foreground">
-              10,000+ <span className="text-primary">Professional Invoices</span>
-            </p>
           </div>
         </div>
       </section>
@@ -255,7 +224,6 @@ export default function Landing() {
             period="per month"
             description="Unlimited everything"
             badge="Most Popular"
-            savings="Save $84/year vs FreshBooks"
             features={[
               "Unlimited invoices",
               "Unlimited clients",
@@ -276,38 +244,8 @@ export default function Landing() {
         </p>
       </section>
 
-      {/* Testimonials Section */}
-      <section className="container mx-auto px-4 py-24 bg-secondary/20">
-        <div className="text-center mb-16">
-          <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
-            Loved by Freelancers & Small Businesses
-          </h2>
-        </div>
-        
-        <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-          <TestimonialCard
-            quote="SleekInvoices cut my invoicing time from 15 minutes to 30 seconds. The Stripe integration means I get paid the same day. Game changer for my freelance business."
-            author="Sarah Chen"
-            role="Freelance Designer"
-            rating={5}
-          />
-          <TestimonialCard
-            quote="Finally, an invoicing tool that doesn't feel like it was built in 2005. Clean, fast, and does exactly what I need without the bloat."
-            author="Marcus Rodriguez"
-            role="Consultant"
-            rating={5}
-          />
-          <TestimonialCard
-            quote="Switched from FreshBooks and saved $84/year. SleekInvoices has everything I need and nothing I don't. The automated reminders alone are worth it."
-            author="Jamie Thompson"
-            role="Small Business Owner"
-            rating={5}
-          />
-        </div>
-      </section>
-
       {/* FAQ Section */}
-      <section className="container mx-auto px-4 py-24">
+      <section className="container mx-auto px-4 py-24 bg-secondary/20">
         <div className="text-center mb-16">
           <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
             Frequently Asked Questions
@@ -357,7 +295,7 @@ export default function Landing() {
               Ready to Get Paid Faster?
             </h2>
             <p className="text-xl mb-8 opacity-90">
-              Join hundreds of freelancers and small businesses using SleekInvoices
+              Start creating professional invoices today
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button size="lg" variant="secondary" asChild className="text-lg px-8 py-6 shadow-xl">
@@ -365,9 +303,6 @@ export default function Landing() {
                   Start Your Free Trial
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </a>
-              </Button>
-              <Button size="lg" variant="outline" className="text-lg px-8 py-6 border-2 border-white text-white hover:bg-white hover:text-primary">
-                Schedule a Demo
               </Button>
             </div>
             <p className="text-sm opacity-75 pt-4">
@@ -498,7 +433,6 @@ function PricingCard({
   period,
   description,
   badge,
-  savings,
   features,
   cta,
   ctaHref,
@@ -509,7 +443,6 @@ function PricingCard({
   period: string;
   description: string;
   badge?: string;
-  savings?: string;
   features: string[];
   cta: string;
   ctaHref: string;
@@ -536,14 +469,6 @@ function PricingCard({
         <span className="text-5xl font-bold text-foreground">{price}</span>
         <span className="text-muted-foreground ml-2">/{period}</span>
       </div>
-
-      {savings && (
-        <div className="text-center mb-6">
-          <span className="inline-block px-3 py-1 bg-green-500/10 text-green-600 text-sm font-medium rounded-full">
-            {savings}
-          </span>
-        </div>
-      )}
       
       <ul className="space-y-3 mb-8">
         {features.map((feature, index) => (
@@ -562,39 +487,6 @@ function PricingCard({
       >
         <a href={ctaHref}>{cta}</a>
       </Button>
-    </div>
-  );
-}
-
-// Testimonial Card Component
-function TestimonialCard({
-  quote,
-  author,
-  role,
-  rating,
-}: {
-  quote: string;
-  author: string;
-  role: string;
-  rating: number;
-}) {
-  return (
-    <div className="bg-card border border-border rounded-2xl p-8 hover:shadow-lg transition-shadow">
-      <div className="flex gap-1 mb-4">
-        {[...Array(rating)].map((_, i) => (
-          <Star key={i} className="h-5 w-5 text-yellow-500 fill-yellow-500" />
-        ))}
-      </div>
-      <p className="text-foreground mb-6 leading-relaxed">"{quote}"</p>
-      <div className="flex items-center gap-3">
-        <div className="w-12 h-12 rounded-full bg-primary flex items-center justify-center text-white font-semibold">
-          {author.split(' ').map(n => n[0]).join('')}
-        </div>
-        <div>
-          <p className="font-semibold text-foreground">{author}</p>
-          <p className="text-sm text-muted-foreground">{role}</p>
-        </div>
-      </div>
     </div>
   );
 }
