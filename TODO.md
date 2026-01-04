@@ -799,4 +799,91 @@ See TODO_PHASE6A_FRONTEND.md for detailed implementation plan
 - [x] Document Stripe setup process
 - [x] Add payment flow diagrams
 - [x] Create user guide for accepting payments
-- [ ] Save checkpoint with Stripe integration
+- [x] Save checkpoint with Stripe integration
+
+
+---
+
+## 💎 SUBSCRIPTION SYSTEM IMPLEMENTATION
+
+### Phase 1: Stripe Product & Pricing Setup (30 min)
+- [ ] Create "InvoiceFlow Pro" product in Stripe Dashboard
+- [ ] Set up $12/month recurring price
+- [ ] Copy price ID and add to environment variables
+- [ ] Create shared/subscription.ts with plan constants
+- [ ] Update routers.ts with real price ID
+- [ ] Test checkout with test card
+
+### Phase 2: Database Schema Updates (1 hour)
+- [ ] Add usageTracking table to drizzle/schema.ts
+- [ ] Add index for userId + month lookups
+- [ ] Run migration: pnpm db:push
+- [ ] Add getCurrentMonthUsage() helper to db.ts
+- [ ] Add incrementInvoiceCount() helper to db.ts
+- [ ] Add updateUserSubscription() helper to db.ts
+- [ ] Test database helpers
+
+### Phase 3: Invoice Limit Enforcement (2 hours)
+- [ ] Add limit check to invoices.create procedure
+- [ ] Throw error when free user exceeds 3 invoices/month
+- [ ] Increment usage counter after invoice creation
+- [ ] Add subscription.getUsage query to routers.ts
+- [ ] Add usage warning banner to Dashboard.tsx
+- [ ] Disable "New Invoice" button when limit reached
+- [ ] Show remaining invoices count to free users
+- [ ] Test: Create 3 invoices as free user
+- [ ] Test: Verify 4th invoice fails with proper error
+- [ ] Test: Verify Pro users unlimited
+
+### Phase 4: Premium Feature Gating (3 hours)
+- [ ] Gate createPaymentLink procedure (Pro only)
+- [ ] Gate sendEmail procedure (Pro only)
+- [ ] Gate analytics.get query (Pro only)
+- [ ] Create UpgradePrompt.tsx component
+- [ ] Add conditional rendering to ViewInvoice.tsx
+- [ ] Show upgrade prompt on Analytics page for free users
+- [ ] Replace feature buttons with upgrade CTAs
+- [ ] Test: Verify free users see upgrade prompts
+- [ ] Test: Verify Pro users access all features
+
+### Phase 5: Subscription Webhook Handling (2 hours)
+- [ ] Add customer.subscription.created handler
+- [ ] Add customer.subscription.updated handler
+- [ ] Add customer.subscription.deleted handler
+- [ ] Add invoice.payment_succeeded handler
+- [ ] Add invoice.payment_failed handler
+- [ ] Update user subscriptionStatus from webhooks
+- [ ] Configure webhook events in Stripe Dashboard
+- [ ] Test: Subscribe and verify status updates
+- [ ] Test: Cancel and verify status updates
+- [ ] Test: Failed payment updates status to past_due
+
+### Phase 6: Usage Tracking & Analytics (1 hour)
+- [ ] Add usage stats card to Subscription.tsx
+- [ ] Show invoices created this month
+- [ ] Add admin subscription stats query (optional)
+- [ ] Track MRR (Monthly Recurring Revenue)
+- [ ] Test: Verify usage stats display correctly
+- [ ] Test: Verify usage resets at month start
+
+### Phase 7: Testing & Validation (3 hours)
+- [ ] Test complete free tier flow (0-3 invoices)
+- [ ] Test upgrade flow with test card
+- [ ] Test Pro tier unlimited invoices
+- [ ] Test feature access (payments, email, analytics)
+- [ ] Test subscription cancellation
+- [ ] Test webhook event handling
+- [ ] Test edge cases (mid-month upgrade, etc.)
+- [ ] Test month rollover usage reset
+- [ ] Verify all error messages are user-friendly
+- [ ] Create test documentation
+
+### Phase 8: Production Deployment
+- [ ] Switch Stripe to live mode
+- [ ] Create production product & price
+- [ ] Configure production webhook endpoint
+- [ ] Update environment variables with live keys
+- [ ] Set up webhook monitoring
+- [ ] Monitor MRR and conversion rates
+- [ ] Set up failed payment alerts
+- [ ] Save final checkpoint

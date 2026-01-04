@@ -1119,9 +1119,24 @@ export const appRouter = router({
         await db.updateUserSubscription(ctx.user.id, { stripeCustomerId: customerId });
       }
       
-      // TODO: Create subscription price in Stripe dashboard and use that price ID
-      // For now, hardcode a test price ID
-      const priceId = 'price_1234567890'; // Replace with actual price ID
+      /**
+       * STRIPE PRICE ID SETUP:
+       * 1. Log into Stripe Dashboard (https://dashboard.stripe.com)
+       * 2. Go to Products → Create Product
+       * 3. Name: "InvoiceFlow Pro"
+       * 4. Add recurring price: $12/month
+       * 5. Copy the Price ID (format: price_xxxxxxxxxxxxx)
+       * 6. Set environment variable: STRIPE_PRO_PRICE_ID=price_xxxxxxxxxxxxx
+       */
+      const priceId = process.env.STRIPE_PRO_PRICE_ID;
+      
+      if (!priceId) {
+        throw new Error('Stripe price ID not configured. Please set STRIPE_PRO_PRICE_ID environment variable.');
+      }
+      
+      if (priceId.includes('PLACEHOLDER') || priceId === 'price_1234567890') {
+        throw new Error('Stripe price ID is still a placeholder. Please create a product in Stripe Dashboard and update STRIPE_PRO_PRICE_ID.');
+      }
       
       const { url } = await createSubscriptionCheckout({
         customerId,

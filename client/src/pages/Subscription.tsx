@@ -6,6 +6,7 @@ import { trpc } from "@/lib/trpc";
 import { FileText, Check, CreditCard, ExternalLink } from "lucide-react";
 import { Link } from "wouter";
 import { toast } from "sonner";
+import { SUBSCRIPTION_PLANS } from "@shared/subscription";
 
 export default function Subscription() {
   const { user, loading, isAuthenticated } = useAuth();
@@ -111,8 +112,8 @@ export default function Subscription() {
             <h1 className="text-3xl font-bold text-foreground mb-2">Subscription</h1>
             <p className="text-muted-foreground">
               {isActive
-                ? "You're on the Pro plan with unlimited invoices"
-                : "Upgrade to Pro for unlimited invoices and features"}
+                ? `You're on the ${SUBSCRIPTION_PLANS.PRO.name} plan with unlimited invoices`
+                : `Upgrade to ${SUBSCRIPTION_PLANS.PRO.name} for unlimited invoices and features`}
             </p>
           </div>
 
@@ -129,7 +130,7 @@ export default function Subscription() {
               <CardContent>
                 <div className="space-y-2">
                   <p className="text-sm text-muted-foreground">
-                    <strong>Plan:</strong> Pro ($12/month)
+                    <strong>Plan:</strong> {SUBSCRIPTION_PLANS.PRO.name} (${SUBSCRIPTION_PLANS.PRO.price}/month)
                   </p>
                   {currentPeriodEnd && (
                     <p className="text-sm text-muted-foreground">
@@ -169,7 +170,7 @@ export default function Subscription() {
                 <CardTitle>Free</CardTitle>
                 <CardDescription>Get started with basic features</CardDescription>
                 <div className="mt-4">
-                  <span className="text-4xl font-bold text-foreground">$0</span>
+                  <span className="text-4xl font-bold text-foreground">${SUBSCRIPTION_PLANS.FREE.price}</span>
                   <span className="text-muted-foreground">/month</span>
                 </div>
               </CardHeader>
@@ -177,7 +178,7 @@ export default function Subscription() {
                 <ul className="space-y-3 mb-6">
                   <li className="flex items-center gap-2">
                     <Check className="h-4 w-4 text-green-500" />
-                    <span className="text-sm">3 invoices per month</span>
+                    <span className="text-sm">{SUBSCRIPTION_PLANS.FREE.invoiceLimit} invoices per month</span>
                   </li>
                   <li className="flex items-center gap-2">
                     <Check className="h-4 w-4 text-green-500" />
@@ -213,7 +214,7 @@ export default function Subscription() {
                 </CardTitle>
                 <CardDescription>Everything you need to grow</CardDescription>
                 <div className="mt-4">
-                  <span className="text-4xl font-bold text-foreground">$12</span>
+                  <span className="text-4xl font-bold text-foreground">${SUBSCRIPTION_PLANS.PRO.price}</span>
                   <span className="text-muted-foreground">/month</span>
                 </div>
               </CardHeader>
@@ -300,8 +301,8 @@ export default function Subscription() {
                   Is there a free trial?
                 </h3>
                 <p className="text-sm text-muted-foreground">
-                  The free plan allows you to create 3 invoices per month with no time limit.
-                  Upgrade to Pro when you're ready for unlimited invoices.
+                  The free plan allows you to create {SUBSCRIPTION_PLANS.FREE.invoiceLimit} invoices per month with no time limit.
+                  Upgrade to {SUBSCRIPTION_PLANS.PRO.name} when you're ready for unlimited invoices.
                 </p>
               </div>
             </CardContent>
