@@ -36,3 +36,20 @@
 - [ ] Form validation
 - [ ] Testing
 - [x] Initial checkpoint creation
+
+## Phase 1: Clients Management (Complete ✅)
+- [x] Create shared components (ClientDialog, DeleteConfirmDialog)
+- [x] Implement Clients.tsx with table view and search
+- [x] Implement create client flow
+- [x] Implement edit client flow
+- [x] Implement delete client flow with confirmation
+- [x] Add loading and error states
+- [x] Test all CRUD operations
+
+## Phase 2: Invoices List (Complete ✅)
+- [x] Build InvoiceTable component
+- [x] Implement status filter dropdown
+- [x] Add search by invoice number/client
+- [x] Add quick action buttons (view, edit, delete, PDF, email, payment link)
+- [x] Add loading and error states
+- [x] Test all features

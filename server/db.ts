@@ -203,11 +203,41 @@ export async function createInvoice(invoice: InsertInvoice): Promise<Invoice> {
   return created[0]!;
 }
 
-export async function getInvoicesByUserId(userId: number): Promise<Invoice[]> {
+export async function getInvoicesByUserId(userId: number) {
   const db = await getDb();
   if (!db) return [];
   
-  return db.select().from(invoices).where(eq(invoices.userId, userId)).orderBy(desc(invoices.createdAt));
+  const results = await db.select({
+    id: invoices.id,
+    invoiceNumber: invoices.invoiceNumber,
+    status: invoices.status,
+    issueDate: invoices.issueDate,
+    dueDate: invoices.dueDate,
+    total: invoices.total,
+    paymentLink: invoices.stripePaymentLinkUrl,
+    clientId: invoices.clientId,
+    clientName: clients.name,
+    clientEmail: clients.email,
+  })
+  .from(invoices)
+  .leftJoin(clients, eq(invoices.clientId, clients.id))
+  .where(eq(invoices.userId, userId))
+  .orderBy(desc(invoices.createdAt));
+  
+  return results.map(r => ({
+    id: r.id,
+    invoiceNumber: r.invoiceNumber,
+    status: r.status,
+    issueDate: r.issueDate,
+    dueDate: r.dueDate,
+    total: r.total,
+    paymentLink: r.paymentLink,
+    client: {
+      id: r.clientId,
+      name: r.clientName || 'Unknown',
+      email: r.clientEmail,
+    },
+  }));
 }
 
 export async function getInvoiceById(invoiceId: number, userId: number): Promise<Invoice | undefined> {
@@ -325,12 +355,16 @@ export async function getInvoiceStats(userId: number) {
   const paidInvoices = allInvoices.filter(inv => inv.status === 'paid').length;
   const overdueInvoices = allInvoices.filter(inv => inv.status === 'overdue').length;
   
+  const averageInvoiceValue = totalInvoices > 0 ? totalRevenue / paidInvoices : 0;
+  
   return {
     totalRevenue,
     outstandingBalance,
+    outstandingAmount: outstandingBalance, // Alias for compatibility
     totalInvoices,
     paidInvoices,
     overdueInvoices,
+    averageInvoiceValue,
   };
 }
 
@@ -362,6 +396,30 @@ export async function getMonthlyRevenue(userId: number, months: number = 6) {
   return Object.entries(monthlyData).map(([month, revenue]) => ({
     month,
     revenue,
+    count: paidInvoices.filter(inv => inv.paidAt?.toISOString().slice(0, 7) === month).length,
+  }));
+}
+
+export async function getInvoiceStatusBreakdown(userId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const allInvoices = await db.select().from(invoices).where(eq(invoices.userId, userId));
+  
+  const breakdown: { [key: string]: { count: number; totalAmount: number } } = {};
+  
+  allInvoices.forEach(invoice => {
+    if (!breakdown[invoice.status]) {
+      breakdown[invoice.status] = { count: 0, totalAmount: 0 };
+    }
+    breakdown[invoice.status].count++;
+    breakdown[invoice.status].totalAmount += Number(invoice.total);
+  });
+  
+  return Object.entries(breakdown).map(([status, data]) => ({
+    status,
+    count: data.count,
+    totalAmount: data.totalAmount,
   }));
 }
 

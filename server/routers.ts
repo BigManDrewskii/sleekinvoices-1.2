@@ -421,6 +421,21 @@ export const appRouter = router({
         
         return result;
       }),
+    
+    getAnalytics: protectedProcedure
+      .input(z.object({ timeRange: z.enum(['7d', '30d', '90d', '1y']).default('30d') }))
+      .query(async ({ ctx, input }) => {
+        const stats = await db.getInvoiceStats(ctx.user.id);
+        const months = input.timeRange === '7d' ? 1 : input.timeRange === '30d' ? 3 : input.timeRange === '90d' ? 6 : 12;
+        const monthlyRevenue = await db.getMonthlyRevenue(ctx.user.id, months);
+        const statusBreakdown = await db.getInvoiceStatusBreakdown(ctx.user.id);
+        
+        return {
+          ...stats,
+          monthlyRevenue,
+          statusBreakdown,
+        };
+      }),
   }),
 
   analytics: router({

@@ -22,7 +22,7 @@ function Router() {
       <Route path={"/dashboard"} component={Dashboard} />
       <Route path={"/clients"} component={Clients} />
       <Route path={"/invoices"} component={Invoices} />
-      <Route path={"/invoices/new"} component={CreateInvoice} />
+      <Route path={"/invoices/create"} component={CreateInvoice} />
       <Route path={"/invoices/:id/edit"} component={EditInvoice} />
       <Route path={"/invoices/:id"} component={ViewInvoice} />
       <Route path={"/analytics"} component={Analytics} />

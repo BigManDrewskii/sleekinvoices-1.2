@@ -1,3 +1,462 @@
+import { useAuth } from "@/_core/hooks/useAuth";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { StatusBadge } from "@/components/shared/StatusBadge";
+import { DeleteConfirmDialog } from "@/components/shared/DeleteConfirmDialog";
+import { getLoginUrl } from "@/const";
+import { trpc } from "@/lib/trpc";
+import { formatCurrency, formatDate } from "@/lib/utils";
+import {
+  FileText,
+  Edit,
+  Trash2,
+  Download,
+  Mail,
+  Link as LinkIcon,
+  CheckCircle,
+  ArrowLeft,
+} from "lucide-react";
+import { useState } from "react";
+import { Link, useLocation, useParams } from "wouter";
+import { toast } from "sonner";
+
 export default function ViewInvoice() {
-  return <div className="min-h-screen bg-background p-8"><h1 className="text-3xl font-bold">View Invoice</h1></div>;
+  const { user, loading, isAuthenticated } = useAuth();
+  const [, setLocation] = useLocation();
+  const params = useParams();
+  const invoiceId = parseInt(params.id || "0");
+
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+
+  const { data, isLoading, error } = trpc.invoices.get.useQuery(
+    { id: invoiceId },
+    { enabled: isAuthenticated && invoiceId > 0 }
+  );
+
+  const utils = trpc.useUtils();
+
+  const deleteInvoice = trpc.invoices.delete.useMutation({
+    onSuccess: () => {
+      toast.success("Invoice deleted successfully");
+      setLocation("/invoices");
+    },
+    onError: (error) => {
+      toast.error(error.message || "Failed to delete invoice");
+    },
+  });
+
+  const generatePDF = trpc.invoices.generatePDF.useMutation({
+    onSuccess: (data) => {
+      window.open(data.url, "_blank");
+      toast.success("PDF generated successfully");
+    },
+    onError: (error) => {
+      toast.error(error.message || "Failed to generate PDF");
+    },
+  });
+
+  const sendEmail = trpc.invoices.sendEmail.useMutation({
+    onSuccess: () => {
+      toast.success("Invoice sent successfully");
+      utils.invoices.get.invalidate({ id: invoiceId });
+    },
+    onError: (error) => {
+      toast.error(error.message || "Failed to send invoice");
+    },
+  });
+
+  const createPaymentLink = trpc.invoices.createPaymentLink.useMutation({
+    onSuccess: (data) => {
+      toast.success("Payment link created");
+      utils.invoices.get.invalidate({ id: invoiceId });
+      navigator.clipboard.writeText(data.url);
+      toast.success("Payment link copied to clipboard");
+    },
+    onError: (error) => {
+      toast.error(error.message || "Failed to create payment link");
+    },
+  });
+
+  const markAsPaid = trpc.invoices.update.useMutation({
+    onSuccess: () => {
+      toast.success("Invoice marked as paid");
+      utils.invoices.get.invalidate({ id: invoiceId });
+      utils.invoices.list.invalidate();
+    },
+    onError: (error) => {
+      toast.error(error.message || "Failed to update invoice");
+    },
+  });
+
+  if (loading || isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    window.location.href = getLoginUrl();
+    return null;
+  }
+
+  if (error || !data) {
+    return (
+      <div className="min-h-screen bg-background">
+        <nav className="border-b bg-card/50 backdrop-blur-sm">
+          <div className="container mx-auto px-4 py-4 flex items-center justify-between">
+            <Link href="/dashboard">
+              <a className="flex items-center gap-2">
+                <FileText className="h-6 w-6 text-primary" />
+                <span className="text-xl font-bold text-foreground">InvoiceFlow</span>
+              </a>
+            </Link>
+          </div>
+        </nav>
+        <div className="container mx-auto px-4 py-16 text-center">
+          <h1 className="text-2xl font-bold text-foreground mb-4">Invoice Not Found</h1>
+          <p className="text-muted-foreground mb-8">
+            The invoice you're looking for doesn't exist or you don't have permission to view it.
+          </p>
+          <Link href="/invoices">
+            <a>
+              <Button>
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Back to Invoices
+              </Button>
+            </a>
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  const { invoice, lineItems, client } = data;
+
+  const handleMarkAsPaid = () => {
+    markAsPaid.mutate({
+      id: invoiceId,
+      status: "paid",
+    });
+  };
+
+  return (
+    <div className="min-h-screen bg-background">
+      {/* Navigation */}
+      <nav className="border-b bg-card/50 backdrop-blur-sm sticky top-0 z-50">
+        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-8">
+            <Link href="/dashboard">
+              <a className="flex items-center gap-2">
+                <FileText className="h-6 w-6 text-primary" />
+                <span className="text-xl font-bold text-foreground">InvoiceFlow</span>
+              </a>
+            </Link>
+            <div className="hidden md:flex items-center gap-6">
+              <Link href="/dashboard">
+                <a className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
+                  Dashboard
+                </a>
+              </Link>
+              <Link href="/invoices">
+                <a className="text-sm font-medium text-foreground">Invoices</a>
+              </Link>
+              <Link href="/clients">
+                <a className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
+                  Clients
+                </a>
+              </Link>
+              <Link href="/analytics">
+                <a className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
+                  Analytics
+                </a>
+              </Link>
+            </div>
+          </div>
+          <div className="flex items-center gap-4">
+            <Link href="/settings">
+              <a className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
+                {user?.name || "Settings"}
+              </a>
+            </Link>
+          </div>
+        </div>
+      </nav>
+
+      {/* Main Content */}
+      <div className="container mx-auto px-4 py-8">
+        <div className="max-w-4xl mx-auto">
+          {/* Header with Actions */}
+          <div className="flex items-center justify-between mb-8">
+            <div className="flex items-center gap-4">
+              <Link href="/invoices">
+                <a>
+                  <Button variant="ghost" size="sm">
+                    <ArrowLeft className="h-4 w-4 mr-2" />
+                    Back
+                  </Button>
+                </a>
+              </Link>
+              <div>
+                <h1 className="text-3xl font-bold text-foreground">{invoice.invoiceNumber}</h1>
+                <p className="text-muted-foreground">Invoice Details</p>
+              </div>
+            </div>
+            <StatusBadge status={invoice.status} />
+          </div>
+
+          {/* Action Buttons */}
+          <div className="flex flex-wrap items-center gap-2 mb-6">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setLocation(`/invoices/${invoiceId}/edit`)}
+            >
+              <Edit className="h-4 w-4 mr-2" />
+              Edit
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => generatePDF.mutate({ id: invoiceId })}
+              disabled={generatePDF.isPending}
+            >
+              <Download className="h-4 w-4 mr-2" />
+              Download PDF
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => sendEmail.mutate({ id: invoiceId })}
+              disabled={sendEmail.isPending}
+            >
+              <Mail className="h-4 w-4 mr-2" />
+              Send Email
+            </Button>
+            {!invoice.stripePaymentLinkUrl && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => createPaymentLink.mutate({ id: invoiceId })}
+                disabled={createPaymentLink.isPending}
+              >
+                <LinkIcon className="h-4 w-4 mr-2" />
+                Create Payment Link
+              </Button>
+            )}
+            {(invoice.status === "sent" || invoice.status === "overdue") && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleMarkAsPaid}
+                disabled={markAsPaid.isPending}
+              >
+                <CheckCircle className="h-4 w-4 mr-2" />
+                Mark as Paid
+              </Button>
+            )}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setDeleteDialogOpen(true)}
+              className="text-red-600 hover:text-red-700 hover:bg-red-50"
+            >
+              <Trash2 className="h-4 w-4 mr-2" />
+              Delete
+            </Button>
+          </div>
+
+          {/* Invoice Details */}
+          <div className="space-y-6">
+            {/* Client and Invoice Info */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Invoice Information</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <h3 className="text-sm font-medium text-muted-foreground mb-2">Bill To</h3>
+                    <div className="space-y-1">
+                      <p className="font-semibold">{client?.name || "Unknown Client"}</p>
+                      {client?.email && <p className="text-sm">{client.email}</p>}
+                      {client?.phone && <p className="text-sm">{client.phone}</p>}
+                      {client?.address && <p className="text-sm whitespace-pre-line">{client.address}</p>}
+                    </div>
+                  </div>
+                  <div className="space-y-3">
+                    <div>
+                      <span className="text-sm text-muted-foreground">Issue Date: </span>
+                      <span className="font-medium">{formatDate(invoice.issueDate)}</span>
+                    </div>
+                    <div>
+                      <span className="text-sm text-muted-foreground">Due Date: </span>
+                      <span className="font-medium">{formatDate(invoice.dueDate)}</span>
+                    </div>
+                    {invoice.paidAt && (
+                      <div>
+                        <span className="text-sm text-muted-foreground">Paid At: </span>
+                        <span className="font-medium">{formatDate(invoice.paidAt)}</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Line Items */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Line Items</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Description</TableHead>
+                      <TableHead className="text-right">Quantity</TableHead>
+                      <TableHead className="text-right">Rate</TableHead>
+                      <TableHead className="text-right">Amount</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {lineItems?.map((item) => (
+                      <TableRow key={item.id}>
+                        <TableCell>{item.description}</TableCell>
+                        <TableCell className="text-right">{item.quantity}</TableCell>
+                        <TableCell className="text-right">{formatCurrency(item.rate)}</TableCell>
+                        <TableCell className="text-right font-medium">
+                          {formatCurrency(item.amount)}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+
+            {/* Totals */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Totals</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-muted-foreground">Subtotal</span>
+                    <span className="font-medium">{formatCurrency(invoice.subtotal)}</span>
+                  </div>
+                  {parseFloat(invoice.discountAmount) > 0 && (
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-muted-foreground">
+                        Discount
+                        {invoice.discountType === "percentage"
+                          ? ` (${invoice.discountValue}%)`
+                          : ""}
+                      </span>
+                      <span className="text-red-600">-{formatCurrency(invoice.discountAmount)}</span>
+                    </div>
+                  )}
+                  {parseFloat(invoice.taxAmount) > 0 && (
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-muted-foreground">Tax ({invoice.taxRate}%)</span>
+                      <span>+{formatCurrency(invoice.taxAmount)}</span>
+                    </div>
+                  )}
+                  <div className="flex items-center justify-between pt-3 border-t-2 border-primary/20">
+                    <span className="text-lg font-bold">Total</span>
+                    <span className="text-2xl font-bold text-primary">
+                      {formatCurrency(invoice.total)}
+                    </span>
+                  </div>
+                  {parseFloat(invoice.amountPaid) > 0 && (
+                    <>
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-muted-foreground">Amount Paid</span>
+                        <span className="text-green-600">-{formatCurrency(invoice.amountPaid)}</span>
+                      </div>
+                      <div className="flex items-center justify-between pt-2 border-t">
+                        <span className="font-semibold">Balance Due</span>
+                        <span className="font-bold">
+                          {formatCurrency(
+                            parseFloat(invoice.total) - parseFloat(invoice.amountPaid)
+                          )}
+                        </span>
+                      </div>
+                    </>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Notes and Payment Terms */}
+            {(invoice.notes || invoice.paymentTerms || invoice.stripePaymentLinkUrl) && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Additional Information</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {invoice.notes && (
+                    <div>
+                      <h3 className="text-sm font-medium text-muted-foreground mb-2">Notes</h3>
+                      <p className="text-sm whitespace-pre-line">{invoice.notes}</p>
+                    </div>
+                  )}
+                  {invoice.paymentTerms && (
+                    <div>
+                      <h3 className="text-sm font-medium text-muted-foreground mb-2">
+                        Payment Terms
+                      </h3>
+                      <p className="text-sm">{invoice.paymentTerms}</p>
+                    </div>
+                  )}
+                  {invoice.stripePaymentLinkUrl && (
+                    <div>
+                      <h3 className="text-sm font-medium text-muted-foreground mb-2">
+                        Payment Link
+                      </h3>
+                      <div className="flex items-center gap-2">
+                        <code className="flex-1 p-2 bg-muted rounded text-xs break-all">
+                          {invoice.stripePaymentLinkUrl}
+                        </code>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => {
+                            navigator.clipboard.writeText(invoice.stripePaymentLinkUrl!);
+                            toast.success("Payment link copied to clipboard");
+                          }}
+                        >
+                          Copy
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Delete Dialog */}
+      <DeleteConfirmDialog
+        open={deleteDialogOpen}
+        onOpenChange={setDeleteDialogOpen}
+        onConfirm={() => deleteInvoice.mutate({ id: invoiceId })}
+        title="Delete Invoice"
+        description={`Are you sure you want to delete invoice ${invoice.invoiceNumber}? This action cannot be undone.`}
+        isLoading={deleteInvoice.isPending}
+      />
+    </div>
+  );
 }
