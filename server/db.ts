@@ -24,7 +24,9 @@ import {
   InsertStripeWebhookEvent,
   reminderSettings,
   reminderLogs,
-  usageTracking
+  usageTracking,
+  customFields,
+  invoiceCustomFieldValues
 } from "../drizzle/schema";
 import { ENV } from './_core/env';
 import { DEFAULT_REMINDER_TEMPLATE } from './email';
@@ -726,14 +728,38 @@ export async function deleteRecurringInvoiceLineItems(recurringInvoiceId: number
 export async function createInvoiceTemplate(template: {
   userId: number;
   name: string;
+  templateType?: "modern" | "classic" | "minimal" | "bold" | "professional" | "creative";
   primaryColor?: string;
   secondaryColor?: string;
-  fontFamily?: string;
+  accentColor?: string;
+  headingFont?: string;
+  bodyFont?: string;
+  fontSize?: number;
   logoUrl?: string;
+  logoPosition?: "left" | "center" | "right";
+  logoWidth?: number;
+  headerLayout?: "standard" | "centered" | "split";
+  footerLayout?: "simple" | "detailed" | "minimal";
+  showCompanyAddress?: boolean;
+  showPaymentTerms?: boolean;
+  showTaxField?: boolean;
+  showDiscountField?: boolean;
+  showNotesField?: boolean;
+  footerText?: string;
+  language?: string;
+  dateFormat?: string;
   isDefault?: boolean;
 }) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
+
+  // If this template is being set as default, unset other defaults first
+  if (template.isDefault) {
+    await db
+      .update(invoiceTemplates)
+      .set({ isDefault: false })
+      .where(eq(invoiceTemplates.userId, template.userId));
+  }
 
   const result = await db.insert(invoiceTemplates).values(template);
   return result;
@@ -764,25 +790,59 @@ export async function updateInvoiceTemplate(
   userId: number,
   updates: Partial<{
     name: string;
+    templateType: "modern" | "classic" | "minimal" | "bold" | "professional" | "creative";
     primaryColor: string;
     secondaryColor: string;
-    fontFamily: string;
+    accentColor: string;
+    headingFont: string;
+    bodyFont: string;
+    fontSize: number;
     logoUrl: string;
+    logoPosition: "left" | "center" | "right";
+    logoWidth: number;
+    headerLayout: "standard" | "centered" | "split";
+    footerLayout: "simple" | "detailed" | "minimal";
+    showCompanyAddress: boolean;
+    showPaymentTerms: boolean;
+    showTaxField: boolean;
+    showDiscountField: boolean;
+    showNotesField: boolean;
+    footerText: string;
+    language: string;
+    dateFormat: string;
     isDefault: boolean;
   }>
 ) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
 
+  // If setting as default, unset other defaults first
+  if (updates.isDefault) {
+    await db
+      .update(invoiceTemplates)
+      .set({ isDefault: false })
+      .where(eq(invoiceTemplates.userId, userId));
+  }
+
   await db
     .update(invoiceTemplates)
-    .set(updates)
+    .set(updates as any)
     .where(and(eq(invoiceTemplates.id, id), eq(invoiceTemplates.userId, userId)));
 }
 
 export async function deleteInvoiceTemplate(id: number, userId: number) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
+
+  // Check if this is the default template
+  const template = await getInvoiceTemplateById(id, userId);
+  if (!template) {
+    throw new Error("Template not found");
+  }
+
+  if (template.isDefault) {
+    throw new Error("Cannot delete default template. Set another template as default first.");
+  }
 
   await db
     .delete(invoiceTemplates)
@@ -1990,4 +2050,183 @@ export async function canUserCreateInvoice(
 
   // Check against free tier limit (3 invoices/month)
   return canCreateInvoice(subscriptionStatus, usage.invoicesCreated);
+}
+
+
+
+// ============================================
+// Custom Fields
+// ============================================
+
+export async function createCustomField(field: {
+  userId: number;
+  templateId?: number;
+  fieldName: string;
+  fieldLabel: string;
+  fieldType: "text" | "number" | "date" | "select";
+  isRequired?: boolean;
+  defaultValue?: string;
+  selectOptions?: string;
+  sortOrder?: number;
+}) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  await db.insert(customFields).values(field);
+  return { success: true };
+}
+
+export async function getCustomFieldsByUserId(userId: number, templateId?: number) {
+  const db = await getDb();
+  if (!db) return [];
+
+  if (templateId) {
+    // Get fields for specific template or global fields (templateId = null)
+    return await db
+      .select()
+      .from(customFields)
+      .where(
+        and(
+          eq(customFields.userId, userId),
+          sql`(${customFields.templateId} = ${templateId} OR ${customFields.templateId} IS NULL)`
+        )
+      )
+      .orderBy(customFields.sortOrder);
+  } else {
+    // Get all fields for user
+    return await db
+      .select()
+      .from(customFields)
+      .where(eq(customFields.userId, userId))
+      .orderBy(customFields.sortOrder);
+  }
+}
+
+export async function getCustomFieldById(fieldId: number, userId: number) {
+  const db = await getDb();
+  if (!db) return null;
+
+  const results = await db
+    .select()
+    .from(customFields)
+    .where(
+      and(
+        eq(customFields.id, fieldId),
+        eq(customFields.userId, userId)
+      )
+    );
+
+  return results[0] || null;
+}
+
+export async function updateCustomField(
+  fieldId: number,
+  userId: number,
+  updates: Partial<{
+    fieldName: string;
+    fieldLabel: string;
+    fieldType: "text" | "number" | "date" | "select";
+    isRequired: boolean;
+    defaultValue: string;
+    selectOptions: string;
+    sortOrder: number;
+  }>
+) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  await db
+    .update(customFields)
+    .set(updates)
+    .where(
+      and(
+        eq(customFields.id, fieldId),
+        eq(customFields.userId, userId)
+      )
+    );
+}
+
+export async function deleteCustomField(fieldId: number, userId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  // Delete all values associated with this field first
+  await db
+    .delete(invoiceCustomFieldValues)
+    .where(eq(invoiceCustomFieldValues.customFieldId, fieldId));
+
+  // Delete the field definition
+  await db
+    .delete(customFields)
+    .where(
+      and(
+        eq(customFields.id, fieldId),
+        eq(customFields.userId, userId)
+      )
+    );
+}
+
+// ============================================
+// Invoice Custom Field Values
+// ============================================
+
+export async function setInvoiceCustomFieldValue(
+  invoiceId: number,
+  customFieldId: number,
+  value: string
+) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  // Use upsert pattern (insert or update)
+  await db
+    .insert(invoiceCustomFieldValues)
+    .values({ invoiceId, customFieldId, value })
+    .onDuplicateKeyUpdate({ set: { value } });
+}
+
+export async function getInvoiceCustomFieldValues(invoiceId: number) {
+  const db = await getDb();
+  if (!db) return [];
+
+  return await db
+    .select({
+      id: invoiceCustomFieldValues.id,
+      invoiceId: invoiceCustomFieldValues.invoiceId,
+      customFieldId: invoiceCustomFieldValues.customFieldId,
+      value: invoiceCustomFieldValues.value,
+      fieldName: customFields.fieldName,
+      fieldLabel: customFields.fieldLabel,
+      fieldType: customFields.fieldType,
+    })
+    .from(invoiceCustomFieldValues)
+    .leftJoin(customFields, eq(invoiceCustomFieldValues.customFieldId, customFields.id))
+    .where(eq(invoiceCustomFieldValues.invoiceId, invoiceId));
+}
+
+export async function deleteInvoiceCustomFieldValues(invoiceId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  await db
+    .delete(invoiceCustomFieldValues)
+    .where(eq(invoiceCustomFieldValues.invoiceId, invoiceId));
+}
+
+
+export async function getDefaultTemplate(userId: number) {
+  const db = await getDb();
+  if (!db) return null;
+
+  const results = await db
+    .select()
+    .from(invoiceTemplates)
+    .where(
+      and(
+        eq(invoiceTemplates.userId, userId),
+        eq(invoiceTemplates.isDefault, true)
+      )
+    );
+
+  return results[0] || null;
 }

@@ -214,20 +214,41 @@ export const invoiceTemplates = mysqlTable("invoiceTemplates", {
   name: varchar("name", { length: 100 }).notNull(),
   isDefault: boolean("isDefault").default(false).notNull(),
   
+  // Template layout type
+  templateType: mysqlEnum("templateType", ["modern", "classic", "minimal", "bold", "professional", "creative"]).default("modern").notNull(),
+  
   // Color scheme
-  primaryColor: varchar("primaryColor", { length: 7 }).default("#3b82f6").notNull(), // hex color
-  secondaryColor: varchar("secondaryColor", { length: 7 }).default("#64748b").notNull(),
+  primaryColor: varchar("primaryColor", { length: 7 }).default("#5f6fff").notNull(), // hex color
+  secondaryColor: varchar("secondaryColor", { length: 7 }).default("#252f33").notNull(),
   accentColor: varchar("accentColor", { length: 7 }).default("#10b981").notNull(),
   
-  // Typography
-  fontFamily: varchar("fontFamily", { length: 50 }).default("Inter").notNull(),
+  // Typography - separate fonts for headings and body
+  headingFont: varchar("headingFont", { length: 50 }).default("Inter").notNull(),
+  bodyFont: varchar("bodyFont", { length: 50 }).default("Inter").notNull(),
   fontSize: int("fontSize").default(14).notNull(),
   
-  // Layout options
+  // Logo customization
+  logoUrl: text("logoUrl"),
   logoPosition: mysqlEnum("logoPosition", ["left", "center", "right"]).default("left").notNull(),
+  logoWidth: int("logoWidth").default(150).notNull(), // pixels
+  
+  // Layout structure
+  headerLayout: mysqlEnum("headerLayout", ["standard", "centered", "split"]).default("standard").notNull(),
+  footerLayout: mysqlEnum("footerLayout", ["simple", "detailed", "minimal"]).default("simple").notNull(),
+  
+  // Field visibility controls
   showCompanyAddress: boolean("showCompanyAddress").default(true).notNull(),
   showPaymentTerms: boolean("showPaymentTerms").default(true).notNull(),
+  showTaxField: boolean("showTaxField").default(true).notNull(),
+  showDiscountField: boolean("showDiscountField").default(true).notNull(),
+  showNotesField: boolean("showNotesField").default(true).notNull(),
+  
+  // Footer customization
   footerText: text("footerText"),
+  
+  // Language and currency
+  language: varchar("language", { length: 10 }).default("en").notNull(),
+  dateFormat: varchar("dateFormat", { length: 20 }).default("MM/DD/YYYY").notNull(),
   
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
@@ -235,6 +256,43 @@ export const invoiceTemplates = mysqlTable("invoiceTemplates", {
 
 export type InvoiceTemplate = typeof invoiceTemplates.$inferSelect;
 export type InsertInvoiceTemplate = typeof invoiceTemplates.$inferInsert;
+
+/**
+ * Custom fields for invoices - user-defined fields
+ */
+export const customFields = mysqlTable("customFields", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  templateId: int("templateId"), // nullable - if null, applies to all templates
+  
+  fieldName: varchar("fieldName", { length: 100 }).notNull(),
+  fieldLabel: varchar("fieldLabel", { length: 100 }).notNull(),
+  fieldType: mysqlEnum("fieldType", ["text", "number", "date", "select"]).default("text").notNull(),
+  isRequired: boolean("isRequired").default(false).notNull(),
+  defaultValue: text("defaultValue"),
+  selectOptions: text("selectOptions"), // JSON array for select type
+  sortOrder: int("sortOrder").default(0).notNull(),
+  
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type CustomField = typeof customFields.$inferSelect;
+export type InsertCustomField = typeof customFields.$inferInsert;
+
+/**
+ * Custom field values for specific invoices
+ */
+export const invoiceCustomFieldValues = mysqlTable("invoiceCustomFieldValues", {
+  id: int("id").autoincrement().primaryKey(),
+  invoiceId: int("invoiceId").notNull(),
+  customFieldId: int("customFieldId").notNull(),
+  value: text("value").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type InvoiceCustomFieldValue = typeof invoiceCustomFieldValues.$inferSelect;
+export type InsertInvoiceCustomFieldValue = typeof invoiceCustomFieldValues.$inferInsert;
 
 /**
  * Expense categories for organization

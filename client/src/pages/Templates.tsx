@@ -1,294 +1,318 @@
 import { useState } from "react";
-import { trpc } from "@/lib/trpc";
+import { Link } from "wouter";
+import { Plus, Eye, Edit, Trash2, Check, Palette, Type, Layout, Settings as SettingsIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, Palette, Trash2, Check } from "lucide-react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
+import { TemplateEditor } from "@/components/templates/TemplateEditor";
+import { TemplatePreview } from "@/components/templates/TemplatePreview";
+import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
-export default function Templates() {
-  const { data: templates, isLoading } = trpc.templates.list.useQuery();
-  const createMutation = trpc.templates.create.useMutation();
-  const updateMutation = trpc.templates.update.useMutation();
-  const deleteMutation = trpc.templates.delete.useMutation();
+export default function InvoiceTemplates() {
+
+  const [selectedTemplateId, setSelectedTemplateId] = useState<number | null>(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const [isPreviewing, setIsPreviewing] = useState(false);
+  const [deleteTemplateId, setDeleteTemplateId] = useState<number | null>(null);
+
+  const { data: templates, isLoading, refetch } = trpc.templates.list.useQuery();
   const setDefaultMutation = trpc.templates.setDefault.useMutation();
-  const utils = trpc.useUtils();
+  const deleteMutation = trpc.templates.delete.useMutation();
 
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [editingTemplate, setEditingTemplate] = useState<any>(null);
-  const [formData, setFormData] = useState({
-    name: "",
-    primaryColor: "#3B82F6",
-    secondaryColor: "#1E40AF",
-    fontFamily: "Inter",
-  });
+  const selectedTemplate = templates?.find(t => t.id === selectedTemplateId);
 
-  const handleOpenDialog = (template?: any) => {
-    if (template) {
-      setEditingTemplate(template);
-      setFormData({
-        name: template.name,
-        primaryColor: template.primaryColor || "#3B82F6",
-        secondaryColor: template.secondaryColor || "#1E40AF",
-        fontFamily: template.fontFamily || "Inter",
-      });
-    } else {
-      setEditingTemplate(null);
-      setFormData({
-        name: "",
-        primaryColor: "#3B82F6",
-        secondaryColor: "#1E40AF",
-        fontFamily: "Inter",
-      });
-    }
-    setIsDialogOpen(true);
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
+  const handleSetDefault = async (templateId: number) => {
     try {
-      if (editingTemplate) {
-        await updateMutation.mutateAsync({
-          id: editingTemplate.id,
-          ...formData,
-        });
-        toast.success("Template updated successfully");
-      } else {
-        await createMutation.mutateAsync(formData);
-        toast.success("Template created successfully");
-      }
-      
-      utils.templates.list.invalidate();
-      setIsDialogOpen(false);
-    } catch (error) {
-      toast.error("Failed to save template");
-    }
-  };
-
-  const handleDelete = async (id: number) => {
-    if (!confirm("Are you sure you want to delete this template?")) return;
-
-    try {
-      await deleteMutation.mutateAsync({ id });
-      utils.templates.list.invalidate();
-      toast.success("Template deleted");
-    } catch (error) {
-      toast.error("Failed to delete template");
-    }
-  };
-
-  const handleSetDefault = async (id: number) => {
-    try {
-      await setDefaultMutation.mutateAsync({ id });
-      utils.templates.list.invalidate();
+      await setDefaultMutation.mutateAsync({ id: templateId });
       toast.success("Default template updated");
+      refetch();
     } catch (error) {
       toast.error("Failed to set default template");
     }
   };
 
-  if (isLoading) {
+  const handleDelete = async () => {
+    if (!deleteTemplateId) return;
+
+    try {
+      await deleteMutation.mutateAsync({ id: deleteTemplateId });
+      toast.success("Template deleted");
+      refetch();
+      setDeleteTemplateId(null);
+      if (selectedTemplateId === deleteTemplateId) {
+        setSelectedTemplateId(null);
+        setIsEditing(false);
+        setIsPreviewing(false);
+      }
+    } catch (error: any) {
+      toast.error(error.message || "Failed to delete template");
+      setDeleteTemplateId(null);
+    }
+  };
+
+  const handleEditComplete = () => {
+    setIsEditing(false);
+    setSelectedTemplateId(null);
+    refetch();
+  };
+
+  if (isEditing && selectedTemplateId) {
     return (
-      <div className="container py-8">
-        <div className="flex items-center justify-center h-64">
-          <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+      <TemplateEditor
+        templateId={selectedTemplateId}
+        onComplete={handleEditComplete}
+        onCancel={() => {
+          setIsEditing(false);
+          setSelectedTemplateId(null);
+        }}
+      />
+    );
+  }
+
+  if (isPreviewing && selectedTemplate) {
+    return (
+      <div className="min-h-screen bg-background">
+        <div className="border-b bg-card">
+          <div className="container flex items-center justify-between py-4">
+            <div>
+              <h1 className="text-2xl font-bold">{selectedTemplate.name} - Preview</h1>
+              <p className="text-sm text-muted-foreground">Preview how your invoices will look</p>
+            </div>
+            <Button onClick={() => setIsPreviewing(false)} variant="outline">
+              Close Preview
+            </Button>
+          </div>
+        </div>
+        <div className="container py-8">
+          <TemplatePreview template={selectedTemplate} />
         </div>
       </div>
     );
   }
 
   return (
-    <div className="container py-8">
-      <div className="flex items-center justify-between mb-8">
-        <div>
-          <h1 className="text-3xl font-bold">Invoice Templates</h1>
-          <p className="text-muted-foreground mt-2">
-            Customize your invoice branding with colors and fonts
-          </p>
+    <div className="min-h-screen bg-background">
+      {/* Header */}
+      <div className="border-b bg-card">
+        <div className="container flex items-center justify-between py-4">
+          <div className="flex items-center gap-4">
+            <Link href="/dashboard" className="text-muted-foreground hover:text-foreground transition-colors">
+              <img src="/SleekInvoices-Wide.svg" alt="SleekInvoices" className="h-6" />
+            </Link>
+            <div>
+              <h1 className="text-2xl font-bold">Invoice Templates</h1>
+              <p className="text-sm text-muted-foreground">Customize your invoice appearance</p>
+            </div>
+          </div>
+          <Button
+            onClick={() => {
+              setSelectedTemplateId(null);
+              setIsEditing(true);
+            }}
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            New Template
+          </Button>
         </div>
-
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogTrigger asChild>
-            <Button onClick={() => handleOpenDialog()}>
-              <Plus className="w-4 h-4 mr-2" />
-              Create Template
-            </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>
-                {editingTemplate ? "Edit Template" : "Create Template"}
-              </DialogTitle>
-            </DialogHeader>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <Label htmlFor="name">Template Name</Label>
-                <Input
-                  id="name"
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  placeholder="Professional Blue"
-                  required
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="primaryColor">Primary Color</Label>
-                  <div className="flex gap-2">
-                    <Input
-                      id="primaryColor"
-                      type="color"
-                      value={formData.primaryColor}
-                      onChange={(e) => setFormData({ ...formData, primaryColor: e.target.value })}
-                      className="w-16 h-10 p-1"
-                    />
-                    <Input
-                      value={formData.primaryColor}
-                      onChange={(e) => setFormData({ ...formData, primaryColor: e.target.value })}
-                      placeholder="#3B82F6"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <Label htmlFor="secondaryColor">Secondary Color</Label>
-                  <div className="flex gap-2">
-                    <Input
-                      id="secondaryColor"
-                      type="color"
-                      value={formData.secondaryColor}
-                      onChange={(e) => setFormData({ ...formData, secondaryColor: e.target.value })}
-                      className="w-16 h-10 p-1"
-                    />
-                    <Input
-                      value={formData.secondaryColor}
-                      onChange={(e) => setFormData({ ...formData, secondaryColor: e.target.value })}
-                      placeholder="#1E40AF"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <div>
-                <Label htmlFor="fontFamily">Font Family</Label>
-                <Select value={formData.fontFamily} onValueChange={(v) => setFormData({ ...formData, fontFamily: v })}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Inter">Inter</SelectItem>
-                    <SelectItem value="Roboto">Roboto</SelectItem>
-                    <SelectItem value="Open Sans">Open Sans</SelectItem>
-                    <SelectItem value="Lato">Lato</SelectItem>
-                    <SelectItem value="Montserrat">Montserrat</SelectItem>
-                    <SelectItem value="Poppins">Poppins</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="flex gap-2 pt-4">
-                <Button type="submit" disabled={createMutation.isPending || updateMutation.isPending}>
-                  {editingTemplate ? "Update Template" : "Create Template"}
-                </Button>
-                <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
-                  Cancel
-                </Button>
-              </div>
-            </form>
-          </DialogContent>
-        </Dialog>
       </div>
 
-      {!templates || templates.length === 0 ? (
-        <Card className="p-12 text-center">
-          <Palette className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
-          <h3 className="text-lg font-semibold mb-2">No templates yet</h3>
-          <p className="text-muted-foreground mb-6">
-            Create custom invoice templates with your brand colors and fonts
-          </p>
-          <Button onClick={() => handleOpenDialog()}>
-            <Plus className="w-4 h-4 mr-2" />
-            Create Your First Template
-          </Button>
-        </Card>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {templates.map((template: any) => (
-            <Card key={template.id} className="p-6 relative">
-              {template.isDefault && (
-                <div className="absolute top-3 right-3">
-                  <span className="px-2 py-1 bg-green-100 text-green-700 text-xs font-medium rounded-full flex items-center gap-1">
-                    <Check className="w-3 h-3" />
+      {/* Content */}
+      <div className="container py-8">
+        {isLoading ? (
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {[1, 2, 3].map((i) => (
+              <Card key={i}>
+                <CardHeader>
+                  <Skeleton className="h-6 w-32" />
+                  <Skeleton className="h-4 w-24" />
+                </CardHeader>
+                <CardContent>
+                  <Skeleton className="h-40 w-full" />
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        ) : templates && templates.length > 0 ? (
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {templates.map((template) => (
+              <Card key={template.id} className="relative overflow-hidden group">
+                {template.isDefault && (
+                  <Badge className="absolute top-4 right-4 z-10 bg-primary">
+                    <Check className="h-3 w-3 mr-1" />
                     Default
-                  </span>
-                </div>
-              )}
-
-              <h3 className="text-lg font-semibold mb-4">{template.name}</h3>
-
-              <div className="space-y-3 mb-4">
-                <div className="flex items-center gap-3">
-                  <div
-                    className="w-12 h-12 rounded border"
-                    style={{ backgroundColor: template.primaryColor }}
-                  />
-                  <div>
-                    <p className="text-sm font-medium">Primary</p>
-                    <p className="text-xs text-muted-foreground">{template.primaryColor}</p>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-3">
-                  <div
-                    className="w-12 h-12 rounded border"
-                    style={{ backgroundColor: template.secondaryColor }}
-                  />
-                  <div>
-                    <p className="text-sm font-medium">Secondary</p>
-                    <p className="text-xs text-muted-foreground">{template.secondaryColor}</p>
-                  </div>
-                </div>
-
-                <div>
-                  <p className="text-sm font-medium">Font</p>
-                  <p className="text-xs text-muted-foreground">{template.fontFamily}</p>
-                </div>
-              </div>
-
-              <div className="flex gap-2">
-                {!template.isDefault && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleSetDefault(template.id)}
-                  >
-                    Set Default
-                  </Button>
+                  </Badge>
                 )}
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handleOpenDialog(template)}
-                >
-                  Edit
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handleDelete(template.id)}
-                >
-                  <Trash2 className="w-4 h-4" />
-                </Button>
-              </div>
-            </Card>
-          ))}
-        </div>
-      )}
+                
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Palette className="h-5 w-5" style={{ color: template.primaryColor }} />
+                    {template.name}
+                  </CardTitle>
+                  <CardDescription className="capitalize">
+                    {template.templateType} style
+                  </CardDescription>
+                </CardHeader>
+
+                <CardContent className="space-y-4">
+                  {/* Template Preview Thumbnail */}
+                  <div 
+                    className="h-40 border rounded-lg overflow-hidden bg-white cursor-pointer hover:border-primary transition-colors"
+                    onClick={() => {
+                      setSelectedTemplateId(template.id);
+                      setIsPreviewing(true);
+                    }}
+                  >
+                    <div className="p-4 space-y-2">
+                      <div 
+                        className="h-8 rounded"
+                        style={{ backgroundColor: template.primaryColor, opacity: 0.1 }}
+                      />
+                      <div className="space-y-1">
+                        <div className="h-2 bg-gray-200 rounded w-3/4" />
+                        <div className="h-2 bg-gray-200 rounded w-1/2" />
+                      </div>
+                      <div className="space-y-1 pt-2">
+                        <div className="h-2 bg-gray-100 rounded" />
+                        <div className="h-2 bg-gray-100 rounded" />
+                        <div className="h-2 bg-gray-100 rounded w-2/3" />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Template Details */}
+                  <div className="space-y-2 text-sm">
+                    <div className="flex items-center gap-2 text-muted-foreground">
+                      <Type className="h-4 w-4" />
+                      <span>{template.headingFont || template.bodyFont}</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-muted-foreground">
+                      <Layout className="h-4 w-4" />
+                      <span className="capitalize">{template.headerLayout} header</span>
+                    </div>
+                    <div className="flex gap-2">
+                      <div 
+                        className="h-6 w-6 rounded border"
+                        style={{ backgroundColor: template.primaryColor }}
+                        title="Primary color"
+                      />
+                      <div 
+                        className="h-6 w-6 rounded border"
+                        style={{ backgroundColor: template.secondaryColor }}
+                        title="Secondary color"
+                      />
+                      <div 
+                        className="h-6 w-6 rounded border"
+                        style={{ backgroundColor: template.accentColor }}
+                        title="Accent color"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Actions */}
+                  <div className="flex gap-2">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="flex-1"
+                      onClick={() => {
+                        setSelectedTemplateId(template.id);
+                        setIsPreviewing(true);
+                      }}
+                    >
+                      <Eye className="h-4 w-4 mr-1" />
+                      Preview
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="flex-1"
+                      onClick={() => {
+                        setSelectedTemplateId(template.id);
+                        setIsEditing(true);
+                      }}
+                    >
+                      <Edit className="h-4 w-4 mr-1" />
+                      Edit
+                    </Button>
+                  </div>
+
+                  <div className="flex gap-2">
+                    {!template.isDefault && (
+                      <Button
+                        size="sm"
+                        variant="secondary"
+                        className="flex-1"
+                        onClick={() => handleSetDefault(template.id)}
+                        disabled={setDefaultMutation.isPending}
+                      >
+                        <Check className="h-4 w-4 mr-1" />
+                        Set Default
+                      </Button>
+                    )}
+                    <Button
+                      size="sm"
+                      variant="destructive"
+                      onClick={() => setDeleteTemplateId(template.id)}
+                      disabled={deleteMutation.isPending}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        ) : (
+          <Card>
+            <CardContent className="flex flex-col items-center justify-center py-12">
+              <SettingsIcon className="h-12 w-12 text-muted-foreground mb-4" />
+              <h3 className="text-lg font-semibold mb-2">No templates yet</h3>
+              <p className="text-muted-foreground text-center mb-4">
+                Create your first invoice template to customize how your invoices look
+              </p>
+              <Button
+                onClick={() => {
+                  setSelectedTemplateId(null);
+                  setIsEditing(true);
+                }}
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                Create Template
+              </Button>
+            </CardContent>
+          </Card>
+        )}
+      </div>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={!!deleteTemplateId} onOpenChange={() => setDeleteTemplateId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Template</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete this template? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

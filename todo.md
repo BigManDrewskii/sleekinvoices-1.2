@@ -176,3 +176,68 @@
 ## Bug Fixes
 - [x] Fix nested anchor tag error on /invoices/new page
 - [x] Locate and remove nested <a> tags causing React error (fixed 3 instances in CreateInvoice and EditInvoice)
+- [x] Fix toast notification implementation (migrated from deprecated toast to sonner)
+
+## Custom Invoice Template System (Complete ✅)
+### Phase 1: Database Schema (Complete ✅)
+- [x] Design invoiceTemplates table schema with comprehensive fields
+- [x] Design customFields table for user-defined fields
+- [x] Design invoiceCustomFieldValues table for storing field values
+- [x] Push database schema changes (migration 0009)
+
+### Phase 2: Pre-designed Templates (Complete ✅)
+- [x] Create Modern template (purple-blue, Inter font)
+- [x] Create Classic template (navy, Georgia font)
+- [x] Create Minimal template (black, Helvetica font)
+- [x] Create Bold template (red, Arial Black font)
+- [x] Create Professional template (teal, Roboto font)
+- [x] Create Creative template (purple, Montserrat font)
+
+### Phase 3: Template Customization UI (Complete ✅)
+- [x] Create Templates page at /templates route
+- [x] Build template selector with visual cards
+- [x] Add comprehensive template customization form
+- [x] Implement template editor component
+
+### Phase 4: Logo & Brand Colors (Complete ✅)
+- [x] Add logo URL input field
+- [x] Add logo position controls (left, center, right)
+- [x] Build color pickers for primary/secondary/accent colors
+- [x] Add color preview in live preview component
+
+### Phase 5: Fonts & Layout (Complete ✅)
+- [x] Integrate Google Fonts (Inter, Roboto, Montserrat, Open Sans, Georgia)
+- [x] Add font selector for headings and body text
+- [x] Implement header layout controls (standard, centered, split)
+- [x] Add footer layout customization (simple, detailed, minimal)
+
+### Phase 6: Field Visibility & Custom Fields (Complete ✅)
+- [x] Build field visibility toggles (tax, discount, notes, company address, payment terms)
+- [x] Create custom fields backend API (CRUD operations)
+- [x] Add custom field types (text, number, date, select)
+- [x] Implement custom field validation in database layer
+
+### Phase 7: Server-side PDF Generation (Complete ✅)
+- [x] Update PDF generation to use template settings
+- [x] Create dynamic PDF templates with custom styling
+- [x] Implement Google Fonts loading for PDFs
+- [x] Apply template colors, fonts, and layouts to PDFs
+
+### Phase 8: Live Preview (Complete ✅)
+- [x] Build TemplatePreview component
+- [x] Implement real-time template rendering
+- [x] Add sample invoice data for preview
+- [x] Show all template customizations in preview
+
+### Phase 9: Integration (Complete ✅)
+- [x] Apply default template to invoice PDF generation
+- [x] Update email sending to use template
+- [x] Update payment reminders to use template
+- [x] Add getDefaultTemplate database function
+
+### Phase 10: Testing (Complete ✅)
+- [x] Create comprehensive vitest test suite (12 tests)
+- [x] Test template CRUD operations
+- [x] Test field validation (template types, logo positions, layouts)
+- [x] Test default template management
+- [x] All tests passing (12/12)

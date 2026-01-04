@@ -326,11 +326,15 @@ export const appRouter = router({
         const client = await db.getClientById(invoice.clientId, ctx.user.id);
         if (!client) throw new Error('Client not found');
         
+        // Get user's default template
+        const template = await db.getDefaultTemplate(ctx.user.id);
+        
         const pdfBuffer = await generateInvoicePDF({
           invoice,
           client,
           lineItems,
           user: ctx.user,
+          template,
         });
         
         // Upload to S3
@@ -373,12 +377,16 @@ export const appRouter = router({
         const client = await db.getClientById(invoice.clientId, ctx.user.id);
         if (!client) throw new Error('Client not found');
         
+        // Get user's default template
+        const template = await db.getDefaultTemplate(ctx.user.id);
+        
         // Generate PDF
         const pdfBuffer = await generateInvoicePDF({
           invoice,
           client,
           lineItems,
           user: ctx.user,
+          template,
         });
         
         // Send email
@@ -428,12 +436,16 @@ export const appRouter = router({
         
         const lineItems = await db.getLineItemsByInvoiceId(input.id);
         
+        // Get user's default template
+        const template = await db.getDefaultTemplate(ctx.user.id);
+        
         // Generate PDF for attachment
         const pdfBuffer = await generateInvoicePDF({
           invoice,
           client,
           lineItems,
           user: ctx.user,
+          template,
         });
         
         // Send reminder email
@@ -677,10 +689,26 @@ export const appRouter = router({
     create: protectedProcedure
       .input(z.object({
         name: z.string(),
+        templateType: z.enum(["modern", "classic", "minimal", "bold", "professional", "creative"]).optional(),
         primaryColor: z.string().optional(),
         secondaryColor: z.string().optional(),
-        fontFamily: z.string().optional(),
+        accentColor: z.string().optional(),
+        headingFont: z.string().optional(),
+        bodyFont: z.string().optional(),
+        fontSize: z.number().optional(),
         logoUrl: z.string().optional(),
+        logoPosition: z.enum(["left", "center", "right"]).optional(),
+        logoWidth: z.number().optional(),
+        headerLayout: z.enum(["standard", "centered", "split"]).optional(),
+        footerLayout: z.enum(["simple", "detailed", "minimal"]).optional(),
+        showCompanyAddress: z.boolean().optional(),
+        showPaymentTerms: z.boolean().optional(),
+        showTaxField: z.boolean().optional(),
+        showDiscountField: z.boolean().optional(),
+        showNotesField: z.boolean().optional(),
+        footerText: z.string().optional(),
+        language: z.string().optional(),
+        dateFormat: z.string().optional(),
         isDefault: z.boolean().optional(),
       }))
       .mutation(async ({ ctx, input }) => {
@@ -694,10 +722,26 @@ export const appRouter = router({
       .input(z.object({
         id: z.number(),
         name: z.string().optional(),
+        templateType: z.enum(["modern", "classic", "minimal", "bold", "professional", "creative"]).optional(),
         primaryColor: z.string().optional(),
         secondaryColor: z.string().optional(),
-        fontFamily: z.string().optional(),
+        accentColor: z.string().optional(),
+        headingFont: z.string().optional(),
+        bodyFont: z.string().optional(),
+        fontSize: z.number().optional(),
         logoUrl: z.string().optional(),
+        logoPosition: z.enum(["left", "center", "right"]).optional(),
+        logoWidth: z.number().optional(),
+        headerLayout: z.enum(["standard", "centered", "split"]).optional(),
+        footerLayout: z.enum(["simple", "detailed", "minimal"]).optional(),
+        showCompanyAddress: z.boolean().optional(),
+        showPaymentTerms: z.boolean().optional(),
+        showTaxField: z.boolean().optional(),
+        showDiscountField: z.boolean().optional(),
+        showNotesField: z.boolean().optional(),
+        footerText: z.string().optional(),
+        language: z.string().optional(),
+        dateFormat: z.string().optional(),
         isDefault: z.boolean().optional(),
       }))
       .mutation(async ({ ctx, input }) => {
@@ -721,6 +765,61 @@ export const appRouter = router({
       }),
   }),
 
+  customFields: router({
+    list: protectedProcedure
+      .input(z.object({ templateId: z.number().optional() }))
+      .query(async ({ ctx, input }) => {
+        return await db.getCustomFieldsByUserId(ctx.user.id, input.templateId);
+      }),
+    
+    get: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .query(async ({ ctx, input }) => {
+        return await db.getCustomFieldById(input.id, ctx.user.id);
+      }),
+    
+    create: protectedProcedure
+      .input(z.object({
+        templateId: z.number().optional(),
+        fieldName: z.string(),
+        fieldLabel: z.string(),
+        fieldType: z.enum(["text", "number", "date", "select"]),
+        isRequired: z.boolean().optional(),
+        defaultValue: z.string().optional(),
+        selectOptions: z.string().optional(),
+        sortOrder: z.number().optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        return await db.createCustomField({
+          userId: ctx.user.id,
+          ...input,
+        });
+      }),
+    
+    update: protectedProcedure
+      .input(z.object({
+        id: z.number(),
+        fieldName: z.string().optional(),
+        fieldLabel: z.string().optional(),
+        fieldType: z.enum(["text", "number", "date", "select"]).optional(),
+        isRequired: z.boolean().optional(),
+        defaultValue: z.string().optional(),
+        selectOptions: z.string().optional(),
+        sortOrder: z.number().optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const { id, ...updates } = input;
+        await db.updateCustomField(id, ctx.user.id, updates);
+        return { success: true };
+      }),
+    
+    delete: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ ctx, input }) => {
+        await db.deleteCustomField(input.id, ctx.user.id);
+        return { success: true };
+      }),
+  }),
   expenses: router({
     categories: router({
       list: protectedProcedure.query(async ({ ctx }) => {

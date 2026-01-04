@@ -1,11 +1,13 @@
 import puppeteer from 'puppeteer';
 import { Invoice, Client, InvoiceLineItem, User } from '../drizzle/schema';
+import type { InvoiceTemplate } from '../drizzle/schema';
 
 interface InvoicePDFData {
   invoice: Invoice;
   client: Client;
   lineItems: InvoiceLineItem[];
   user: User;
+  template?: InvoiceTemplate | null;
 }
 
 function formatCurrency(amount: number | string): string {
@@ -16,17 +18,46 @@ function formatCurrency(amount: number | string): string {
   }).format(num);
 }
 
-function formatDate(date: Date | null): string {
+function formatDate(date: Date | null, dateFormat: string = 'MM/DD/YYYY'): string {
   if (!date) return '';
-  return new Intl.DateTimeFormat('en-US', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  }).format(new Date(date));
+  const d = new Date(date);
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  const year = d.getFullYear();
+  
+  switch (dateFormat) {
+    case "DD/MM/YYYY":
+      return `${day}/${month}/${year}`;
+    case "YYYY-MM-DD":
+      return `${year}-${month}-${day}`;
+    case "MMM DD, YYYY":
+      return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    default: // MM/DD/YYYY
+      return `${month}/${day}/${year}`;
+  }
 }
 
 function generateInvoiceHTML(data: InvoicePDFData): string {
-  const { invoice, client, lineItems, user } = data;
+  const { invoice, client, lineItems, user, template } = data;
+  
+  // Default template values
+  const primaryColor = template?.primaryColor || '#5f6fff';
+  const secondaryColor = template?.secondaryColor || '#252f33';
+  const accentColor = template?.accentColor || '#10b981';
+  const headingFont = template?.headingFont || 'Inter, sans-serif';
+  const bodyFont = template?.bodyFont || 'Inter, sans-serif';
+  const fontSize = template?.fontSize || 14;
+  const logoPosition = template?.logoPosition || 'left';
+  const logoWidth = template?.logoWidth || 150;
+  const headerLayout = template?.headerLayout || 'standard';
+  const footerLayout = template?.footerLayout || 'simple';
+  const showCompanyAddress = template?.showCompanyAddress !== false;
+  const showPaymentTerms = template?.showPaymentTerms !== false;
+  const showTaxField = template?.showTaxField !== false;
+  const showDiscountField = template?.showDiscountField !== false;
+  const showNotesField = template?.showNotesField !== false;
+  const footerText = template?.footerText || 'Thank you for your business!';
+  const dateFormat = template?.dateFormat || 'MM/DD/YYYY';
   
   const lineItemsHTML = lineItems.map(item => `
     <tr>
@@ -36,6 +67,14 @@ function generateInvoiceHTML(data: InvoicePDFData): string {
       <td style="padding: 12px; border-bottom: 1px solid #e5e7eb; text-align: right; font-weight: 600;">${formatCurrency(item.amount)}</td>
     </tr>
   `).join('');
+
+  // Header layout styles
+  const headerFlexStyle = headerLayout === 'split' ? 'display: flex; justify-content: space-between; align-items: flex-start;' : '';
+  const logoAlignStyle = 
+    logoPosition === 'center' ? 'margin: 0 auto; text-align: center;' :
+    logoPosition === 'right' ? 'margin-left: auto; text-align: right;' :
+    '';
+  const invoiceTitleAlign = headerLayout === 'centered' ? 'text-align: center;' : headerLayout === 'split' ? 'text-align: right;' : '';
   
   return `
 <!DOCTYPE html>
@@ -44,6 +83,9 @@ function generateInvoiceHTML(data: InvoicePDFData): string {
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Invoice ${invoice.invoiceNumber}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Roboto:wght@400;500;700&family=Montserrat:wght@400;600;700&family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
     * {
       margin: 0;
@@ -52,8 +94,9 @@ function generateInvoiceHTML(data: InvoicePDFData): string {
     }
     
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-      color: #1f2937;
+      font-family: ${bodyFont};
+      color: ${secondaryColor};
+      font-size: ${fontSize}px;
       line-height: 1.6;
       padding: 40px;
       background: white;
@@ -66,51 +109,60 @@ function generateInvoiceHTML(data: InvoicePDFData): string {
     }
     
     .header {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
+      ${headerFlexStyle}
       margin-bottom: 48px;
       padding-bottom: 24px;
-      border-bottom: 2px solid #e5e7eb;
+      border-bottom: 2px solid ${primaryColor}40;
     }
     
     .company-info {
-      flex: 1;
+      ${headerLayout === 'split' ? 'flex: 1;' : ''}
+      ${logoAlignStyle}
+    }
+    
+    .company-logo {
+      max-width: ${logoWidth}px;
+      margin-bottom: 16px;
     }
     
     .company-name {
       font-size: 24px;
       font-weight: 700;
-      color: #111827;
+      font-family: ${headingFont};
+      color: ${primaryColor};
       margin-bottom: 8px;
     }
     
     .company-details {
-      font-size: 14px;
-      color: #6b7280;
+      font-size: ${fontSize - 1}px;
+      color: ${secondaryColor}cc;
       line-height: 1.8;
     }
     
     .invoice-title {
-      text-align: right;
+      ${invoiceTitleAlign}
+      ${headerLayout === 'split' ? 'flex: 1;' : ''}
     }
     
     .invoice-title h1 {
       font-size: 36px;
       font-weight: 700;
-      color: #111827;
+      font-family: ${headingFont};
+      color: ${primaryColor};
       margin-bottom: 8px;
     }
     
     .invoice-number {
-      font-size: 14px;
-      color: #6b7280;
+      font-size: ${fontSize}px;
+      color: ${secondaryColor}cc;
     }
     
     .invoice-details {
       display: flex;
       justify-content: space-between;
       margin-bottom: 48px;
+      padding-bottom: 24px;
+      border-bottom: 1px solid ${primaryColor}20;
     }
     
     .bill-to, .invoice-info {
@@ -118,24 +170,25 @@ function generateInvoiceHTML(data: InvoicePDFData): string {
     }
     
     .section-title {
-      font-size: 12px;
+      font-size: ${fontSize - 2}px;
       font-weight: 600;
+      font-family: ${headingFont};
       text-transform: uppercase;
       letter-spacing: 0.5px;
-      color: #6b7280;
+      color: ${primaryColor};
       margin-bottom: 12px;
     }
     
     .client-name {
-      font-size: 16px;
+      font-size: ${fontSize + 2}px;
       font-weight: 600;
-      color: #111827;
+      color: ${secondaryColor};
       margin-bottom: 4px;
     }
     
     .client-details {
-      font-size: 14px;
-      color: #6b7280;
+      font-size: ${fontSize}px;
+      color: ${secondaryColor}cc;
       line-height: 1.8;
     }
     
@@ -147,16 +200,16 @@ function generateInvoiceHTML(data: InvoicePDFData): string {
       display: flex;
       justify-content: flex-end;
       margin-bottom: 8px;
-      font-size: 14px;
+      font-size: ${fontSize}px;
     }
     
     .info-label {
-      color: #6b7280;
+      color: ${secondaryColor}cc;
       margin-right: 12px;
     }
     
     .info-value {
-      color: #111827;
+      color: ${secondaryColor};
       font-weight: 600;
     }
     
@@ -164,7 +217,7 @@ function generateInvoiceHTML(data: InvoicePDFData): string {
       display: inline-block;
       padding: 4px 12px;
       border-radius: 9999px;
-      font-size: 12px;
+      font-size: ${fontSize - 2}px;
       font-weight: 600;
       text-transform: uppercase;
       letter-spacing: 0.5px;
@@ -176,13 +229,13 @@ function generateInvoiceHTML(data: InvoicePDFData): string {
     }
     
     .status-sent {
-      background: #dbeafe;
-      color: #1e40af;
+      background: ${primaryColor}20;
+      color: ${primaryColor};
     }
     
     .status-paid {
-      background: #d1fae5;
-      color: #065f46;
+      background: ${accentColor}20;
+      color: ${accentColor};
     }
     
     .status-overdue {
@@ -197,18 +250,19 @@ function generateInvoiceHTML(data: InvoicePDFData): string {
     }
     
     .line-items-table thead {
-      background: #f9fafb;
+      background: ${primaryColor}10;
     }
     
     .line-items-table th {
       padding: 12px;
       text-align: left;
-      font-size: 12px;
+      font-size: ${fontSize - 2}px;
       font-weight: 600;
+      font-family: ${headingFont};
       text-transform: uppercase;
       letter-spacing: 0.5px;
-      color: #6b7280;
-      border-bottom: 2px solid #e5e7eb;
+      color: ${primaryColor};
+      border-bottom: 2px solid ${primaryColor};
     }
     
     .line-items-table th:nth-child(2),
@@ -218,8 +272,8 @@ function generateInvoiceHTML(data: InvoicePDFData): string {
     }
     
     .line-items-table td {
-      font-size: 14px;
-      color: #374151;
+      font-size: ${fontSize}px;
+      color: ${secondaryColor};
     }
     
     .totals {
@@ -232,62 +286,75 @@ function generateInvoiceHTML(data: InvoicePDFData): string {
       display: flex;
       justify-content: space-between;
       padding: 12px 0;
-      font-size: 14px;
+      font-size: ${fontSize}px;
     }
     
     .total-label {
-      color: #6b7280;
+      color: ${secondaryColor}cc;
     }
     
     .total-value {
-      color: #111827;
+      color: ${secondaryColor};
       font-weight: 600;
     }
     
     .grand-total {
-      border-top: 2px solid #e5e7eb;
+      border-top: 2px solid ${primaryColor};
       padding-top: 16px !important;
       margin-top: 8px;
     }
     
     .grand-total .total-label {
-      font-size: 16px;
+      font-size: ${fontSize + 2}px;
       font-weight: 600;
-      color: #111827;
+      font-family: ${headingFont};
+      color: ${primaryColor};
     }
     
     .grand-total .total-value {
-      font-size: 20px;
+      font-size: ${fontSize + 6}px;
       font-weight: 700;
-      color: #111827;
+      font-family: ${headingFont};
+      color: ${primaryColor};
     }
     
     .notes-section {
       margin-top: 48px;
       padding-top: 24px;
-      border-top: 1px solid #e5e7eb;
+      border-top: 1px solid ${primaryColor}20;
     }
     
     .notes-title {
-      font-size: 14px;
+      font-size: ${fontSize}px;
       font-weight: 600;
-      color: #111827;
+      font-family: ${headingFont};
+      color: ${primaryColor};
       margin-bottom: 8px;
     }
     
     .notes-content {
-      font-size: 14px;
-      color: #6b7280;
+      font-size: ${fontSize}px;
+      color: ${secondaryColor}cc;
       line-height: 1.8;
     }
     
     .footer {
       margin-top: 64px;
       padding-top: 24px;
-      border-top: 1px solid #e5e7eb;
-      text-align: center;
-      font-size: 12px;
-      color: #9ca3af;
+      border-top: 1px solid ${primaryColor}20;
+      text-align: ${footerLayout === 'detailed' ? 'center' : footerLayout === 'minimal' ? 'center' : 'center'};
+      font-size: ${footerLayout === 'minimal' ? fontSize - 2 : fontSize}px;
+      color: ${secondaryColor}99;
+    }
+    
+    .footer-detailed {
+      margin-bottom: 8px;
+      font-weight: 600;
+    }
+    
+    .footer-contact {
+      font-size: ${fontSize - 2}px;
+      margin-top: 8px;
     }
   </style>
 </head>
@@ -295,19 +362,30 @@ function generateInvoiceHTML(data: InvoicePDFData): string {
   <div class="invoice-container">
     <div class="header">
       <div class="company-info">
-        ${user.logoUrl ? `<img src="${user.logoUrl}" alt="Logo" style="max-width: 120px; margin-bottom: 16px;">` : ''}
+        ${user.logoUrl && template?.logoUrl !== null ? `<img src="${user.logoUrl}" alt="Logo" class="company-logo">` : ''}
         <div class="company-name">${user.companyName || user.name || 'Your Company'}</div>
+        ${showCompanyAddress ? `
         <div class="company-details">
           ${user.companyAddress ? `${user.companyAddress}<br>` : ''}
           ${user.email ? `${user.email}<br>` : ''}
           ${user.companyPhone ? `${user.companyPhone}` : ''}
         </div>
+        ` : ''}
       </div>
+      ${headerLayout !== 'centered' ? `
       <div class="invoice-title">
         <h1>INVOICE</h1>
         <div class="invoice-number">${invoice.invoiceNumber}</div>
       </div>
+      ` : ''}
     </div>
+    
+    ${headerLayout === 'centered' ? `
+    <div style="text-align: center; margin-bottom: 48px;">
+      <h1 style="font-size: 36px; font-weight: 700; font-family: ${headingFont}; color: ${primaryColor}; margin-bottom: 8px;">INVOICE</h1>
+      <div style="font-size: ${fontSize}px; color: ${secondaryColor}cc;">${invoice.invoiceNumber}</div>
+    </div>
+    ` : ''}
     
     <div class="invoice-details">
       <div class="bill-to">
@@ -328,16 +406,16 @@ function generateInvoiceHTML(data: InvoicePDFData): string {
         </div>
         <div class="info-row">
           <span class="info-label">Issue Date:</span>
-          <span class="info-value">${formatDate(invoice.issueDate)}</span>
+          <span class="info-value">${formatDate(invoice.issueDate, dateFormat)}</span>
         </div>
         <div class="info-row">
           <span class="info-label">Due Date:</span>
-          <span class="info-value">${formatDate(invoice.dueDate)}</span>
+          <span class="info-value">${formatDate(invoice.dueDate, dateFormat)}</span>
         </div>
         ${invoice.paidAt ? `
         <div class="info-row">
           <span class="info-label">Paid On:</span>
-          <span class="info-value">${formatDate(invoice.paidAt)}</span>
+          <span class="info-value">${formatDate(invoice.paidAt, dateFormat)}</span>
         </div>
         ` : ''}
       </div>
@@ -362,13 +440,13 @@ function generateInvoiceHTML(data: InvoicePDFData): string {
         <span class="total-label">Subtotal</span>
         <span class="total-value">${formatCurrency(invoice.subtotal)}</span>
       </div>
-      ${Number(invoice.discountAmount) > 0 ? `
+      ${showDiscountField && Number(invoice.discountAmount) > 0 ? `
       <div class="total-row">
-        <span class="total-label">Discount ${invoice.discountType === 'percentage' ? `(${invoice.discountValue}%)` : ''}</span>
-        <span class="total-value">-${formatCurrency(invoice.discountAmount)}</span>
+        <span class="total-label" style="color: ${accentColor};">Discount ${invoice.discountType === 'percentage' ? `(${invoice.discountValue}%)` : ''}</span>
+        <span class="total-value" style="color: ${accentColor};">-${formatCurrency(invoice.discountAmount)}</span>
       </div>
       ` : ''}
-      ${Number(invoice.taxAmount) > 0 ? `
+      ${showTaxField && Number(invoice.taxAmount) > 0 ? `
       <div class="total-row">
         <span class="total-label">Tax (${invoice.taxRate}%)</span>
         <span class="total-value">${formatCurrency(invoice.taxAmount)}</span>
@@ -380,15 +458,15 @@ function generateInvoiceHTML(data: InvoicePDFData): string {
       </div>
     </div>
     
-    ${invoice.notes || invoice.paymentTerms ? `
+    ${(showNotesField && invoice.notes) || (showPaymentTerms && invoice.paymentTerms) ? `
     <div class="notes-section">
-      ${invoice.notes ? `
+      ${showNotesField && invoice.notes ? `
       <div style="margin-bottom: 24px;">
         <div class="notes-title">Notes</div>
         <div class="notes-content">${invoice.notes}</div>
       </div>
       ` : ''}
-      ${invoice.paymentTerms ? `
+      ${showPaymentTerms && invoice.paymentTerms ? `
       <div>
         <div class="notes-title">Payment Terms</div>
         <div class="notes-content">${invoice.paymentTerms}</div>
@@ -397,9 +475,16 @@ function generateInvoiceHTML(data: InvoicePDFData): string {
     </div>
     ` : ''}
     
+    ${footerText ? `
     <div class="footer">
-      Thank you for your business!
+      ${footerLayout === 'detailed' ? `
+        <div class="footer-detailed">${footerText}</div>
+        <div class="footer-contact">For questions, contact us at ${user.email || 'support@example.com'}</div>
+      ` : `
+        ${footerText}
+      `}
     </div>
+    ` : ''}
   </div>
 </body>
 </html>
@@ -407,7 +492,7 @@ function generateInvoiceHTML(data: InvoicePDFData): string {
 }
 
 /**
- * Generate PDF from invoice data
+ * Generate PDF from invoice data with optional template
  */
 export async function generateInvoicePDF(data: InvoicePDFData): Promise<Buffer> {
   const html = generateInvoiceHTML(data);
