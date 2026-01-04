@@ -65,6 +65,15 @@ export async function handleStripeWebhook(req: Request, res: Response) {
         await handleChargeRefunded(event);
         break;
       
+      case "customer.subscription.created":
+      case "customer.subscription.updated":
+        await handleSubscriptionUpdated(event);
+        break;
+      
+      case "customer.subscription.deleted":
+        await handleSubscriptionDeleted(event);
+        break;
+      
       default:
         console.log(`[Stripe Webhook] Unhandled event type: ${event.type}`);
     }
@@ -253,4 +262,100 @@ async function handleChargeRefunded(event: any) {
       }
     }
   }
+}
+
+
+/**
+ * Handle subscription created or updated
+ */
+async function handleSubscriptionUpdated(event: any) {
+  const subscription = event.data.object;
+  
+  console.log(`[Stripe Webhook] Subscription ${event.type}: ${subscription.id}`);
+  
+  // Find user by Stripe customer ID
+  const { users } = await import("../../drizzle/schema");
+  const { getDb } = await import("../db");
+  const { eq } = await import("drizzle-orm");
+  
+  const db = await getDb();
+  if (!db) return;
+  
+  const userResult = await db
+    .select()
+    .from(users)
+    .where(eq(users.stripeCustomerId, subscription.customer))
+    .limit(1);
+  
+  const user = userResult[0];
+  if (!user) {
+    console.error(`[Stripe Webhook] User not found for customer: ${subscription.customer}`);
+    return;
+  }
+  
+  // Map Stripe subscription status to our status
+  let subscriptionStatus: 'free' | 'active' | 'canceled' | 'past_due' = 'free';
+  
+  if (subscription.status === 'active') {
+    subscriptionStatus = 'active';
+  } else if (subscription.status === 'canceled') {
+    subscriptionStatus = 'canceled';
+  } else if (subscription.status === 'past_due') {
+    subscriptionStatus = 'past_due';
+  }
+  
+  // Update user subscription info
+  await db
+    .update(users)
+    .set({
+      subscriptionStatus,
+      subscriptionId: subscription.id,
+      currentPeriodEnd: new Date(subscription.current_period_end * 1000),
+      updatedAt: new Date(),
+    })
+    .where(eq(users.id, user.id));
+  
+  console.log(`[Stripe Webhook] User ${user.id} subscription updated to ${subscriptionStatus}`);
+}
+
+/**
+ * Handle subscription deleted (canceled)
+ */
+async function handleSubscriptionDeleted(event: any) {
+  const subscription = event.data.object;
+  
+  console.log(`[Stripe Webhook] Subscription deleted: ${subscription.id}`);
+  
+  // Find user by Stripe customer ID
+  const { users } = await import("../../drizzle/schema");
+  const { getDb } = await import("../db");
+  const { eq } = await import("drizzle-orm");
+  
+  const db = await getDb();
+  if (!db) return;
+  
+  const userResult = await db
+    .select()
+    .from(users)
+    .where(eq(users.stripeCustomerId, subscription.customer))
+    .limit(1);
+  
+  const user = userResult[0];
+  if (!user) {
+    console.error(`[Stripe Webhook] User not found for customer: ${subscription.customer}`);
+    return;
+  }
+  
+  // Downgrade to free tier
+  await db
+    .update(users)
+    .set({
+      subscriptionStatus: 'free',
+      subscriptionId: null,
+      currentPeriodEnd: null,
+      updatedAt: new Date(),
+    })
+    .where(eq(users.id, user.id));
+  
+  console.log(`[Stripe Webhook] User ${user.id} downgraded to free tier`);
 }
