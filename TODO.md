@@ -1020,6 +1020,19 @@ See TODO_PHASE6A_FRONTEND.md for detailed implementation plan
 - [x] Investigate why webhook returns 200 but not valid JSON (was returning HTML)
 - [x] Found route mismatch: /api/webhooks/stripe vs /api/stripe/webhook
 - [x] Changed webhook route to /api/stripe/webhook
-- [ ] Publish changes to production site
-- [ ] Test webhook verification on production site
-- [ ] Confirm webhook works with Stripe Dashboard verification
+- [x] Publish changes to production site
+- [x] Test webhook verification on production site (returns proper JSON)
+- [x] Webhook correctly validates signatures and returns JSON errors
+
+
+---
+
+## ✅ CHECKOUT TESTING (Jan 4, 2026)
+- [x] Webhook endpoint verified (returns JSON)
+- [x] Created comprehensive testing guide (CHECKOUT_TESTING_GUIDE.md)
+- [ ] User tests: Verify webhook in Stripe Dashboard
+- [ ] User tests: Create checkout session and redirect to Stripe
+- [ ] User tests: Complete payment with test card
+- [ ] User tests: Verify Pro tier activation (Unlimited usage)
+- [ ] User tests: Create 4+ invoices to confirm no limit
+- [ ] User tests: Check webhook events in Stripe Dashboard
