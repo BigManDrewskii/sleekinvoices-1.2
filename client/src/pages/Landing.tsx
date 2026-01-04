@@ -15,7 +15,7 @@ export default function Landing() {
     <div className="min-h-screen bg-background">
       <Navigation />
 
-      {/* Hero Section - Enhanced with asymmetric layout */}
+      {/* Hero Section */}
       <section className="container mx-auto px-4 py-16 md:py-24">
         <div className="grid lg:grid-cols-2 gap-12 items-center max-w-7xl mx-auto">
           {/* Left Column - Content */}
@@ -26,9 +26,7 @@ export default function Landing() {
             
             <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-foreground leading-tight">
               Create Professional Invoices in{" "}
-              <span className="text-primary bg-gradient-to-r from-primary to-purple-400 bg-clip-text text-transparent">
-                Seconds
-              </span>
+              <span className="text-primary">Seconds</span>
             </h1>
             
             <p className="text-lg md:text-xl text-muted-foreground max-w-2xl leading-relaxed">
@@ -52,7 +50,7 @@ export default function Landing() {
 
             {/* CTAs */}
             <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start pt-4">
-              <Button size="lg" asChild className="text-lg px-8 py-6 shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30 transition-all">
+              <Button size="lg" asChild className="text-lg px-8 py-6">
                 <a href={getLoginUrl()}>
                   Start Free Trial
                   <ArrowRight className="ml-2 h-5 w-5" />
@@ -77,10 +75,10 @@ export default function Landing() {
 
           {/* Right Column - Visual */}
           <div className="relative">
-            <div className="relative bg-gradient-to-br from-primary/10 via-purple-500/10 to-transparent rounded-2xl p-8 backdrop-blur-sm border border-primary/20">
-              {/* Placeholder for product screenshot - using styled card */}
-              <div className="bg-card rounded-xl shadow-2xl border overflow-hidden">
-                <div className="bg-primary/5 p-4 border-b flex items-center gap-2">
+            <div className="relative bg-card rounded-2xl p-8 border border-border">
+              {/* Product screenshot mockup */}
+              <div className="bg-muted rounded-xl shadow-2xl border border-border overflow-hidden">
+                <div className="bg-secondary p-4 border-b border-border flex items-center gap-2">
                   <div className="flex gap-1.5">
                     <div className="h-3 w-3 rounded-full bg-red-500/50"></div>
                     <div className="h-3 w-3 rounded-full bg-yellow-500/50"></div>
@@ -90,7 +88,7 @@ export default function Landing() {
                     SleekInvoices - New Invoice
                   </div>
                 </div>
-                <div className="p-6 space-y-4">
+                <div className="p-6 space-y-4 bg-card">
                   <div className="flex items-center justify-between">
                     <div className="text-sm font-medium">Invoice #INV-001</div>
                     <div className="px-3 py-1 bg-primary/10 text-primary text-xs rounded-full">Draft</div>
@@ -109,7 +107,7 @@ export default function Landing() {
                       <div className="h-2 bg-muted rounded w-2/3"></div>
                     </div>
                   </div>
-                  <div className="pt-4 border-t">
+                  <div className="pt-4 border-t border-border">
                     <div className="flex justify-between items-center">
                       <div className="text-sm text-muted-foreground">Total</div>
                       <div className="text-2xl font-bold text-primary">$1,250.00</div>
@@ -117,11 +115,11 @@ export default function Landing() {
                   </div>
                 </div>
               </div>
-              {/* Floating elements for visual interest */}
-              <div className="absolute -top-4 -right-4 bg-green-500 text-white p-3 rounded-lg shadow-lg text-sm font-medium">
+              {/* Floating elements */}
+              <div className="absolute -top-4 -right-4 bg-green-500 text-white p-3 rounded-lg shadow-lg">
                 <CheckCircle className="h-5 w-5" />
               </div>
-              <div className="absolute -bottom-4 -left-4 bg-primary text-primary-foreground p-3 rounded-lg shadow-lg text-sm font-medium">
+              <div className="absolute -bottom-4 -left-4 bg-primary text-primary-foreground p-3 rounded-lg shadow-lg">
                 <Zap className="h-5 w-5" />
               </div>
             </div>
@@ -130,7 +128,7 @@ export default function Landing() {
       </section>
 
       {/* Social Proof Bar */}
-      <section className="border-y bg-card/30 backdrop-blur-sm">
+      <section className="border-y border-border bg-secondary/30">
         <div className="container mx-auto px-4 py-8">
           <div className="text-center">
             <p className="text-sm text-muted-foreground mb-4">
@@ -143,7 +141,7 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* Features Section - Enhanced with better visual hierarchy */}
+      {/* Features Section */}
       <section className="container mx-auto px-4 py-24">
         <div className="text-center mb-16 max-w-3xl mx-auto">
           <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
@@ -155,47 +153,47 @@ export default function Landing() {
         </div>
         
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
-          <EnhancedFeatureCard
+          <FeatureCard
             icon={<Zap className="h-8 w-8" />}
             title="Lightning-Fast Creation"
             description="Create beautiful invoices in under 30 seconds with smart templates and auto-fill. Add your logo, customize colors, and send instantly."
-            gradient="from-yellow-500 to-orange-500"
+            iconColor="text-yellow-500"
           />
-          <EnhancedFeatureCard
+          <FeatureCard
             icon={<CreditCard className="h-8 w-8" />}
             title="Get Paid with Stripe"
             description="Add secure payment links to every invoice. Customers pay with one click, funds arrive in 1-2 days. No setup required."
-            gradient="from-blue-500 to-cyan-500"
+            iconColor="text-blue-500"
           />
-          <EnhancedFeatureCard
+          <FeatureCard
             icon={<Bell className="h-8 w-8" />}
             title="Automated Reminders"
             description="Never chase payments again. Automatic email reminders keep you top-of-mind without awkward follow-ups."
-            gradient="from-purple-500 to-pink-500"
+            iconColor="text-purple-500"
           />
-          <EnhancedFeatureCard
+          <FeatureCard
             icon={<BarChart3 className="h-8 w-8" />}
             title="Real-Time Analytics"
             description="Track revenue, outstanding balances, and payment trends at a glance. Know exactly where your business stands."
-            gradient="from-green-500 to-emerald-500"
+            iconColor="text-green-500"
           />
-          <EnhancedFeatureCard
+          <FeatureCard
             icon={<Mail className="h-8 w-8" />}
             title="Professional Emails"
             description="Send invoices from your custom domain (invoices@yourbusiness.com). Look professional, build trust, get paid faster."
-            gradient="from-indigo-500 to-purple-500"
+            iconColor="text-primary"
           />
-          <EnhancedFeatureCard
+          <FeatureCard
             icon={<Users className="h-8 w-8" />}
             title="Client Management"
             description="Store client details, track payment history, and manage relationships in one organized place."
-            gradient="from-rose-500 to-red-500"
+            iconColor="text-rose-500"
           />
         </div>
       </section>
 
       {/* How It Works Section */}
-      <section className="container mx-auto px-4 py-24 bg-gradient-to-b from-transparent via-primary/5 to-transparent">
+      <section className="container mx-auto px-4 py-24 bg-secondary/20">
         <div className="text-center mb-16">
           <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
             Start Invoicing in 3 Simple Steps
@@ -224,7 +222,7 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* Pricing Section - Enhanced */}
+      {/* Pricing Section */}
       <section className="container mx-auto px-4 py-24">
         <div className="text-center mb-16 max-w-3xl mx-auto">
           <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
@@ -236,7 +234,7 @@ export default function Landing() {
         </div>
         
         <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-          <EnhancedPricingCard
+          <PricingCard
             name="Free"
             price="$0"
             period="forever"
@@ -251,7 +249,7 @@ export default function Landing() {
             cta="Start Free"
             ctaHref={getLoginUrl()}
           />
-          <EnhancedPricingCard
+          <PricingCard
             name="Pro"
             price="$12"
             period="per month"
@@ -279,7 +277,7 @@ export default function Landing() {
       </section>
 
       {/* Testimonials Section */}
-      <section className="container mx-auto px-4 py-24 bg-gradient-to-b from-primary/5 to-transparent">
+      <section className="container mx-auto px-4 py-24 bg-secondary/20">
         <div className="text-center mb-16">
           <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
             Loved by Freelancers & Small Businesses
@@ -353,10 +351,7 @@ export default function Landing() {
 
       {/* Final CTA Section */}
       <section className="container mx-auto px-4 py-24">
-        <div className="bg-gradient-to-r from-primary via-purple-600 to-primary text-primary-foreground rounded-3xl p-12 md:p-16 text-center relative overflow-hidden">
-          {/* Background decoration */}
-          <div className="absolute inset-0 bg-grid-white/10 [mask-image:radial-gradient(white,transparent_70%)]"></div>
-          
+        <div className="bg-primary text-primary-foreground rounded-3xl p-12 md:p-16 text-center relative overflow-hidden">
           <div className="relative z-10 max-w-3xl mx-auto space-y-6">
             <h2 className="text-4xl md:text-5xl font-bold mb-4">
               Ready to Get Paid Faster?
@@ -390,7 +385,7 @@ export default function Landing() {
       </section>
 
       {/* Footer */}
-      <footer className="border-t bg-card/50 mt-24">
+      <footer className="border-t border-border bg-secondary/30 mt-24">
         <div className="container mx-auto px-4 py-12">
           <div className="grid md:grid-cols-4 gap-8 mb-8">
             <div className="space-y-4">
@@ -431,7 +426,7 @@ export default function Landing() {
             </div>
           </div>
           
-          <div className="border-t pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
+          <div className="border-t border-border pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
             <p className="text-sm text-muted-foreground">
               © 2026 SleekInvoices. All rights reserved.
             </p>
@@ -447,21 +442,21 @@ export default function Landing() {
   );
 }
 
-// Enhanced Feature Card Component
-function EnhancedFeatureCard({ 
+// Feature Card Component
+function FeatureCard({ 
   icon, 
   title, 
   description, 
-  gradient 
+  iconColor 
 }: { 
   icon: React.ReactNode; 
   title: string; 
   description: string;
-  gradient: string;
+  iconColor: string;
 }) {
   return (
-    <div className="group bg-card border rounded-2xl p-8 hover:shadow-xl hover:shadow-primary/10 transition-all duration-300 hover:-translate-y-1">
-      <div className={`inline-flex p-3 rounded-xl bg-gradient-to-br ${gradient} text-white mb-4 group-hover:scale-110 transition-transform duration-300`}>
+    <div className="group bg-card border border-border rounded-2xl p-8 hover:shadow-xl hover:shadow-primary/10 transition-all duration-300 hover:-translate-y-1">
+      <div className={`inline-flex p-3 rounded-xl bg-secondary ${iconColor} mb-4 group-hover:scale-110 transition-transform duration-300`}>
         {icon}
       </div>
       <h3 className="text-xl font-semibold text-foreground mb-3">{title}</h3>
@@ -496,8 +491,8 @@ function StepCard({
   );
 }
 
-// Enhanced Pricing Card Component
-function EnhancedPricingCard({
+// Pricing Card Component
+function PricingCard({
   name,
   price,
   period,
@@ -524,10 +519,10 @@ function EnhancedPricingCard({
     <div className={`relative bg-card border rounded-2xl p-8 transition-all duration-300 ${
       highlighted 
         ? "ring-2 ring-primary shadow-2xl shadow-primary/20 scale-105" 
-        : "hover:shadow-lg"
+        : "border-border hover:shadow-lg"
     }`}>
       {badge && (
-        <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-4 py-1 bg-gradient-to-r from-primary to-purple-600 text-primary-foreground text-sm font-medium rounded-full shadow-lg">
+        <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-4 py-1 bg-primary text-primary-foreground text-sm font-medium rounded-full shadow-lg">
           {badge}
         </div>
       )}
@@ -584,7 +579,7 @@ function TestimonialCard({
   rating: number;
 }) {
   return (
-    <div className="bg-card border rounded-2xl p-8 hover:shadow-lg transition-shadow">
+    <div className="bg-card border border-border rounded-2xl p-8 hover:shadow-lg transition-shadow">
       <div className="flex gap-1 mb-4">
         {[...Array(rating)].map((_, i) => (
           <Star key={i} className="h-5 w-5 text-yellow-500 fill-yellow-500" />
@@ -592,7 +587,7 @@ function TestimonialCard({
       </div>
       <p className="text-foreground mb-6 leading-relaxed">"{quote}"</p>
       <div className="flex items-center gap-3">
-        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary to-purple-600 flex items-center justify-center text-white font-semibold">
+        <div className="w-12 h-12 rounded-full bg-primary flex items-center justify-center text-white font-semibold">
           {author.split(' ').map(n => n[0]).join('')}
         </div>
         <div>
@@ -607,7 +602,7 @@ function TestimonialCard({
 // FAQ Item Component
 function FAQItem({ question, answer }: { question: string; answer: string }) {
   return (
-    <div className="bg-card border rounded-xl p-6 hover:shadow-md transition-shadow">
+    <div className="bg-card border border-border rounded-xl p-6 hover:shadow-md transition-shadow">
       <h4 className="font-semibold text-foreground mb-2">{question}</h4>
       <p className="text-muted-foreground text-sm leading-relaxed">{answer}</p>
     </div>
