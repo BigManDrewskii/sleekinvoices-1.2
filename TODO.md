@@ -721,3 +721,43 @@ See TODO_PHASE6A_FRONTEND.md for detailed implementation plan
   - [x] Update CSS variables in index.css
   - [x] Update dark theme colors
   - [x] Test all components with new theme
+
+
+---
+
+## 🔴 PHASE 1: CRITICAL BUG FIXES (Production Blockers)
+
+### Bug 1: Invoice Status Not Updating After Send
+- [x] Analyze sendEmail procedure in server/routers.ts
+- [x] Check if status is being updated in the mutation
+- [x] Verify database schema allows status updates
+- [x] Add status update to 'sent' when email is sent
+- [x] Add timestamp for sentAt field
+- [x] Test: Create invoice → Send → Verify status changes to SENT
+- [x] Test: Verify sentAt timestamp is recorded
+
+### Bug 2: Analytics Charts Not Rendering
+- [x] Analyze Analytics.tsx chart components
+- [x] Check data format returned by analytics procedures
+- [x] Verify chart library (recharts) is receiving correct data shape
+- [x] Check for console errors in browser
+- [x] Fix data transformation if needed
+- [x] Add fallback/error handling for charts
+- [x] Test: Verify "Revenue Over Time" chart displays
+- [x] Test: Verify "Invoice Volume" chart displays
+
+### Bug 3: Recurring Invoice Display Shows "REC"
+- [x] Analyze RecurringInvoices.tsx component
+- [x] Check if client data is being fetched with recurring invoices
+- [x] Verify JOIN in database query includes client name
+- [x] Update display to show client name, amount, description
+- [x] Test: Create recurring invoice → Verify client name shows
+- [x] Test: Verify amount and description are visible
+
+### Testing & Verification
+- [x] Run all existing tests: `pnpm test`
+- [x] Manual test all 3 bug fixes in browser
+- [x] Check for any regressions
+- [x] Verify no new console errors
+- [ ] Create checkpoint after all fixes verified
+

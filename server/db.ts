@@ -498,28 +498,37 @@ export async function getMonthlyRevenue(userId: number, months: number = 6) {
   const startDate = new Date();
   startDate.setMonth(startDate.getMonth() - months);
   
-  const paidInvoices = await db.select().from(invoices)
+  // Get ALL invoices (not just paid) to show revenue pipeline
+  const allInvoices = await db.select().from(invoices)
     .where(and(
       eq(invoices.userId, userId),
-      eq(invoices.status, 'paid'),
-      gte(invoices.paidAt, startDate)
+      gte(invoices.createdAt, startDate)
     ))
-    .orderBy(invoices.paidAt);
+    .orderBy(invoices.createdAt);
   
-  // Group by month
-  const monthlyData: { [key: string]: number } = {};
+  // Group by month using createdAt
+  const monthlyData: { [key: string]: { revenue: number; count: number; paidCount: number } } = {};
   
-  paidInvoices.forEach(invoice => {
-    if (invoice.paidAt) {
-      const monthKey = invoice.paidAt.toISOString().slice(0, 7); // YYYY-MM
-      monthlyData[monthKey] = (monthlyData[monthKey] || 0) + Number(invoice.total);
+  allInvoices.forEach(invoice => {
+    const monthKey = invoice.createdAt.toISOString().slice(0, 7); // YYYY-MM
+    
+    if (!monthlyData[monthKey]) {
+      monthlyData[monthKey] = { revenue: 0, count: 0, paidCount: 0 };
+    }
+    
+    monthlyData[monthKey].count++;
+    monthlyData[monthKey].revenue += Number(invoice.total);
+    
+    if (invoice.status === 'paid') {
+      monthlyData[monthKey].paidCount++;
     }
   });
   
-  return Object.entries(monthlyData).map(([month, revenue]) => ({
+  return Object.entries(monthlyData).map(([month, data]) => ({
     month,
-    revenue,
-    count: paidInvoices.filter(inv => inv.paidAt?.toISOString().slice(0, 7) === month).length,
+    revenue: data.revenue,
+    count: data.count,
+    paidCount: data.paidCount,
   }));
 }
 
@@ -591,11 +600,35 @@ export async function getRecurringInvoicesByUserId(userId: number) {
   const db = await getDb();
   if (!db) return [];
   
-  const { recurringInvoices } = await import("../drizzle/schema");
+  const { recurringInvoices, clients } = await import("../drizzle/schema");
   
-  return db.select().from(recurringInvoices)
-    .where(eq(recurringInvoices.userId, userId))
-    .orderBy(desc(recurringInvoices.createdAt));
+  // Join with clients table to get client information
+  const results = await db.select({
+    id: recurringInvoices.id,
+    userId: recurringInvoices.userId,
+    clientId: recurringInvoices.clientId,
+    frequency: recurringInvoices.frequency,
+    startDate: recurringInvoices.startDate,
+    endDate: recurringInvoices.endDate,
+    nextInvoiceDate: recurringInvoices.nextInvoiceDate,
+    invoiceNumberPrefix: recurringInvoices.invoiceNumberPrefix,
+    taxRate: recurringInvoices.taxRate,
+    discountType: recurringInvoices.discountType,
+    discountValue: recurringInvoices.discountValue,
+    notes: recurringInvoices.notes,
+    paymentTerms: recurringInvoices.paymentTerms,
+    isActive: recurringInvoices.isActive,
+    createdAt: recurringInvoices.createdAt,
+    // Client fields
+    clientName: clients.name,
+    clientEmail: clients.email,
+  })
+  .from(recurringInvoices)
+  .leftJoin(clients, eq(recurringInvoices.clientId, clients.id))
+  .where(eq(recurringInvoices.userId, userId))
+  .orderBy(desc(recurringInvoices.createdAt));
+  
+  return results;
 }
 
 export async function getRecurringInvoiceById(id: number, userId: number) {

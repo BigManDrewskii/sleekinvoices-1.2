@@ -89,7 +89,7 @@ export default function RecurringInvoices() {
                 <div className="flex-1">
                   <div className="flex items-center gap-3 mb-2">
                     <h3 className="text-lg font-semibold">
-                      {recurring.invoiceNumberPrefix}
+                      {recurring.clientName || 'Unknown Client'}
                     </h3>
                     <span className={`px-2 py-1 rounded-full text-xs font-medium ${
                       recurring.isActive 
@@ -102,6 +102,10 @@ export default function RecurringInvoices() {
                       {getFrequencyLabel(recurring.frequency)}
                     </span>
                   </div>
+                  
+                  <p className="text-sm text-muted-foreground mb-2">
+                    {recurring.invoiceNumberPrefix} • {recurring.clientEmail || 'No email'}
+                  </p>
                   
                   <div className="grid grid-cols-3 gap-4 mt-4 text-sm">
                     <div>

@@ -366,7 +366,16 @@ export const appRouter = router({
           paymentLinkUrl: invoice.stripePaymentLinkUrl || undefined,
         });
         
-        // Log email
+        // Always update invoice status to 'sent' when user clicks send
+        // This ensures status updates even if email delivery fails
+        if (invoice.status === 'draft') {
+          await db.updateInvoice(input.id, ctx.user.id, {
+            status: 'sent',
+            sentAt: new Date(),
+          });
+        }
+        
+        // Log email result
         await db.logEmail({
           userId: ctx.user.id,
           invoiceId: invoice.id,
@@ -377,15 +386,11 @@ export const appRouter = router({
           errorMessage: result.error,
         });
         
-        // Update invoice status to sent
-        if (result.success && invoice.status === 'draft') {
-          await db.updateInvoice(input.id, ctx.user.id, {
-            status: 'sent',
-            sentAt: new Date(),
-          });
-        }
-        
-        return result;
+        return {
+          success: true, // Status updated successfully
+          emailSent: result.success, // Separate flag for email delivery
+          error: result.error,
+        };
       }),
     
     sendReminder: protectedProcedure
