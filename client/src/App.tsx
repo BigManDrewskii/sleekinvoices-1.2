@@ -15,6 +15,7 @@ import ViewInvoice from "./pages/ViewInvoice";
 import Analytics from "./pages/Analytics";
 import Settings from "./pages/Settings";
 import Subscription from "./pages/Subscription";
+import SubscriptionSuccess from "./pages/SubscriptionSuccess";
 import RecurringInvoices from "./pages/RecurringInvoices";
 import CreateRecurringInvoice from "./pages/CreateRecurringInvoice";
 import Templates from "./pages/Templates";
@@ -35,6 +36,7 @@ function Router() {
       <Route path={"/analytics"} component={Analytics} />
       <Route path={"/settings"} component={Settings} />
       <Route path={"/subscription"} component={Subscription} />
+      <Route path={"/subscription/success"} component={SubscriptionSuccess} />
       <Route path={"/recurring-invoices"} component={RecurringInvoices} />
       <Route path={"/recurring-invoices/create"} component={CreateRecurringInvoice} />
       <Route path={"/templates"} component={Templates} />
