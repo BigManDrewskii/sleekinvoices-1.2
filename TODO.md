@@ -1346,3 +1346,39 @@ See TODO_PHASE6A_FRONTEND.md for detailed implementation plan
 - [ ] Team collaboration (multiple users)
 - [ ] Integrations (QuickBooks, Xero, Zapier)
 
+
+
+---
+
+## 🚀 PRODUCTION READINESS AUDIT
+
+### Authentication System
+- [ ] Verify Manus OAuth is production-ready for real customers
+- [ ] Check if custom domain auth works correctly
+- [ ] Verify session persistence and security
+- [ ] Test logout and re-authentication flows
+
+### Non-Production Elements
+- [ ] Search for test/demo/placeholder data
+- [ ] Check for hardcoded test values
+- [ ] Verify all API endpoints are production-ready
+- [ ] Check for debug/console logs that should be removed
+- [ ] Verify error messages don't expose sensitive info
+- [ ] Check for TODO/FIXME comments indicating incomplete work
+
+
+---
+
+## 📧 CUSTOM EMAIL DOMAIN SETUP
+
+### Resend Configuration
+- [x] Create Resend account (if not already done)
+- [x] Add custom domain to Resend
+- [x] Configure DNS records (SPF, DKIM, DMARC)
+- [x] Verify domain in Resend dashboard
+- [x] Update email sender in code to use custom domain
+
+### Code Updates
+- [x] Update FROM address in server/email.ts
+- [ ] Test email delivery with custom domain
+- [ ] Verify emails don't go to spam

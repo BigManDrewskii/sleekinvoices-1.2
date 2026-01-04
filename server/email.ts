@@ -185,7 +185,8 @@ export async function sendInvoiceEmail(params: SendInvoiceEmailParams): Promise<
     `;
     
     const result = await resendClient.emails.send({
-      from: `${user.name || user.companyName || 'Invoice'} <onboarding@resend.dev>`, // TODO: Use custom domain
+      from: `${user.name || user.companyName || 'SleekInvoices'} <invoices@sleekinvoices.com>`,
+      replyTo: user.email || 'support@sleekinvoices.com',
       to: [client.email],
       subject: `Invoice ${invoice.invoiceNumber} from ${user.companyName || user.name}`,
       html: emailHtml,
@@ -366,7 +367,8 @@ export async function sendPaymentReminderEmail(params: SendInvoiceEmailParams): 
     `;
     
     const result = await resendClient.emails.send({
-      from: `${user.name || user.companyName || 'Invoice'} <onboarding@resend.dev>`,
+      from: `${user.name || user.companyName || 'SleekInvoices'} <reminders@sleekinvoices.com>`,
+      replyTo: user.email || 'support@sleekinvoices.com',
       to: [client.email],
       subject: `${isOverdue ? 'Overdue' : 'Reminder'}: Invoice ${invoice.invoiceNumber}`,
       html: emailHtml,
@@ -596,7 +598,8 @@ export async function sendReminderEmail(params: SendReminderEmailParams): Promis
     });
     
     const emailOptions: any = {
-      from: `${user.companyName || user.name || 'InvoiceFlow'} <noreply@manus.im>`,
+      from: `${user.companyName || user.name || 'SleekInvoices'} <reminders@sleekinvoices.com>`,
+      replyTo: user.email || 'support@sleekinvoices.com',
       to: client.email,
       subject: `Payment Reminder: Invoice ${invoice.invoiceNumber} is ${daysOverdue} days overdue`,
       html: emailHtml,
