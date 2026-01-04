@@ -975,3 +975,40 @@ See TODO_PHASE6A_FRONTEND.md for detailed implementation plan
 - [x] Handle subscription cancellation (set status to 'canceled')
 - [x] Write comprehensive tests (11 tests, all passing)
 - [ ] Test live Stripe checkout flow end-to-end
+
+
+---
+
+## 🧹 CLEANUP: Reset Account for Real Stripe Testing (Jan 4, 2026) - COMPLETE
+- [x] Delete all test/dummy invoices from database (74 deleted)
+- [x] Delete all test clients
+- [x] Delete all test expenses
+- [x] Reset usage counter to 0/3 for current month
+- [x] Set user subscription status to 'free'
+- [x] Clear Stripe subscription ID and period end
+- [x] Verify clean state (0 invoices, 0 clients, 0 expenses, FREE tier, 0/3 usage)
+
+
+---
+
+## 🔧 STRIPE LIVE MODE SETUP (Jan 4, 2026) - COMPLETE
+- [x] Navigate to Stripe Dashboard products page
+- [x] Verify we're in LIVE mode (not test mode)
+- [x] Check if SleekInvoices Pro product exists in LIVE mode
+- [x] Product exists: "SleekInvoices Pro" at $12/month
+- [x] LIVE price ID confirmed: price_1SltisPrdXjaohfoZ7MNKEDP
+- [x] Add STRIPE_PRO_PRICE_ID to Manus Application secrets
+- [x] Add all LIVE Stripe keys to Application secrets
+- [x] Publish changes to production site
+- [ ] Test checkout flow on production site (requires login)
+
+
+---
+
+## 🔧 WEBHOOK VERIFICATION FIX (Jan 4, 2026) - COMPLETE
+- [x] Webhook handler already returns valid JSON response
+- [x] Webhook returns {"verified": true} for test events
+- [x] Webhook returns {"received": true} for real events
+- [x] LIVE Stripe keys added to production via Application secrets
+- [ ] Test webhook verification on production site
+- [ ] Test complete checkout flow with LIVE keys on production

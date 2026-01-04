@@ -1,0 +1,16 @@
+{
+  "query": "SELECT \n  (SELECT COUNT(*) FROM invoices WHERE userId = 1) as invoice_count,\n  (SELECT COUNT(*) FROM clients WHERE userId = 1) as client_count,\n  (SELECT COUNT(*) FROM expenses WHERE userId = 1) as expense_count,\n  (SELECT invoicesCreated FROM usageTracking WHERE userId = 1 AND month = DATE_FORMAT(NOW(), '%Y-%m-01')) as current_usage;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user REX6DRAh92xmf1o.58be8e717db2 --database coKdAkLfsbebvczbYNFn3V --execute SELECT \n  (SELECT COUNT(*) FROM invoices WHERE userId = 1) as invoice_count,\n  (SELECT COUNT(*) FROM clients WHERE userId = 1) as client_count,\n  (SELECT COUNT(*) FROM expenses WHERE userId = 1) as expense_count,\n  (SELECT invoicesCreated FROM usageTracking WHERE userId = 1 AND month = DATE_FORMAT(NOW(), '%Y-%m-01')) as current_usage;",
+  "rows": [
+    {
+      "invoice_count": "74",
+      "client_count": "149",
+      "expense_count": "19",
+      "current_usage": "NULL"
+    }
+  ],
+  "messages": [],
+  "stdout": "invoice_count\tclient_count\texpense_count\tcurrent_usage\n74\t149\t19\tNULL\n",
+  "stderr": "",
+  "execution_time_ms": 60
+}

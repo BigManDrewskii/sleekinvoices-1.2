@@ -1,0 +1,21 @@
+{
+  "query": "SELECT \n  u.id, u.name, u.email, u.subscriptionStatus, u.subscriptionId,\n  (SELECT COUNT(*) FROM invoices WHERE userId = 1) as invoice_count,\n  (SELECT COUNT(*) FROM clients WHERE userId = 1) as client_count,\n  (SELECT COUNT(*) FROM expenses WHERE userId = 1) as expense_count,\n  (SELECT invoicesCreated FROM usageTracking WHERE userId = 1 AND month = DATE_FORMAT(NOW(), '%Y-%m-01')) as current_usage\nFROM users u WHERE u.id = 1;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user REX6DRAh92xmf1o.58be8e717db2 --database coKdAkLfsbebvczbYNFn3V --execute SELECT \n  u.id, u.name, u.email, u.subscriptionStatus, u.subscriptionId,\n  (SELECT COUNT(*) FROM invoices WHERE userId = 1) as invoice_count,\n  (SELECT COUNT(*) FROM clients WHERE userId = 1) as client_count,\n  (SELECT COUNT(*) FROM expenses WHERE userId = 1) as expense_count,\n  (SELECT invoicesCreated FROM usageTracking WHERE userId = 1 AND month = DATE_FORMAT(NOW(), '%Y-%m-01')) as current_usage\nFROM users u WHERE u.id = 1;",
+  "rows": [
+    {
+      "id": "1",
+      "name": "Andreas",
+      "email": "drewskiiart@gmail.com",
+      "subscriptionStatus": "free",
+      "subscriptionId": "NULL",
+      "invoice_count": "0",
+      "client_count": "0",
+      "expense_count": "0",
+      "current_usage": "NULL"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tname\temail\tsubscriptionStatus\tsubscriptionId\tinvoice_count\tclient_count\texpense_count\tcurrent_usage\n1\tAndreas\tdrewskiiart@gmail.com\tfree\tNULL\t0\t0\t0\tNULL\n",
+  "stderr": "",
+  "execution_time_ms": 58
+}

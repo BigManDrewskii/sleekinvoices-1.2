@@ -1,0 +1,18 @@
+{
+  "query": "SELECT * FROM usageTracking WHERE userId = 1 ORDER BY month DESC LIMIT 3;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user REX6DRAh92xmf1o.58be8e717db2 --database coKdAkLfsbebvczbYNFn3V --execute SELECT * FROM usageTracking WHERE userId = 1 ORDER BY month DESC LIMIT 3;",
+  "rows": [
+    {
+      "id": "1",
+      "userId": "1",
+      "month": "2026-01",
+      "invoicesCreated": "4",
+      "createdAt": "2026-01-04 15:42:55",
+      "updatedAt": "2026-01-04 15:42:55"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tuserId\tmonth\tinvoicesCreated\tcreatedAt\tupdatedAt\n1\t1\t2026-01\t4\t2026-01-04 15:42:55\t2026-01-04 15:42:55\n",
+  "stderr": "",
+  "execution_time_ms": 65
+}

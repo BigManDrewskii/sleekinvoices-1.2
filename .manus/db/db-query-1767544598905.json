@@ -1,0 +1,18 @@
+{
+  "query": "SELECT id, name, email, subscriptionStatus, subscriptionId, currentPeriodEnd FROM users WHERE email = 'drewskiiart@gmail.com';",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user REX6DRAh92xmf1o.58be8e717db2 --database coKdAkLfsbebvczbYNFn3V --execute SELECT id, name, email, subscriptionStatus, subscriptionId, currentPeriodEnd FROM users WHERE email = 'drewskiiart@gmail.com';",
+  "rows": [
+    {
+      "id": "1",
+      "name": "Andreas",
+      "email": "drewskiiart@gmail.com",
+      "subscriptionStatus": "active",
+      "subscriptionId": "sub_test_1767544376383",
+      "currentPeriodEnd": "2026-02-03 16:32:56"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tname\temail\tsubscriptionStatus\tsubscriptionId\tcurrentPeriodEnd\n1\tAndreas\tdrewskiiart@gmail.com\tactive\tsub_test_1767544376383\t2026-02-03 16:32:56\n",
+  "stderr": "",
+  "execution_time_ms": 111
+}
