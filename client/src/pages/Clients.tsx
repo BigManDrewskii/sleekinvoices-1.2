@@ -106,13 +106,13 @@ export default function Clients() {
       <Navigation />
 
       {/* Main Content */}
-      <div className="container mx-auto px-4 py-8">
-        <div className="flex items-center justify-between mb-8">
+      <div className="container mx-auto px-4 py-6 md:py-8">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6 md:mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-foreground">Clients</h1>
-            <p className="text-muted-foreground">Manage your client database</p>
+            <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Clients</h1>
+            <p className="text-sm sm:text-base text-muted-foreground">Manage your client database</p>
           </div>
-          <Button onClick={handleAddNew}>
+          <Button onClick={handleAddNew} className="w-full sm:w-auto">
             <Plus className="h-4 w-4 mr-2" />
             Add Client
           </Button>
@@ -157,7 +157,9 @@ export default function Clients() {
                 No clients match your search query
               </div>
             ) : (
-              <div className="overflow-x-auto">
+              <>
+              {/* Desktop Table View */}
+              <div className="hidden md:block overflow-x-auto">
                 <Table>
                   <TableHeader>
                     <TableRow>
@@ -230,6 +232,67 @@ export default function Clients() {
                   </TableBody>
                 </Table>
               </div>
+              
+              {/* Mobile Card View */}
+              <div className="md:hidden space-y-4">
+                {filteredClients?.map((client) => (
+                  <div key={client.id} className="border rounded-lg p-4 space-y-3">
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <p className="font-semibold text-foreground">{client.name}</p>
+                        {client.companyName && (
+                          <p className="text-sm text-muted-foreground">{client.companyName}</p>
+                        )}
+                      </div>
+                    </div>
+                    
+                    <div className="space-y-2 text-sm">
+                      {client.email && (
+                        <div className="flex items-center gap-2">
+                          <Mail className="h-4 w-4 text-muted-foreground" />
+                          <span>{client.email}</span>
+                        </div>
+                      )}
+                      {client.phone && (
+                        <div className="flex items-center gap-2">
+                          <Phone className="h-4 w-4 text-muted-foreground" />
+                          <span>{client.phone}</span>
+                        </div>
+                      )}
+                      {client.address && (
+                        <div className="flex items-start gap-2">
+                          <MapPin className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" />
+                          <span className="line-clamp-2">{client.address}</span>
+                        </div>
+                      )}
+                      {!client.email && !client.phone && !client.address && (
+                        <p className="text-muted-foreground">No contact information</p>
+                      )}
+                    </div>
+                    
+                    <div className="flex gap-2 pt-2 border-t">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleEdit(client)}
+                        className="flex-1"
+                      >
+                        <Edit className="h-4 w-4 mr-1" />
+                        Edit
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleDelete(client)}
+                        className="text-red-600 hover:text-red-700"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              </>
             )}
           </CardContent>
         </Card>

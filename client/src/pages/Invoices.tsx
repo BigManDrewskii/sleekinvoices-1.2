@@ -178,13 +178,13 @@ export default function Invoices() {
       <Navigation />
 
       {/* Main Content */}
-      <div className="container mx-auto px-4 py-8">
-        <div className="flex items-center justify-between mb-8">
+      <div className="container mx-auto px-4 py-6 md:py-8">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6 md:mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-foreground">Invoices</h1>
-            <p className="text-muted-foreground">Manage and track all your invoices</p>
+            <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Invoices</h1>
+            <p className="text-sm sm:text-base text-muted-foreground">Manage and track all your invoices</p>
           </div>
-          <Button onClick={() => setLocation("/invoices/create")}>
+          <Button onClick={() => setLocation("/invoices/create")} className="w-full sm:w-auto">
             <Plus className="h-4 w-4 mr-2" />
             New Invoice
           </Button>
@@ -253,7 +253,9 @@ export default function Invoices() {
                 No invoices match your filters
               </div>
             ) : (
-              <div className="overflow-x-auto">
+              <>
+              {/* Desktop Table View */}
+              <div className="hidden md:block overflow-x-auto">
                 <Table>
                   <TableHeader>
                     <TableRow>
@@ -357,6 +359,105 @@ export default function Invoices() {
                   </TableBody>
                 </Table>
               </div>
+              
+              {/* Mobile Card View */}
+              <div className="md:hidden space-y-4">
+                {filteredInvoices?.map((invoice) => (
+                  <div key={invoice.id} className="border rounded-lg p-4 space-y-3">
+                    <div className="flex items-start justify-between">
+                      <div>
+                        <p className="font-semibold text-foreground">{invoice.invoiceNumber}</p>
+                        <p className="text-sm text-muted-foreground">{invoice.client.name}</p>
+                      </div>
+                      <div className="flex gap-1">
+                        <StatusBadge status={invoice.status} />
+                      </div>
+                    </div>
+                    
+                    <div className="grid grid-cols-2 gap-2 text-sm">
+                      <div>
+                        <p className="text-muted-foreground">Issue Date</p>
+                        <p className="font-medium">{formatDateShort(invoice.issueDate)}</p>
+                      </div>
+                      <div>
+                        <p className="text-muted-foreground">Due Date</p>
+                        <p className="font-medium">{formatDateShort(invoice.dueDate)}</p>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center justify-between pt-2 border-t">
+                      <div>
+                        <p className="text-sm text-muted-foreground">Amount</p>
+                        <p className="text-lg font-bold">{formatCurrency(invoice.total)}</p>
+                        {invoice.paymentStatus && invoice.paymentStatus !== 'unpaid' && (
+                          <p className="text-xs text-muted-foreground">Paid: {formatCurrency(invoice.totalPaid || '0')}</p>
+                        )}
+                      </div>
+                      {invoice.paymentStatus ? (
+                        <PaymentStatusBadge status={invoice.paymentStatus} />
+                      ) : (
+                        <PaymentStatusBadge status="unpaid" />
+                      )}
+                    </div>
+                    
+                    <div className="flex flex-wrap gap-2 pt-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setLocation(`/invoices/${invoice.id}`)}
+                        className="flex-1"
+                      >
+                        <Eye className="h-4 w-4 mr-1" />
+                        View
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setLocation(`/invoices/${invoice.id}/edit`)}
+                        className="flex-1"
+                      >
+                        <Edit className="h-4 w-4 mr-1" />
+                        Edit
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleDownloadPDF(invoice.id)}
+                        disabled={generatePDF.isPending}
+                      >
+                        <Download className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleSendEmail(invoice.id)}
+                        disabled={sendEmail.isPending}
+                      >
+                        <Mail className="h-4 w-4" />
+                      </Button>
+                      {!invoice.paymentLink && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleCreatePaymentLink(invoice.id)}
+                          disabled={createPaymentLink.isPending}
+                        >
+                          <LinkIcon className="h-4 w-4" />
+                        </Button>
+                      )}
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleDelete(invoice)}
+                        className="text-red-600 hover:text-red-700"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              </>
             )}
           </CardContent>
         </Card>

@@ -16,20 +16,20 @@ export default function Landing() {
       <Navigation />
 
       {/* Hero Section */}
-      <section className="container mx-auto px-4 py-16 md:py-24">
-        <div className="grid lg:grid-cols-2 gap-12 items-center max-w-7xl mx-auto">
+      <section className="container mx-auto px-4 py-12 md:py-16 lg:py-24">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-12 items-center max-w-7xl mx-auto">
           {/* Left Column - Content */}
           <div className="space-y-8 text-center lg:text-left">
             <div className="inline-block px-4 py-2 bg-primary/10 text-primary rounded-full text-sm font-medium">
               ✨ Professional Invoicing Made Simple
             </div>
             
-            <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-foreground leading-tight">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold text-foreground leading-tight">
               Create Professional Invoices in{" "}
               <span className="text-primary">Seconds</span>
             </h1>
             
-            <p className="text-lg md:text-xl text-muted-foreground max-w-2xl leading-relaxed">
+            <p className="text-base sm:text-lg md:text-xl text-muted-foreground max-w-2xl leading-relaxed">
               The modern invoicing solution for freelancers and small businesses. 
               Get paid faster with beautiful invoices, built-in Stripe payments, and automated reminders.
             </p>
@@ -57,7 +57,7 @@ export default function Landing() {
           </div>
 
           {/* Right Column - Visual */}
-          <div className="relative">
+          <div className="relative order-first lg:order-last">
             <div className="relative bg-card rounded-2xl p-8 border border-border">
               {/* Product screenshot mockup */}
               <div className="bg-muted rounded-xl shadow-2xl border border-border overflow-hidden">
@@ -111,7 +111,7 @@ export default function Landing() {
       </section>
 
       {/* Features Section */}
-      <section className="container mx-auto px-4 py-24">
+      <section className="container mx-auto px-4 py-16 md:py-24">
         <div className="text-center mb-16 max-w-3xl mx-auto">
           <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
             Everything You Need to Get Paid
@@ -121,7 +121,7 @@ export default function Landing() {
           </p>
         </div>
         
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 max-w-7xl mx-auto">
           <FeatureCard
             icon={<Zap className="h-8 w-8" />}
             title="Lightning-Fast Creation"
@@ -162,14 +162,14 @@ export default function Landing() {
       </section>
 
       {/* How It Works Section */}
-      <section className="container mx-auto px-4 py-24 bg-secondary/20">
+      <section className="container mx-auto px-4 py-16 md:py-24 bg-secondary/20">
         <div className="text-center mb-16">
           <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
             Start Invoicing in 3 Simple Steps
           </h2>
         </div>
         
-        <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 md:gap-8 max-w-5xl mx-auto">
           <StepCard
             number="1"
             title="Sign Up Free"
@@ -192,7 +192,7 @@ export default function Landing() {
       </section>
 
       {/* Pricing Section */}
-      <section className="container mx-auto px-4 py-24">
+      <section className="container mx-auto px-4 py-16 md:py-24">
         <div className="text-center mb-16 max-w-3xl mx-auto">
           <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
             Simple, Transparent Pricing
@@ -202,7 +202,7 @@ export default function Landing() {
           </p>
         </div>
         
-        <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 max-w-4xl mx-auto">
           <PricingCard
             name="Free"
             price="$0"
@@ -245,14 +245,14 @@ export default function Landing() {
       </section>
 
       {/* FAQ Section */}
-      <section className="container mx-auto px-4 py-24 bg-secondary/20">
+      <section className="container mx-auto px-4 py-16 md:py-24 bg-secondary/20">
         <div className="text-center mb-16">
           <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
             Frequently Asked Questions
           </h2>
         </div>
         
-        <div className="grid md:grid-cols-2 gap-6 max-w-5xl mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 max-w-5xl mx-auto">
           <FAQItem
             question="How does the free trial work?"
             answer="Start with 3 free invoices per month. No credit card required. Upgrade to Pro anytime for unlimited invoices and premium features."
@@ -288,13 +288,13 @@ export default function Landing() {
       </section>
 
       {/* Final CTA Section */}
-      <section className="container mx-auto px-4 py-24">
-        <div className="bg-primary text-primary-foreground rounded-3xl p-12 md:p-16 text-center relative overflow-hidden">
+      <section className="container mx-auto px-4 py-16 md:py-24">
+        <div className="bg-primary text-primary-foreground rounded-2xl md:rounded-3xl p-8 md:p-12 lg:p-16 text-center relative overflow-hidden">
           <div className="relative z-10 max-w-3xl mx-auto space-y-6">
-            <h2 className="text-4xl md:text-5xl font-bold mb-4">
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4">
               Ready to Get Paid Faster?
             </h2>
-            <p className="text-xl mb-8 opacity-90">
+            <p className="text-lg sm:text-xl mb-8 opacity-90">
               Start creating professional invoices today
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -322,7 +322,7 @@ export default function Landing() {
       {/* Footer */}
       <footer className="border-t border-border bg-secondary/30 mt-24">
         <div className="container mx-auto px-4 py-12">
-          <div className="grid md:grid-cols-4 gap-8 mb-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
             <div className="space-y-4">
               <div className="flex items-center gap-2">
                 <img src="/SleekInvoices-Wide.svg" alt="SleekInvoices" className="h-6" />
@@ -449,9 +449,9 @@ function PricingCard({
   highlighted?: boolean;
 }) {
   return (
-    <div className={`relative bg-card border rounded-2xl p-8 transition-all duration-300 ${
+    <div className={`relative bg-card border rounded-2xl p-6 md:p-8 transition-all duration-300 ${
       highlighted 
-        ? "ring-2 ring-primary shadow-2xl shadow-primary/20 scale-105" 
+        ? "ring-2 ring-primary shadow-2xl shadow-primary/20 md:scale-105" 
         : "border-border hover:shadow-lg"
     }`}>
       {badge && (

@@ -38,14 +38,14 @@ export default function Dashboard() {
       <Navigation />
 
       {/* Main Content */}
-      <div className="container mx-auto px-4 py-8">
-        <div className="flex items-center justify-between mb-8">
+      <div className="container mx-auto px-4 py-6 md:py-8">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6 md:mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-foreground">Dashboard</h1>
-            <p className="text-muted-foreground">Welcome back, {user?.name || "there"}!</p>
+            <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Dashboard</h1>
+            <p className="text-sm sm:text-base text-muted-foreground">Welcome back, {user?.name || "there"}!</p>
           </div>
-          <Button asChild>
-            <Link href="/invoices/new" className="flex items-center gap-2">
+          <Button asChild className="w-full sm:w-auto">
+            <Link href="/invoices/new" className="flex items-center gap-2 justify-center">
               <Plus className="h-4 w-4" />
               New Invoice
             </Link>
@@ -53,12 +53,12 @@ export default function Dashboard() {
         </div>
 
         {/* Upgrade Promo Banner */}
-        <div className="mb-8">
+        <div className="mb-6 md:mb-8">
           <UpgradePromoBanner />
         </div>
 
         {/* Usage Indicator for Free Tier */}
-        <div className="mb-8">
+        <div className="mb-6 md:mb-8">
           <Card>
             <CardHeader>
               <CardTitle className="text-lg">Monthly Usage</CardTitle>
@@ -71,7 +71,7 @@ export default function Dashboard() {
         </div>
 
         {/* Stats Grid */}
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-6 md:mb-8">
           <StatCard
             title="Total Revenue"
             value={statsLoading ? "..." : `$${stats?.totalRevenue.toFixed(2) || "0.00"}`}
@@ -125,7 +125,7 @@ export default function Dashboard() {
                   <Link 
                     key={invoice.id} 
                     href={`/invoices/${invoice.id}`}
-                    className="flex items-center justify-between p-4 rounded-lg border hover:bg-accent transition-colors"
+                    className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 p-4 rounded-lg border hover:bg-accent transition-colors"
                   >
                     <div className="flex items-center gap-4">
                       <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
@@ -139,10 +139,12 @@ export default function Dashboard() {
                       </div>
                     </div>
                     <div className="flex items-center gap-4">
-                      <span className={`px-3 py-1 rounded-full text-xs font-medium status-${invoice.status}`}>
-                        {invoice.status.toUpperCase()}
-                      </span>
-                      <span className="font-semibold text-foreground">${Number(invoice.total).toFixed(2)}</span>
+                      <div className="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-end">
+                        <span className={`px-3 py-1 rounded-full text-xs font-medium status-${invoice.status}`}>
+                          {invoice.status.toUpperCase()}
+                        </span>
+                        <span className="font-semibold text-foreground">${Number(invoice.total).toFixed(2)}</span>
+                      </div>
                     </div>
                   </Link>
                 ))}

@@ -133,16 +133,16 @@ export default function Analytics() {
       <Navigation />
 
       {/* Main Content */}
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 py-6 md:py-8">
         <div className="max-w-7xl mx-auto">
           {/* Header */}
-          <div className="flex items-center justify-between mb-8">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6 md:mb-8">
             <div>
-              <h1 className="text-3xl font-bold text-foreground">Analytics</h1>
-              <p className="text-muted-foreground">Track your revenue and invoice performance</p>
+              <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Analytics</h1>
+              <p className="text-sm sm:text-base text-muted-foreground">Track your revenue and invoice performance</p>
             </div>
             <Select value={timeRange} onValueChange={(val: any) => setTimeRange(val)}>
-              <SelectTrigger className="w-[180px]">
+              <SelectTrigger className="w-full sm:w-[180px]">
                 <Calendar className="h-4 w-4 mr-2" />
                 <SelectValue />
               </SelectTrigger>
@@ -156,7 +156,7 @@ export default function Analytics() {
           </div>
 
           {/* Key Metrics */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-6 md:mb-8">
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
