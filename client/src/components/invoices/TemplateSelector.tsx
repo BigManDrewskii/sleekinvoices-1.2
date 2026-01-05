@@ -1,7 +1,7 @@
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { trpc } from "@/lib/trpc";
-import { Palette } from "lucide-react";
+
 
 interface TemplateSelectorProps {
   value: number | null;
@@ -34,7 +34,6 @@ export function TemplateSelector({ value, onChange, error }: TemplateSelectorPro
   return (
     <div className="space-y-2">
       <Label htmlFor="template">
-        <Palette className="inline w-4 h-4 mr-2" />
         Invoice Template
       </Label>
       <Select

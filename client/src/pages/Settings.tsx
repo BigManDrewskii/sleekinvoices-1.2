@@ -186,10 +186,7 @@ export default function Settings() {
             {/* Personal Information */}
             <Card>
               <CardHeader>
-                <div className="flex items-center gap-2">
-                  <User className="h-5 w-5 text-primary" />
-                  <CardTitle>Personal Information</CardTitle>
-                </div>
+                <CardTitle>Personal Information</CardTitle>
                 <CardDescription>Your personal details and account information</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -221,10 +218,7 @@ export default function Settings() {
             {/* Company Information */}
             <Card>
               <CardHeader>
-                <div className="flex items-center gap-2">
-                  <Building2 className="h-5 w-5 text-primary" />
-                  <CardTitle>Company Information</CardTitle>
-                </div>
+                <CardTitle>Company Information</CardTitle>
                 <CardDescription>Details that appear on your invoices</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -342,10 +336,7 @@ export default function Settings() {
             {/* Email Reminder Settings */}
             <Card>
               <CardHeader>
-                <div className="flex items-center gap-2">
-                  <Mail className="h-5 w-5 text-primary" />
-                  <CardTitle>Email Reminder Settings</CardTitle>
-                </div>
+                <CardTitle>Email Reminder Settings</CardTitle>
                 <CardDescription>Automatically send payment reminders to clients with overdue invoices</CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">

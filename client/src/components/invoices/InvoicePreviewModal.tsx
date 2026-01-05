@@ -7,7 +7,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { formatCurrency, formatDate } from "@/lib/utils";
-import { Eye, X, Palette } from "lucide-react";
+import { Eye, X } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 import { TemplateSelector } from "./TemplateSelector";
 import { useState } from "react";
@@ -268,8 +268,7 @@ export function InvoicePreviewModal({
 
           {/* Template Attribution */}
           <div className="mt-8 pt-4 border-t border-gray-200 text-center">
-            <p className="text-xs text-gray-400 flex items-center justify-center gap-1">
-              <Palette className="h-3 w-3" />
+            <p className="text-xs text-gray-400 text-center">
               Using {template?.name || "Default"} template
             </p>
           </div>

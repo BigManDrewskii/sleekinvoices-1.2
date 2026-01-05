@@ -1,0 +1,250 @@
+{
+  "query": "SELECT userId, name, COUNT(*) as count FROM invoiceTemplates GROUP BY userId, name ORDER BY userId, name;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user REX6DRAh92xmf1o.58be8e717db2 --database coKdAkLfsbebvczbYNFn3V --execute SELECT userId, name, COUNT(*) as count FROM invoiceTemplates GROUP BY userId, name ORDER BY userId, name;",
+  "rows": [
+    {
+      "userId": "1",
+      "name": "Bold",
+      "count": "1"
+    },
+    {
+      "userId": "1",
+      "name": "Classic",
+      "count": "1"
+    },
+    {
+      "userId": "1",
+      "name": "Creative",
+      "count": "1"
+    },
+    {
+      "userId": "1",
+      "name": "Minimal",
+      "count": "1"
+    },
+    {
+      "userId": "1",
+      "name": "Modern",
+      "count": "1"
+    },
+    {
+      "userId": "1",
+      "name": "Professional",
+      "count": "1"
+    },
+    {
+      "userId": "1",
+      "name": "Professional Blue",
+      "count": "1"
+    },
+    {
+      "userId": "180492",
+      "name": "Temporary Template",
+      "count": "1"
+    },
+    {
+      "userId": "180492",
+      "name": "Test Classic Template",
+      "count": "1"
+    },
+    {
+      "userId": "180492",
+      "name": "Test Field Visibility Template",
+      "count": "1"
+    },
+    {
+      "userId": "180492",
+      "name": "Test left Logo Template",
+      "count": "1"
+    },
+    {
+      "userId": "180492",
+      "name": "Test Modern Template",
+      "count": "1"
+    },
+    {
+      "userId": "180492",
+      "name": "Test standard Header Template",
+      "count": "1"
+    },
+    {
+      "userId": "180493",
+      "name": "Temporary Template",
+      "count": "1"
+    },
+    {
+      "userId": "180493",
+      "name": "Test Classic Template",
+      "count": "1"
+    },
+    {
+      "userId": "180493",
+      "name": "Test Field Visibility Template",
+      "count": "1"
+    },
+    {
+      "userId": "180493",
+      "name": "Test left Logo Template",
+      "count": "1"
+    },
+    {
+      "userId": "180493",
+      "name": "Test Modern Template",
+      "count": "1"
+    },
+    {
+      "userId": "180493",
+      "name": "Test standard Header Template",
+      "count": "1"
+    },
+    {
+      "userId": "180494",
+      "name": "Test Classic Template",
+      "count": "1"
+    },
+    {
+      "userId": "180494",
+      "name": "Updated Modern Template",
+      "count": "1"
+    },
+    {
+      "userId": "180495",
+      "name": "Test Classic Template",
+      "count": "1"
+    },
+    {
+      "userId": "180495",
+      "name": "Updated Modern Template",
+      "count": "1"
+    },
+    {
+      "userId": "180496",
+      "name": "Test Classic Template",
+      "count": "1"
+    },
+    {
+      "userId": "180496",
+      "name": "Updated Modern Template",
+      "count": "1"
+    },
+    {
+      "userId": "180497",
+      "name": "Updated Modern Template",
+      "count": "1"
+    },
+    {
+      "userId": "240080",
+      "name": "Updated Modern Template",
+      "count": "1"
+    },
+    {
+      "userId": "240083",
+      "name": "Updated Modern Template",
+      "count": "1"
+    },
+    {
+      "userId": "240084",
+      "name": "Bold",
+      "count": "1"
+    },
+    {
+      "userId": "240084",
+      "name": "Classic",
+      "count": "1"
+    },
+    {
+      "userId": "240084",
+      "name": "Creative",
+      "count": "1"
+    },
+    {
+      "userId": "240084",
+      "name": "Minimal",
+      "count": "1"
+    },
+    {
+      "userId": "240084",
+      "name": "Modern",
+      "count": "1"
+    },
+    {
+      "userId": "240084",
+      "name": "Professional",
+      "count": "1"
+    },
+    {
+      "userId": "240204",
+      "name": "Updated Modern Template",
+      "count": "1"
+    },
+    {
+      "userId": "240205",
+      "name": "Bold",
+      "count": "1"
+    },
+    {
+      "userId": "240205",
+      "name": "Classic",
+      "count": "1"
+    },
+    {
+      "userId": "240205",
+      "name": "Creative",
+      "count": "1"
+    },
+    {
+      "userId": "240205",
+      "name": "Minimal",
+      "count": "1"
+    },
+    {
+      "userId": "240205",
+      "name": "Modern",
+      "count": "1"
+    },
+    {
+      "userId": "240205",
+      "name": "Professional",
+      "count": "1"
+    },
+    {
+      "userId": "240276",
+      "name": "Updated Modern Template",
+      "count": "1"
+    },
+    {
+      "userId": "240277",
+      "name": "Bold",
+      "count": "1"
+    },
+    {
+      "userId": "240277",
+      "name": "Classic",
+      "count": "1"
+    },
+    {
+      "userId": "240277",
+      "name": "Creative",
+      "count": "1"
+    },
+    {
+      "userId": "240277",
+      "name": "Minimal",
+      "count": "1"
+    },
+    {
+      "userId": "240277",
+      "name": "Modern",
+      "count": "1"
+    },
+    {
+      "userId": "240277",
+      "name": "Professional",
+      "count": "1"
+    }
+  ],
+  "messages": [],
+  "stdout": "userId\tname\tcount\n1\tBold\t1\n1\tClassic\t1\n1\tCreative\t1\n1\tMinimal\t1\n1\tModern\t1\n1\tProfessional\t1\n1\tProfessional Blue\t1\n180492\tTemporary Template\t1\n180492\tTest Classic Template\t1\n180492\tTest Field Visibility Template\t1\n180492\tTest left Logo Template\t1\n180492\tTest Modern Template\t1\n180492\tTest standard Header Template\t1\n180493\tTemporary Template\t1\n180493\tTest Classic Template\t1\n180493\tTest Field Visibility Template\t1\n180493\tTest left Logo Template\t1\n180493\tTest Modern Template\t1\n180493\tTest standard Header Template\t1\n180494\tTest Classic Template\t1\n180494\tUpdated Modern Template\t1\n180495\tTest Classic Template\t1\n180495\tUpdated Modern Template\t1\n180496\tTest Classic Template\t1\n180496\tUpdated Modern Template\t1\n180497\tUpdated Modern Template\t1\n240080\tUpdated Modern Template\t1\n240083\tUpdated Modern Template\t1\n240084\tBold\t1\n240084\tClassic\t1\n240084\tCreative\t1\n240084\tMinimal\t1\n240084\tModern\t1\n240084\tProfessional\t1\n240204\tUpdated Modern Template\t1\n240205\tBold\t1\n240205\tClassic\t1\n240205\tCreative\t1\n240205\tMinimal\t1\n240205\tModern\t1\n240205\tProfessional\t1\n240276\tUpdated Modern Template\t1\n240277\tBold\t1\n240277\tClassic\t1\n240277\tCreative\t1\n240277\tMinimal\t1\n240277\tModern\t1\n240277\tProfessional\t1\n",
+  "stderr": "",
+  "execution_time_ms": 57
+}

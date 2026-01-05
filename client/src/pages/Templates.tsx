@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "wouter";
-import { Plus, Eye, Edit, Trash2, Star, Copy, Sparkles } from "lucide-react";
+import { Plus, Eye, Edit, Trash2, Star, Copy } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { trpc } from "@/lib/trpc";
@@ -200,9 +200,7 @@ export default function InvoiceTemplates() {
           <div className="flex flex-col items-center justify-center py-16 px-4">
             <div className="w-full max-w-md text-center space-y-6">
               <div className="flex justify-center">
-                <div className="rounded-full bg-primary/10 p-6">
-                  <Sparkles className="h-12 w-12 text-primary" />
-                </div>
+                <div className="text-6xl">📄</div>
               </div>
               
               <div className="space-y-2">
@@ -223,7 +221,6 @@ export default function InvoiceTemplates() {
                     <>Creating Templates...</>
                   ) : (
                     <>
-                      <Sparkles className="h-5 w-5 mr-2" />
                       Initialize Default Templates
                     </>
                   )}
@@ -262,8 +259,7 @@ export default function InvoiceTemplates() {
           <div className="space-y-8">
             <Card className="border-dashed">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Sparkles className="h-5 w-5 text-primary" />
+                <CardTitle>
                   Get Professional Templates
                 </CardTitle>
                 <CardDescription>
@@ -279,7 +275,6 @@ export default function InvoiceTemplates() {
                     <>Creating Templates...</>
                   ) : (
                     <>
-                      <Sparkles className="h-4 w-4 mr-2" />
                       Initialize Default Templates
                     </>
                   )}

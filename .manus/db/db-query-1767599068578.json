@@ -1,0 +1,594 @@
+{
+  "query": "SELECT id, userId, name, templateType, isDefault, createdAt FROM invoiceTemplates ORDER BY userId, name;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user REX6DRAh92xmf1o.58be8e717db2 --database coKdAkLfsbebvczbYNFn3V --execute SELECT id, userId, name, templateType, isDefault, createdAt FROM invoiceTemplates ORDER BY userId, name;",
+  "rows": [
+    {
+      "id": "120045",
+      "userId": "1",
+      "name": "Bold",
+      "templateType": "bold",
+      "isDefault": "0",
+      "createdAt": "2026-01-05 07:10:35"
+    },
+    {
+      "id": "120046",
+      "userId": "1",
+      "name": "Bold",
+      "templateType": "bold",
+      "isDefault": "0",
+      "createdAt": "2026-01-05 07:10:35"
+    },
+    {
+      "id": "120041",
+      "userId": "1",
+      "name": "Classic",
+      "templateType": "classic",
+      "isDefault": "0",
+      "createdAt": "2026-01-05 07:10:35"
+    },
+    {
+      "id": "120042",
+      "userId": "1",
+      "name": "Classic",
+      "templateType": "classic",
+      "isDefault": "0",
+      "createdAt": "2026-01-05 07:10:35"
+    },
+    {
+      "id": "120050",
+      "userId": "1",
+      "name": "Creative",
+      "templateType": "creative",
+      "isDefault": "0",
+      "createdAt": "2026-01-05 07:10:36"
+    },
+    {
+      "id": "120049",
+      "userId": "1",
+      "name": "Creative",
+      "templateType": "creative",
+      "isDefault": "0",
+      "createdAt": "2026-01-05 07:10:36"
+    },
+    {
+      "id": "120043",
+      "userId": "1",
+      "name": "Minimal",
+      "templateType": "minimal",
+      "isDefault": "0",
+      "createdAt": "2026-01-05 07:10:35"
+    },
+    {
+      "id": "120044",
+      "userId": "1",
+      "name": "Minimal",
+      "templateType": "minimal",
+      "isDefault": "0",
+      "createdAt": "2026-01-05 07:10:35"
+    },
+    {
+      "id": "120040",
+      "userId": "1",
+      "name": "Modern",
+      "templateType": "modern",
+      "isDefault": "1",
+      "createdAt": "2026-01-05 07:10:35"
+    },
+    {
+      "id": "120039",
+      "userId": "1",
+      "name": "Modern",
+      "templateType": "modern",
+      "isDefault": "1",
+      "createdAt": "2026-01-05 07:10:35"
+    },
+    {
+      "id": "120047",
+      "userId": "1",
+      "name": "Professional",
+      "templateType": "professional",
+      "isDefault": "0",
+      "createdAt": "2026-01-05 07:10:36"
+    },
+    {
+      "id": "120048",
+      "userId": "1",
+      "name": "Professional",
+      "templateType": "professional",
+      "isDefault": "0",
+      "createdAt": "2026-01-05 07:10:36"
+    },
+    {
+      "id": "60002",
+      "userId": "1",
+      "name": "Professional Blue",
+      "templateType": "modern",
+      "isDefault": "0",
+      "createdAt": "2026-01-04 12:40:24"
+    },
+    {
+      "id": "60006",
+      "userId": "1",
+      "name": "Professional Blue",
+      "templateType": "modern",
+      "isDefault": "0",
+      "createdAt": "2026-01-04 12:47:00"
+    },
+    {
+      "id": "60009",
+      "userId": "1",
+      "name": "Professional Blue",
+      "templateType": "modern",
+      "isDefault": "0",
+      "createdAt": "2026-01-04 13:17:37"
+    },
+    {
+      "id": "60010",
+      "userId": "1",
+      "name": "Professional Blue",
+      "templateType": "modern",
+      "isDefault": "0",
+      "createdAt": "2026-01-04 13:26:49"
+    },
+    {
+      "id": "60011",
+      "userId": "1",
+      "name": "Professional Blue",
+      "templateType": "modern",
+      "isDefault": "0",
+      "createdAt": "2026-01-04 13:39:12"
+    },
+    {
+      "id": "60012",
+      "userId": "1",
+      "name": "Professional Blue",
+      "templateType": "modern",
+      "isDefault": "0",
+      "createdAt": "2026-01-04 14:17:20"
+    },
+    {
+      "id": "60007",
+      "userId": "1",
+      "name": "Professional Blue",
+      "templateType": "modern",
+      "isDefault": "0",
+      "createdAt": "2026-01-04 12:47:29"
+    },
+    {
+      "id": "1",
+      "userId": "1",
+      "name": "Professional Blue",
+      "templateType": "modern",
+      "isDefault": "0",
+      "createdAt": "2026-01-04 09:45:11"
+    },
+    {
+      "id": "2",
+      "userId": "1",
+      "name": "Professional Blue",
+      "templateType": "modern",
+      "isDefault": "0",
+      "createdAt": "2026-01-04 09:45:31"
+    },
+    {
+      "id": "60008",
+      "userId": "1",
+      "name": "Professional Blue",
+      "templateType": "modern",
+      "isDefault": "0",
+      "createdAt": "2026-01-04 13:17:09"
+    },
+    {
+      "id": "60005",
+      "userId": "1",
+      "name": "Professional Blue",
+      "templateType": "modern",
+      "isDefault": "0",
+      "createdAt": "2026-01-04 12:46:48"
+    },
+    {
+      "id": "60004",
+      "userId": "1",
+      "name": "Professional Blue",
+      "templateType": "modern",
+      "isDefault": "0",
+      "createdAt": "2026-01-04 12:46:09"
+    },
+    {
+      "id": "60003",
+      "userId": "1",
+      "name": "Professional Blue",
+      "templateType": "modern",
+      "isDefault": "0",
+      "createdAt": "2026-01-04 12:44:34"
+    },
+    {
+      "id": "60001",
+      "userId": "1",
+      "name": "Professional Blue",
+      "templateType": "modern",
+      "isDefault": "0",
+      "createdAt": "2026-01-04 12:36:52"
+    },
+    {
+      "id": "30003",
+      "userId": "1",
+      "name": "Professional Blue",
+      "templateType": "modern",
+      "isDefault": "0",
+      "createdAt": "2026-01-04 11:59:00"
+    },
+    {
+      "id": "30002",
+      "userId": "1",
+      "name": "Professional Blue",
+      "templateType": "modern",
+      "isDefault": "0",
+      "createdAt": "2026-01-04 11:39:46"
+    },
+    {
+      "id": "30001",
+      "userId": "1",
+      "name": "Professional Blue",
+      "templateType": "modern",
+      "isDefault": "0",
+      "createdAt": "2026-01-04 11:39:15"
+    },
+    {
+      "id": "3",
+      "userId": "1",
+      "name": "Professional Blue",
+      "templateType": "modern",
+      "isDefault": "0",
+      "createdAt": "2026-01-04 09:46:08"
+    },
+    {
+      "id": "90003",
+      "userId": "180492",
+      "name": "Temporary Template",
+      "templateType": "minimal",
+      "isDefault": "0",
+      "createdAt": "2026-01-04 22:38:49"
+    },
+    {
+      "id": "90002",
+      "userId": "180492",
+      "name": "Test Classic Template",
+      "templateType": "classic",
+      "isDefault": "0",
+      "createdAt": "2026-01-04 22:38:49"
+    },
+    {
+      "id": "90007",
+      "userId": "180492",
+      "name": "Test Field Visibility Template",
+      "templateType": "modern",
+      "isDefault": "0",
+      "createdAt": "2026-01-04 22:38:49"
+    },
+    {
+      "id": "90005",
+      "userId": "180492",
+      "name": "Test left Logo Template",
+      "templateType": "modern",
+      "isDefault": "0",
+      "createdAt": "2026-01-04 22:38:49"
+    },
+    {
+      "id": "90001",
+      "userId": "180492",
+      "name": "Test Modern Template",
+      "templateType": "modern",
+      "isDefault": "0",
+      "createdAt": "2026-01-04 22:38:48"
+    },
+    {
+      "id": "90004",
+      "userId": "180492",
+      "name": "Test modern Template",
+      "templateType": "modern",
+      "isDefault": "0",
+      "createdAt": "2026-01-04 22:38:49"
+    },
+    {
+      "id": "90006",
+      "userId": "180492",
+      "name": "Test standard Header Template",
+      "templateType": "modern",
+      "isDefault": "0",
+      "createdAt": "2026-01-04 22:38:49"
+    },
+    {
+      "id": "90010",
+      "userId": "180493",
+      "name": "Temporary Template",
+      "templateType": "minimal",
+      "isDefault": "0",
+      "createdAt": "2026-01-04 22:39:19"
+    },
+    {
+      "id": "90009",
+      "userId": "180493",
+      "name": "Test Classic Template",
+      "templateType": "classic",
+      "isDefault": "0",
+      "createdAt": "2026-01-04 22:39:19"
+    },
+    {
+      "id": "90014",
+      "userId": "180493",
+      "name": "Test Field Visibility Template",
+      "templateType": "modern",
+      "isDefault": "0",
+      "createdAt": "2026-01-04 22:39:19"
+    },
+    {
+      "id": "90012",
+      "userId": "180493",
+      "name": "Test left Logo Template",
+      "templateType": "modern",
+      "isDefault": "0",
+      "createdAt": "2026-01-04 22:39:19"
+    },
+    {
+      "id": "90011",
+      "userId": "180493",
+      "name": "Test modern Template",
+      "templateType": "modern",
+      "isDefault": "0",
+      "createdAt": "2026-01-04 22:39:19"
+    },
+    {
+      "id": "90008",
+      "userId": "180493",
+      "name": "Test Modern Template",
+      "templateType": "modern",
+      "isDefault": "0",
+      "createdAt": "2026-01-04 22:39:19"
+    },
+    {
+      "id": "90013",
+      "userId": "180493",
+      "name": "Test standard Header Template",
+      "templateType": "modern",
+      "isDefault": "0",
+      "createdAt": "2026-01-04 22:39:19"
+    },
+    {
+      "id": "90016",
+      "userId": "180494",
+      "name": "Test Classic Template",
+      "templateType": "classic",
+      "isDefault": "0",
+      "createdAt": "2026-01-04 22:40:46"
+    },
+    {
+      "id": "90015",
+      "userId": "180494",
+      "name": "Updated Modern Template",
+      "templateType": "modern",
+      "isDefault": "1",
+      "createdAt": "2026-01-04 22:40:46"
+    },
+    {
+      "id": "90032",
+      "userId": "180495",
+      "name": "Test Classic Template",
+      "templateType": "classic",
+      "isDefault": "0",
+      "createdAt": "2026-01-04 22:40:57"
+    },
+    {
+      "id": "90031",
+      "userId": "180495",
+      "name": "Updated Modern Template",
+      "templateType": "modern",
+      "isDefault": "1",
+      "createdAt": "2026-01-04 22:40:57"
+    },
+    {
+      "id": "90048",
+      "userId": "180496",
+      "name": "Test Classic Template",
+      "templateType": "classic",
+      "isDefault": "0",
+      "createdAt": "2026-01-04 22:41:05"
+    },
+    {
+      "id": "90047",
+      "userId": "180496",
+      "name": "Updated Modern Template",
+      "templateType": "modern",
+      "isDefault": "1",
+      "createdAt": "2026-01-04 22:41:05"
+    },
+    {
+      "id": "90063",
+      "userId": "180497",
+      "name": "Updated Modern Template",
+      "templateType": "modern",
+      "isDefault": "1",
+      "createdAt": "2026-01-04 22:41:25"
+    },
+    {
+      "id": "120001",
+      "userId": "240080",
+      "name": "Updated Modern Template",
+      "templateType": "modern",
+      "isDefault": "1",
+      "createdAt": "2026-01-05 07:02:21"
+    },
+    {
+      "id": "120017",
+      "userId": "240083",
+      "name": "Updated Modern Template",
+      "templateType": "modern",
+      "isDefault": "1",
+      "createdAt": "2026-01-05 07:02:45"
+    },
+    {
+      "id": "120036",
+      "userId": "240084",
+      "name": "Bold",
+      "templateType": "bold",
+      "isDefault": "0",
+      "createdAt": "2026-01-05 07:02:46"
+    },
+    {
+      "id": "120034",
+      "userId": "240084",
+      "name": "Classic",
+      "templateType": "classic",
+      "isDefault": "0",
+      "createdAt": "2026-01-05 07:02:46"
+    },
+    {
+      "id": "120038",
+      "userId": "240084",
+      "name": "Creative",
+      "templateType": "creative",
+      "isDefault": "0",
+      "createdAt": "2026-01-05 07:02:46"
+    },
+    {
+      "id": "120035",
+      "userId": "240084",
+      "name": "Minimal",
+      "templateType": "minimal",
+      "isDefault": "0",
+      "createdAt": "2026-01-05 07:02:46"
+    },
+    {
+      "id": "120033",
+      "userId": "240084",
+      "name": "Modern",
+      "templateType": "modern",
+      "isDefault": "1",
+      "createdAt": "2026-01-05 07:02:46"
+    },
+    {
+      "id": "120037",
+      "userId": "240084",
+      "name": "Professional",
+      "templateType": "professional",
+      "isDefault": "0",
+      "createdAt": "2026-01-05 07:02:46"
+    },
+    {
+      "id": "120051",
+      "userId": "240204",
+      "name": "Updated Modern Template",
+      "templateType": "modern",
+      "isDefault": "1",
+      "createdAt": "2026-01-05 07:11:23"
+    },
+    {
+      "id": "120070",
+      "userId": "240205",
+      "name": "Bold",
+      "templateType": "bold",
+      "isDefault": "0",
+      "createdAt": "2026-01-05 07:11:24"
+    },
+    {
+      "id": "120068",
+      "userId": "240205",
+      "name": "Classic",
+      "templateType": "classic",
+      "isDefault": "0",
+      "createdAt": "2026-01-05 07:11:24"
+    },
+    {
+      "id": "120072",
+      "userId": "240205",
+      "name": "Creative",
+      "templateType": "creative",
+      "isDefault": "0",
+      "createdAt": "2026-01-05 07:11:24"
+    },
+    {
+      "id": "120069",
+      "userId": "240205",
+      "name": "Minimal",
+      "templateType": "minimal",
+      "isDefault": "0",
+      "createdAt": "2026-01-05 07:11:24"
+    },
+    {
+      "id": "120067",
+      "userId": "240205",
+      "name": "Modern",
+      "templateType": "modern",
+      "isDefault": "1",
+      "createdAt": "2026-01-05 07:11:24"
+    },
+    {
+      "id": "120071",
+      "userId": "240205",
+      "name": "Professional",
+      "templateType": "professional",
+      "isDefault": "0",
+      "createdAt": "2026-01-05 07:11:24"
+    },
+    {
+      "id": "120073",
+      "userId": "240276",
+      "name": "Updated Modern Template",
+      "templateType": "modern",
+      "isDefault": "1",
+      "createdAt": "2026-01-05 07:36:57"
+    },
+    {
+      "id": "120092",
+      "userId": "240277",
+      "name": "Bold",
+      "templateType": "bold",
+      "isDefault": "0",
+      "createdAt": "2026-01-05 07:36:58"
+    },
+    {
+      "id": "120090",
+      "userId": "240277",
+      "name": "Classic",
+      "templateType": "classic",
+      "isDefault": "0",
+      "createdAt": "2026-01-05 07:36:58"
+    },
+    {
+      "id": "120094",
+      "userId": "240277",
+      "name": "Creative",
+      "templateType": "creative",
+      "isDefault": "0",
+      "createdAt": "2026-01-05 07:36:58"
+    },
+    {
+      "id": "120091",
+      "userId": "240277",
+      "name": "Minimal",
+      "templateType": "minimal",
+      "isDefault": "0",
+      "createdAt": "2026-01-05 07:36:58"
+    },
+    {
+      "id": "120089",
+      "userId": "240277",
+      "name": "Modern",
+      "templateType": "modern",
+      "isDefault": "1",
+      "createdAt": "2026-01-05 07:36:58"
+    },
+    {
+      "id": "120093",
+      "userId": "240277",
+      "name": "Professional",
+      "templateType": "professional",
+      "isDefault": "0",
+      "createdAt": "2026-01-05 07:36:58"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tuserId\tname\ttemplateType\tisDefault\tcreatedAt\n120045\t1\tBold\tbold\t0\t2026-01-05 07:10:35\n120046\t1\tBold\tbold\t0\t2026-01-05 07:10:35\n120041\t1\tClassic\tclassic\t0\t2026-01-05 07:10:35\n120042\t1\tClassic\tclassic\t0\t2026-01-05 07:10:35\n120050\t1\tCreative\tcreative\t0\t2026-01-05 07:10:36\n120049\t1\tCreative\tcreative\t0\t2026-01-05 07:10:36\n120043\t1\tMinimal\tminimal\t0\t2026-01-05 07:10:35\n120044\t1\tMinimal\tminimal\t0\t2026-01-05 07:10:35\n120040\t1\tModern\tmodern\t1\t2026-01-05 07:10:35\n120039\t1\tModern\tmodern\t1\t2026-01-05 07:10:35\n120047\t1\tProfessional\tprofessional\t0\t2026-01-05 07:10:36\n120048\t1\tProfessional\tprofessional\t0\t2026-01-05 07:10:36\n60002\t1\tProfessional Blue\tmodern\t0\t2026-01-04 12:40:24\n60006\t1\tProfessional Blue\tmodern\t0\t2026-01-04 12:47:00\n60009\t1\tProfessional Blue\tmodern\t0\t2026-01-04 13:17:37\n60010\t1\tProfessional Blue\tmodern\t0\t2026-01-04 13:26:49\n60011\t1\tProfessional Blue\tmodern\t0\t2026-01-04 13:39:12\n60012\t1\tProfessional Blue\tmodern\t0\t2026-01-04 14:17:20\n60007\t1\tProfessional Blue\tmodern\t0\t2026-01-04 12:47:29\n1\t1\tProfessional Blue\tmodern\t0\t2026-01-04 09:45:11\n2\t1\tProfessional Blue\tmodern\t0\t2026-01-04 09:45:31\n60008\t1\tProfessional Blue\tmodern\t0\t2026-01-04 13:17:09\n60005\t1\tProfessional Blue\tmodern\t0\t2026-01-04 12:46:48\n60004\t1\tProfessional Blue\tmodern\t0\t2026-01-04 12:46:09\n60003\t1\tProfessional Blue\tmodern\t0\t2026-01-04 12:44:34\n60001\t1\tProfessional Blue\tmodern\t0\t2026-01-04 12:36:52\n30003\t1\tProfessional Blue\tmodern\t0\t2026-01-04 11:59:00\n30002\t1\tProfessional Blue\tmodern\t0\t2026-01-04 11:39:46\n30001\t1\tProfessional Blue\tmodern\t0\t2026-01-04 11:39:15\n3\t1\tProfessional Blue\tmodern\t0\t2026-01-04 09:46:08\n90003\t180492\tTemporary Template\tminimal\t0\t2026-01-04 22:38:49\n90002\t180492\tTest Classic Template\tclassic\t0\t2026-01-04 22:38:49\n90007\t180492\tTest Field Visibility Template\tmodern\t0\t2026-01-04 22:38:49\n90005\t180492\tTest left Logo Template\tmodern\t0\t2026-01-04 22:38:49\n90001\t180492\tTest Modern Template\tmodern\t0\t2026-01-04 22:38:48\n90004\t180492\tTest modern Template\tmodern\t0\t2026-01-04 22:38:49\n90006\t180492\tTest standard Header Template\tmodern\t0\t2026-01-04 22:38:49\n90010\t180493\tTemporary Template\tminimal\t0\t2026-01-04 22:39:19\n90009\t180493\tTest Classic Template\tclassic\t0\t2026-01-04 22:39:19\n90014\t180493\tTest Field Visibility Template\tmodern\t0\t2026-01-04 22:39:19\n90012\t180493\tTest left Logo Template\tmodern\t0\t2026-01-04 22:39:19\n90011\t180493\tTest modern Template\tmodern\t0\t2026-01-04 22:39:19\n90008\t180493\tTest Modern Template\tmodern\t0\t2026-01-04 22:39:19\n90013\t180493\tTest standard Header Template\tmodern\t0\t2026-01-04 22:39:19\n90016\t180494\tTest Classic Template\tclassic\t0\t2026-01-04 22:40:46\n90015\t180494\tUpdated Modern Template\tmodern\t1\t2026-01-04 22:40:46\n90032\t180495\tTest Classic Template\tclassic\t0\t2026-01-04 22:40:57\n90031\t180495\tUpdated Modern Template\tmodern\t1\t2026-01-04 22:40:57\n90048\t180496\tTest Classic Template\tclassic\t0\t2026-01-04 22:41:05\n90047\t180496\tUpdated Modern Template\tmodern\t1\t2026-01-04 22:41:05\n90063\t180497\tUpdated Modern Template\tmodern\t1\t2026-01-04 22:41:25\n120001\t240080\tUpdated Modern Template\tmodern\t1\t2026-01-05 07:02:21\n120017\t240083\tUpdated Modern Template\tmodern\t1\t2026-01-05 07:02:45\n120036\t240084\tBold\tbold\t0\t2026-01-05 07:02:46\n120034\t240084\tClassic\tclassic\t0\t2026-01-05 07:02:46\n120038\t240084\tCreative\tcreative\t0\t2026-01-05 07:02:46\n120035\t240084\tMinimal\tminimal\t0\t2026-01-05 07:02:46\n120033\t240084\tModern\tmodern\t1\t2026-01-05 07:02:46\n120037\t240084\tProfessional\tprofessional\t0\t2026-01-05 07:02:46\n120051\t240204\tUpdated Modern Template\tmodern\t1\t2026-01-05 07:11:23\n120070\t240205\tBold\tbold\t0\t2026-01-05 07:11:24\n120068\t240205\tClassic\tclassic\t0\t2026-01-05 07:11:24\n120072\t240205\tCreative\tcreative\t0\t2026-01-05 07:11:24\n120069\t240205\tMinimal\tminimal\t0\t2026-01-05 07:11:24\n120067\t240205\tModern\tmodern\t1\t2026-01-05 07:11:24\n120071\t240205\tProfessional\tprofessional\t0\t2026-01-05 07:11:24\n120073\t240276\tUpdated Modern Template\tmodern\t1\t2026-01-05 07:36:57\n120092\t240277\tBold\tbold\t0\t2026-01-05 07:36:58\n120090\t240277\tClassic\tclassic\t0\t2026-01-05 07:36:58\n120094\t240277\tCreative\tcreative\t0\t2026-01-05 07:36:58\n120091\t240277\tMinimal\tminimal\t0\t2026-01-05 07:36:58\n120089\t240277\tModern\tmodern\t1\t2026-01-05 07:36:58\n120093\t240277\tProfessional\tprofessional\t0\t2026-01-05 07:36:58\n",
+  "stderr": "",
+  "execution_time_ms": 84
+}
