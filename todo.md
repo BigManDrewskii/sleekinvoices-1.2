@@ -376,6 +376,8 @@
 - [x] Add fallback chain: SVG → PNG @1x → PNG @2x
 - [x] Optimize image loading with lazy loading attributes
 - [x] Test across all device pixel ratios (1x, 2x, 3x)
+- [x] Implement two-breakpoint system (desktop full logo, mobile/tablet monogram)
+- [x] Update breakpoint to 768px (md) for clean transition
 
 ### Navigation & Header Branding
 - [x] Update Navigation component to use optimized logo variants

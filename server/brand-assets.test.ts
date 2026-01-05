@@ -133,41 +133,40 @@ describe("Brand Asset System", () => {
   });
 
   describe("Responsive Logo Breakpoints", () => {
-    it("should use monogram for mobile (< 640px)", () => {
-      const mobileBreakpoint = 640;
+    it("should use monogram for mobile (< 768px)", () => {
+      const mobileBreakpoint = 768;
       const screenWidth = 320;
       
-      const variant = screenWidth < mobileBreakpoint ? "monogram" : "compact";
+      const variant = screenWidth < mobileBreakpoint ? "monogram" : "wide";
       expect(variant).toBe("monogram");
     });
 
-    it("should use compact for tablet (640px - 1024px)", () => {
-      const tabletMin = 640;
-      const tabletMax = 1024;
-      const screenWidth = 768;
+    it("should use monogram for tablet (< 768px)", () => {
+      const tabletBreakpoint = 768;
+      const screenWidth = 640;
       
-      const variant = screenWidth < tabletMax ? "compact" : "wide";
-      expect(variant).toBe("compact");
+      const variant = screenWidth < tabletBreakpoint ? "monogram" : "wide";
+      expect(variant).toBe("monogram");
     });
 
-    it("should use wide for desktop (> 1024px)", () => {
-      const desktopMin = 1024;
+    it("should use wide for desktop (>= 768px)", () => {
+      const desktopBreakpoint = 768;
       const screenWidth = 1280;
       
-      const variant = screenWidth >= desktopMin ? "wide" : "compact";
+      const variant = screenWidth >= desktopBreakpoint ? "wide" : "monogram";
       expect(variant).toBe("wide");
     });
 
-    it("should handle edge case at mobile breakpoint", () => {
-      const screenWidth = 640;
-      const variant = screenWidth < 640 ? "monogram" : "compact";
+    it("should handle edge case at breakpoint (767px)", () => {
+      const screenWidth = 767;
+      const variant = screenWidth < 768 ? "monogram" : "wide";
       
-      expect(variant).toBe("compact");
+      expect(variant).toBe("monogram");
     });
 
-    it("should handle edge case at tablet breakpoint", () => {
-      const screenWidth = 1024;
-      const variant = screenWidth < 1024 ? "compact" : "wide";
+    it("should handle edge case at breakpoint (768px)", () => {
+      const screenWidth = 768;
+      const variant = screenWidth < 768 ? "monogram" : "wide";
       
       expect(variant).toBe("wide");
     });

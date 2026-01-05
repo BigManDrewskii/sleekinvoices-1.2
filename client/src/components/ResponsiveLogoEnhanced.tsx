@@ -41,9 +41,9 @@ export function ResponsiveLogoEnhanced({
   }, [responsive]);
 
   // Determine which variant to use based on screen width
+  // Two-tier system: monogram for mobile/tablet (< 768px), wide for desktop (>= 768px)
   const getVariantForScreenWidth = (width: number): typeof variant => {
-    if (width < 640) return "monogram"; // Mobile
-    if (width < 1024) return "compact"; // Tablet
+    if (width < 768) return "monogram"; // Mobile & Tablet
     return "wide"; // Desktop
   };
 
@@ -80,9 +80,9 @@ export function ResponsiveLogoEnhanced({
         />
       </picture>
 
-      {/* Brand Name - Desktop only */}
+      {/* Brand Name - Desktop only (md and up) */}
       {showBrand && activeVariant === "wide" && (
-        <span className="text-sm font-semibold text-foreground whitespace-nowrap">
+        <span className="hidden md:inline text-sm font-semibold text-foreground whitespace-nowrap">
           SleekInvoices
         </span>
       )}
