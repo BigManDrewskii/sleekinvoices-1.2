@@ -1,6 +1,13 @@
 import { useAuth } from "@/_core/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { getLoginUrl } from "@/const";
 import { trpc } from "@/lib/trpc";
 import { formatCurrency } from "@/lib/utils";
@@ -8,14 +15,12 @@ import {
   FileText,
   TrendingUp,
   DollarSign,
+  Users,
   AlertCircle,
-  Download,
-  RefreshCw,
-  TrendingDown,
-  ArrowUp,
-  ArrowDown,
+  Calendar,
 } from "lucide-react";
 import { useState } from "react";
+import { Link } from "wouter";
 import {
   LineChart,
   Line,
@@ -30,83 +35,52 @@ import {
   Tooltip,
   Legend,
   ResponsiveContainer,
-  Area,
-  AreaChart,
-  ScatterChart,
-  Scatter,
 } from "recharts";
 import { Navigation } from "@/components/Navigation";
 import { AnalyticsMetricCard } from "@/components/analytics/AnalyticsMetricCard";
 import { AnalyticsDateRangeFilter } from "@/components/analytics/AnalyticsDateRangeFilter";
 
 const STATUS_COLORS = {
-  draft: "#8b5cf6",
-  sent: "#06b6d4",
-  paid: "#10b981",
+  draft: "#94a3b8",
+  sent: "#3b82f6",
+  paid: "#22c55e",
   overdue: "#ef4444",
-  canceled: "#6b7280",
-};
-
-const GRADIENT_COLORS = {
-  primary: "#6366f1",
-  success: "#10b981",
-  warning: "#f59e0b",
-  danger: "#ef4444",
-  info: "#06b6d4",
-};
-
-// Custom tooltip for charts
-const CustomTooltip = ({ active, payload, label }: any) => {
-  if (active && payload && payload.length) {
-    return (
-      <div className="bg-background border border-border rounded-lg p-3 shadow-lg">
-        <p className="text-sm font-medium text-foreground">{label}</p>
-        {payload.map((entry: any, index: number) => (
-          <p key={index} style={{ color: entry.color }} className="text-sm">
-            {entry.name}: {typeof entry.value === 'number' ? formatCurrency(entry.value) : entry.value}
-          </p>
-        ))}
-      </div>
-    );
-  }
-  return null;
+  canceled: "#64748b",
 };
 
 export default function Analytics() {
   const { user, loading, isAuthenticated } = useAuth();
   const [timeRange, setTimeRange] = useState<"7d" | "30d" | "90d" | "1y">("30d");
-  const [isRefreshing, setIsRefreshing] = useState(false);
 
-  const { data: analytics, isLoading, refetch } = trpc.invoices.getAnalytics.useQuery(
+  const { data: analytics, isLoading } = trpc.invoices.getAnalytics.useQuery(
     { timeRange },
     { enabled: isAuthenticated }
   );
-
+  
+  const { data: expenseStats } = trpc.expenses.stats.useQuery(
+    { months: 6 },
+    { enabled: isAuthenticated }
+  );
+  
   const { data: agingReport } = trpc.analytics.getAgingReport.useQuery(
     undefined,
     { enabled: isAuthenticated }
   );
-
+  
   const { data: clientProfitability } = trpc.analytics.getClientProfitability.useQuery(
     undefined,
     { enabled: isAuthenticated }
   );
-
+  
   const { data: cashFlowProjection } = trpc.analytics.getCashFlowProjection.useQuery(
     { months: 6 },
     { enabled: isAuthenticated }
   );
-
+  
   const { data: revenueVsExpenses } = trpc.analytics.getRevenueVsExpenses.useQuery(
     { year: new Date().getFullYear() },
     { enabled: isAuthenticated }
   );
-
-  const handleRefresh = async () => {
-    setIsRefreshing(true);
-    await refetch();
-    setIsRefreshing(false);
-  };
 
   if (loading || isLoading) {
     return (
@@ -139,53 +113,51 @@ export default function Analytics() {
     statusBreakdown: [],
   };
 
-  // Format data for charts
+  // Format monthly revenue data for chart
   const revenueChartData = monthlyRevenue.map((item: any) => ({
-    month: new Date(item.month).toLocaleDateString("en-US", { month: "short" }),
+    month: new Date(item.month).toLocaleDateString("en-US", {
+      month: "short",
+      year: "numeric",
+    }),
     revenue: parseFloat(item.revenue),
     invoices: item.count,
   }));
 
+  // Format status breakdown for pie chart
   const statusChartData = statusBreakdown.map((item: any) => ({
     name: item.status.charAt(0).toUpperCase() + item.status.slice(1),
     value: item.count,
     amount: parseFloat(item.totalAmount),
   }));
 
-  const paidPercentage = totalInvoices > 0 ? (paidInvoices / totalInvoices) * 100 : 0;
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-background/95">
+    <div className="min-h-screen bg-background">
       <Navigation />
 
-      <div className="container mx-auto px-4 py-8 md:py-12">
+      {/* Main Content */}
+      <div className="container mx-auto px-4 py-6 md:py-8">
         <div className="max-w-7xl mx-auto">
           {/* Header */}
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 mb-12">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6 md:mb-8">
             <div>
-              <h1 className="text-4xl font-bold bg-gradient-to-r from-primary via-purple-500 to-pink-500 bg-clip-text text-transparent">
-                Analytics Dashboard
-              </h1>
-              <p className="text-muted-foreground mt-2">
-                Real-time insights into your business performance
-              </p>
+              <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Analytics</h1>
+              <p className="text-sm sm:text-base text-muted-foreground">Track your revenue and invoice performance</p>
             </div>
-            <div className="flex items-center gap-3">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleRefresh}
-                disabled={isRefreshing}
-                className="gap-2"
-              >
-                <RefreshCw className={`h-4 w-4 ${isRefreshing ? "animate-spin" : ""}`} />
-                Refresh
-              </Button>
-              <AnalyticsDateRangeFilter value={timeRange} onChange={setTimeRange} />
-            </div>
+            <Select value={timeRange} onValueChange={(val: any) => setTimeRange(val)}>
+              <SelectTrigger className="w-full sm:w-[180px]">
+                <Calendar className="h-4 w-4 mr-2" />
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="7d">Last 7 days</SelectItem>
+                <SelectItem value="30d">Last 30 days</SelectItem>
+                <SelectItem value="90d">Last 90 days</SelectItem>
+                <SelectItem value="1y">Last year</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
 
-          {/* Key Metrics Grid */}
+          {/* Key Metrics */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
             <AnalyticsMetricCard
               title="Total Revenue"
@@ -209,14 +181,13 @@ export default function Analytics() {
                 isPositive: false,
                 label: "vs last period",
               }}
-              valueClassName="text-orange-600 dark:text-orange-400"
             />
 
             <AnalyticsMetricCard
               title="Total Invoices"
               value={totalInvoices}
               icon={<FileText className="h-5 w-5" />}
-              subtitle={`${Math.round(paidPercentage)}% paid`}
+              subtitle={`${Math.round((paidInvoices / (totalInvoices || 1)) * 100)}% paid`}
               trend={{
                 value: 5.3,
                 isPositive: true,
@@ -237,75 +208,121 @@ export default function Analytics() {
             />
           </div>
 
-          {/* Main Charts Section */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-            {/* Revenue Trend - Large */}
-            <Card className="lg:col-span-2 overflow-hidden border-0 shadow-lg bg-gradient-to-br from-card to-card/50">
-              <CardHeader className="pb-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <CardTitle className="text-xl">Revenue Trend</CardTitle>
-                    <CardDescription>Monthly performance over time</CardDescription>
-                  </div>
-                  <Button variant="ghost" size="sm" className="gap-2">
-                    <Download className="h-4 w-4" />
-                  </Button>
+          {/* Profit & Loss */}
+          <Card className="mb-8">
+            <CardHeader>
+              <CardTitle>Profit & Loss Overview</CardTitle>
+              <CardDescription>Revenue vs Expenses (Last 6 months)</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground mb-2">Total Revenue</p>
+                  <p className="text-3xl font-bold text-green-600">
+                    {formatCurrency(parseFloat(analytics?.totalRevenue?.toString() || "0"))}
+                  </p>
                 </div>
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground mb-2">Total Expenses</p>
+                  <p className="text-3xl font-bold text-red-600">
+                    {formatCurrency(parseFloat(expenseStats?.totalExpenses?.toString() || "0"))}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground mb-2">Net Profit</p>
+                  <p className={`text-3xl font-bold ${
+                    (parseFloat(analytics?.totalRevenue?.toString() || "0") - parseFloat(expenseStats?.totalExpenses?.toString() || "0")) >= 0
+                      ? "text-green-600"
+                      : "text-red-600"
+                  }`}>
+                    {formatCurrency(
+                      parseFloat(analytics?.totalRevenue?.toString() || "0") - parseFloat(expenseStats?.totalExpenses?.toString() || "0")
+                    )}
+                  </p>
+                </div>
+              </div>
+              
+              {expenseStats?.expensesByCategory && expenseStats.expensesByCategory.length > 0 && (
+                <div className="mt-6">
+                  <h4 className="text-sm font-semibold mb-4">Expenses by Category</h4>
+                  <div className="space-y-3">
+                    {expenseStats.expensesByCategory.map((cat: any) => (
+                      <div key={cat.categoryId} className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <div
+                            className="w-3 h-3 rounded-full"
+                            style={{ backgroundColor: cat.categoryColor || "#3B82F6" }}
+                          />
+                          <span className="text-sm">{cat.categoryName || "Uncategorized"}</span>
+                        </div>
+                        <span className="text-sm font-semibold">
+                          {formatCurrency(parseFloat(cat.total))}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Charts */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+            {/* Revenue Over Time */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Revenue Over Time</CardTitle>
+                <CardDescription>Monthly revenue and invoice count</CardDescription>
               </CardHeader>
               <CardContent>
                 {revenueChartData.length > 0 ? (
-                  <ResponsiveContainer width="100%" height={350}>
-                    <AreaChart data={revenueChartData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
-                      <defs>
-                        <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor={GRADIENT_COLORS.primary} stopOpacity={0.4} />
-                          <stop offset="95%" stopColor={GRADIENT_COLORS.primary} stopOpacity={0} />
-                        </linearGradient>
-                      </defs>
-                      <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
-                      <XAxis dataKey="month" stroke="hsl(var(--muted-foreground))" style={{ fontSize: "12px" }} />
-                      <YAxis stroke="hsl(var(--muted-foreground))" style={{ fontSize: "12px" }} />
-                      <Tooltip content={<CustomTooltip />} />
-                      <Area
+                  <ResponsiveContainer width="100%" height={300}>
+                    <LineChart data={revenueChartData}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="month" />
+                      <YAxis />
+                      <Tooltip
+                        formatter={(value: any, name: string) =>
+                          name === "revenue" ? formatCurrency(value) : value
+                        }
+                      />
+                      <Legend />
+                      <Line
                         type="monotone"
                         dataKey="revenue"
-                        stroke={GRADIENT_COLORS.primary}
-                        fillOpacity={1}
-                        fill="url(#colorRevenue)"
-                        strokeWidth={3}
-                        isAnimationActive={true}
+                        stroke="hsl(var(--primary))"
+                        strokeWidth={2}
+                        name="Revenue"
                       />
-                    </AreaChart>
+                    </LineChart>
                   </ResponsiveContainer>
                 ) : (
-                  <div className="h-[350px] flex items-center justify-center text-muted-foreground">
-                    No data available
+                  <div className="h-[300px] flex items-center justify-center text-muted-foreground">
+                    No data available for the selected period
                   </div>
                 )}
               </CardContent>
             </Card>
 
-            {/* Invoice Status - Pie */}
-            <Card className="overflow-hidden border-0 shadow-lg bg-gradient-to-br from-card to-card/50">
-              <CardHeader className="pb-4">
-                <CardTitle className="text-xl">Invoice Status</CardTitle>
-                <CardDescription>Distribution by status</CardDescription>
+            {/* Invoice Status Breakdown */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Invoice Status</CardTitle>
+                <CardDescription>Breakdown by status</CardDescription>
               </CardHeader>
               <CardContent>
                 {statusChartData.length > 0 ? (
-                  <ResponsiveContainer width="100%" height={350}>
+                  <ResponsiveContainer width="100%" height={300}>
                     <PieChart>
                       <Pie
                         data={statusChartData}
                         cx="50%"
                         cy="50%"
                         labelLine={false}
-                        label={({ name, value }) => `${name}: ${value}`}
-                        outerRadius={100}
-                        fill={GRADIENT_COLORS.primary}
+                        label={(entry) => `${entry.name}: ${entry.value}`}
+                        outerRadius={80}
+                        fill="hsl(var(--primary))"
                         dataKey="value"
-                        animationBegin={0}
-                        animationDuration={800}
                       >
                         {statusChartData.map((entry: any, index: number) => (
                           <Cell
@@ -318,218 +335,122 @@ export default function Analytics() {
                           />
                         ))}
                       </Pie>
-                      <Tooltip content={<CustomTooltip />} />
+                      <Tooltip
+                        formatter={(value: any, name: string, props: any) =>
+                          `${value} invoices (${formatCurrency(props.payload.amount)})`
+                        }
+                      />
                     </PieChart>
                   </ResponsiveContainer>
                 ) : (
-                  <div className="h-[350px] flex items-center justify-center text-muted-foreground">
-                    No data available
+                  <div className="h-[300px] flex items-center justify-center text-muted-foreground">
+                    No invoices yet
                   </div>
                 )}
               </CardContent>
             </Card>
           </div>
 
-          {/* Secondary Charts */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-            {/* Invoice Volume */}
-            <Card className="overflow-hidden border-0 shadow-lg bg-gradient-to-br from-card to-card/50">
-              <CardHeader className="pb-4">
-                <CardTitle className="text-xl">Invoice Volume</CardTitle>
-                <CardDescription>Invoices created per month</CardDescription>
-              </CardHeader>
-              <CardContent>
-                {revenueChartData.length > 0 ? (
-                  <ResponsiveContainer width="100%" height={300}>
-                    <BarChart data={revenueChartData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
-                      <defs>
-                        <linearGradient id="colorBar" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="0%" stopColor={GRADIENT_COLORS.info} stopOpacity={1} />
-                          <stop offset="100%" stopColor={GRADIENT_COLORS.info} stopOpacity={0.6} />
-                        </linearGradient>
-                      </defs>
-                      <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
-                      <XAxis dataKey="month" stroke="hsl(var(--muted-foreground))" style={{ fontSize: "12px" }} />
-                      <YAxis stroke="hsl(var(--muted-foreground))" style={{ fontSize: "12px" }} />
-                      <Tooltip content={<CustomTooltip />} />
-                      <Bar
-                        dataKey="invoices"
-                        fill="url(#colorBar)"
-                        radius={[8, 8, 0, 0]}
-                        animationDuration={800}
-                      />
-                    </BarChart>
-                  </ResponsiveContainer>
-                ) : (
-                  <div className="h-[300px] flex items-center justify-center text-muted-foreground">
-                    No data available
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-
-            {/* Cash Flow */}
-            <Card className="overflow-hidden border-0 shadow-lg bg-gradient-to-br from-card to-card/50">
-              <CardHeader className="pb-4">
-                <CardTitle className="text-xl">Cash Flow Projection</CardTitle>
-                <CardDescription>Next 6 months forecast</CardDescription>
-              </CardHeader>
-              <CardContent>
-                {cashFlowProjection && cashFlowProjection.length > 0 ? (
-                  <ResponsiveContainer width="100%" height={300}>
-                    <LineChart data={cashFlowProjection} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
-                      <XAxis dataKey="month" stroke="hsl(var(--muted-foreground))" style={{ fontSize: "12px" }} />
-                      <YAxis stroke="hsl(var(--muted-foreground))" style={{ fontSize: "12px" }} />
-                      <Tooltip content={<CustomTooltip />} />
-                      <Legend />
-                      <Line
-                        type="monotone"
-                        dataKey="expectedIncome"
-                        stroke={GRADIENT_COLORS.success}
-                        strokeWidth={3}
-                        dot={{ fill: GRADIENT_COLORS.success, r: 4 }}
-                        activeDot={{ r: 6 }}
-                      />
-                      <Line
-                        type="monotone"
-                        dataKey="expectedExpenses"
-                        stroke={GRADIENT_COLORS.danger}
-                        strokeWidth={3}
-                        dot={{ fill: GRADIENT_COLORS.danger, r: 4 }}
-                        activeDot={{ r: 6 }}
-                      />
-                      <Line
-                        type="monotone"
-                        dataKey="netCashFlow"
-                        stroke={GRADIENT_COLORS.info}
-                        strokeWidth={3}
-                        dot={{ fill: GRADIENT_COLORS.info, r: 4 }}
-                        activeDot={{ r: 6 }}
-                      />
-                    </LineChart>
-                  </ResponsiveContainer>
-                ) : (
-                  <div className="h-[300px] flex items-center justify-center text-muted-foreground">
-                    No data available
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Aging Report */}
-          {agingReport && (
-            <Card className="mb-8 overflow-hidden border-0 shadow-lg bg-gradient-to-br from-card to-card/50">
-              <CardHeader className="pb-4">
-                <CardTitle className="text-xl">Accounts Receivable Aging</CardTitle>
-                <CardDescription>Outstanding invoices by days overdue</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-                  {[
-                    { label: "Current", data: agingReport.current, color: "from-green-500 to-emerald-600", textColor: "text-green-600 dark:text-green-400" },
-                    { label: "0-30 Days", data: agingReport.days_0_30, color: "from-blue-500 to-cyan-600", textColor: "text-blue-600 dark:text-blue-400" },
-                    { label: "31-60 Days", data: agingReport.days_31_60, color: "from-yellow-500 to-amber-600", textColor: "text-yellow-600 dark:text-yellow-400" },
-                    { label: "61-90 Days", data: agingReport.days_61_90, color: "from-orange-500 to-red-600", textColor: "text-orange-600 dark:text-orange-400" },
-                    { label: "90+ Days", data: agingReport.days_90_plus, color: "from-red-600 to-rose-700", textColor: "text-red-600 dark:text-red-400" },
-                  ].map((category) => (
-                    <div
-                      key={category.label}
-                      className={`p-4 rounded-xl bg-gradient-to-br ${category.color} bg-opacity-10 border border-current border-opacity-20 backdrop-blur-sm`}
-                    >
-                      <p className="text-xs font-semibold text-muted-foreground mb-2 uppercase tracking-wide">
-                        {category.label}
-                      </p>
-                      <p className={`text-3xl font-bold ${category.textColor} mb-2`}>
-                        {category.data.count}
-                      </p>
-                      <p className={`text-sm font-medium ${category.textColor}`}>
-                        {formatCurrency(category.data.amount)}
-                      </p>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          )}
-
-          {/* Profit & Loss */}
-          {revenueVsExpenses && revenueVsExpenses.length > 0 && (
-            <Card className="overflow-hidden border-0 shadow-lg bg-gradient-to-br from-card to-card/50">
-              <CardHeader className="pb-4">
-                <CardTitle className="text-xl">Monthly Profit & Loss</CardTitle>
-                <CardDescription>Revenue vs expenses for {new Date().getFullYear()}</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <ResponsiveContainer width="100%" height={350}>
-                  <BarChart data={revenueVsExpenses} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
-                    <defs>
-                      <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor={GRADIENT_COLORS.success} stopOpacity={1} />
-                        <stop offset="100%" stopColor={GRADIENT_COLORS.success} stopOpacity={0.6} />
-                      </linearGradient>
-                      <linearGradient id="colorExpenses" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor={GRADIENT_COLORS.danger} stopOpacity={1} />
-                        <stop offset="100%" stopColor={GRADIENT_COLORS.danger} stopOpacity={0.6} />
-                      </linearGradient>
-                      <linearGradient id="colorProfit" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor={GRADIENT_COLORS.info} stopOpacity={1} />
-                        <stop offset="100%" stopColor={GRADIENT_COLORS.info} stopOpacity={0.6} />
-                      </linearGradient>
-                    </defs>
-                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
-                    <XAxis dataKey="month" stroke="hsl(var(--muted-foreground))" style={{ fontSize: "12px" }} />
-                    <YAxis stroke="hsl(var(--muted-foreground))" style={{ fontSize: "12px" }} />
-                    <Tooltip content={<CustomTooltip />} />
+          {/* Invoice Count by Month */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Invoice Volume</CardTitle>
+              <CardDescription>Number of invoices created each month</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {revenueChartData.length > 0 ? (
+                <ResponsiveContainer width="100%" height={300}>
+                  <BarChart data={revenueChartData}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="month" />
+                    <YAxis />
+                    <Tooltip />
                     <Legend />
-                    <Bar dataKey="revenue" fill="url(#colorRevenue)" radius={[8, 8, 0, 0]} />
-                    <Bar dataKey="expenses" fill="url(#colorExpenses)" radius={[8, 8, 0, 0]} />
-                    <Bar dataKey="netProfit" fill="url(#colorProfit)" radius={[8, 8, 0, 0]} />
+                    <Bar dataKey="invoices" fill="hsl(var(--primary))" name="Invoices Created" />
                   </BarChart>
                 </ResponsiveContainer>
-              </CardContent>
-            </Card>
-          )}
+              ) : (
+                <div className="h-[300px] flex items-center justify-center text-muted-foreground">
+                  No data available for the selected period
+                </div>
+              )}
+            </CardContent>
+          </Card>
 
-          {/* Client Profitability Table */}
-          {clientProfitability && clientProfitability.length > 0 && (
-            <Card className="overflow-hidden border-0 shadow-lg bg-gradient-to-br from-card to-card/50">
-              <CardHeader className="pb-4">
-                <CardTitle className="text-xl">Top Clients by Profitability</CardTitle>
-                <CardDescription>Revenue and profit breakdown</CardDescription>
-              </CardHeader>
-              <CardContent>
+          {/* Aging Report */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Accounts Receivable Aging</CardTitle>
+              <CardDescription>Outstanding invoices by days overdue</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {agingReport ? (
+                <div className="space-y-4">
+                  <div className="grid grid-cols-5 gap-4">
+                    <div className="text-center p-4 border rounded-lg">
+                      <div className="text-sm text-muted-foreground mb-1">Current</div>
+                      <div className="text-2xl font-bold">{agingReport.current.count}</div>
+                      <div className="text-sm text-green-600">{formatCurrency(agingReport.current.amount)}</div>
+                    </div>
+                    <div className="text-center p-4 border rounded-lg">
+                      <div className="text-sm text-muted-foreground mb-1">0-30 Days</div>
+                      <div className="text-2xl font-bold">{agingReport.days_0_30.count}</div>
+                      <div className="text-sm text-yellow-600">{formatCurrency(agingReport.days_0_30.amount)}</div>
+                    </div>
+                    <div className="text-center p-4 border rounded-lg">
+                      <div className="text-sm text-muted-foreground mb-1">31-60 Days</div>
+                      <div className="text-2xl font-bold">{agingReport.days_31_60.count}</div>
+                      <div className="text-sm text-orange-600">{formatCurrency(agingReport.days_31_60.amount)}</div>
+                    </div>
+                    <div className="text-center p-4 border rounded-lg">
+                      <div className="text-sm text-muted-foreground mb-1">61-90 Days</div>
+                      <div className="text-2xl font-bold">{agingReport.days_61_90.count}</div>
+                      <div className="text-sm text-red-600">{formatCurrency(agingReport.days_61_90.amount)}</div>
+                    </div>
+                    <div className="text-center p-4 border rounded-lg">
+                      <div className="text-sm text-muted-foreground mb-1">90+ Days</div>
+                      <div className="text-2xl font-bold">{agingReport.days_90_plus.count}</div>
+                      <div className="text-sm text-red-800 font-semibold">{formatCurrency(agingReport.days_90_plus.amount)}</div>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="h-[150px] flex items-center justify-center text-muted-foreground">
+                  Loading aging report...
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Client Profitability */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Client Profitability</CardTitle>
+              <CardDescription>Revenue and profit by client</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {clientProfitability && clientProfitability.length > 0 ? (
                 <div className="overflow-x-auto">
-                  <table className="w-full text-sm">
+                  <table className="w-full">
                     <thead>
-                      <tr className="border-b border-border/50">
-                        <th className="text-left p-4 font-semibold text-muted-foreground">Client</th>
-                        <th className="text-right p-4 font-semibold text-muted-foreground">Revenue</th>
-                        <th className="text-right p-4 font-semibold text-muted-foreground">Expenses</th>
-                        <th className="text-right p-4 font-semibold text-muted-foreground">Profit</th>
-                        <th className="text-right p-4 font-semibold text-muted-foreground">Margin</th>
+                      <tr className="border-b">
+                        <th className="text-left p-2">Client</th>
+                        <th className="text-right p-2">Revenue</th>
+                        <th className="text-right p-2">Expenses</th>
+                        <th className="text-right p-2">Profit</th>
+                        <th className="text-right p-2">Margin</th>
                       </tr>
                     </thead>
                     <tbody>
-                      {clientProfitability.slice(0, 10).map((client: any, index: number) => (
-                        <tr
-                          key={client.clientId}
-                          className={`border-b border-border/30 transition-colors ${
-                            index % 2 === 0 ? "bg-muted/30" : ""
-                          } hover:bg-muted/50`}
-                        >
-                          <td className="p-4 font-medium">{client.clientName}</td>
-                          <td className="text-right p-4 text-green-600 dark:text-green-400 font-semibold">
-                            {formatCurrency(client.revenue)}
-                          </td>
-                          <td className="text-right p-4 text-red-600 dark:text-red-400">
-                            {formatCurrency(client.expenses)}
-                          </td>
-                          <td className={`text-right p-4 font-bold ${client.profit >= 0 ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"}`}>
+                      {clientProfitability.slice(0, 10).map((client: any) => (
+                        <tr key={client.clientId} className="border-b hover:bg-muted/50">
+                          <td className="p-2 font-medium">{client.clientName}</td>
+                          <td className="text-right p-2">{formatCurrency(client.revenue)}</td>
+                          <td className="text-right p-2">{formatCurrency(client.expenses)}</td>
+                          <td className={`text-right p-2 font-semibold ${client.profit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                             {formatCurrency(client.profit)}
                           </td>
-                          <td className={`text-right p-4 font-semibold ${client.margin >= 0 ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"}`}>
+                          <td className={`text-right p-2 ${client.margin >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                             {client.margin.toFixed(1)}%
                           </td>
                         </tr>
@@ -537,9 +458,69 @@ export default function Analytics() {
                     </tbody>
                   </table>
                 </div>
-              </CardContent>
-            </Card>
-          )}
+              ) : (
+                <div className="h-[200px] flex items-center justify-center text-muted-foreground">
+                  No client data available
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Cash Flow Projection */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Cash Flow Projection</CardTitle>
+              <CardDescription>Expected income and expenses for next 6 months</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {cashFlowProjection && cashFlowProjection.length > 0 ? (
+                <ResponsiveContainer width="100%" height={300}>
+                  <LineChart data={cashFlowProjection}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="month" />
+                    <YAxis />
+                    <Tooltip formatter={(value: any) => formatCurrency(value)} />
+                    <Legend />
+                    <Line type="monotone" dataKey="expectedIncome" stroke="#22c55e" strokeWidth={2} name="Expected Income" />
+                    <Line type="monotone" dataKey="expectedExpenses" stroke="#ef4444" strokeWidth={2} name="Expected Expenses" />
+                    <Line type="monotone" dataKey="netCashFlow" stroke="#3b82f6" strokeWidth={2} name="Net Cash Flow" />
+                  </LineChart>
+                </ResponsiveContainer>
+              ) : (
+                <div className="h-[300px] flex items-center justify-center text-muted-foreground">
+                  Loading cash flow projection...
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Revenue vs Expenses */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Revenue vs Expenses</CardTitle>
+              <CardDescription>Monthly profit & loss for {new Date().getFullYear()}</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {revenueVsExpenses && revenueVsExpenses.length > 0 ? (
+                <ResponsiveContainer width="100%" height={300}>
+                  <BarChart data={revenueVsExpenses}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="month" />
+                    <YAxis />
+                    <Tooltip formatter={(value: any) => formatCurrency(value)} />
+                    <Legend />
+                    <Bar dataKey="revenue" fill="#22c55e" name="Revenue" />
+                    <Bar dataKey="expenses" fill="#ef4444" name="Expenses" />
+                    <Bar dataKey="netProfit" fill="#3b82f6" name="Net Profit" />
+                  </BarChart>
+                </ResponsiveContainer>
+              ) : (
+                <div className="h-[300px] flex items-center justify-center text-muted-foreground">
+                  Loading revenue vs expenses...
+                </div>
+              )}
+            </CardContent>
+          </Card>
         </div>
       </div>
     </div>
