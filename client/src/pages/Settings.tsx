@@ -22,6 +22,7 @@ export default function Settings() {
   const [companyName, setCompanyName] = useState("");
   const [companyAddress, setCompanyAddress] = useState("");
   const [companyPhone, setCompanyPhone] = useState("");
+  const [taxId, setTaxId] = useState("");
   
   // Logo state
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
@@ -52,6 +53,7 @@ export default function Settings() {
       setCompanyName(user.companyName || "");
       setCompanyAddress(user.companyAddress || "");
       setCompanyPhone(user.companyPhone || "");
+      setTaxId((user as any).taxId || "");
       setLogoPreview(user.logoUrl || null);
     }
   }, [user]);
@@ -112,6 +114,7 @@ export default function Settings() {
       companyName,
       companyAddress,
       companyPhone,
+      taxId: taxId || undefined,
     });
   };
 
@@ -251,6 +254,19 @@ export default function Settings() {
                     onChange={(e) => setCompanyPhone(e.target.value)}
                     placeholder="+1 (555) 123-4567"
                   />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="taxId">VAT / Tax ID</Label>
+                  <Input
+                    id="taxId"
+                    value={taxId}
+                    onChange={(e) => setTaxId(e.target.value)}
+                    placeholder="e.g., DE123456789 or EIN: 12-3456789"
+                  />
+                  <p className="text-sm text-muted-foreground">
+                    Your VAT number or Tax ID will appear on invoices
+                  </p>
                 </div>
 
                 <div className="flex justify-end pt-4">

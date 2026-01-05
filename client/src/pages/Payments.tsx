@@ -29,7 +29,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { Plus, DollarSign, CreditCard, Banknote, FileCheck } from "lucide-react";
+import { Plus, DollarSign, CreditCard, Banknote, FileCheck, Bitcoin } from "lucide-react";
 import { toast } from "sonner";
 
 export default function Payments() {
@@ -38,9 +38,15 @@ export default function Payments() {
     invoiceId: "",
     amount: "",
     currency: "USD",
-    paymentMethod: "manual" as const,
+    paymentMethod: "manual" as "manual" | "bank_transfer" | "check" | "cash" | "crypto",
     paymentDate: new Date().toISOString().split("T")[0],
     notes: "",
+    // Crypto fields
+    cryptoAmount: "",
+    cryptoCurrency: "",
+    cryptoNetwork: "",
+    cryptoTxHash: "",
+    cryptoWalletAddress: "",
   });
 
   const { data: payments, isLoading, refetch } = trpc.payments.list.useQuery({});
@@ -57,6 +63,11 @@ export default function Payments() {
         paymentMethod: "manual",
         paymentDate: new Date().toISOString().split("T")[0],
         notes: "",
+        cryptoAmount: "",
+        cryptoCurrency: "",
+        cryptoNetwork: "",
+        cryptoTxHash: "",
+        cryptoWalletAddress: "",
       });
     },
     onError: (error) => {
@@ -77,6 +88,14 @@ export default function Payments() {
       paymentMethod: formData.paymentMethod,
       paymentDate: new Date(formData.paymentDate),
       notes: formData.notes || undefined,
+      // Include crypto fields if crypto payment
+      ...(formData.paymentMethod === "crypto" && {
+        cryptoAmount: formData.cryptoAmount || undefined,
+        cryptoCurrency: formData.cryptoCurrency || undefined,
+        cryptoNetwork: formData.cryptoNetwork || undefined,
+        cryptoTxHash: formData.cryptoTxHash || undefined,
+        cryptoWalletAddress: formData.cryptoWalletAddress || undefined,
+      }),
     });
   };
 
@@ -88,6 +107,8 @@ export default function Payments() {
         return <Banknote className="h-4 w-4" />;
       case "check":
         return <FileCheck className="h-4 w-4" />;
+      case "crypto":
+        return <Bitcoin className="h-4 w-4" />;
       default:
         return <DollarSign className="h-4 w-4" />;
     }
@@ -301,9 +322,100 @@ export default function Payments() {
                   <SelectItem value="bank_transfer">Bank Transfer</SelectItem>
                   <SelectItem value="check">Check</SelectItem>
                   <SelectItem value="cash">Cash</SelectItem>
+                  <SelectItem value="crypto">Cryptocurrency</SelectItem>
                 </SelectContent>
               </Select>
             </div>
+
+            {/* Crypto Payment Fields */}
+            {formData.paymentMethod === "crypto" && (
+              <div className="space-y-4 p-4 border rounded-lg bg-muted/50">
+                <div className="flex items-center gap-2 text-sm font-medium">
+                  <Bitcoin className="h-4 w-4" />
+                  Cryptocurrency Details
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="cryptoAmount">Crypto Amount</Label>
+                    <Input
+                      id="cryptoAmount"
+                      type="text"
+                      placeholder="0.00000000"
+                      value={formData.cryptoAmount}
+                      onChange={(e) =>
+                        setFormData({ ...formData, cryptoAmount: e.target.value })
+                      }
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="cryptoCurrency">Crypto Currency</Label>
+                    <Select
+                      value={formData.cryptoCurrency}
+                      onValueChange={(value) =>
+                        setFormData({ ...formData, cryptoCurrency: value })
+                      }
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="BTC">Bitcoin (BTC)</SelectItem>
+                        <SelectItem value="ETH">Ethereum (ETH)</SelectItem>
+                        <SelectItem value="USDT">Tether (USDT)</SelectItem>
+                        <SelectItem value="USDC">USD Coin (USDC)</SelectItem>
+                        <SelectItem value="SOL">Solana (SOL)</SelectItem>
+                        <SelectItem value="XRP">Ripple (XRP)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="cryptoNetwork">Network</Label>
+                  <Select
+                    value={formData.cryptoNetwork}
+                    onValueChange={(value) =>
+                      setFormData({ ...formData, cryptoNetwork: value })
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select network..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="mainnet">Mainnet</SelectItem>
+                      <SelectItem value="polygon">Polygon</SelectItem>
+                      <SelectItem value="arbitrum">Arbitrum</SelectItem>
+                      <SelectItem value="optimism">Optimism</SelectItem>
+                      <SelectItem value="bsc">BNB Chain</SelectItem>
+                      <SelectItem value="solana">Solana</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="cryptoTxHash">Transaction Hash</Label>
+                  <Input
+                    id="cryptoTxHash"
+                    type="text"
+                    placeholder="0x..."
+                    value={formData.cryptoTxHash}
+                    onChange={(e) =>
+                      setFormData({ ...formData, cryptoTxHash: e.target.value })
+                    }
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="cryptoWalletAddress">Receiving Wallet Address</Label>
+                  <Input
+                    id="cryptoWalletAddress"
+                    type="text"
+                    placeholder="0x... or bc1..."
+                    value={formData.cryptoWalletAddress}
+                    onChange={(e) =>
+                      setFormData({ ...formData, cryptoWalletAddress: e.target.value })
+                    }
+                  />
+                </div>
+              </div>
+            )}
 
             <div className="space-y-2">
               <Label htmlFor="paymentDate">Payment Date</Label>

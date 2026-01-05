@@ -23,6 +23,7 @@ import {
   Link as LinkIcon,
   CheckCircle,
   ArrowLeft,
+  Eye,
 } from "lucide-react";
 import { useState } from "react";
 import {
@@ -166,7 +167,7 @@ export default function ViewInvoice() {
     );
   }
 
-  const { invoice, lineItems, client } = data;
+  const { invoice, lineItems, client, viewCount } = data;
 
   const handleMarkAsPaid = () => {
     markAsPaid.mutate({
@@ -305,6 +306,17 @@ export default function ViewInvoice() {
                       <div>
                         <span className="text-sm text-muted-foreground">Paid At: </span>
                         <span className="font-medium">{formatDate(invoice.paidAt)}</span>
+                      </div>
+                    )}
+                    {viewCount !== undefined && viewCount > 0 && (
+                      <div className="flex items-center gap-2">
+                        <Eye className="h-4 w-4 text-muted-foreground" />
+                        <span className="text-sm text-muted-foreground">Viewed {viewCount} time{viewCount !== 1 ? 's' : ''}</span>
+                        {(invoice as any).firstViewedAt && (
+                          <span className="text-xs text-muted-foreground">
+                            (first: {formatDate((invoice as any).firstViewedAt)})
+                          </span>
+                        )}
                       </div>
                     )}
                   </div>

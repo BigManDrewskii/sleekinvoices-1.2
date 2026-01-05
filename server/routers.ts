@@ -35,6 +35,7 @@ export const appRouter = router({
         companyName: z.string().optional(),
         companyAddress: z.string().optional(),
         companyPhone: z.string().optional(),
+        taxId: z.string().max(50).optional(), // VAT/Tax ID for invoices
       }))
       .mutation(async ({ ctx, input }) => {
         await db.updateUserProfile(ctx.user.id, input);
@@ -134,8 +135,9 @@ export const appRouter = router({
         
         const lineItems = await db.getLineItemsByInvoiceId(input.id);
         const client = await db.getClientById(invoice.clientId, ctx.user.id);
+        const viewCount = await db.getInvoiceViewCount(input.id);
         
-        return { invoice, lineItems, client };
+        return { invoice, lineItems, client, viewCount };
       }),
     
     getNextNumber: protectedProcedure.query(async ({ ctx }) => {
@@ -1112,7 +1114,7 @@ export const appRouter = router({
     // Get single invoice details (public)
     getInvoice: publicProcedure
       .input(z.object({ accessToken: z.string(), invoiceId: z.number() }))
-      .query(async ({ input }) => {
+      .query(async ({ input, ctx }) => {
         const client = await db.getClientByAccessToken(input.accessToken);
         if (!client) {
           throw new Error('Invalid or expired access token');
@@ -1123,9 +1125,15 @@ export const appRouter = router({
           throw new Error('Invoice not found');
         }
         
-        const lineItems = await db.getLineItemsByInvoiceId(input.invoiceId);
+        // Track this view
+        const ipAddress = ctx.req.headers['x-forwarded-for'] as string || ctx.req.socket?.remoteAddress;
+        const userAgent = ctx.req.headers['user-agent'] as string;
+        await db.recordInvoiceView(input.invoiceId, ipAddress, userAgent);
         
-        return { invoice, lineItems, client };
+        const lineItems = await db.getLineItemsByInvoiceId(input.invoiceId);
+        const viewCount = await db.getInvoiceViewCount(input.invoiceId);
+        
+        return { invoice, lineItems, client, viewCount };
       }),
     
     // Get active portal access for a client (protected)
@@ -1197,10 +1205,16 @@ export const appRouter = router({
         invoiceId: z.number(),
         amount: z.string(),
         currency: z.string().default("USD"),
-        paymentMethod: z.enum(["stripe", "manual", "bank_transfer", "check", "cash"]),
+        paymentMethod: z.enum(["stripe", "manual", "bank_transfer", "check", "cash", "crypto"]),
         paymentDate: z.date(),
         receivedDate: z.date().optional(),
         notes: z.string().optional(),
+        // Crypto payment fields
+        cryptoAmount: z.string().optional(),
+        cryptoCurrency: z.string().max(10).optional(), // BTC, ETH, USDT, etc.
+        cryptoNetwork: z.string().max(20).optional(), // mainnet, polygon, arbitrum, etc.
+        cryptoTxHash: z.string().max(100).optional(), // Transaction hash
+        cryptoWalletAddress: z.string().max(100).optional(), // Receiving wallet
       }))
       .mutation(async ({ ctx, input }) => {
         // Create the payment

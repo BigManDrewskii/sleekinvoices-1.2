@@ -1600,33 +1600,33 @@ See TODO_PHASE6A_FRONTEND.md for detailed implementation plan
 ### Phase 3: Public Invoice Experience
 
 #### 3.1 Backend: Invoice View Tracking
-- [ ] 3.1.1 Create `server/lib/view-tracking.ts` utility
+- [x] 3.1.1 Create `server/lib/view-tracking.ts` utility
   - Function: `recordInvoiceView(invoiceId: number, ipAddress: string, userAgent: string): Promise<void>`
   - Logic: Check if first view, update invoice status to 'viewed' if so
-- [ ] 3.1.2 Create `/api/track/invoice/:id` middleware route
+- [x] 3.1.2 Create `/api/track/invoice/:id` middleware route
   - Records view, then redirects to actual invoice view
-- [ ] 3.1.3 Update email templates to use tracking URL instead of direct URL
-- [ ] 3.1.4 Write vitest test for view tracking logic
+- [x] 3.1.3 Update email templates to use tracking URL instead of direct URL
+- [x] 3.1.4 Write vitest test for view tracking logic
 
 #### 3.2 Backend: View Notifications
-- [ ] 3.2.1 Create `server/lib/notifications.ts` utility
+- [x] 3.2.1 Create `server/lib/notifications.ts` utility
   - Function: `notifyInvoiceViewed(userId: number, invoiceId: string, viewedAt: Date): Promise<void>`
-- [ ] 3.2.2 Implement email notification for first view
+- [x] 3.2.2 Implement email notification for first view
   - Subject: "Invoice #{number} was just viewed"
   - Body: Client name, timestamp, link to invoice
-- [ ] 3.2.3 Create `notifications` table for in-app notifications
+- [x] 3.2.3 Create `notifications` table for in-app notifications
   - Fields: id, userId, type, title, message, data (JSON), readAt, createdAt
-- [ ] 3.2.4 Implement `notifications.list` procedure (paginated, unread first)
-- [ ] 3.2.5 Implement `notifications.markAsRead` procedure
+- [x] 3.2.4 Implement `notifications.list` procedure (paginated, unread first)
+- [x] 3.2.5 Implement `notifications.markAsRead` procedure
 - [ ] 3.2.6 Write vitest tests for notification system
 
 #### 3.3 Frontend: Notification Bell
-- [ ] 3.3.1 Create `NotificationBell` component for navigation
+- [x] 3.3.1 Create `NotificationBell` component for navigation
   - Shows unread count badge
   - Dropdown with recent notifications
   - "Mark all as read" action
-- [ ] 3.3.2 Add NotificationBell to main navigation
-- [ ] 3.3.3 Implement notification polling (every 30 seconds)
+- [x] 3.3.2 Add NotificationBell to main navigation
+- [x] 3.3.3 Implement notification polling (every 30 seconds)
 
 #### 3.4 Backend: Public Invoice Payment Options
 - [ ] 3.4.1 Update `clientPortal.getInvoice` to include payment options
@@ -1753,3 +1753,27 @@ Before marking a phase complete, verify:
 - [x] 2.3.1 Add VAT Number column to clients table
 - [x] 2.3.2 Add Tax Exempt badge/indicator
 - [x] 2.3.3 Make VAT column sortable/filterable
+
+
+---
+
+## Phase 3: Settings VAT, View Tracking, and Crypto Payments
+
+### 3.1 Add VAT/Tax ID to User Settings
+- [x] 3.1.1 Add taxId column to users table if not exists
+- [x] 3.1.2 Update user profile update procedure to accept taxId
+- [x] 3.1.3 Add VAT/Tax ID input field to Settings page
+- [x] 3.1.4 Display taxId on invoice PDF header
+
+### 3.2 Invoice View Tracking
+- [x] 3.2.1 Create public invoice view endpoint
+- [x] 3.2.2 Track view in invoiceViews table
+- [x] 3.2.3 Update invoice firstViewedAt on first view
+- [x] 3.2.4 Update invoice status to 'viewed' on first view
+- [x] 3.2.5 Show view count and first viewed date in invoice details
+
+### 3.3 Crypto Payment Foundation
+- [x] 3.3.1 Add crypto payment fields to payments table
+- [x] 3.3.2 Create crypto payment recording procedure
+- [x] 3.3.3 Add crypto payment option to payment recording UI
+- [x] 3.3.4 Display crypto payments in payment history

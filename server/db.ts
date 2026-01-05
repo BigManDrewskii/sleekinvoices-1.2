@@ -26,7 +26,8 @@ import {
   reminderLogs,
   usageTracking,
   customFields,
-  invoiceCustomFieldValues
+  invoiceCustomFieldValues,
+  invoiceViews
 } from "../drizzle/schema";
 import { ENV } from './_core/env';
 import { DEFAULT_REMINDER_TEMPLATE } from './email';
@@ -2367,4 +2368,71 @@ export async function getDefaultTemplate(userId: number) {
     );
 
   return results[0] || null;
+}
+
+
+// ============================================
+// Invoice View Tracking
+// ============================================
+
+export async function recordInvoiceView(
+  invoiceId: number,
+  ipAddress?: string,
+  userAgent?: string
+) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  // Record the view
+  await db.insert(invoiceViews).values({
+    invoiceId,
+    ipAddress: ipAddress || null,
+    userAgent: userAgent || null,
+  });
+
+  // Check if this is the first view
+  const [invoice] = await db
+    .select({ firstViewedAt: invoices.firstViewedAt, status: invoices.status })
+    .from(invoices)
+    .where(eq(invoices.id, invoiceId));
+
+  // If first view, update the invoice
+  if (invoice && !invoice.firstViewedAt) {
+    const updates: { firstViewedAt: Date; status?: 'viewed' } = {
+      firstViewedAt: new Date(),
+    };
+    
+    // Only update status to 'viewed' if currently 'sent'
+    if (invoice.status === 'sent') {
+      updates.status = 'viewed';
+    }
+    
+    await db
+      .update(invoices)
+      .set(updates)
+      .where(eq(invoices.id, invoiceId));
+  }
+}
+
+export async function getInvoiceViewCount(invoiceId: number) {
+  const db = await getDb();
+  if (!db) return 0;
+
+  const result = await db
+    .select({ count: sql<number>`COUNT(*)` })
+    .from(invoiceViews)
+    .where(eq(invoiceViews.invoiceId, invoiceId));
+
+  return result[0]?.count || 0;
+}
+
+export async function getInvoiceViews(invoiceId: number) {
+  const db = await getDb();
+  if (!db) return [];
+
+  return await db
+    .select()
+    .from(invoiceViews)
+    .where(eq(invoiceViews.invoiceId, invoiceId))
+    .orderBy(desc(invoiceViews.viewedAt));
 }

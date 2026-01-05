@@ -17,6 +17,7 @@ export const users = mysqlTable("users", {
   companyAddress: text("companyAddress"),
   companyPhone: varchar("companyPhone", { length: 50 }),
   logoUrl: text("logoUrl"),
+  taxId: varchar("taxId", { length: 50 }), // VAT/Tax ID for invoices
   
   // Subscription info
   stripeCustomerId: varchar("stripeCustomerId", { length: 255 }),
@@ -427,10 +428,17 @@ export const payments = mysqlTable("payments", {
   // Payment details - DECIMAL(24,8) for crypto precision
   amount: decimal("amount", { precision: 24, scale: 8 }).notNull(),
   currency: varchar("currency", { length: 3 }).default("USD").notNull(),
-  paymentMethod: mysqlEnum("paymentMethod", ["stripe", "manual", "bank_transfer", "check", "cash"]).notNull(),
+  paymentMethod: mysqlEnum("paymentMethod", ["stripe", "manual", "bank_transfer", "check", "cash", "crypto"]).notNull(),
   
   // Stripe integration
   stripePaymentIntentId: varchar("stripePaymentIntentId", { length: 255 }),
+  
+  // Crypto payment details
+  cryptoAmount: decimal("cryptoAmount", { precision: 24, scale: 18 }), // 18 decimals for ETH precision
+  cryptoCurrency: varchar("cryptoCurrency", { length: 10 }), // BTC, ETH, USDT, etc.
+  cryptoNetwork: varchar("cryptoNetwork", { length: 20 }), // mainnet, polygon, arbitrum, etc.
+  cryptoTxHash: varchar("cryptoTxHash", { length: 100 }), // Transaction hash for verification
+  cryptoWalletAddress: varchar("cryptoWalletAddress", { length: 100 }), // Receiving wallet address
   
   // Dates
   paymentDate: timestamp("paymentDate").notNull(), // When payment was made
