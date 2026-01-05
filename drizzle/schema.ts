@@ -108,6 +108,9 @@ export const invoices = mysqlTable("invoices", {
   notes: text("notes"),
   paymentTerms: text("paymentTerms"),
   
+  // Template reference (optional - uses default if not specified)
+  templateId: int("templateId"),
+  
   // Dates
   issueDate: timestamp("issueDate").notNull(),
   dueDate: timestamp("dueDate").notNull(),
