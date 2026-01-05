@@ -348,32 +348,27 @@ describe('Invoice Template System', () => {
           footerText: preset.footerText,
           language: preset.language,
           dateFormat: preset.dateFormat,
-          isDefault: preset.name === "Modern", // First template is default
+          isDefault: preset.name === "Sleek - Default", // Sleek template is default
         });
       }
 
-      // Verify all 6 templates were created
+      // Verify Sleek - Default template was created
       const createdTemplates = await db.getInvoiceTemplatesByUserId(testUser.id);
-      expect(createdTemplates.length).toBe(6);
+      expect(createdTemplates.length).toBe(1);
 
-      // Verify template names
-      const templateNames = createdTemplates.map(t => t.name).sort();
-      expect(templateNames).toEqual(["Bold", "Classic", "Creative", "Minimal", "Modern", "Professional"]);
+      // Verify template name
+      const templateNames = createdTemplates.map(t => t.name);
+      expect(templateNames).toEqual(["Sleek - Default"]);
 
-      // Verify Modern is the default
+      // Verify Sleek - Default is the default
       const defaultTemplate = createdTemplates.find(t => t.isDefault);
-      expect(defaultTemplate?.name).toBe("Modern");
+      expect(defaultTemplate?.name).toBe("Sleek - Default");
       
-      // Verify each template has correct properties
-      const modernTemplate = createdTemplates.find(t => t.name === "Modern");
-      expect(modernTemplate?.templateType).toBe("modern");
-      expect(modernTemplate?.primaryColor).toBe("#5f6fff");
-      expect(modernTemplate?.headingFont).toBe("Inter");
-      
-      const classicTemplate = createdTemplates.find(t => t.name === "Classic");
-      expect(classicTemplate?.templateType).toBe("classic");
-      expect(classicTemplate?.primaryColor).toBe("#1e3a8a");
-      expect(classicTemplate?.headingFont).toBe("Georgia");
+      // Verify template has correct properties
+      const sleekTemplate = createdTemplates.find(t => t.name === "Sleek - Default");
+      expect(sleekTemplate?.templateType).toBe("sleek");
+      expect(sleekTemplate?.primaryColor).toBe("#5f6fff");
+      expect(sleekTemplate?.headingFont).toBe("Inter");
     });
   });
 

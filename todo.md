@@ -801,3 +801,27 @@
 - [x] Font changes update immediately
 - [x] Color changes update immediately
 - [x] Layout changes update immediately
+
+
+## Single Template Focus (User Request - Jan 5, 2026)
+
+### Requirements
+- Remove all old preset templates (Modern, Classic, Minimal, Bold, Professional, Creative)
+- Show only "Sleek - Default" as the single template
+- Allow users to create custom templates based on Sleek - Default
+
+### Tasks
+- [ ] Update template initialization to only create "Sleek - Default"
+- [ ] Update Templates page to remove preset templates section
+- [ ] Simplify UI to focus on single template customization
+- [ ] Update backend to use Sleek - Default as the only preset
+
+
+## Template Cleanup and Preview Redesign (User Request - Jan 5, 2026)
+
+### Tasks
+- [x] Delete all old templates (Modern, Classic, Minimal, Bold, Professional, Creative)
+- [x] Redesign template preview card to be minimal and elegant (TemplatePreviewCard.tsx)
+- [x] Show key colors as swatches instead of PDF preview
+- [x] Add "Aa" typography demonstration
+- [x] Remove janky PDF preview from template cards

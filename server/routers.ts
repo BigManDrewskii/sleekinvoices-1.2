@@ -821,8 +821,8 @@ export const appRouter = router({
             footerText: preset.footerText,
             language: preset.language,
             dateFormat: preset.dateFormat,
-            // Only set as default if user has no default template and this is Modern
-            isDefault: !hasDefaultTemplate && preset.name === "Modern",
+            // Only set as default if user has no default template and this is Sleek - Default
+            isDefault: !hasDefaultTemplate && preset.name === "Sleek - Default",
           });
           createdCount++;
         }

@@ -218,7 +218,7 @@ export const invoiceTemplates = mysqlTable("invoiceTemplates", {
   isDefault: boolean("isDefault").default(false).notNull(),
   
   // Template layout type
-  templateType: mysqlEnum("templateType", ["modern", "classic", "minimal", "bold", "professional", "creative"]).default("modern").notNull(),
+  templateType: mysqlEnum("templateType", ["sleek", "modern", "classic", "minimal", "bold", "professional", "creative"]).default("sleek").notNull(),
   
   // Color scheme
   primaryColor: varchar("primaryColor", { length: 7 }).default("#5f6fff").notNull(), // hex color
