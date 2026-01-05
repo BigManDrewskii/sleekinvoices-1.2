@@ -28,9 +28,18 @@ export default function Landing() {
     <div className="min-h-screen bg-background">
       <LandingNavigation />
 
-      {/* Hero Section - Clean, minimal, no graphic */}
+      {/* Hero Section with Sleeky mascot */}
       <section className="pt-32 pb-20 md:pt-40 md:pb-32">
         <div className="container max-w-5xl mx-auto px-4 text-center">
+          {/* Sleeky Mascot */}
+          <div className="mb-6">
+            <img
+              src="/sleeky.svg"
+              alt="Sleeky - SleekInvoices mascot"
+              className="h-32 sm:h-40 md:h-48 mx-auto"
+            />
+          </div>
+
           {/* Badge */}
           <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 border border-primary/20 text-primary rounded-full text-sm font-medium mb-8">
             <Sparkles className="h-4 w-4" />
