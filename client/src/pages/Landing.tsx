@@ -335,18 +335,29 @@ export default function Landing() {
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-border py-12">
+      <footer className="relative mt-16">
+        {/* Sleeky Mascot - Large, floating above footer */}
         <div className="container max-w-6xl mx-auto px-4">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-8">
-            <div className="col-span-2 md:col-span-1">
-              <div className="flex items-center gap-2.5 mb-4">
-                <img src="/monogram-white.svg" alt="SleekInvoices" className="h-8 w-8" />
-                <span className="font-semibold text-foreground">SleekInvoices</span>
+          <img 
+            src="/sleeky-relaxed.png" 
+            alt="Sleeky relaxing with paid invoices" 
+            className="w-48 md:w-64 lg:w-72 h-auto mb-[-2rem]"
+          />
+        </div>
+
+        {/* Footer Content - Rounded top border */}
+        <div className="border border-border rounded-t-2xl bg-card/30">
+          <div className="container max-w-6xl mx-auto px-4 py-10">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-8 lg:gap-16 mb-8">
+              <div className="col-span-2 md:col-span-1">
+                <div className="flex items-center gap-2.5 mb-4">
+                  <img src="/monogram-white.svg" alt="SleekInvoices" className="h-7 w-7" />
+                  <span className="font-semibold text-foreground">SleekInvoices</span>
+                </div>
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  Professional invoicing for freelancers and small businesses.
+                </p>
               </div>
-              <p className="text-sm text-muted-foreground">
-                Professional invoicing for freelancers and small businesses.
-              </p>
-            </div>
 
             <div>
               <h4 className="font-semibold text-foreground mb-4 text-sm">Product</h4>
@@ -447,7 +458,8 @@ export default function Landing() {
             </div>
           </div>
         </div>
-      </footer>
+      </div>
+    </footer>
     </div>
   );
 }
