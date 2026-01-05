@@ -684,3 +684,20 @@
 - [x] Preview shows actual template styling (colors, fonts, layout)
 - [x] Preview visible alongside editor for immediate feedback
 
+
+
+## Templates Page Redesign (User Feedback)
+
+### Issues Identified
+- [x] Gradient preview looks archaic and outdated
+- [x] Button at line 169 does not work (New Template button)
+- [x] Template cards need modern, professional design
+
+### Redesign Tasks
+- [x] Replace gradient previews with actual invoice thumbnail previews (MiniInvoicePreview component)
+- [x] Modernize template card design (cleaner, more professional)
+- [x] Fix non-working buttons (New Template button condition fixed)
+- [x] Improve overall visual hierarchy and spacing
+- [x] Add hover states and micro-interactions
+- [x] Test all template actions work correctly
+

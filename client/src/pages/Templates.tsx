@@ -7,6 +7,7 @@ import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
 import { TemplateEditor } from "@/components/templates/TemplateEditor";
 import { TemplatePreview } from "@/components/templates/TemplatePreview";
+import { MiniInvoicePreview } from "@/components/templates/MiniInvoicePreview";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
@@ -114,8 +115,8 @@ export default function InvoiceTemplates() {
     refetch();
   };
 
-  // Show template editor when editing
-  if (isEditing && selectedTemplateId) {
+  // Show template editor when editing (selectedTemplateId can be null for new templates)
+  if (isEditing) {
     return (
       <TemplateEditor
         templateId={selectedTemplateId}
@@ -408,58 +409,81 @@ interface TemplateCardProps {
 
 function TemplateCard({ template, isPreset, onEdit, onPreview, onDelete, onSetDefault }: TemplateCardProps) {
   return (
-    <Card className="relative overflow-hidden group hover:shadow-lg transition-shadow">
-      {/* Color Preview Bar */}
-      <div 
-        className="h-24 w-full" 
-        style={{
-          background: `linear-gradient(135deg, ${template.primaryColor} 0%, ${template.secondaryColor} 100%)`
-        }}
-      />
+    <Card className="relative overflow-hidden group hover:shadow-xl hover:scale-[1.02] transition-all duration-200 bg-card/50 backdrop-blur">
+      {/* Mini Invoice Preview */}
+      <div className="p-4 pb-2">
+        <div 
+          className="relative rounded-lg overflow-hidden border border-border/50 cursor-pointer hover:border-primary/50 transition-colors"
+          onClick={onPreview}
+        >
+          <MiniInvoicePreview template={template} />
+          {/* Hover overlay */}
+          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors flex items-center justify-center">
+            <div className="opacity-0 group-hover:opacity-100 transition-opacity">
+              <Eye className="h-6 w-6 text-primary" />
+            </div>
+          </div>
+        </div>
+      </div>
       
-      <CardHeader>
+      <CardHeader className="pt-2 pb-3">
         <div className="flex items-start justify-between">
           <div className="flex-1">
-            <CardTitle className="flex items-center gap-2">
+            <CardTitle className="flex items-center gap-2 text-base">
               {template.name}
               {template.isDefault && (
-                <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                <Badge variant="secondary" className="text-xs font-normal">
+                  <Star className="h-3 w-3 fill-yellow-500 text-yellow-500 mr-1" />
+                  Default
+                </Badge>
               )}
             </CardTitle>
-            <CardDescription className="capitalize">{template.templateType}</CardDescription>
+            <CardDescription className="capitalize text-xs mt-1">
+              {template.templateType} style
+            </CardDescription>
           </div>
         </div>
       </CardHeader>
 
-      <CardContent className="space-y-3">
-        {/* Template Info */}
-        <div className="text-sm text-muted-foreground space-y-1">
-          <div className="flex items-center gap-2">
-            <div className="flex gap-1">
-              <div className="w-4 h-4 rounded-full border" style={{ backgroundColor: template.primaryColor }} />
-              <div className="w-4 h-4 rounded-full border" style={{ backgroundColor: template.secondaryColor }} />
-              <div className="w-4 h-4 rounded-full border" style={{ backgroundColor: template.accentColor }} />
-            </div>
-            <span className="text-xs">{template.headingFont}</span>
+      <CardContent className="pt-0 space-y-3">
+        {/* Color & Font Info */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-1.5">
+            <div 
+              className="w-5 h-5 rounded-full ring-2 ring-background shadow-sm" 
+              style={{ backgroundColor: template.primaryColor }} 
+              title="Primary"
+            />
+            <div 
+              className="w-5 h-5 rounded-full ring-2 ring-background shadow-sm -ml-2" 
+              style={{ backgroundColor: template.secondaryColor }} 
+              title="Secondary"
+            />
+            <div 
+              className="w-5 h-5 rounded-full ring-2 ring-background shadow-sm -ml-2" 
+              style={{ backgroundColor: template.accentColor }} 
+              title="Accent"
+            />
           </div>
+          <span className="text-xs text-muted-foreground">{template.headingFont}</span>
         </div>
 
         {/* Actions */}
-        <div className="flex flex-wrap gap-2">
-          <Button onClick={onPreview} variant="outline" size="sm" className="flex-1">
-            <Eye className="h-4 w-4 mr-1" />
+        <div className="flex gap-2">
+          <Button onClick={onPreview} variant="outline" size="sm" className="flex-1 h-8">
+            <Eye className="h-3.5 w-3.5 mr-1.5" />
             Preview
           </Button>
-          <Button onClick={onEdit} variant="outline" size="sm" className="flex-1">
-            <Edit className="h-4 w-4 mr-1" />
+          <Button onClick={onEdit} variant="default" size="sm" className="flex-1 h-8">
+            <Edit className="h-3.5 w-3.5 mr-1.5" />
             Edit
           </Button>
         </div>
 
         <div className="flex gap-2">
           {!template.isDefault && (
-            <Button onClick={onSetDefault} variant="ghost" size="sm" className="flex-1">
-              <Star className="h-4 w-4 mr-1" />
+            <Button onClick={onSetDefault} variant="ghost" size="sm" className="flex-1 h-8 text-xs">
+              <Star className="h-3.5 w-3.5 mr-1" />
               Set Default
             </Button>
           )}
@@ -468,9 +492,9 @@ function TemplateCard({ template, isPreset, onEdit, onPreview, onDelete, onSetDe
               onClick={onDelete} 
               variant="ghost" 
               size="sm"
-              className="text-destructive hover:text-destructive hover:bg-destructive/10"
+              className="h-8 text-xs text-destructive hover:text-destructive hover:bg-destructive/10"
             >
-              <Trash2 className="h-4 w-4 mr-1" />
+              <Trash2 className="h-3.5 w-3.5 mr-1" />
               Delete
             </Button>
           )}
