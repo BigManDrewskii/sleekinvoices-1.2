@@ -836,3 +836,38 @@
 - [x] Load fonts dynamically for preview before selection
 - [x] Separate preview types for heading vs body fonts
 - [x] Expanded font picker with side-by-side preview panel
+
+
+## Competitor Crush Roadmap (User Request - Jan 5, 2026)
+
+### Phase 1: Crypto Foundation & Compliance
+- [ ] Create payment_gateways table (provider, config JSONB, is_enabled)
+- [ ] Update invoices table for high-decimal precision (DECIMAL 24,8)
+- [ ] Update invoiceLineItems table for high-decimal precision
+- [ ] Add vatNumber field to clients table
+- [ ] Add taxExempt field to clients table
+- [ ] Update ClientDialog.tsx with VAT/Tax ID field
+- [ ] Implement decimal.js for precise calculations
+- [ ] Add dynamic currency symbol logic ($ → Ξ for ETH, ₿ for BTC)
+- [ ] Update invoice form to allow 8 decimal places for crypto
+
+### Phase 2: Payment Architecture ("Get Paid")
+- [ ] Create Settings "Payment Connections" tab UI
+- [ ] Implement Stripe custom keys section
+- [ ] Implement Coinbase Commerce section with API key input
+- [ ] Implement Manual Wallet section with address + network
+- [ ] Create paymentGateways tRPC router (list, create, update, delete)
+- [ ] Implement Coinbase Commerce charge creation
+- [ ] Implement Coinbase Commerce webhook handler
+- [ ] Implement manual wallet "Marked Paid" workflow
+- [ ] Secure API key encryption/storage
+
+### Phase 3: Public Invoice Experience
+- [ ] Add "Pay with Crypto" button to invoice public view
+- [ ] Implement QR code generation for wallet addresses
+- [ ] Add "viewed" status to invoice status enum
+- [ ] Implement link tracking middleware (/track/invoice/:id)
+- [ ] Send notification when invoice is viewed
+- [ ] Add Crypto QR Code toggle to template settings
+- [ ] Display VAT number on invoice PDF
+- [ ] Add dynamic payment instructions section

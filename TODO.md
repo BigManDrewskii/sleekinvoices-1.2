@@ -1411,3 +1411,320 @@ See TODO_PHASE6A_FRONTEND.md for detailed implementation plan
 
 - [x] Simplify UpgradePromoBanner design
 - [x] Improve "Upgrade to Pro - Unlimited Invoices" button styling in UsageIndicator
+
+
+---
+
+## 🚀 COMPETITOR CRUSH: Crypto Payments & EU Compliance
+
+> **Goal**: Transform SleekInvoices into a competition-crushing SaaS with crypto payments, EU compliance, and "sticky" UX features.
+> **Rule**: Mark each task `[x]` when complete. Reference this section before starting any new task.
+
+---
+
+### Phase 1: Crypto Foundation & Compliance
+
+#### 1.1 Database Schema: Payment Gateways Table
+- [ ] 1.1.1 Create `payment_gateways` table in `drizzle/schema.ts`
+  - Fields: id, userId, provider (enum: 'stripe_connect', 'coinbase_commerce', 'manual_wallet'), config (text/JSON), isEnabled, createdAt, updatedAt
+- [ ] 1.1.2 Create `user_wallets` table for manual crypto wallets
+  - Fields: id, userId, label, address, network (enum: 'ethereum', 'polygon', 'bitcoin', 'bsc'), createdAt
+  - Constraint: Max 3 wallets per user (enforce in application layer)
+- [ ] 1.1.3 Run `pnpm db:push` to apply schema changes
+- [ ] 1.1.4 Write vitest test to verify tables exist and constraints work
+
+#### 1.2 Database Schema: High-Decimal Precision
+- [ ] 1.2.1 Update `invoices` table monetary columns to DECIMAL(24,8)
+  - Columns: subtotal, taxAmount, discountAmount, total, amountPaid
+- [ ] 1.2.2 Update `invoiceLineItems` table monetary columns to DECIMAL(24,8)
+  - Columns: quantity, rate, amount
+- [ ] 1.2.3 Update `expenses` table monetary columns to DECIMAL(24,8)
+  - Columns: amount, taxAmount
+- [ ] 1.2.4 Update `recurringInvoices` table monetary columns to DECIMAL(24,8)
+  - Columns: discountValue
+- [ ] 1.2.5 Update `recurringInvoiceLineItems` table monetary columns to DECIMAL(24,8)
+  - Columns: quantity, rate
+- [ ] 1.2.6 Add `cryptoAmount` column to `invoices` table (DECIMAL 24,18 for wei-level precision)
+- [ ] 1.2.7 Add `cryptoCurrency` column to `invoices` table (VARCHAR 10, nullable)
+- [ ] 1.2.8 Run `pnpm db:push` to apply schema changes
+- [ ] 1.2.9 Write vitest test to verify decimal precision is preserved (test with 0.00000001)
+
+#### 1.3 Database Schema: VAT/Tax Compliance
+- [ ] 1.3.1 Add `vatNumber` column to `clients` table (VARCHAR 50, nullable)
+- [ ] 1.3.2 Add `taxExempt` column to `clients` table (BOOLEAN, default false)
+- [ ] 1.3.3 Run `pnpm db:push` to apply schema changes
+- [ ] 1.3.4 Write vitest test to verify VAT fields save and retrieve correctly
+
+#### 1.4 Database Schema: Invoice View Tracking
+- [ ] 1.4.1 Create `invoice_views` table in `drizzle/schema.ts`
+  - Fields: id, invoiceId, viewedAt, ipAddress (VARCHAR 45), userAgent (TEXT), isFirstView (BOOLEAN)
+- [ ] 1.4.2 Add `viewed` to invoice status enum (after 'sent', before 'paid')
+- [ ] 1.4.3 Add `firstViewedAt` column to `invoices` table (TIMESTAMP, nullable)
+- [ ] 1.4.4 Run `pnpm db:push` to apply schema changes
+- [ ] 1.4.5 Write vitest test to verify view tracking table works
+
+#### 1.5 Encryption Setup
+- [ ] 1.5.1 Add `ENCRYPTION_KEY` to environment variables (generate 32-byte key)
+- [ ] 1.5.2 Create `server/lib/encryption.ts` utility
+  - Function: `encrypt(plaintext: string): string` - returns base64 encrypted string
+  - Function: `decrypt(ciphertext: string): string` - returns original plaintext
+  - Use AES-256-GCM algorithm
+- [ ] 1.5.3 Write vitest test for encryption/decryption round-trip
+
+#### 1.6 Backend: Client VAT Field
+- [ ] 1.6.1 Update `clients.create` procedure to accept `vatNumber` and `taxExempt`
+- [ ] 1.6.2 Update `clients.update` procedure to accept `vatNumber` and `taxExempt`
+- [ ] 1.6.3 Update `clients.list` and `clients.get` to return VAT fields
+- [ ] 1.6.4 Write vitest test for client CRUD with VAT fields
+
+#### 1.7 Backend: VIES VAT Validation
+- [ ] 1.7.1 Create `server/lib/vat-validation.ts` utility
+  - Function: `validateVATNumber(vatNumber: string): Promise<{valid: boolean, name?: string, address?: string}>`
+  - Use VIES SOAP API (https://ec.europa.eu/taxation_customs/vies/checkVatService.wsdl)
+  - Handle network errors gracefully (return {valid: false} on timeout)
+- [ ] 1.7.2 Create `clients.validateVAT` procedure that calls the validation utility
+- [ ] 1.7.3 Write vitest test with mock VIES responses
+
+#### 1.8 Frontend: Client Dialog VAT Field
+- [ ] 1.8.1 Add `vatNumber` input field to `ClientDialog.tsx`
+  - Label: "VAT / Tax ID"
+  - Placeholder: "e.g., DE123456789"
+  - Position: After address field
+- [ ] 1.8.2 Add `taxExempt` checkbox to `ClientDialog.tsx`
+  - Label: "Tax Exempt"
+  - Position: After VAT field
+- [ ] 1.8.3 Add "Validate VAT" button next to VAT input
+  - Shows loading spinner during validation
+  - Shows checkmark if valid, X if invalid
+  - Auto-fills company name if VIES returns it
+- [ ] 1.8.4 Update form state and submission to include VAT fields
+
+#### 1.9 Frontend: Decimal Precision Handling
+- [ ] 1.9.1 Install `decimal.js` package: `pnpm add decimal.js`
+- [ ] 1.9.2 Create `client/src/lib/decimal-utils.ts` utility
+  - Function: `formatCryptoAmount(amount: string, currency: string): string`
+  - Function: `parseCryptoAmount(input: string): string`
+  - Function: `calculateLineItemTotal(quantity: string, rate: string): string`
+  - Function: `getDecimalPlaces(currency: string): number` (2 for fiat, 8 for crypto)
+- [ ] 1.9.3 Update invoice line item inputs to use decimal.js for calculations
+- [ ] 1.9.4 Update invoice total calculations to use decimal.js
+- [ ] 1.9.5 Write unit tests for decimal utility functions
+
+#### 1.10 Frontend: Crypto Currency Selector
+- [ ] 1.10.1 Create `shared/currencies.ts` with currency definitions
+  - Fiat: USD, EUR, GBP, CAD, AUD, etc. (symbol, decimals: 2)
+  - Crypto: BTC, ETH, USDC, USDT, DAI (symbol, decimals: 8, icon)
+- [ ] 1.10.2 Create `CurrencySelector` component with tabs (Fiat | Crypto)
+- [ ] 1.10.3 Update invoice creation form to use new CurrencySelector
+- [ ] 1.10.4 Display correct symbol based on selected currency ($ → Ξ → ₿)
+- [ ] 1.10.5 Adjust decimal input validation based on currency type
+
+---
+
+### Phase 2: Payment Architecture ("Get Paid")
+
+#### 2.1 Stripe Connect Setup
+- [ ] 2.1.1 Register SleekInvoices as a Stripe Connect platform (if not already)
+- [ ] 2.1.2 Add Stripe Connect environment variables
+  - `STRIPE_CONNECT_CLIENT_ID`
+  - `STRIPE_CONNECT_REDIRECT_URI`
+- [ ] 2.1.3 Create `server/lib/stripe-connect.ts` utility
+  - Function: `generateConnectUrl(userId: string): string` - OAuth URL
+  - Function: `exchangeCodeForAccount(code: string): Promise<StripeAccount>`
+  - Function: `createPaymentIntent(accountId: string, amount: number, currency: string): Promise<PaymentIntent>`
+- [ ] 2.1.4 Write vitest test for Stripe Connect URL generation
+
+#### 2.2 Coinbase Commerce Setup
+- [ ] 2.2.1 Install Coinbase Commerce SDK: `pnpm add coinbase-commerce-node`
+- [ ] 2.2.2 Create `server/lib/coinbase-commerce.ts` utility
+  - Function: `createCharge(apiKey: string, invoiceId: string, amount: string, currency: string): Promise<Charge>`
+  - Function: `verifyWebhookSignature(payload: string, signature: string, secret: string): boolean`
+- [ ] 2.2.3 Write vitest test with mocked Coinbase responses
+
+#### 2.3 Backend: Payment Gateways Router
+- [ ] 2.3.1 Create `server/routers/payment-gateways.ts` router
+- [ ] 2.3.2 Implement `paymentGateways.list` - returns user's configured gateways (masked keys)
+- [ ] 2.3.3 Implement `paymentGateways.getStripeConnectUrl` - returns OAuth URL
+- [ ] 2.3.4 Implement `paymentGateways.completeStripeConnect` - exchanges code, saves encrypted account ID
+- [ ] 2.3.5 Implement `paymentGateways.disconnectStripe` - removes Stripe connection
+- [ ] 2.3.6 Implement `paymentGateways.saveCoinbaseKey` - encrypts and saves API key
+- [ ] 2.3.7 Implement `paymentGateways.removeCoinbase` - removes Coinbase configuration
+- [ ] 2.3.8 Implement `paymentGateways.testCoinbaseConnection` - verifies API key works
+- [ ] 2.3.9 Write vitest tests for all payment gateway procedures
+
+#### 2.4 Backend: User Wallets Router
+- [ ] 2.4.1 Create `server/routers/user-wallets.ts` router
+- [ ] 2.4.2 Implement `userWallets.list` - returns user's wallet addresses
+- [ ] 2.4.3 Implement `userWallets.create` - adds new wallet (enforce max 3)
+- [ ] 2.4.4 Implement `userWallets.update` - updates wallet label/address
+- [ ] 2.4.5 Implement `userWallets.delete` - removes wallet
+- [ ] 2.4.6 Implement wallet address validation (checksum for ETH, format for BTC)
+- [ ] 2.4.7 Write vitest tests for wallet CRUD operations
+
+#### 2.5 Backend: Payment Processing
+- [ ] 2.5.1 Create `server/routers/payments.ts` router
+- [ ] 2.5.2 Implement `payments.createStripeIntent` - creates PaymentIntent via user's connected Stripe
+- [ ] 2.5.3 Implement `payments.createCoinbaseCharge` - creates Coinbase Commerce charge
+- [ ] 2.5.4 Implement `payments.markAsPaid` - manual payment confirmation (for wallet transfers)
+- [ ] 2.5.5 Create `/api/webhooks/stripe-connect` endpoint for payment confirmations
+- [ ] 2.5.6 Create `/api/webhooks/coinbase` endpoint for charge confirmations
+- [ ] 2.5.7 Write vitest tests for payment creation flows
+
+#### 2.6 Frontend: Settings "Payment Connections" Tab
+- [ ] 2.6.1 Create `client/src/pages/settings/PaymentConnections.tsx` component
+- [ ] 2.6.2 Add "Payment Connections" tab to Settings page navigation
+- [ ] 2.6.3 Implement Stripe Connect section
+  - "Connect with Stripe" button (redirects to Stripe OAuth)
+  - Connected state shows account info and "Disconnect" button
+  - Status indicator (Connected/Not Connected)
+- [ ] 2.6.4 Implement Coinbase Commerce section
+  - API Key input field (masked display)
+  - "Save" and "Test Connection" buttons
+  - Status indicator with last test result
+- [ ] 2.6.5 Implement Manual Wallets section
+  - List of configured wallets (up to 3)
+  - "Add Wallet" button opens modal
+  - Each wallet shows: Label, Address (truncated), Network, Edit/Delete buttons
+- [ ] 2.6.6 Add wallet modal with fields: Label, Address, Network dropdown
+- [ ] 2.6.7 Add QR code preview for each wallet address
+
+#### 2.7 Frontend: Stripe Connect OAuth Callback
+- [ ] 2.7.1 Create `/settings/stripe-callback` route
+- [ ] 2.7.2 Handle OAuth code exchange on callback
+- [ ] 2.7.3 Show success/error message and redirect to Payment Connections
+
+---
+
+### Phase 3: Public Invoice Experience
+
+#### 3.1 Backend: Invoice View Tracking
+- [ ] 3.1.1 Create `server/lib/view-tracking.ts` utility
+  - Function: `recordInvoiceView(invoiceId: number, ipAddress: string, userAgent: string): Promise<void>`
+  - Logic: Check if first view, update invoice status to 'viewed' if so
+- [ ] 3.1.2 Create `/api/track/invoice/:id` middleware route
+  - Records view, then redirects to actual invoice view
+- [ ] 3.1.3 Update email templates to use tracking URL instead of direct URL
+- [ ] 3.1.4 Write vitest test for view tracking logic
+
+#### 3.2 Backend: View Notifications
+- [ ] 3.2.1 Create `server/lib/notifications.ts` utility
+  - Function: `notifyInvoiceViewed(userId: number, invoiceId: string, viewedAt: Date): Promise<void>`
+- [ ] 3.2.2 Implement email notification for first view
+  - Subject: "Invoice #{number} was just viewed"
+  - Body: Client name, timestamp, link to invoice
+- [ ] 3.2.3 Create `notifications` table for in-app notifications
+  - Fields: id, userId, type, title, message, data (JSON), readAt, createdAt
+- [ ] 3.2.4 Implement `notifications.list` procedure (paginated, unread first)
+- [ ] 3.2.5 Implement `notifications.markAsRead` procedure
+- [ ] 3.2.6 Write vitest tests for notification system
+
+#### 3.3 Frontend: Notification Bell
+- [ ] 3.3.1 Create `NotificationBell` component for navigation
+  - Shows unread count badge
+  - Dropdown with recent notifications
+  - "Mark all as read" action
+- [ ] 3.3.2 Add NotificationBell to main navigation
+- [ ] 3.3.3 Implement notification polling (every 30 seconds)
+
+#### 3.4 Backend: Public Invoice Payment Options
+- [ ] 3.4.1 Update `clientPortal.getInvoice` to include payment options
+  - Return: stripeEnabled, coinbaseEnabled, wallets[], paymentInstructions
+- [ ] 3.4.2 Create `publicPayments.createStripeSession` - for public invoice payment
+- [ ] 3.4.3 Create `publicPayments.createCoinbaseCharge` - for public crypto payment
+- [ ] 3.4.4 Create `publicPayments.confirmWalletPayment` - client confirms they sent payment
+
+#### 3.5 Frontend: QR Code Generation
+- [ ] 3.5.1 Install QR code library: `pnpm add qrcode.react`
+- [ ] 3.5.2 Create `CryptoPaymentQR` component
+  - Props: address, amount, currency, network
+  - Generates EIP-681 URI for ETH (ethereum:0x...?value=...)
+  - Generates BIP-21 URI for BTC (bitcoin:...?amount=...)
+  - Shows QR code with "Click to copy address" below
+- [ ] 3.5.3 Create `WalletPaymentModal` component
+  - Shows QR code, address, amount due
+  - "I have sent the payment" button
+  - Network/currency selector if multiple wallets
+
+#### 3.6 Frontend: Public Invoice View Updates
+- [ ] 3.6.1 Update `ClientPortal.tsx` invoice view with payment options
+- [ ] 3.6.2 Add "Pay with Card" button (Stripe, if connected)
+- [ ] 3.6.3 Add "Pay with Crypto" button (opens modal with options)
+- [ ] 3.6.4 Show Coinbase Commerce option if configured
+- [ ] 3.6.5 Show manual wallet options with QR codes
+- [ ] 3.6.6 Add payment status indicator (Pending, Processing, Paid)
+- [ ] 3.6.7 Style payment buttons prominently (large, colored CTA)
+
+#### 3.7 Frontend: Invoice Status Badge Update
+- [ ] 3.7.1 Update `StatusBadge` component to handle 'viewed' status
+  - Color: Purple (distinct from sent/paid)
+  - Icon: Eye icon
+- [ ] 3.7.2 Update invoice list to show "Viewed" status
+- [ ] 3.7.3 Add "First viewed at" timestamp to invoice detail view
+
+#### 3.8 Template: Crypto QR Code Toggle
+- [ ] 3.8.1 Add `showCryptoQR` field to `invoiceTemplates` table (BOOLEAN, default false)
+- [ ] 3.8.2 Add toggle in template editor Field Visibility section
+- [ ] 3.8.3 Update PDF generation to include QR code if enabled
+- [ ] 3.8.4 Position QR code in bottom-right of invoice PDF
+
+#### 3.9 Template: VAT Number Display
+- [ ] 3.9.1 Update invoice PDF template to show client VAT number
+  - Position: Under client address
+  - Label: "VAT: {number}"
+  - Only show if client has VAT number
+- [ ] 3.9.2 Update invoice web preview to show VAT number
+
+#### 3.10 Template: Payment Instructions
+- [ ] 3.10.1 Add `paymentInstructions` field to `invoiceTemplates` table (TEXT, nullable)
+- [ ] 3.10.2 Add payment instructions textarea in template editor
+- [ ] 3.10.3 Auto-generate default instructions based on enabled payment methods
+- [ ] 3.10.4 Display payment instructions on invoice PDF footer
+
+---
+
+### Phase 4: Testing & Polish
+
+#### 4.1 Integration Tests
+- [ ] 4.1.1 Write E2E test: Create client with VAT → Create invoice → Send → Track view
+- [ ] 4.1.2 Write E2E test: Connect Stripe → Create invoice → Pay via Stripe
+- [ ] 4.1.3 Write E2E test: Add wallet → Create invoice → Mark as paid
+- [ ] 4.1.4 Write E2E test: Crypto invoice with 8 decimal precision
+
+#### 4.2 Error Handling
+- [ ] 4.2.1 Add error boundaries for payment components
+- [ ] 4.2.2 Add retry logic for webhook failures
+- [ ] 4.2.3 Add user-friendly error messages for payment failures
+- [ ] 4.2.4 Add logging for payment events (for debugging)
+
+#### 4.3 Documentation
+- [ ] 4.3.1 Update ROADMAP.md with completion status
+- [ ] 4.3.2 Add inline code comments for complex payment logic
+- [ ] 4.3.3 Create user-facing help docs for payment setup
+
+---
+
+### Completion Checklist
+
+Before marking a phase complete, verify:
+- [ ] All vitest tests pass (`pnpm test`)
+- [ ] No TypeScript errors (`pnpm typecheck`)
+- [ ] Manual testing in browser confirms functionality
+- [ ] Database migrations applied successfully
+
+---
+
+### Technical Notes
+
+**Encryption Key**: Generate with `openssl rand -base64 32`
+
+**Stripe Connect**: Requires Stripe account with Connect enabled
+
+**VIES API**: May have rate limits, implement caching for repeated lookups
+
+**Webhook Security**: Always verify signatures before processing
+
+**Decimal Precision Reference**:
+- Fiat currencies: 2 decimal places (0.01)
+- Bitcoin: 8 decimal places (0.00000001 = 1 satoshi)
+- Ethereum: 18 decimal places internally, display 8 (0.00000001)
+- USDC/USDT: 6 decimal places (0.000001)
