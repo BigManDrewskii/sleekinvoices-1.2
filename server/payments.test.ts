@@ -104,7 +104,7 @@ describe("Payment Reconciliation", () => {
 
       expect(payment).toBeDefined();
       expect(payment.invoiceId).toBe(testInvoiceId);
-      expect(payment.amount).toBe("500.00");
+      expect(payment.amount).toBe("500.00000000");
       expect(payment.paymentMethod).toBe("manual");
       expect(payment.status).toBe("completed");
       
@@ -125,7 +125,7 @@ describe("Payment Reconciliation", () => {
 
       expect(payment).toBeDefined();
       expect(payment.paymentMethod).toBe("bank_transfer");
-      expect(payment.amount).toBe("250.00");
+      expect(payment.amount).toBe("250.00000000");
       
       // Cleanup this test payment
       await db.deletePayment(payment.id);

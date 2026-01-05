@@ -1,0 +1,9 @@
+{
+  "query": "-- Phase 1.2: High-Decimal Precision for Crypto Support\n-- 1.2.1 Update invoices table monetary columns to DECIMAL(24,8)\nALTER TABLE `invoices` \n  MODIFY COLUMN `subtotal` DECIMAL(24,8) NOT NULL,\n  MODIFY COLUMN `taxAmount` DECIMAL(24,8) NOT NULL DEFAULT '0.00000000',\n  MODIFY COLUMN `discountValue` DECIMAL(24,8) NOT NULL DEFAULT '0.00000000',\n  MODIFY COLUMN `discountAmount` DECIMAL(24,8) NOT NULL DEFAULT '0.00000000',\n  MODIFY COLUMN `total` DECIMAL(24,8) NOT NULL,\n  MODIFY COLUMN `amountPaid` DECIMAL(24,8) NOT NULL DEFAULT '0.00000000';",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user REX6DRAh92xmf1o.58be8e717db2 --database coKdAkLfsbebvczbYNFn3V --execute -- Phase 1.2: High-Decimal Precision for Crypto Support\n-- 1.2.1 Update invoices table monetary columns to DECIMAL(24,8)\nALTER TABLE `invoices` \n  MODIFY COLUMN `subtotal` DECIMAL(24,8) NOT NULL,\n  MODIFY COLUMN `taxAmount` DECIMAL(24,8) NOT NULL DEFAULT '0.00000000',\n  MODIFY COLUMN `discountValue` DECIMAL(24,8) NOT NULL DEFAULT '0.00000000',\n  MODIFY COLUMN `discountAmount` DECIMAL(24,8) NOT NULL DEFAULT '0.00000000',\n  MODIFY COLUMN `total` DECIMAL(24,8) NOT NULL,\n  MODIFY COLUMN `amountPaid` DECIMAL(24,8) NOT NULL DEFAULT '0.00000000';",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 2835
+}

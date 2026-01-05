@@ -1,0 +1,9 @@
+{
+  "query": "-- 1.2.2 Update invoiceLineItems table monetary columns to DECIMAL(24,8)\nALTER TABLE `invoiceLineItems`\n  MODIFY COLUMN `quantity` DECIMAL(24,8) NOT NULL,\n  MODIFY COLUMN `rate` DECIMAL(24,8) NOT NULL,\n  MODIFY COLUMN `amount` DECIMAL(24,8) NOT NULL;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user REX6DRAh92xmf1o.58be8e717db2 --database coKdAkLfsbebvczbYNFn3V --execute -- 1.2.2 Update invoiceLineItems table monetary columns to DECIMAL(24,8)\nALTER TABLE `invoiceLineItems`\n  MODIFY COLUMN `quantity` DECIMAL(24,8) NOT NULL,\n  MODIFY COLUMN `rate` DECIMAL(24,8) NOT NULL,\n  MODIFY COLUMN `amount` DECIMAL(24,8) NOT NULL;",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 1505
+}

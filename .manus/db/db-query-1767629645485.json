@@ -1,0 +1,9 @@
+{
+  "query": "-- 1.4.3 Add firstViewedAt column to invoices table (TIMESTAMP, nullable)\nALTER TABLE `invoices`\n  ADD COLUMN IF NOT EXISTS `firstViewedAt` TIMESTAMP NULL;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user REX6DRAh92xmf1o.58be8e717db2 --database coKdAkLfsbebvczbYNFn3V --execute -- 1.4.3 Add firstViewedAt column to invoices table (TIMESTAMP, nullable)\nALTER TABLE `invoices`\n  ADD COLUMN IF NOT EXISTS `firstViewedAt` TIMESTAMP NULL;",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 782
+}

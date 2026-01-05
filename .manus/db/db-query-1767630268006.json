@@ -1,0 +1,9 @@
+{
+  "query": "-- Update invoice status enum to include 'viewed'\nALTER TABLE `invoices` \n  MODIFY COLUMN `status` ENUM('draft', 'sent', 'viewed', 'paid', 'overdue', 'canceled') NOT NULL DEFAULT 'draft';",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user REX6DRAh92xmf1o.58be8e717db2 --database coKdAkLfsbebvczbYNFn3V --execute -- Update invoice status enum to include 'viewed'\nALTER TABLE `invoices` \n  MODIFY COLUMN `status` ENUM('draft', 'sent', 'viewed', 'paid', 'overdue', 'canceled') NOT NULL DEFAULT 'draft';",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 875
+}

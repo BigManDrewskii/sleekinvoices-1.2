@@ -1,0 +1,9 @@
+{
+  "query": "-- 1.2.6 Add cryptoAmount column to invoices table (DECIMAL 24,18 for wei-level precision)\n-- 1.2.7 Add cryptoCurrency column to invoices table (VARCHAR 10, nullable)\nALTER TABLE `invoices`\n  ADD COLUMN IF NOT EXISTS `cryptoAmount` DECIMAL(24,18) NULL,\n  ADD COLUMN IF NOT EXISTS `cryptoCurrency` VARCHAR(10) NULL;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user REX6DRAh92xmf1o.58be8e717db2 --database coKdAkLfsbebvczbYNFn3V --execute -- 1.2.6 Add cryptoAmount column to invoices table (DECIMAL 24,18 for wei-level precision)\n-- 1.2.7 Add cryptoCurrency column to invoices table (VARCHAR 10, nullable)\nALTER TABLE `invoices`\n  ADD COLUMN IF NOT EXISTS `cryptoAmount` DECIMAL(24,18) NULL,\n  ADD COLUMN IF NOT EXISTS `cryptoCurrency` VARCHAR(10) NULL;",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 1142
+}

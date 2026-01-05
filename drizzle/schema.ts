@@ -65,6 +65,11 @@ export const clients = mysqlTable("clients", {
   address: text("address"),
   phone: varchar("phone", { length: 50 }),
   notes: text("notes"),
+  
+  // VAT/Tax compliance fields
+  vatNumber: varchar("vatNumber", { length: 50 }), // EU VAT number (e.g., DE123456789)
+  taxExempt: boolean("taxExempt").default(false).notNull(), // Tax exempt status
+  
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });
@@ -83,21 +88,25 @@ export const invoices = mysqlTable("invoices", {
   // Invoice identification
   invoiceNumber: varchar("invoiceNumber", { length: 50 }).notNull(),
   
-  // Status tracking
-  status: mysqlEnum("status", ["draft", "sent", "paid", "overdue", "canceled"]).default("draft").notNull(),
+  // Status tracking - includes 'viewed' for when client first opens invoice
+  status: mysqlEnum("status", ["draft", "sent", "viewed", "paid", "overdue", "canceled"]).default("draft").notNull(),
   
-  // Financial details
+  // Financial details - DECIMAL(24,8) for crypto precision
   currency: varchar("currency", { length: 3 }).default("USD").notNull(),
-  subtotal: decimal("subtotal", { precision: 10, scale: 2 }).notNull(),
+  subtotal: decimal("subtotal", { precision: 24, scale: 8 }).notNull(),
   taxRate: decimal("taxRate", { precision: 5, scale: 2 }).default("0").notNull(),
-  taxAmount: decimal("taxAmount", { precision: 10, scale: 2 }).default("0").notNull(),
+  taxAmount: decimal("taxAmount", { precision: 24, scale: 8 }).default("0").notNull(),
   discountType: mysqlEnum("discountType", ["percentage", "fixed"]).default("percentage"),
-  discountValue: decimal("discountValue", { precision: 10, scale: 2 }).default("0").notNull(),
-  discountAmount: decimal("discountAmount", { precision: 10, scale: 2 }).default("0").notNull(),
-  total: decimal("total", { precision: 10, scale: 2 }).notNull(),
+  discountValue: decimal("discountValue", { precision: 24, scale: 8 }).default("0").notNull(),
+  discountAmount: decimal("discountAmount", { precision: 24, scale: 8 }).default("0").notNull(),
+  total: decimal("total", { precision: 24, scale: 8 }).notNull(),
   
-  // Payment tracking
-  amountPaid: decimal("amountPaid", { precision: 10, scale: 2 }).default("0").notNull(),
+  // Payment tracking - DECIMAL(24,8) for crypto precision
+  amountPaid: decimal("amountPaid", { precision: 24, scale: 8 }).default("0").notNull(),
+  
+  // Crypto payment fields
+  cryptoAmount: decimal("cryptoAmount", { precision: 24, scale: 18 }), // Wei-level precision
+  cryptoCurrency: varchar("cryptoCurrency", { length: 10 }), // BTC, ETH, USDC, etc.
   
   // Stripe payment integration
   stripePaymentLinkId: varchar("stripePaymentLinkId", { length: 255 }),
@@ -116,6 +125,7 @@ export const invoices = mysqlTable("invoices", {
   dueDate: timestamp("dueDate").notNull(),
   sentAt: timestamp("sentAt"),
   paidAt: timestamp("paidAt"),
+  firstViewedAt: timestamp("firstViewedAt"), // When invoice was first viewed by client
   
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
@@ -131,9 +141,9 @@ export const invoiceLineItems = mysqlTable("invoiceLineItems", {
   id: int("id").autoincrement().primaryKey(),
   invoiceId: int("invoiceId").notNull(),
   description: text("description").notNull(),
-  quantity: decimal("quantity", { precision: 10, scale: 2 }).notNull(),
-  rate: decimal("rate", { precision: 10, scale: 2 }).notNull(),
-  amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
+  quantity: decimal("quantity", { precision: 24, scale: 8 }).notNull(), // DECIMAL(24,8) for crypto precision
+  rate: decimal("rate", { precision: 24, scale: 8 }).notNull(), // DECIMAL(24,8) for crypto precision
+  amount: decimal("amount", { precision: 24, scale: 8 }).notNull(), // DECIMAL(24,8) for crypto precision
   sortOrder: int("sortOrder").default(0).notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
 });
@@ -177,7 +187,7 @@ export const recurringInvoices = mysqlTable("recurringInvoices", {
   invoiceNumberPrefix: varchar("invoiceNumberPrefix", { length: 50 }).notNull(),
   taxRate: decimal("taxRate", { precision: 5, scale: 2 }).default("0").notNull(),
   discountType: mysqlEnum("discountType", ["percentage", "fixed"]).default("percentage"),
-  discountValue: decimal("discountValue", { precision: 10, scale: 2 }).default("0").notNull(),
+  discountValue: decimal("discountValue", { precision: 24, scale: 8 }).default("0").notNull(), // DECIMAL(24,8) for crypto precision
   notes: text("notes"),
   paymentTerms: text("paymentTerms"),
   
@@ -199,8 +209,8 @@ export const recurringInvoiceLineItems = mysqlTable("recurringInvoiceLineItems",
   id: int("id").autoincrement().primaryKey(),
   recurringInvoiceId: int("recurringInvoiceId").notNull(),
   description: text("description").notNull(),
-  quantity: decimal("quantity", { precision: 10, scale: 2 }).notNull(),
-  rate: decimal("rate", { precision: 10, scale: 2 }).notNull(),
+  quantity: decimal("quantity", { precision: 24, scale: 8 }).notNull(), // DECIMAL(24,8) for crypto precision
+  rate: decimal("rate", { precision: 24, scale: 8 }).notNull(), // DECIMAL(24,8) for crypto precision
   sortOrder: int("sortOrder").default(0).notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
 });
@@ -320,8 +330,8 @@ export const expenses = mysqlTable("expenses", {
   userId: int("userId").notNull(),
   categoryId: int("categoryId").notNull(),
   
-  // Financial details
-  amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
+  // Financial details - DECIMAL(24,8) for crypto precision
+  amount: decimal("amount", { precision: 24, scale: 8 }).notNull(),
   currency: varchar("currency", { length: 3 }).default("USD").notNull(),
   date: timestamp("date").notNull(),
   
@@ -342,8 +352,8 @@ export const expenses = mysqlTable("expenses", {
     "other",
   ]),
   
-  // Tax and billable
-  taxAmount: decimal("taxAmount", { precision: 10, scale: 2 }).default("0").notNull(),
+  // Tax and billable - DECIMAL(24,8) for crypto precision
+  taxAmount: decimal("taxAmount", { precision: 24, scale: 8 }).default("0").notNull(),
   isBillable: boolean("isBillable").default(false).notNull(),
   clientId: int("clientId"), // If billable, which client
   invoiceId: int("invoiceId"), // If billed, which invoice
@@ -414,8 +424,8 @@ export const payments = mysqlTable("payments", {
   invoiceId: int("invoiceId").notNull(),
   userId: int("userId").notNull(),
   
-  // Payment details
-  amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
+  // Payment details - DECIMAL(24,8) for crypto precision
+  amount: decimal("amount", { precision: 24, scale: 8 }).notNull(),
   currency: varchar("currency", { length: 3 }).default("USD").notNull(),
   paymentMethod: mysqlEnum("paymentMethod", ["stripe", "manual", "bank_transfer", "check", "cash"]).notNull(),
   
@@ -547,3 +557,26 @@ export const userWallets = mysqlTable("userWallets", {
 
 export type UserWallet = typeof userWallets.$inferSelect;
 export type InsertUserWallet = typeof userWallets.$inferInsert;
+
+
+/**
+ * Invoice view tracking for analytics and notifications
+ * Tracks every time a client views an invoice via the public link
+ */
+export const invoiceViews = mysqlTable("invoiceViews", {
+  id: int("id").autoincrement().primaryKey(),
+  invoiceId: int("invoiceId").notNull(),
+  
+  // View metadata
+  viewedAt: timestamp("viewedAt").defaultNow().notNull(),
+  ipAddress: varchar("ipAddress", { length: 45 }), // IPv6 compatible
+  userAgent: text("userAgent"),
+  
+  // First view tracking
+  isFirstView: boolean("isFirstView").default(false).notNull(),
+  
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type InvoiceView = typeof invoiceViews.$inferSelect;
+export type InsertInvoiceView = typeof invoiceViews.$inferInsert;

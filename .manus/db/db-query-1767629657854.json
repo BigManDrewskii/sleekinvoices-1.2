@@ -1,0 +1,9 @@
+{
+  "query": "-- 1.2.3 Update expenses table monetary columns to DECIMAL(24,8)\nALTER TABLE `expenses`\n  MODIFY COLUMN `amount` DECIMAL(24,8) NOT NULL,\n  MODIFY COLUMN `taxAmount` DECIMAL(24,8) NOT NULL DEFAULT '0.00000000';",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user REX6DRAh92xmf1o.58be8e717db2 --database coKdAkLfsbebvczbYNFn3V --execute -- 1.2.3 Update expenses table monetary columns to DECIMAL(24,8)\nALTER TABLE `expenses`\n  MODIFY COLUMN `amount` DECIMAL(24,8) NOT NULL,\n  MODIFY COLUMN `taxAmount` DECIMAL(24,8) NOT NULL DEFAULT '0.00000000';",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 1180
+}

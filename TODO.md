@@ -1436,42 +1436,42 @@ See TODO_PHASE6A_FRONTEND.md for detailed implementation plan
   - Created `server/payment-gateways.test.ts` with 12 passing tests
 
 #### 1.2 Database Schema: High-Decimal Precision
-- [ ] 1.2.1 Update `invoices` table monetary columns to DECIMAL(24,8)
+- [x] 1.2.1 Update `invoices` table monetary columns to DECIMAL(24,8)
   - Columns: subtotal, taxAmount, discountAmount, total, amountPaid
-- [ ] 1.2.2 Update `invoiceLineItems` table monetary columns to DECIMAL(24,8)
+- [x] 1.2.2 Update `invoiceLineItems` table monetary columns to DECIMAL(24,8)
   - Columns: quantity, rate, amount
-- [ ] 1.2.3 Update `expenses` table monetary columns to DECIMAL(24,8)
+- [x] 1.2.3 Update `expenses` table monetary columns to DECIMAL(24,8)
   - Columns: amount, taxAmount
-- [ ] 1.2.4 Update `recurringInvoices` table monetary columns to DECIMAL(24,8)
+- [x] 1.2.4 Update `recurringInvoices` table monetary columns to DECIMAL(24,8)
   - Columns: discountValue
-- [ ] 1.2.5 Update `recurringInvoiceLineItems` table monetary columns to DECIMAL(24,8)
+- [x] 1.2.5 Update `recurringInvoiceLineItems` table monetary columns to DECIMAL(24,8)
   - Columns: quantity, rate
-- [ ] 1.2.6 Add `cryptoAmount` column to `invoices` table (DECIMAL 24,18 for wei-level precision)
-- [ ] 1.2.7 Add `cryptoCurrency` column to `invoices` table (VARCHAR 10, nullable)
-- [ ] 1.2.8 Run `pnpm db:push` to apply schema changes
-- [ ] 1.2.9 Write vitest test to verify decimal precision is preserved (test with 0.00000001)
+- [x] 1.2.6 Add `cryptoAmount` column to `invoices` table (DECIMAL 24,18 for wei-level precision)
+- [x] 1.2.7 Add `cryptoCurrency` column to `invoices` table (VARCHAR 10, nullable)
+- [x] 1.2.8 Run `pnpm db:push` to apply schema changes
+- [x] 1.2.9 Write vitest test to verify decimal precision is preserved (test with 0.00000001)
 
 #### 1.3 Database Schema: VAT/Tax Compliance
-- [ ] 1.3.1 Add `vatNumber` column to `clients` table (VARCHAR 50, nullable)
-- [ ] 1.3.2 Add `taxExempt` column to `clients` table (BOOLEAN, default false)
-- [ ] 1.3.3 Run `pnpm db:push` to apply schema changes
-- [ ] 1.3.4 Write vitest test to verify VAT fields save and retrieve correctly
+- [x] 1.3.1 Add `vatNumber` column to `clients` table (VARCHAR 50, nullable)
+- [x] 1.3.2 Add `taxExempt` column to `clients` table (BOOLEAN, default false)
+- [x] 1.3.3 Run `pnpm db:push` to apply schema changes
+- [x] 1.3.4 Write vitest test to verify VAT fields save and retrieve correctly
 
 #### 1.4 Database Schema: Invoice View Tracking
-- [ ] 1.4.1 Create `invoice_views` table in `drizzle/schema.ts`
+- [x] 1.4.1 Create `invoice_views` table in `drizzle/schema.ts`
   - Fields: id, invoiceId, viewedAt, ipAddress (VARCHAR 45), userAgent (TEXT), isFirstView (BOOLEAN)
-- [ ] 1.4.2 Add `viewed` to invoice status enum (after 'sent', before 'paid')
-- [ ] 1.4.3 Add `firstViewedAt` column to `invoices` table (TIMESTAMP, nullable)
-- [ ] 1.4.4 Run `pnpm db:push` to apply schema changes
-- [ ] 1.4.5 Write vitest test to verify view tracking table works
+- [x] 1.4.2 Add `viewed` to invoice status enum (after 'sent', before 'paid')
+- [x] 1.4.3 Add `firstViewedAt` column to `invoices` table (TIMESTAMP, nullable)
+- [x] 1.4.4 Run `pnpm db:push` to apply schema changes
+- [x] 1.4.5 Write vitest test to verify view tracking table works
 
 #### 1.5 Encryption Setup
-- [ ] 1.5.1 Add `ENCRYPTION_KEY` to environment variables (generate 32-byte key)
-- [ ] 1.5.2 Create `server/lib/encryption.ts` utility
+- [x] 1.5.1 Add `ENCRYPTION_KEY` to environment variables (generate 32-byte key)
+- [x] 1.5.2 Create `server/lib/encryption.ts` utility
   - Function: `encrypt(plaintext: string): string` - returns base64 encrypted string
   - Function: `decrypt(ciphertext: string): string` - returns original plaintext
   - Use AES-256-GCM algorithm
-- [ ] 1.5.3 Write vitest test for encryption/decryption round-trip
+- [x] 1.5.3 Write vitest test for encryption/decryption round-trip
 
 #### 1.6 Backend: Client VAT Field
 - [ ] 1.6.1 Update `clients.create` procedure to accept `vatNumber` and `taxExempt`

@@ -1,0 +1,9 @@
+{
+  "query": "-- 1.3.1 Add vatNumber column to clients table (VARCHAR 50, nullable)\n-- 1.3.2 Add taxExempt column to clients table (BOOLEAN, default false)\nALTER TABLE `clients`\n  ADD COLUMN IF NOT EXISTS `vatNumber` VARCHAR(50) NULL,\n  ADD COLUMN IF NOT EXISTS `taxExempt` BOOLEAN NOT NULL DEFAULT FALSE;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user REX6DRAh92xmf1o.58be8e717db2 --database coKdAkLfsbebvczbYNFn3V --execute -- 1.3.1 Add vatNumber column to clients table (VARCHAR 50, nullable)\n-- 1.3.2 Add taxExempt column to clients table (BOOLEAN, default false)\nALTER TABLE `clients`\n  ADD COLUMN IF NOT EXISTS `vatNumber` VARCHAR(50) NULL,\n  ADD COLUMN IF NOT EXISTS `taxExempt` BOOLEAN NOT NULL DEFAULT FALSE;",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 1053
+}

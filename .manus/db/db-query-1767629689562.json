@@ -1,0 +1,9 @@
+{
+  "query": "-- 1.4.1 Create invoice_views table\nCREATE TABLE IF NOT EXISTS `invoiceViews` (\n  `id` INT AUTO_INCREMENT PRIMARY KEY,\n  `invoiceId` INT NOT NULL,\n  `viewedAt` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,\n  `ipAddress` VARCHAR(45) NULL,\n  `userAgent` TEXT NULL,\n  `isFirstView` BOOLEAN NOT NULL DEFAULT FALSE,\n  `createdAt` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP\n);\n\n-- Add index for faster lookups by invoiceId\nCREATE INDEX IF NOT EXISTS `idx_invoice_views_invoice_id` ON `invoiceViews` (`invoiceId`);",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user REX6DRAh92xmf1o.58be8e717db2 --database coKdAkLfsbebvczbYNFn3V --execute -- 1.4.1 Create invoice_views table\nCREATE TABLE IF NOT EXISTS `invoiceViews` (\n  `id` INT AUTO_INCREMENT PRIMARY KEY,\n  `invoiceId` INT NOT NULL,\n  `viewedAt` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,\n  `ipAddress` VARCHAR(45) NULL,\n  `userAgent` TEXT NULL,\n  `isFirstView` BOOLEAN NOT NULL DEFAULT FALSE,\n  `createdAt` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP\n);\n\n-- Add index for faster lookups by invoiceId\nCREATE INDEX IF NOT EXISTS `idx_invoice_views_invoice_id` ON `invoiceViews` (`invoiceId`);",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 1073
+}
