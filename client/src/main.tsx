@@ -8,6 +8,17 @@ import App from "./App";
 import { getLoginUrl } from "./const";
 import "./index.css";
 
+// Suppress benign ResizeObserver warnings
+// These occur when components resize faster than the observer can process
+// and don't affect functionality
+const resizeObserverErrHandler = (e: ErrorEvent) => {
+  if (e.message === 'ResizeObserver loop completed with undelivered notifications.') {
+    e.stopImmediatePropagation();
+    return true;
+  }
+};
+window.addEventListener('error', resizeObserverErrHandler);
+
 const queryClient = new QueryClient();
 
 const redirectToLoginIfUnauthorized = (error: unknown) => {

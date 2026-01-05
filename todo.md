@@ -60,3 +60,6 @@
 - [x] Test all edge cases (delete default, field visibility)
 - [x] All 13 tests passing
 - [ ] Save final checkpoint
+
+## Console Warning Cleanup
+- [x] Suppress benign ResizeObserver warnings in browser console
