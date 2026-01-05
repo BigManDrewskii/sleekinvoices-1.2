@@ -1424,14 +1424,16 @@ See TODO_PHASE6A_FRONTEND.md for detailed implementation plan
 
 ### Phase 1: Crypto Foundation & Compliance
 
-#### 1.1 Database Schema: Payment Gateways Table
-- [ ] 1.1.1 Create `payment_gateways` table in `drizzle/schema.ts`
-  - Fields: id, userId, provider (enum: 'stripe_connect', 'coinbase_commerce', 'manual_wallet'), config (text/JSON), isEnabled, createdAt, updatedAt
-- [ ] 1.1.2 Create `user_wallets` table for manual crypto wallets
-  - Fields: id, userId, label, address, network (enum: 'ethereum', 'polygon', 'bitcoin', 'bsc'), createdAt
+#### 1.1 Database Schema: Payment Gateways Table ✅ COMPLETE
+- [x] 1.1.1 Create `payment_gateways` table in `drizzle/schema.ts`
+  - Fields: id, userId, provider (enum: 'stripe_connect', 'coinbase_commerce'), config (text/JSON), isEnabled, displayName, lastTestedAt, createdAt, updatedAt
+  - Added unique index on (userId, provider)
+- [x] 1.1.2 Create `user_wallets` table for manual crypto wallets
+  - Fields: id, userId, label, address, network (enum: 'ethereum', 'polygon', 'bitcoin', 'bsc', 'arbitrum', 'optimism'), sortOrder, createdAt, updatedAt
   - Constraint: Max 3 wallets per user (enforce in application layer)
-- [ ] 1.1.3 Run `pnpm db:push` to apply schema changes
-- [ ] 1.1.4 Write vitest test to verify tables exist and constraints work
+- [x] 1.1.3 Run database migrations (via SQL - tables created successfully)
+- [x] 1.1.4 Write vitest test to verify tables exist and constraints work
+  - Created `server/payment-gateways.test.ts` with 12 passing tests
 
 #### 1.2 Database Schema: High-Decimal Precision
 - [ ] 1.2.1 Update `invoices` table monetary columns to DECIMAL(24,8)

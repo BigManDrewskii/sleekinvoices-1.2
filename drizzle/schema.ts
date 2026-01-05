@@ -489,3 +489,61 @@ export const reminderLogs = mysqlTable("reminderLogs", {
 export type ReminderLog = typeof reminderLogs.$inferSelect;
 export type InsertReminderLog = typeof reminderLogs.$inferInsert;
 
+
+/**
+ * Payment gateways configuration for user-connected payment providers
+ * Supports Stripe Connect, Coinbase Commerce, and manual wallets
+ */
+export const paymentGateways = mysqlTable("paymentGateways", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  
+  // Provider type
+  provider: mysqlEnum("provider", ["stripe_connect", "coinbase_commerce"]).notNull(),
+  
+  // Encrypted configuration (JSON string with provider-specific data)
+  // For stripe_connect: { accountId, accessToken, refreshToken }
+  // For coinbase_commerce: { apiKey }
+  config: text("config").notNull(),
+  
+  // Status
+  isEnabled: boolean("isEnabled").default(true).notNull(),
+  
+  // Metadata
+  displayName: varchar("displayName", { length: 100 }), // User-friendly name
+  lastTestedAt: timestamp("lastTestedAt"), // Last successful connection test
+  
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+}, (table) => ({
+  // One provider per user (can have both Stripe and Coinbase, but not two Stripes)
+  userProviderIdx: uniqueIndex("user_provider_idx").on(table.userId, table.provider),
+}));
+
+export type PaymentGateway = typeof paymentGateways.$inferSelect;
+export type InsertPaymentGateway = typeof paymentGateways.$inferInsert;
+
+/**
+ * User wallet addresses for manual crypto payments
+ * Users can add up to 3 wallets for different networks
+ */
+export const userWallets = mysqlTable("userWallets", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  
+  // Wallet identification
+  label: varchar("label", { length: 100 }).notNull(), // e.g., "My ETH Wallet", "BTC Address"
+  address: varchar("address", { length: 255 }).notNull(), // Wallet address
+  
+  // Network/blockchain
+  network: mysqlEnum("network", ["ethereum", "polygon", "bitcoin", "bsc", "arbitrum", "optimism"]).notNull(),
+  
+  // Display order
+  sortOrder: int("sortOrder").default(0).notNull(),
+  
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type UserWallet = typeof userWallets.$inferSelect;
+export type InsertUserWallet = typeof userWallets.$inferInsert;
