@@ -20,6 +20,7 @@ import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { GlobalSearch } from "@/components/GlobalSearch";
+import { ResponsiveLogo } from "@/components/ResponsiveLogo";
 
 export function Navigation() {
   const [location] = useLocation();
@@ -76,8 +77,14 @@ export function Navigation() {
       <div className="container mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
           {/* Logo */}
-          <Link href="/dashboard" className="flex items-center gap-2">
-            <img src="/SleekInvoices-Wide.svg" alt="SleekInvoices" className="h-6" />
+          <Link href="/dashboard" className="flex items-center">
+            <ResponsiveLogo
+              logoUrl="/SleekInvoices-Wide.svg"
+              monogramUrl="/sleek-monogram.svg"
+              logoWidth={120}
+              monogramWidth={32}
+              showBrand={false}
+            />
           </Link>
 
           {/* Desktop Navigation */}

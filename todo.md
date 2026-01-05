@@ -336,3 +336,19 @@
 - [ ] Keyboard navigation works for all new elements
 - [ ] Screen reader announces new elements correctly
 - [ ] Mobile responsiveness verified
+
+
+## Responsive Logo System
+
+### Mobile-First Logo Optimization
+- [x] Create ResponsiveLogo component that switches between full logo and monogram
+- [x] Add monogram logo upload field in template editor
+- [x] Store monogram URL in template schema
+- [x] Display full logo on desktop (md and up)
+- [x] Display monogram on mobile/tablet (below md)
+- [x] Update Navigation component to use responsive logo
+- [ ] Update TemplatePreview component to use responsive logo
+- [ ] Update InvoicePreviewModal to use responsive logo
+- [ ] Update PDF generation to use appropriate logo based on context
+- [x] Add tests for responsive logo switching (35 tests passing)
+- [x] Test with various logo and monogram sizes
