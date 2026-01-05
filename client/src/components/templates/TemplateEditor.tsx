@@ -326,7 +326,42 @@ export function TemplateEditor({ templateId, onComplete, onCancel }: TemplateEdi
                     <CardTitle>Color Scheme</CardTitle>
                     <CardDescription>Customize your brand colors</CardDescription>
                   </CardHeader>
-                  <CardContent className="space-y-4">
+                  <CardContent className="space-y-6">
+                    {/* Brand Color Presets */}
+                    <div className="space-y-3">
+                      <Label>Quick Presets</Label>
+                      <div className="grid grid-cols-4 gap-2">
+                        {[
+                          { name: 'Ocean', primary: '#0ea5e9', secondary: '#0c4a6e', accent: '#06b6d4' },
+                          { name: 'Forest', primary: '#22c55e', secondary: '#14532d', accent: '#84cc16' },
+                          { name: 'Sunset', primary: '#f97316', secondary: '#7c2d12', accent: '#eab308' },
+                          { name: 'Berry', primary: '#a855f7', secondary: '#581c87', accent: '#ec4899' },
+                          { name: 'Slate', primary: '#64748b', secondary: '#1e293b', accent: '#94a3b8' },
+                          { name: 'Rose', primary: '#f43f5e', secondary: '#881337', accent: '#fb7185' },
+                          { name: 'Indigo', primary: '#6366f1', secondary: '#312e81', accent: '#818cf8' },
+                          { name: 'Teal', primary: '#14b8a6', secondary: '#134e4a', accent: '#2dd4bf' },
+                        ].map((preset) => (
+                          <button
+                            key={preset.name}
+                            type="button"
+                            onClick={() => {
+                              setPrimaryColor(preset.primary);
+                              setSecondaryColor(preset.secondary);
+                              setAccentColor(preset.accent);
+                            }}
+                            className="flex flex-col items-center gap-1 p-2 rounded-lg border border-border hover:border-primary transition-colors"
+                          >
+                            <div className="flex gap-0.5">
+                              <div className="w-4 h-4 rounded-full" style={{ backgroundColor: preset.primary }} />
+                              <div className="w-4 h-4 rounded-full" style={{ backgroundColor: preset.secondary }} />
+                              <div className="w-4 h-4 rounded-full" style={{ backgroundColor: preset.accent }} />
+                            </div>
+                            <span className="text-xs text-muted-foreground">{preset.name}</span>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
                     <div className="grid gap-4 sm:grid-cols-3">
                       <div className="space-y-2">
                         <Label htmlFor="primaryColor">Primary Color</Label>
@@ -392,7 +427,35 @@ export function TemplateEditor({ templateId, onComplete, onCancel }: TemplateEdi
                     <CardTitle>Typography</CardTitle>
                     <CardDescription>Font family and size settings</CardDescription>
                   </CardHeader>
-                  <CardContent className="space-y-4">
+                  <CardContent className="space-y-6">
+                    {/* Font Pairing Suggestions */}
+                    <div className="space-y-3">
+                      <Label>Recommended Pairings</Label>
+                      <div className="grid grid-cols-2 gap-2">
+                        {[
+                          { name: 'Modern Clean', heading: 'Inter', body: 'Inter' },
+                          { name: 'Classic Elegance', heading: 'Georgia', body: 'Arial' },
+                          { name: 'Bold Statement', heading: 'Montserrat', body: 'Open Sans' },
+                          { name: 'Professional', heading: 'Helvetica', body: 'Helvetica' },
+                          { name: 'Friendly', heading: 'Open Sans', body: 'Open Sans' },
+                          { name: 'Traditional', heading: 'Georgia', body: 'Georgia' },
+                        ].map((pairing) => (
+                          <button
+                            key={pairing.name}
+                            type="button"
+                            onClick={() => {
+                              setHeadingFont(pairing.heading);
+                              setBodyFont(pairing.body);
+                            }}
+                            className="flex flex-col items-start gap-1 p-3 rounded-lg border border-border hover:border-primary transition-colors text-left"
+                          >
+                            <span className="text-sm font-medium">{pairing.name}</span>
+                            <span className="text-xs text-muted-foreground">{pairing.heading} + {pairing.body}</span>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
                     <div className="space-y-2">
                       <Label htmlFor="headingFont">Heading Font</Label>
                       <Select value={headingFont} onValueChange={setHeadingFont}>

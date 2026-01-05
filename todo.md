@@ -663,3 +663,24 @@
 - [x] Add floating animation to Sleeky in footer section
 - [x] Hide scrollbar globally
 - [x] Match footer max-width to navbar while keeping Sleeky position
+
+
+## Template Editor Enhancements
+
+### Brand Color Presets
+- [x] Add 8 color preset buttons (Ocean, Forest, Sunset, Berry, Slate, Rose, Indigo, Teal)
+- [x] Each preset shows 3 color swatches (primary, secondary, accent)
+- [x] One-click application of entire color scheme
+- [x] Presets displayed in a grid layout in Colors tab
+
+### Font Pairing Suggestions
+- [x] Add 6 recommended font pairings (Modern Clean, Classic Elegance, Bold Statement, Professional, Friendly, Traditional)
+- [x] Each pairing shows heading + body font combination
+- [x] One-click application of both fonts
+- [x] Pairings displayed in Typography tab
+
+### Live Preview
+- [x] Real-time invoice preview updates as settings change
+- [x] Preview shows actual template styling (colors, fonts, layout)
+- [x] Preview visible alongside editor for immediate feedback
+
