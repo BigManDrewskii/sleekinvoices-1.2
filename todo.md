@@ -408,3 +408,11 @@
 - [x] Test high-DPI displays (2x, 3x pixel ratios) (57 tests passing)
 - [ ] Verify logo rendering in dark mode
 - [ ] Test logo rendering in light mode (if applicable)
+
+
+## Logo Breakpoint Adjustment
+
+- [x] Fix awkward logo display at 860px width
+- [x] Lower breakpoint to 900px for better fit
+- [x] Test logo display across all intermediate widths (640-1280px)
+- [x] Ensure monogram displays at 860px and below

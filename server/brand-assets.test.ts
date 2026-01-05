@@ -133,40 +133,40 @@ describe("Brand Asset System", () => {
   });
 
   describe("Responsive Logo Breakpoints", () => {
-    it("should use monogram for mobile (< 768px)", () => {
-      const mobileBreakpoint = 768;
+    it("should use monogram for mobile (< 900px)", () => {
+      const mobileBreakpoint = 900;
       const screenWidth = 320;
       
       const variant = screenWidth < mobileBreakpoint ? "monogram" : "wide";
       expect(variant).toBe("monogram");
     });
 
-    it("should use monogram for tablet (< 768px)", () => {
-      const tabletBreakpoint = 768;
-      const screenWidth = 640;
+    it("should use monogram for tablet (< 900px)", () => {
+      const tabletBreakpoint = 900;
+      const screenWidth = 860;
       
       const variant = screenWidth < tabletBreakpoint ? "monogram" : "wide";
       expect(variant).toBe("monogram");
     });
 
-    it("should use wide for desktop (>= 768px)", () => {
-      const desktopBreakpoint = 768;
+    it("should use wide for desktop (>= 900px)", () => {
+      const desktopBreakpoint = 900;
       const screenWidth = 1280;
       
       const variant = screenWidth >= desktopBreakpoint ? "wide" : "monogram";
       expect(variant).toBe("wide");
     });
 
-    it("should handle edge case at breakpoint (767px)", () => {
-      const screenWidth = 767;
-      const variant = screenWidth < 768 ? "monogram" : "wide";
+    it("should handle edge case at breakpoint (899px)", () => {
+      const screenWidth = 899;
+      const variant = screenWidth < 900 ? "monogram" : "wide";
       
       expect(variant).toBe("monogram");
     });
 
-    it("should handle edge case at breakpoint (768px)", () => {
-      const screenWidth = 768;
-      const variant = screenWidth < 768 ? "monogram" : "wide";
+    it("should handle edge case at breakpoint (900px)", () => {
+      const screenWidth = 900;
+      const variant = screenWidth < 900 ? "monogram" : "wide";
       
       expect(variant).toBe("wide");
     });

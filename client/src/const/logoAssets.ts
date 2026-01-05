@@ -83,13 +83,13 @@ export const FAVICON_CONFIG = {
  * Define which logo variant to use at different screen sizes
  */
 export const LOGO_BREAKPOINTS = {
-  // Mobile & Tablet: < 768px (below md)
+  // Mobile & Tablet: < 900px (below lg)
   mobile: {
     variant: "monogram",
     width: 40,
     height: 40,
   },
-  // Desktop: >= 768px (md and up)
+  // Desktop: >= 900px (lg and up)
   desktop: {
     variant: "wide",
     width: 180,
@@ -133,10 +133,10 @@ export function getLogoDimensions(variant: keyof typeof LOGO_ASSETS) {
 
 /**
  * Get appropriate logo variant for screen width
- * Two-tier system: monogram for mobile/tablet (< 768px), wide for desktop (>= 768px)
+ * Two-tier system: monogram for mobile/tablet (< 900px), wide for desktop (>= 900px)
  */
 export function getResponsiveLogoVariant(screenWidth: number) {
-  if (screenWidth < 768) {
+  if (screenWidth < 900) {
     return "monogram";
   } else {
     return "wide";

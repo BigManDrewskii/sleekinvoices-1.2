@@ -41,9 +41,9 @@ export function ResponsiveLogoEnhanced({
   }, [responsive]);
 
   // Determine which variant to use based on screen width
-  // Two-tier system: monogram for mobile/tablet (< 768px), wide for desktop (>= 768px)
+  // Two-tier system: monogram for mobile/tablet (< 900px), wide for desktop (>= 900px)
   const getVariantForScreenWidth = (width: number): typeof variant => {
-    if (width < 768) return "monogram"; // Mobile & Tablet
+    if (width < 900) return "monogram"; // Mobile & Tablet
     return "wide"; // Desktop
   };
 
