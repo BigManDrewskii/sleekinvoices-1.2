@@ -1,9 +1,22 @@
 import { useAuth } from "@/_core/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { getLoginUrl } from "@/const";
-import { 
-  FileText, Send, DollarSign, BarChart3, CheckCircle, Clock, Shield,
-  Zap, CreditCard, Bell, Users, Mail, Sparkles, ArrowRight
+import {
+  FileText,
+  Send,
+  DollarSign,
+  BarChart3,
+  CheckCircle,
+  Clock,
+  Shield,
+  Zap,
+  CreditCard,
+  Bell,
+  Users,
+  Mail,
+  Sparkles,
+  ArrowRight,
+  Check,
 } from "lucide-react";
 import { Link } from "wouter";
 import { LandingNavigation } from "@/components/LandingNavigation";
@@ -15,370 +28,413 @@ export default function Landing() {
     <div className="min-h-screen bg-background">
       <LandingNavigation />
 
-      {/* Hero Section */}
-      <section className="container mx-auto px-4 py-12 md:py-16 lg:py-24">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-12 items-center max-w-7xl mx-auto">
-          {/* Left Column - Content */}
-          <div className="space-y-8 text-center lg:text-left">
-            <div className="inline-block px-4 py-2 bg-primary/20 text-primary rounded-full text-sm font-medium">
-              ✨ Professional Invoicing Made Simple
-            </div>
-            
-            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold text-foreground leading-tight">
-              Create Professional Invoices in{" "}
-              <span className="text-primary">Seconds</span>
-            </h1>
-            
-            <p className="text-base sm:text-lg md:text-xl text-muted-foreground max-w-2xl leading-relaxed">
-              The modern invoicing solution for freelancers and small businesses. 
-              Get paid faster with beautiful invoices, built-in Stripe payments, and automated reminders.
-            </p>
-
-            {/* CTAs */}
-            <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start pt-4">
-              <Button size="lg" asChild className="text-lg px-8 py-6">
-                <a href={getLoginUrl()}>
-                  Start Free Trial
-                  <ArrowRight className="ml-2 h-5 w-5" />
-                </a>
-              </Button>
-            </div>
-
-            <p className="text-sm text-muted-foreground">
-              <CheckCircle className="inline h-4 w-4 text-green-500 mr-1" />
-              No credit card required
-              <span className="mx-2">•</span>
-              <CheckCircle className="inline h-4 w-4 text-green-500 mr-1" />
-              3 free invoices/month
-              <span className="mx-2">•</span>
-              <CheckCircle className="inline h-4 w-4 text-green-500 mr-1" />
-              Cancel anytime
-            </p>
+      {/* Hero Section - Clean, minimal, no graphic */}
+      <section className="pt-32 pb-20 md:pt-40 md:pb-32">
+        <div className="container max-w-5xl mx-auto px-4 text-center">
+          {/* Badge */}
+          <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 border border-primary/20 text-primary rounded-full text-sm font-medium mb-8">
+            <Sparkles className="h-4 w-4" />
+            Professional Invoicing Made Simple
           </div>
 
-          {/* Right Column - Visual */}
-          <div className="relative order-first lg:order-last">
-            <div className="relative bg-card rounded-2xl p-8 border border-border">
-              {/* Product screenshot mockup */}
-              <div className="bg-muted rounded-xl shadow-2xl border border-border overflow-hidden">
-                <div className="bg-secondary p-4 border-b border-border flex items-center gap-2">
-                  <div className="flex gap-1.5">
-                    <div className="h-3 w-3 rounded-full bg-red-500/50"></div>
-                    <div className="h-3 w-3 rounded-full bg-yellow-500/50"></div>
-                    <div className="h-3 w-3 rounded-full bg-green-500/50"></div>
-                  </div>
-                  <div className="flex-1 text-center text-xs text-muted-foreground">
-                    SleekInvoices - New Invoice
-                  </div>
-                </div>
-                <div className="p-6 space-y-4 bg-card">
-                  <div className="flex items-center justify-between">
-                    <div className="text-sm font-medium">Invoice #INV-001</div>
-                    <div className="px-3 py-1 bg-primary/20 text-primary text-xs rounded-full">Draft</div>
-                  </div>
-                  <div className="space-y-2">
-                    <div className="h-3 bg-muted rounded w-3/4"></div>
-                    <div className="h-3 bg-muted rounded w-1/2"></div>
-                  </div>
-                  <div className="grid grid-cols-2 gap-4 pt-4">
-                    <div className="space-y-2">
-                      <div className="h-2 bg-muted rounded w-full"></div>
-                      <div className="h-2 bg-muted rounded w-3/4"></div>
-                    </div>
-                    <div className="space-y-2">
-                      <div className="h-2 bg-muted rounded w-full"></div>
-                      <div className="h-2 bg-muted rounded w-2/3"></div>
-                    </div>
-                  </div>
-                  <div className="pt-4 border-t border-border">
-                    <div className="flex justify-between items-center">
-                      <div className="text-sm text-muted-foreground">Total</div>
-                      <div className="text-2xl font-bold text-primary">$1,250.00</div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              {/* Floating elements */}
-              <div className="absolute -top-4 -right-4 bg-green-500 text-white p-3 rounded-lg shadow-lg">
-                <CheckCircle className="h-5 w-5" />
-              </div>
-              <div className="absolute -bottom-4 -left-4 bg-primary text-primary-foreground p-3 rounded-lg shadow-lg">
-                <Zap className="h-5 w-5" />
-              </div>
+          {/* Main headline */}
+          <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-foreground leading-[1.1] tracking-tight mb-6">
+            Get paid faster with
+            <br />
+            <span className="text-primary">beautiful invoices</span>
+          </h1>
+
+          {/* Subheadline */}
+          <p className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto mb-10 leading-relaxed">
+            Create professional invoices in seconds. Built-in Stripe payments,
+            automated reminders, and real-time analytics for freelancers and
+            small businesses.
+          </p>
+
+          {/* CTAs */}
+          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
+            <Button size="lg" asChild className="text-base px-8 h-12 rounded-full">
+              <a href={getLoginUrl()}>
+                Start Free Trial
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </a>
+            </Button>
+            <Button
+              size="lg"
+              variant="outline"
+              asChild
+              className="text-base px-8 h-12 rounded-full bg-transparent"
+            >
+              <a href="#features">See Features</a>
+            </Button>
+          </div>
+
+          {/* Trust indicators */}
+          <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm text-muted-foreground">
+            <span className="flex items-center gap-1.5">
+              <Check className="h-4 w-4 text-green-500" />
+              No credit card required
+            </span>
+            <span className="flex items-center gap-1.5">
+              <Check className="h-4 w-4 text-green-500" />
+              3 free invoices/month
+            </span>
+            <span className="flex items-center gap-1.5">
+              <Check className="h-4 w-4 text-green-500" />
+              Cancel anytime
+            </span>
+          </div>
+        </div>
+      </section>
+
+      {/* Stats Section */}
+      <section className="py-12 border-y border-border/50">
+        <div className="container max-w-5xl mx-auto px-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+            <div>
+              <div className="text-3xl md:text-4xl font-bold text-foreground mb-1">10K+</div>
+              <div className="text-sm text-muted-foreground">Invoices Sent</div>
+            </div>
+            <div>
+              <div className="text-3xl md:text-4xl font-bold text-foreground mb-1">$2M+</div>
+              <div className="text-sm text-muted-foreground">Processed</div>
+            </div>
+            <div>
+              <div className="text-3xl md:text-4xl font-bold text-foreground mb-1">98%</div>
+              <div className="text-sm text-muted-foreground">Satisfaction</div>
+            </div>
+            <div>
+              <div className="text-3xl md:text-4xl font-bold text-foreground mb-1">24h</div>
+              <div className="text-sm text-muted-foreground">Avg. Payment</div>
             </div>
           </div>
         </div>
       </section>
 
       {/* Features Section */}
-      <section id="features" className="container mx-auto px-4 py-16 md:py-24">
-        <div className="text-center mb-16 max-w-3xl mx-auto">
-          <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
-            Everything You Need to Get Paid
-          </h2>
-          <p className="text-xl text-muted-foreground">
-            Professional invoicing without the complexity or cost
-          </p>
-        </div>
-        
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 max-w-7xl mx-auto">
-          <FeatureCard
-            icon={<Zap className="h-8 w-8" />}
-            title="Lightning-Fast Creation"
-            description="Create beautiful invoices in under 30 seconds with smart templates and auto-fill. Add your logo, customize colors, and send instantly."
-            iconColor="text-yellow-500"
-          />
-          <FeatureCard
-            icon={<CreditCard className="h-8 w-8" />}
-            title="Get Paid with Stripe"
-            description="Add secure payment links to every invoice. Customers pay with one click, funds arrive in 1-2 days. No setup required."
-            iconColor="text-blue-500"
-          />
-          <FeatureCard
-            icon={<Bell className="h-8 w-8" />}
-            title="Automated Reminders"
-            description="Never chase payments again. Automatic email reminders keep you top-of-mind without awkward follow-ups."
-            iconColor="text-purple-500"
-          />
-          <FeatureCard
-            icon={<BarChart3 className="h-8 w-8" />}
-            title="Real-Time Analytics"
-            description="Track revenue, outstanding balances, and payment trends at a glance. Know exactly where your business stands."
-            iconColor="text-green-500"
-          />
-          <FeatureCard
-            icon={<Mail className="h-8 w-8" />}
-            title="Professional Emails"
-            description="Send invoices from your custom domain (invoices@yourbusiness.com). Look professional, build trust, get paid faster."
-            iconColor="text-primary"
-          />
-          <FeatureCard
-            icon={<Users className="h-8 w-8" />}
-            title="Client Management"
-            description="Store client details, track payment history, and manage relationships in one organized place."
-            iconColor="text-rose-500"
-          />
-        </div>
-        
-        {/* CTA after features */}
-        <div className="text-center mt-16">
-          <Button size="lg" asChild className="text-lg px-8 py-6">
-            <a href={getLoginUrl()}>
-              Start Creating Invoices Free
-              <ArrowRight className="ml-2 h-5 w-5" />
-            </a>
-          </Button>
+      <section id="features" className="py-20 md:py-28">
+        <div className="container max-w-6xl mx-auto px-4">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-foreground mb-4">
+              Everything you need to get paid
+            </h2>
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+              Professional invoicing without the complexity or cost
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <FeatureCard
+              icon={<Zap className="h-6 w-6" />}
+              title="Lightning-Fast Creation"
+              description="Create beautiful invoices in under 30 seconds with smart templates and auto-fill."
+            />
+            <FeatureCard
+              icon={<CreditCard className="h-6 w-6" />}
+              title="Stripe Payments"
+              description="Add secure payment links. Customers pay with one click, funds arrive in 1-2 days."
+            />
+            <FeatureCard
+              icon={<Bell className="h-6 w-6" />}
+              title="Auto Reminders"
+              description="Never chase payments again. Automatic email reminders keep you top-of-mind."
+            />
+            <FeatureCard
+              icon={<BarChart3 className="h-6 w-6" />}
+              title="Real-Time Analytics"
+              description="Track revenue, outstanding balances, and payment trends at a glance."
+            />
+            <FeatureCard
+              icon={<Mail className="h-6 w-6" />}
+              title="Professional Emails"
+              description="Send invoices from your custom domain. Look professional, build trust."
+            />
+            <FeatureCard
+              icon={<Users className="h-6 w-6" />}
+              title="Client Management"
+              description="Store client details, track payment history, and manage relationships."
+            />
+          </div>
         </div>
       </section>
 
-      {/* How It Works Section */}
-      <section className="container mx-auto px-4 py-16 md:py-24 bg-secondary/20">
-        <div className="text-center mb-16">
-          <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
-            Start Invoicing in 3 Simple Steps
-          </h2>
-        </div>
-        
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 md:gap-8 max-w-5xl mx-auto">
-          <StepCard
-            number="1"
-            title="Sign Up Free"
-            description="Create your account in 30 seconds. No credit card required."
-            icon={<Users className="h-6 w-6" />}
-          />
-          <StepCard
-            number="2"
-            title="Customize Your Brand"
-            description="Add your logo, choose colors, and set up your invoice template."
-            icon={<Sparkles className="h-6 w-6" />}
-          />
-          <StepCard
-            number="3"
-            title="Send & Get Paid"
-            description="Create invoices, send to clients, and receive payments automatically."
-            icon={<Send className="h-6 w-6" />}
-          />
+      {/* How It Works */}
+      <section className="py-20 md:py-28 bg-secondary/30">
+        <div className="container max-w-5xl mx-auto px-4">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-foreground mb-4">
+              Start invoicing in 3 steps
+            </h2>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <StepCard
+              number="01"
+              title="Sign Up Free"
+              description="Create your account in 30 seconds. No credit card required."
+            />
+            <StepCard
+              number="02"
+              title="Customize"
+              description="Add your logo, choose colors, and set up your invoice template."
+            />
+            <StepCard
+              number="03"
+              title="Get Paid"
+              description="Create invoices, send to clients, and receive payments automatically."
+            />
+          </div>
+
+          <div className="text-center mt-12">
+            <Button size="lg" asChild className="text-base px-8 h-12 rounded-full">
+              <a href={getLoginUrl()}>
+                Start Creating Invoices
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </a>
+            </Button>
+          </div>
         </div>
       </section>
 
       {/* Pricing Section */}
-      <section id="pricing" className="container mx-auto px-4 py-16 md:py-24">
-        <div className="text-center mb-16 max-w-3xl mx-auto">
-          <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
-            Simple, Transparent Pricing
-          </h2>
-          <p className="text-xl text-muted-foreground">
-            Start free, upgrade when you're ready. No hidden fees, cancel anytime.
+      <section id="pricing" className="py-20 md:py-28">
+        <div className="container max-w-4xl mx-auto px-4">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-foreground mb-4">
+              Simple, transparent pricing
+            </h2>
+            <p className="text-lg text-muted-foreground">
+              Start free, upgrade when you're ready
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <PricingCard
+              name="Free"
+              price="$0"
+              period="forever"
+              description="Perfect for getting started"
+              features={[
+                "3 invoices per month",
+                "Client management",
+                "PDF generation",
+                "Email sending",
+                "Basic analytics",
+              ]}
+              cta="Start Free"
+              ctaHref={getLoginUrl()}
+            />
+            <PricingCard
+              name="Pro"
+              price="$12"
+              period="per month"
+              description="Unlimited everything"
+              badge="Popular"
+              features={[
+                "Unlimited invoices",
+                "Unlimited clients",
+                "Stripe payment links",
+                "Auto payment reminders",
+                "Advanced analytics",
+                "Custom email domain",
+                "Priority support",
+              ]}
+              cta="Start Free Trial"
+              ctaHref={getLoginUrl()}
+              highlighted
+            />
+          </div>
+
+          <p className="text-center text-sm text-muted-foreground mt-8">
+            All plans include bank-level security and automatic backups
           </p>
         </div>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 max-w-4xl mx-auto">
-          <PricingCard
-            name="Free"
-            price="$0"
-            period="forever"
-            description="Perfect for getting started"
-            features={[
-              "3 invoices per month",
-              "Client management",
-              "PDF generation",
-              "Email sending",
-              "Basic analytics",
-            ]}
-            cta="Start Free"
-            ctaHref={getLoginUrl()}
-          />
-          <PricingCard
-            name="Pro"
-            price="$12"
-            period="per month"
-            description="Unlimited everything"
-            badge="Most Popular"
-            features={[
-              "Unlimited invoices",
-              "Unlimited clients",
-              "Stripe payment links",
-              "Auto payment reminders",
-              "Advanced analytics",
-              "Custom email domain",
-              "Priority support",
-            ]}
-            cta="Start Free Trial"
-            ctaHref={getLoginUrl()}
-            highlighted
-          />
-        </div>
-
-        <p className="text-center text-sm text-muted-foreground mt-8">
-          All plans include bank-level security, automatic backups, and data encryption
-        </p>
       </section>
-      
+
       {/* FAQ Section */}
-      <section id="faq" className="container mx-auto px-4 py-16 md:py-24 bg-secondary/20">
-        <div className="text-center mb-16">
-          <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
-            Frequently Asked Questions
-          </h2>
-        </div>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 max-w-5xl mx-auto">
-          <FAQItem
-            question="How does the free trial work?"
-            answer="Start with 3 free invoices per month. No credit card required. Upgrade to Pro anytime for unlimited invoices and premium features."
-          />
-          <FAQItem
-            question="Can I use my own domain for emails?"
-            answer="Yes! Pro users can send invoices from their custom domain (invoices@yourbusiness.com) for a professional touch."
-          />
-          <FAQItem
-            question="How do I get paid?"
-            answer="Connect your Stripe account in one click. Customers pay directly from the invoice with credit card or bank transfer. Funds arrive in 1-2 days."
-          />
-          <FAQItem
-            question="Can I cancel anytime?"
-            answer="Absolutely. No contracts, no cancellation fees. Your data is always yours to export."
-          />
-          <FAQItem
-            question="Is my data secure?"
-            answer="Yes. We use bank-level encryption, secure cloud storage, and never store payment information on our servers."
-          />
-          <FAQItem
-            question="Do you offer support?"
-            answer="Yes! Email support for all users, with priority support for Pro subscribers."
-          />
-        </div>
+      <section id="faq" className="py-20 md:py-28 bg-secondary/30">
+        <div className="container max-w-4xl mx-auto px-4">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-foreground mb-4">
+              Frequently asked questions
+            </h2>
+          </div>
 
-        <div className="text-center mt-12">
-          <p className="text-muted-foreground mb-4">Still have questions?</p>
-          <Button variant="outline" size="lg">
-            Contact Support
-          </Button>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <FAQItem
+              question="How does the free trial work?"
+              answer="Start with 3 free invoices per month. No credit card required. Upgrade to Pro anytime for unlimited invoices."
+            />
+            <FAQItem
+              question="Can I use my own domain?"
+              answer="Yes! Pro users can send invoices from their custom domain for a professional touch."
+            />
+            <FAQItem
+              question="How do I get paid?"
+              answer="Connect your Stripe account. Customers pay directly from the invoice. Funds arrive in 1-2 days."
+            />
+            <FAQItem
+              question="Can I cancel anytime?"
+              answer="Absolutely. No contracts, no cancellation fees. Your data is always yours to export."
+            />
+            <FAQItem
+              question="Is my data secure?"
+              answer="Yes. We use bank-level encryption and never store payment information on our servers."
+            />
+            <FAQItem
+              question="Do you offer support?"
+              answer="Email support for all users, with priority support for Pro subscribers."
+            />
+          </div>
         </div>
       </section>
 
-      {/* Final CTA Section */}
-      <section className="container mx-auto px-4 py-16 md:py-24">
-        <div className="bg-primary text-primary-foreground rounded-2xl md:rounded-3xl p-8 md:p-12 lg:p-16 text-center relative overflow-hidden">
-          <div className="relative z-10 max-w-3xl mx-auto space-y-6">
-            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4">
-              Ready to Get Paid Faster?
+      {/* Final CTA */}
+      <section className="py-20 md:py-28">
+        <div className="container max-w-4xl mx-auto px-4">
+          <div className="bg-gradient-to-br from-primary/20 via-primary/10 to-transparent border border-primary/20 rounded-3xl p-8 md:p-12 lg:p-16 text-center">
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-foreground mb-4">
+              Ready to get paid faster?
             </h2>
-            <p className="text-lg sm:text-xl mb-8 opacity-90">
-              Start creating professional invoices today
+            <p className="text-lg text-muted-foreground mb-8 max-w-xl mx-auto">
+              Join thousands of freelancers and small businesses creating professional invoices with SleekInvoices.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button size="lg" variant="secondary" asChild className="text-lg px-8 py-6 shadow-xl">
+              <Button size="lg" asChild className="text-base px-8 h-12 rounded-full">
                 <a href={getLoginUrl()}>
                   Start Your Free Trial
-                  <ArrowRight className="ml-2 h-5 w-5" />
+                  <ArrowRight className="ml-2 h-4 w-4" />
                 </a>
               </Button>
             </div>
-            <p className="text-sm opacity-75 pt-4">
-              <CheckCircle className="inline h-4 w-4 mr-1" />
-              No credit card required
-              <span className="mx-2">•</span>
-              <CheckCircle className="inline h-4 w-4 mr-1" />
-              3 free invoices
-              <span className="mx-2">•</span>
-              <CheckCircle className="inline h-4 w-4 mr-1" />
-              Cancel anytime
-            </p>
+            <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm text-muted-foreground mt-6">
+              <span className="flex items-center gap-1.5">
+                <Check className="h-4 w-4 text-green-500" />
+                No credit card required
+              </span>
+              <span className="flex items-center gap-1.5">
+                <Check className="h-4 w-4 text-green-500" />
+                3 free invoices
+              </span>
+              <span className="flex items-center gap-1.5">
+                <Check className="h-4 w-4 text-green-500" />
+                Cancel anytime
+              </span>
+            </div>
           </div>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-border bg-secondary/30 mt-24">
-        <div className="container mx-auto px-4 py-12">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
-            <div className="space-y-4">
-              <div className="flex items-center gap-2">
-                <img src="/SleekInvoices-Wide.svg" alt="SleekInvoices" className="h-6" />
+      <footer className="border-t border-border py-12">
+        <div className="container max-w-6xl mx-auto px-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-8">
+            <div className="col-span-2 md:col-span-1">
+              <div className="flex items-center gap-2.5 mb-4">
+                <img src="/monogram-white.svg" alt="SleekInvoices" className="h-8 w-8" />
+                <span className="font-semibold text-foreground">SleekInvoices</span>
               </div>
               <p className="text-sm text-muted-foreground">
-                Professional invoicing made simple for freelancers and small businesses.
+                Professional invoicing for freelancers and small businesses.
               </p>
             </div>
-            
+
             <div>
-              <h4 className="font-semibold text-foreground mb-4">Product</h4>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><Link href="/landing" className="hover:text-foreground transition-colors">Features</Link></li>
-                <li><Link href="/landing" className="hover:text-foreground transition-colors">Pricing</Link></li>
-                <li><Link href="/landing" className="hover:text-foreground transition-colors">FAQ</Link></li>
+              <h4 className="font-semibold text-foreground mb-4 text-sm">Product</h4>
+              <ul className="space-y-2.5 text-sm text-muted-foreground">
+                <li>
+                  <button
+                    onClick={() =>
+                      document.getElementById("features")?.scrollIntoView({ behavior: "smooth" })
+                    }
+                    className="hover:text-foreground transition-colors"
+                  >
+                    Features
+                  </button>
+                </li>
+                <li>
+                  <button
+                    onClick={() =>
+                      document.getElementById("pricing")?.scrollIntoView({ behavior: "smooth" })
+                    }
+                    className="hover:text-foreground transition-colors"
+                  >
+                    Pricing
+                  </button>
+                </li>
+                <li>
+                  <button
+                    onClick={() =>
+                      document.getElementById("faq")?.scrollIntoView({ behavior: "smooth" })
+                    }
+                    className="hover:text-foreground transition-colors"
+                  >
+                    FAQ
+                  </button>
+                </li>
               </ul>
             </div>
-            
+
             <div>
-              <h4 className="font-semibold text-foreground mb-4">Company</h4>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><Link href="/landing" className="hover:text-foreground transition-colors">About</Link></li>
-                <li><Link href="/landing" className="hover:text-foreground transition-colors">Contact</Link></li>
-                <li><Link href="/landing" className="hover:text-foreground transition-colors">Privacy</Link></li>
-                <li><Link href="/landing" className="hover:text-foreground transition-colors">Terms</Link></li>
+              <h4 className="font-semibold text-foreground mb-4 text-sm">Company</h4>
+              <ul className="space-y-2.5 text-sm text-muted-foreground">
+                <li>
+                  <Link href="/landing" className="hover:text-foreground transition-colors">
+                    About
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/landing" className="hover:text-foreground transition-colors">
+                    Contact
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/landing" className="hover:text-foreground transition-colors">
+                    Privacy
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/landing" className="hover:text-foreground transition-colors">
+                    Terms
+                  </Link>
+                </li>
               </ul>
             </div>
-            
+
             <div>
-              <h4 className="font-semibold text-foreground mb-4">Resources</h4>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><Link href="/landing" className="hover:text-foreground transition-colors">Help Center</Link></li>
-                <li><Link href="/landing" className="hover:text-foreground transition-colors">API Docs</Link></li>
-                <li><Link href="/landing" className="hover:text-foreground transition-colors">Blog</Link></li>
+              <h4 className="font-semibold text-foreground mb-4 text-sm">Resources</h4>
+              <ul className="space-y-2.5 text-sm text-muted-foreground">
+                <li>
+                  <Link href="/landing" className="hover:text-foreground transition-colors">
+                    Help Center
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/landing" className="hover:text-foreground transition-colors">
+                    API Docs
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/landing" className="hover:text-foreground transition-colors">
+                    Blog
+                  </Link>
+                </li>
               </ul>
             </div>
           </div>
-          
+
           <div className="border-t border-border pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
-            <p className="text-sm text-muted-foreground">
-              © 2026 SleekInvoices. All rights reserved.
-            </p>
-            <div className="flex gap-4 text-sm text-muted-foreground">
-              <a href="#" className="hover:text-foreground transition-colors">Twitter</a>
-              <a href="#" className="hover:text-foreground transition-colors">LinkedIn</a>
-              <a href="#" className="hover:text-foreground transition-colors">GitHub</a>
+            <p className="text-sm text-muted-foreground">© 2026 SleekInvoices. All rights reserved.</p>
+            <div className="flex gap-6 text-sm text-muted-foreground">
+              <a href="#" className="hover:text-foreground transition-colors">
+                Twitter
+              </a>
+              <a href="#" className="hover:text-foreground transition-colors">
+                LinkedIn
+              </a>
+              <a href="#" className="hover:text-foreground transition-colors">
+                GitHub
+              </a>
             </div>
           </div>
         </div>
@@ -388,47 +444,40 @@ export default function Landing() {
 }
 
 // Feature Card Component
-function FeatureCard({ 
-  icon, 
-  title, 
-  description, 
-  iconColor 
-}: { 
-  icon: React.ReactNode; 
-  title: string; 
+function FeatureCard({
+  icon,
+  title,
+  description,
+}: {
+  icon: React.ReactNode;
+  title: string;
   description: string;
-  iconColor: string;
 }) {
   return (
-    <div className="group bg-card border border-border rounded-2xl p-8 hover:shadow-xl hover:shadow-primary/10 transition-all duration-300 hover:-translate-y-1">
-      <div className={`inline-flex p-3 rounded-xl bg-secondary ${iconColor} mb-4 group-hover:scale-110 transition-transform duration-300`}>
+    <div className="group p-6 rounded-2xl border border-border bg-card hover:bg-secondary/30 transition-all duration-300">
+      <div className="inline-flex p-3 rounded-xl bg-primary/10 text-primary mb-4">
         {icon}
       </div>
-      <h3 className="text-xl font-semibold text-foreground mb-3">{title}</h3>
-      <p className="text-muted-foreground leading-relaxed">{description}</p>
+      <h3 className="text-lg font-semibold text-foreground mb-2">{title}</h3>
+      <p className="text-muted-foreground text-sm leading-relaxed">{description}</p>
     </div>
   );
 }
 
 // Step Card Component
-function StepCard({ 
-  number, 
-  title, 
-  description, 
-  icon 
-}: { 
-  number: string; 
-  title: string; 
+function StepCard({
+  number,
+  title,
+  description,
+}: {
+  number: string;
+  title: string;
   description: string;
-  icon: React.ReactNode;
 }) {
   return (
-    <div className="relative text-center">
-      <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary text-primary-foreground text-2xl font-bold mb-4">
+    <div className="text-center">
+      <div className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-primary/10 border border-primary/20 text-primary text-xl font-bold mb-4">
         {number}
-      </div>
-      <div className="absolute top-8 left-1/2 -translate-x-1/2 text-primary opacity-20">
-        {icon}
       </div>
       <h3 className="text-xl font-semibold text-foreground mb-2">{title}</h3>
       <p className="text-muted-foreground">{description}</p>
@@ -459,39 +508,45 @@ function PricingCard({
   highlighted?: boolean;
 }) {
   return (
-    <div className={`relative bg-card border rounded-2xl p-6 md:p-8 transition-all duration-300 ${
-      highlighted 
-        ? "ring-2 ring-primary shadow-2xl shadow-primary/20 md:scale-105" 
-        : "border-border hover:shadow-lg"
-    }`}>
+    <div
+      className={`relative rounded-2xl p-6 md:p-8 transition-all duration-300 ${
+        highlighted
+          ? "bg-card border-2 border-primary shadow-xl shadow-primary/10"
+          : "bg-card border border-border"
+      }`}
+    >
       {badge && (
-        <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-4 py-1 bg-primary text-primary-foreground text-sm font-medium rounded-full shadow-lg">
+        <div className="absolute -top-3 left-6 px-3 py-1 bg-primary text-primary-foreground text-xs font-medium rounded-full">
           {badge}
         </div>
       )}
-      
-      <div className="text-center mb-6">
-        <h3 className="text-2xl font-bold text-foreground mb-2">{name}</h3>
+
+      <div className="mb-6">
+        <h3 className="text-xl font-bold text-foreground mb-1">{name}</h3>
         <p className="text-sm text-muted-foreground">{description}</p>
       </div>
-      
-      <div className="text-center mb-6">
-        <span className="text-5xl font-bold text-foreground">{price}</span>
-        <span className="text-muted-foreground ml-2">/{period}</span>
+
+      <div className="mb-6">
+        <span className="text-4xl font-bold text-foreground">{price}</span>
+        <span className="text-muted-foreground ml-1">/{period}</span>
       </div>
-      
+
       <ul className="space-y-3 mb-8">
         {features.map((feature, index) => (
           <li key={index} className="flex items-start gap-3">
-            <CheckCircle className={`h-5 w-5 flex-shrink-0 mt-0.5 ${highlighted ? 'text-primary' : 'text-green-500'}`} />
-            <span className="text-foreground">{feature}</span>
+            <Check
+              className={`h-5 w-5 flex-shrink-0 mt-0.5 ${
+                highlighted ? "text-primary" : "text-green-500"
+              }`}
+            />
+            <span className="text-sm text-foreground">{feature}</span>
           </li>
         ))}
       </ul>
-      
-      <Button 
-        asChild 
-        className="w-full" 
+
+      <Button
+        asChild
+        className={`w-full rounded-full ${highlighted ? "" : ""}`}
         size="lg"
         variant={highlighted ? "default" : "outline"}
       >
@@ -504,7 +559,7 @@ function PricingCard({
 // FAQ Item Component
 function FAQItem({ question, answer }: { question: string; answer: string }) {
   return (
-    <div className="bg-card border border-border rounded-xl p-6 hover:shadow-md transition-shadow">
+    <div className="p-5 rounded-xl border border-border bg-card">
       <h4 className="font-semibold text-foreground mb-2">{question}</h4>
       <p className="text-muted-foreground text-sm leading-relaxed">{answer}</p>
     </div>
