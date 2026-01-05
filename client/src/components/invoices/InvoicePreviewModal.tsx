@@ -7,7 +7,10 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { formatCurrency, formatDate } from "@/lib/utils";
-import { Eye, X } from "lucide-react";
+import { Eye, X, Palette } from "lucide-react";
+import { trpc } from "@/lib/trpc";
+import { TemplateSelector } from "./TemplateSelector";
+import { useState } from "react";
 
 interface LineItem {
   description: string;
@@ -32,8 +35,16 @@ interface InvoicePreviewModalProps {
   paymentTerms?: string;
   companyName?: string;
   companyAddress?: string;
+  templateId?: number | null;
+  onTemplateChange?: (templateId: number | null) => void;
 }
 
+/**
+ * Invoice Preview Modal with Template Support
+ * 
+ * Shows a full preview of the invoice with the selected template applied.
+ * Users can switch templates in the preview to see how different styles look.
+ */
 export function InvoicePreviewModal({
   open,
   onClose,
@@ -51,34 +62,78 @@ export function InvoicePreviewModal({
   paymentTerms,
   companyName,
   companyAddress,
+  templateId,
+  onTemplateChange,
 }: InvoicePreviewModalProps) {
+  const [previewTemplateId, setPreviewTemplateId] = useState<number | null>(templateId || null);
+  
+  // Fetch templates to get the selected template's styling
+  const { data: templates } = trpc.templates.list.useQuery();
+  
+  // Get the template to use for preview (either selected or default)
+  const template = previewTemplateId 
+    ? templates?.find(t => t.id === previewTemplateId)
+    : templates?.find(t => t.isDefault);
+
+  // Apply template colors and fonts
+  const primaryColor = template?.primaryColor || "#5f6fff";
+  const secondaryColor = template?.secondaryColor || "#4f46e5";
+  const headingFont = template?.headingFont || "Inter";
+  const bodyFont = template?.bodyFont || "Inter";
+
+  const handleTemplateChange = (newTemplateId: number | null) => {
+    setPreviewTemplateId(newTemplateId);
+    onTemplateChange?.(newTemplateId);
+  };
+
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Eye className="h-5 w-5" />
             Invoice Preview
           </DialogTitle>
           <DialogDescription>
-            Review your invoice before saving
+            Review your invoice before saving. You can switch templates to see different styles.
           </DialogDescription>
         </DialogHeader>
 
-        {/* Invoice Preview */}
-        <div className="bg-white dark:bg-gray-900 p-8 rounded-lg border">
+        {/* Template Selector */}
+        <div className="mb-4">
+          <TemplateSelector
+            value={previewTemplateId}
+            onChange={handleTemplateChange}
+          />
+        </div>
+
+        {/* Invoice Preview with Template Styling */}
+        <div 
+          className="bg-white p-8 rounded-lg border shadow-sm"
+          style={{
+            fontFamily: bodyFont,
+          }}
+        >
           {/* Header */}
-          <div className="flex justify-between items-start mb-8">
+          <div className="flex justify-between items-start mb-8 pb-4 border-b-2" style={{ borderColor: primaryColor }}>
             <div>
-              <h1 className="text-3xl font-bold text-gray-900 dark:text-white">INVOICE</h1>
-              <p className="text-lg text-gray-600 dark:text-gray-400 mt-1">{invoiceNumber}</p>
+              <h1 
+                className="text-4xl font-bold mb-1"
+                style={{ 
+                  color: primaryColor,
+                  fontFamily: headingFont,
+                }}
+              >
+                INVOICE
+              </h1>
+              <p className="text-lg text-gray-600">{invoiceNumber}</p>
             </div>
             <div className="text-right">
               {companyName && (
-                <p className="font-semibold text-gray-900 dark:text-white">{companyName}</p>
+                <p className="font-semibold text-gray-900 text-lg">{companyName}</p>
               )}
               {companyAddress && (
-                <p className="text-sm text-gray-600 dark:text-gray-400 whitespace-pre-line">{companyAddress}</p>
+                <p className="text-sm text-gray-600 whitespace-pre-line mt-1">{companyAddress}</p>
               )}
             </div>
           </div>
@@ -86,20 +141,25 @@ export function InvoicePreviewModal({
           {/* Bill To & Dates */}
           <div className="grid grid-cols-2 gap-8 mb-8">
             <div>
-              <p className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase mb-2">Bill To</p>
-              <p className="font-semibold text-gray-900 dark:text-white">{clientName}</p>
+              <p 
+                className="text-sm font-bold uppercase mb-2"
+                style={{ color: secondaryColor }}
+              >
+                Bill To
+              </p>
+              <p className="font-semibold text-gray-900 text-lg">{clientName}</p>
               {clientEmail && (
-                <p className="text-sm text-gray-600 dark:text-gray-400">{clientEmail}</p>
+                <p className="text-sm text-gray-600 mt-1">{clientEmail}</p>
               )}
             </div>
             <div className="text-right">
-              <div className="mb-2">
-                <span className="text-sm font-semibold text-gray-500 dark:text-gray-400">Issue Date: </span>
-                <span className="text-gray-900 dark:text-white">{formatDate(issueDate)}</span>
+              <div className="mb-3">
+                <span className="text-sm font-semibold text-gray-500">Issue Date: </span>
+                <span className="text-gray-900 font-medium">{formatDate(issueDate)}</span>
               </div>
               <div>
-                <span className="text-sm font-semibold text-gray-500 dark:text-gray-400">Due Date: </span>
-                <span className="text-gray-900 dark:text-white">{formatDate(dueDate)}</span>
+                <span className="text-sm font-semibold text-gray-500">Due Date: </span>
+                <span className="text-gray-900 font-medium">{formatDate(dueDate)}</span>
               </div>
             </div>
           </div>
@@ -107,20 +167,40 @@ export function InvoicePreviewModal({
           {/* Line Items */}
           <table className="w-full mb-8">
             <thead>
-              <tr className="border-b-2 border-gray-300 dark:border-gray-700">
-                <th className="text-left py-3 text-sm font-semibold text-gray-700 dark:text-gray-300">Description</th>
-                <th className="text-right py-3 text-sm font-semibold text-gray-700 dark:text-gray-300">Qty</th>
-                <th className="text-right py-3 text-sm font-semibold text-gray-700 dark:text-gray-300">Rate</th>
-                <th className="text-right py-3 text-sm font-semibold text-gray-700 dark:text-gray-300">Amount</th>
+              <tr style={{ backgroundColor: `${primaryColor}15` }}>
+                <th 
+                  className="text-left py-3 px-4 text-sm font-bold uppercase"
+                  style={{ color: primaryColor }}
+                >
+                  Description
+                </th>
+                <th 
+                  className="text-right py-3 px-4 text-sm font-bold uppercase"
+                  style={{ color: primaryColor }}
+                >
+                  Qty
+                </th>
+                <th 
+                  className="text-right py-3 px-4 text-sm font-bold uppercase"
+                  style={{ color: primaryColor }}
+                >
+                  Rate
+                </th>
+                <th 
+                  className="text-right py-3 px-4 text-sm font-bold uppercase"
+                  style={{ color: primaryColor }}
+                >
+                  Amount
+                </th>
               </tr>
             </thead>
             <tbody>
               {lineItems.map((item, index) => (
-                <tr key={index} className="border-b border-gray-200 dark:border-gray-800">
-                  <td className="py-3 text-gray-900 dark:text-white">{item.description}</td>
-                  <td className="py-3 text-right text-gray-900 dark:text-white">{item.quantity}</td>
-                  <td className="py-3 text-right text-gray-900 dark:text-white">{formatCurrency(item.rate)}</td>
-                  <td className="py-3 text-right text-gray-900 dark:text-white">{formatCurrency(item.quantity * item.rate)}</td>
+                <tr key={index} className="border-b border-gray-200">
+                  <td className="py-3 px-4 text-gray-900">{item.description}</td>
+                  <td className="py-3 px-4 text-right text-gray-900">{item.quantity}</td>
+                  <td className="py-3 px-4 text-right text-gray-900">{formatCurrency(item.rate)}</td>
+                  <td className="py-3 px-4 text-right text-gray-900 font-medium">{formatCurrency(item.quantity * item.rate)}</td>
                 </tr>
               ))}
             </tbody>
@@ -128,24 +208,30 @@ export function InvoicePreviewModal({
 
           {/* Totals */}
           <div className="flex justify-end mb-8">
-            <div className="w-64 space-y-2">
-              <div className="flex justify-between text-gray-700 dark:text-gray-300">
-                <span>Subtotal:</span>
-                <span>{formatCurrency(subtotal)}</span>
+            <div className="w-72 space-y-2">
+              <div className="flex justify-between text-gray-700 py-2">
+                <span className="font-medium">Subtotal:</span>
+                <span className="font-semibold">{formatCurrency(subtotal)}</span>
               </div>
               {discountAmount > 0 && (
-                <div className="flex justify-between text-gray-700 dark:text-gray-300">
-                  <span>Discount:</span>
-                  <span>-{formatCurrency(discountAmount)}</span>
+                <div className="flex justify-between text-gray-700 py-2">
+                  <span className="font-medium">Discount:</span>
+                  <span className="font-semibold text-green-600">-{formatCurrency(discountAmount)}</span>
                 </div>
               )}
               {taxAmount > 0 && (
-                <div className="flex justify-between text-gray-700 dark:text-gray-300">
-                  <span>Tax:</span>
-                  <span>{formatCurrency(taxAmount)}</span>
+                <div className="flex justify-between text-gray-700 py-2">
+                  <span className="font-medium">Tax:</span>
+                  <span className="font-semibold">{formatCurrency(taxAmount)}</span>
                 </div>
               )}
-              <div className="flex justify-between text-lg font-bold text-gray-900 dark:text-white border-t-2 border-gray-300 dark:border-gray-700 pt-2">
+              <div 
+                className="flex justify-between text-xl font-bold pt-3 mt-2 border-t-2"
+                style={{ 
+                  color: primaryColor,
+                  borderColor: primaryColor,
+                }}
+              >
                 <span>Total:</span>
                 <span>{formatCurrency(total)}</span>
               </div>
@@ -154,21 +240,39 @@ export function InvoicePreviewModal({
 
           {/* Notes & Payment Terms */}
           {(notes || paymentTerms) && (
-            <div className="space-y-4">
+            <div className="space-y-4 pt-6 border-t border-gray-200">
               {notes && (
                 <div>
-                  <p className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase mb-1">Notes</p>
-                  <p className="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-line">{notes}</p>
+                  <p 
+                    className="text-sm font-bold uppercase mb-2"
+                    style={{ color: secondaryColor }}
+                  >
+                    Notes
+                  </p>
+                  <p className="text-sm text-gray-700 whitespace-pre-line">{notes}</p>
                 </div>
               )}
               {paymentTerms && (
                 <div>
-                  <p className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase mb-1">Payment Terms</p>
-                  <p className="text-sm text-gray-700 dark:text-gray-300">{paymentTerms}</p>
+                  <p 
+                    className="text-sm font-bold uppercase mb-2"
+                    style={{ color: secondaryColor }}
+                  >
+                    Payment Terms
+                  </p>
+                  <p className="text-sm text-gray-700">{paymentTerms}</p>
                 </div>
               )}
             </div>
           )}
+
+          {/* Template Attribution */}
+          <div className="mt-8 pt-4 border-t border-gray-200 text-center">
+            <p className="text-xs text-gray-400 flex items-center justify-center gap-1">
+              <Palette className="h-3 w-3" />
+              Using {template?.name || "Default"} template
+            </p>
+          </div>
         </div>
 
         {/* Actions */}

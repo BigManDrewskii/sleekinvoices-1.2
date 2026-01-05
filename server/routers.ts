@@ -146,6 +146,7 @@ export const appRouter = router({
         notes: z.string().optional(),
         paymentTerms: z.string().optional(),
         expenseIds: z.array(z.number()).optional(),
+        templateId: z.number().optional(), // Template to use for this invoice
       }))
       .mutation(async ({ ctx, input }) => {
         // ============================================================================
@@ -201,6 +202,7 @@ export const appRouter = router({
           dueDate: input.dueDate,
           notes: input.notes,
           paymentTerms: input.paymentTerms,
+          templateId: input.templateId, // Store selected template
         });
         
         // Create line items
@@ -250,6 +252,7 @@ export const appRouter = router({
         discountValue: z.number().optional(),
         notes: z.string().optional(),
         paymentTerms: z.string().optional(),
+        templateId: z.number().optional(), // Template to use for this invoice
       }))
       .mutation(async ({ ctx, input }) => {
         const { id, lineItems, ...updateData } = input;

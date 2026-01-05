@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { ClientSelector } from "@/components/invoices/ClientSelector";
+import { TemplateSelector } from "@/components/invoices/TemplateSelector";
 import { LineItemRow, LineItem } from "@/components/invoices/LineItemRow";
 import { BillableExpenseDialog } from "@/components/invoices/BillableExpenseDialog";
 import { InvoiceFormCalculations } from "@/components/invoices/InvoiceFormCalculations";
@@ -40,6 +41,7 @@ export default function CreateInvoice() {
   const [discountValue, setDiscountValue] = useState<number>(0);
   const [notes, setNotes] = useState<string>('');
   const [paymentTerms, setPaymentTerms] = useState<string>('Net 30');
+  const [templateId, setTemplateId] = useState<number | null>(null);
 
   // Validation errors
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -182,6 +184,7 @@ export default function CreateInvoice() {
       notes,
       paymentTerms,
       expenseIds: linkedExpenseIds.length > 0 ? linkedExpenseIds : undefined,
+      templateId: templateId || undefined,
     });
   };
 
@@ -208,6 +211,7 @@ export default function CreateInvoice() {
       notes,
       paymentTerms,
       expenseIds: linkedExpenseIds.length > 0 ? linkedExpenseIds : undefined,
+      templateId: templateId || undefined,
     });
   };
 
@@ -248,6 +252,11 @@ export default function CreateInvoice() {
                   value={clientId}
                   onChange={setClientId}
                   error={errors.clientId}
+                />
+
+                <TemplateSelector
+                  value={templateId}
+                  onChange={setTemplateId}
                 />
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -495,6 +504,8 @@ export default function CreateInvoice() {
           paymentTerms={paymentTerms}
           companyName={user?.companyName || undefined}
           companyAddress={user?.companyAddress || undefined}
+          templateId={templateId}
+          onTemplateChange={setTemplateId}
         />
       )}
     </div>

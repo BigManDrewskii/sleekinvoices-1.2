@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { ClientSelector } from "@/components/invoices/ClientSelector";
+import { TemplateSelector } from "@/components/invoices/TemplateSelector";
 import { LineItemRow, LineItem } from "@/components/invoices/LineItemRow";
 import { InvoiceFormCalculations } from "@/components/invoices/InvoiceFormCalculations";
 import { getLoginUrl } from "@/const";
@@ -34,6 +35,7 @@ export default function EditInvoice() {
   const [paymentTerms, setPaymentTerms] = useState<string>('');
   const [invoiceNumber, setInvoiceNumber] = useState<string>('');
   const [status, setStatus] = useState<string>('draft');
+  const [templateId, setTemplateId] = useState<number | null>(null);
 
   // Validation errors
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -58,6 +60,7 @@ export default function EditInvoice() {
       setPaymentTerms(invoice.paymentTerms || '');
       setInvoiceNumber(invoice.invoiceNumber);
       setStatus(invoice.status);
+      setTemplateId(invoice.templateId || null);
       
       // Convert fetched line items to form format
       setLineItems(
@@ -197,6 +200,7 @@ export default function EditInvoice() {
       discountValue,
       notes,
       paymentTerms,
+      templateId: templateId || undefined,
     });
   };
 
@@ -255,6 +259,11 @@ export default function EditInvoice() {
                   value={clientId}
                   onChange={setClientId}
                   error={errors.clientId}
+                />
+
+                <TemplateSelector
+                  value={templateId}
+                  onChange={setTemplateId}
                 />
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
