@@ -72,7 +72,7 @@ const CustomTooltip = ({ active, payload, label }: any) => {
   return null;
 };
 
-export default function Analytics() {
+export default function AnalyticsRedesigned() {
   const { user, loading, isAuthenticated } = useAuth();
   const [timeRange, setTimeRange] = useState<"7d" | "30d" | "90d" | "1y">("30d");
   const [isRefreshing, setIsRefreshing] = useState(false);
