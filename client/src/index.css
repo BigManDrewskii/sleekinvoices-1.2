@@ -364,24 +364,28 @@ body {
   box-shadow: 0 12px 24px -6px rgba(0, 0, 0, 0.15);
 }
 
-/* Better scrollbar styling */
+/* Hide scrollbar globally */
 ::-webkit-scrollbar {
-  width: 10px;
-  height: 10px;
+  display: none;
 }
 
-::-webkit-scrollbar-track {
-  background: hsl(var(--muted));
-  border-radius: var(--radius);
+html {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
 }
 
-::-webkit-scrollbar-thumb {
-  background: hsl(var(--muted-foreground) / 0.3);
-  border-radius: var(--radius);
+/* Sleeky floating animation */
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
 }
 
-::-webkit-scrollbar-thumb:hover {
-  background: hsl(var(--muted-foreground) / 0.5);
+.sleeky-float {
+  animation: float 3s ease-in-out infinite;
 }
 
 /* Typography enhancements */

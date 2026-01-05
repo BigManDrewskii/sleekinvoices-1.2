@@ -656,3 +656,10 @@
 - [x] Copy Sleeky mascot SVG and PNG to public folder
 - [x] Add Sleeky image to hero section above headline
 - [x] Responsive sizing (h-32 sm:h-40 md:h-48)
+
+
+## Landing Page Polish
+- [x] Add floating animation to Sleeky in hero section
+- [x] Add floating animation to Sleeky in footer section
+- [x] Hide scrollbar globally
+- [x] Match footer max-width to navbar while keeping Sleeky position

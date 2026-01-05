@@ -36,7 +36,7 @@ export default function Landing() {
             <img
               src="/sleeky.svg"
               alt="Sleeky - SleekInvoices mascot"
-              className="h-48 sm:h-56 md:h-64 lg:h-72 mx-auto"
+              className="h-48 sm:h-56 md:h-64 lg:h-72 mx-auto sleeky-float"
             />
           </div>
 
@@ -307,17 +307,17 @@ export default function Landing() {
       {/* Footer */}
       <footer className="relative mt-16">
         {/* Sleeky Mascot - Large, floating above footer */}
-        <div className="container max-w-6xl mx-auto px-4">
+        <div className="container max-w-5xl mx-auto px-4">
           <img 
             src="/sleeky-relaxed.png" 
             alt="Sleeky relaxing with paid invoices" 
-            className="w-48 md:w-64 lg:w-72 h-auto mb-[-2rem]"
+            className="w-48 md:w-64 lg:w-72 h-auto mb-[-2rem] sleeky-float"
           />
         </div>
 
         {/* Footer Content - Rounded top border */}
         <div className="border border-border rounded-t-2xl bg-card/30">
-          <div className="container max-w-6xl mx-auto px-4 py-10">
+          <div className="container max-w-5xl mx-auto px-4 py-10">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-8 lg:gap-16 mb-8">
               <div className="col-span-2 md:col-span-1">
                 <div className="flex items-center gap-2.5 mb-4">
