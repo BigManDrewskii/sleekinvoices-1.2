@@ -23,7 +23,7 @@ interface Client {
   phone: string | null;
   address: string | null;
   vatNumber?: string | null;
-  taxExempt?: boolean;
+  taxExempt?: boolean | null;
 }
 
 interface ClientDialogProps {

@@ -71,7 +71,11 @@ export function percentage(value: string | number | Decimal, pct: string | numbe
  * Sum an array of values
  */
 export function sum(values: (string | number | Decimal)[]): Decimal {
-  return values.reduce((acc, val) => add(acc, val), new Decimal(0));
+  let result = new Decimal(0);
+  for (const val of values) {
+    result = add(result, val);
+  }
+  return result;
 }
 
 /**

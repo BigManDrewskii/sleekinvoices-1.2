@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/shared/StatusBadge";
 import { formatCurrency, formatDate } from "@/lib/utils";
-import { ExternalLink, Loader2 } from "lucide-react";
+import { ExternalLink, Loader2, Bitcoin } from "lucide-react";
 
 /**
  * Public client portal - no authentication required
@@ -125,6 +125,17 @@ export default function ClientPortal() {
                             onClick={() => window.open(invoice.stripePaymentLinkUrl, "_blank")}
                           >
                             Pay Now
+                          </Button>
+                        )}
+                        {invoice.cryptoPaymentUrl && invoice.status !== "paid" && (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => window.open(invoice.cryptoPaymentUrl, "_blank")}
+                            className="text-orange-600 hover:text-orange-700"
+                          >
+                            <Bitcoin className="h-4 w-4 mr-1" />
+                            Pay with Crypto
                           </Button>
                         )}
                         <Button

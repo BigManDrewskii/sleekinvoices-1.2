@@ -108,6 +108,8 @@ export const invoices = mysqlTable("invoices", {
   // Crypto payment fields
   cryptoAmount: decimal("cryptoAmount", { precision: 24, scale: 18 }), // Wei-level precision
   cryptoCurrency: varchar("cryptoCurrency", { length: 10 }), // BTC, ETH, USDC, etc.
+  cryptoPaymentId: varchar("cryptoPaymentId", { length: 100 }), // NOWPayments payment ID
+  cryptoPaymentUrl: text("cryptoPaymentUrl"), // NOWPayments invoice URL
   
   // Stripe payment integration
   stripePaymentLinkId: varchar("stripePaymentLinkId", { length: 255 }),

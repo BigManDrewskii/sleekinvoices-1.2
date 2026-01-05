@@ -7,6 +7,7 @@ import * as db from "./db";
 import { createPaymentLink, createStripeCustomer, createSubscriptionCheckout, createCustomerPortalSession } from "./stripe";
 import { generateInvoicePDF } from "./pdf";
 import { sendInvoiceEmail, sendPaymentReminderEmail } from "./email";
+import * as nowpayments from "./lib/nowpayments";
 import { storagePut } from "./storage";
 import { nanoid } from "nanoid";
 
@@ -1492,6 +1493,140 @@ export const appRouter = router({
           : `Subscription status: ${syncResult.status}`,
       };
     }),
+  }),
+
+  // NOWPayments Crypto Payment Gateway
+  crypto: router({
+    // Get API status
+    getStatus: publicProcedure.query(async () => {
+      return await nowpayments.getApiStatus();
+    }),
+
+    // Get available cryptocurrencies
+    getCurrencies: publicProcedure.query(async () => {
+      const currencies = await nowpayments.getAvailableCurrencies();
+      const popular = nowpayments.getPopularCurrencies();
+      return {
+        all: currencies,
+        popular: popular.filter(c => currencies.includes(c)),
+      };
+    }),
+
+    // Get estimated crypto amount for a given fiat amount
+    getEstimate: publicProcedure
+      .input(z.object({
+        amount: z.number().positive(),
+        fiatCurrency: z.string().default('usd'),
+        cryptoCurrency: z.string(),
+      }))
+      .query(async ({ input }) => {
+        const estimate = await nowpayments.getEstimatedPrice(
+          input.amount,
+          input.fiatCurrency,
+          input.cryptoCurrency
+        );
+        return {
+          fiatAmount: input.amount,
+          fiatCurrency: input.fiatCurrency,
+          cryptoAmount: estimate,
+          cryptoCurrency: input.cryptoCurrency,
+        };
+      }),
+
+    // Get minimum payment amount for a currency
+    getMinAmount: publicProcedure
+      .input(z.object({
+        fiatCurrency: z.string().default('usd'),
+        cryptoCurrency: z.string(),
+      }))
+      .query(async ({ input }) => {
+        const minAmount = await nowpayments.getMinimumPaymentAmount(
+          input.fiatCurrency,
+          input.cryptoCurrency
+        );
+        return { minAmount };
+      }),
+
+    // Create a crypto payment for an invoice
+    createPayment: protectedProcedure
+      .input(z.object({
+        invoiceId: z.number(),
+        cryptoCurrency: z.string(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        // Get the invoice
+        const invoice = await db.getInvoiceById(input.invoiceId, ctx.user.id);
+        if (!invoice) {
+          throw new Error('Invoice not found');
+        }
+
+        // Calculate remaining amount to pay
+        const total = parseFloat(invoice.total);
+        const paid = parseFloat(invoice.amountPaid || '0');
+        const remaining = total - paid;
+
+        if (remaining <= 0) {
+          throw new Error('Invoice is already fully paid');
+        }
+
+        // Get the base URL for callbacks
+        const baseUrl = process.env.VITE_APP_URL || `https://${process.env.VITE_APP_ID}.manus.space`;
+
+        // Create NOWPayments invoice
+        const payment = await nowpayments.createInvoice({
+          priceAmount: remaining,
+          priceCurrency: invoice.currency?.toLowerCase() || 'usd',
+          payCurrency: input.cryptoCurrency.toLowerCase(),
+          orderId: `INV-${invoice.id}-${Date.now()}`,
+          orderDescription: `Payment for Invoice ${invoice.invoiceNumber}`,
+          ipnCallbackUrl: `${baseUrl}/api/webhooks/nowpayments`,
+          successUrl: `${baseUrl}/invoices/${invoice.id}?payment=success`,
+          cancelUrl: `${baseUrl}/invoices/${invoice.id}?payment=cancelled`,
+          isFixedRate: true,
+        });
+
+        // Store the payment reference in the database
+        await db.updateInvoice(invoice.id, ctx.user.id, {
+          cryptoPaymentId: payment.id,
+          cryptoCurrency: input.cryptoCurrency.toUpperCase(),
+          cryptoPaymentUrl: payment.invoice_url,
+        });
+
+        return {
+          paymentId: payment.id,
+          invoiceUrl: payment.invoice_url,
+          cryptoCurrency: input.cryptoCurrency,
+          priceAmount: remaining,
+          priceCurrency: invoice.currency || 'USD',
+        };
+      }),
+
+    // Check payment status
+    getPaymentStatus: protectedProcedure
+      .input(z.object({
+        paymentId: z.string(),
+      }))
+      .query(async ({ input }) => {
+        const status = await nowpayments.getPaymentStatus(input.paymentId);
+        return {
+          paymentId: status.payment_id,
+          status: status.payment_status,
+          payAddress: status.pay_address,
+          payAmount: status.pay_amount,
+          actuallyPaid: status.actually_paid,
+          payCurrency: status.pay_currency,
+          isComplete: nowpayments.isPaymentComplete(status.payment_status),
+          isPending: nowpayments.isPaymentPending(status.payment_status),
+          isFailed: nowpayments.isPaymentFailed(status.payment_status),
+        };
+      }),
+
+    // Format currency name for display
+    formatCurrency: publicProcedure
+      .input(z.object({ currency: z.string() }))
+      .query(({ input }) => {
+        return { name: nowpayments.formatCurrencyName(input.currency) };
+      }),
   }),
 });
 

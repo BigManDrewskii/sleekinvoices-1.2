@@ -1,0 +1,9 @@
+{
+  "query": "ALTER TABLE invoices \nADD COLUMN cryptoPaymentId VARCHAR(100) NULL,\nADD COLUMN cryptoPaymentUrl TEXT NULL;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user REX6DRAh92xmf1o.58be8e717db2 --database coKdAkLfsbebvczbYNFn3V --execute ALTER TABLE invoices \nADD COLUMN cryptoPaymentId VARCHAR(100) NULL,\nADD COLUMN cryptoPaymentUrl TEXT NULL;",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 1122
+}

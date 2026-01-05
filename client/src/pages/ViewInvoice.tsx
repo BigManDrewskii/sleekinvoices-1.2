@@ -24,6 +24,7 @@ import {
   CheckCircle,
   ArrowLeft,
   Eye,
+  Bitcoin,
 } from "lucide-react";
 import { useState } from "react";
 import {
@@ -47,6 +48,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Link, useLocation, useParams } from "wouter";
 import { toast } from "sonner";
 import { Navigation } from "@/components/Navigation";
+import { CryptoPaymentDialog } from "@/components/payments/CryptoPaymentDialog";
 
 export default function ViewInvoice() {
   const { user, loading, isAuthenticated } = useAuth();
@@ -55,6 +57,7 @@ export default function ViewInvoice() {
   const invoiceId = parseInt(params.id || "0");
 
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [cryptoDialogOpen, setCryptoDialogOpen] = useState(false);
 
   const { data, isLoading, error } = trpc.invoices.get.useQuery(
     { id: invoiceId },
@@ -251,6 +254,17 @@ export default function ViewInvoice() {
               >
                 <LinkIcon className="h-4 w-4 mr-2" />
                 Create Payment Link
+              </Button>
+            )}
+            {(invoice.status === "sent" || invoice.status === "overdue" || invoice.status === "viewed") && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setCryptoDialogOpen(true)}
+                className="text-orange-600 hover:text-orange-700 hover:bg-orange-50"
+              >
+                <Bitcoin className="h-4 w-4 mr-2" />
+                Pay with Crypto
               </Button>
             )}
             {(invoice.status === "sent" || invoice.status === "overdue") && (
@@ -490,6 +504,16 @@ export default function ViewInvoice() {
         description={`Are you sure you want to delete invoice ${invoice.invoiceNumber}? This action cannot be undone.`}
         isLoading={deleteInvoice.isPending}
        />
+
+      {/* Crypto Payment Dialog */}
+      <CryptoPaymentDialog
+        open={cryptoDialogOpen}
+        onOpenChange={setCryptoDialogOpen}
+        invoiceId={invoiceId}
+        amount={parseFloat(invoice?.total || '0') - parseFloat(invoice?.amountPaid || '0')}
+        currency={invoice?.currency || 'USD'}
+        onPaymentCreated={() => utils.invoices.get.invalidate({ id: invoiceId })}
+      />
     </div>
   );
 }
@@ -668,6 +692,7 @@ function PaymentHistoryCard({ invoiceId, invoiceTotal }: { invoiceId: number; in
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
     </>
   );
 }

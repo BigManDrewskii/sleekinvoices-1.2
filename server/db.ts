@@ -802,7 +802,7 @@ export async function deleteRecurringInvoiceLineItems(recurringInvoiceId: number
 export async function createInvoiceTemplate(template: {
   userId: number;
   name: string;
-  templateType?: "modern" | "classic" | "minimal" | "bold" | "professional" | "creative";
+  templateType?: "sleek" | "modern" | "classic" | "minimal" | "bold" | "professional" | "creative";
   primaryColor?: string;
   secondaryColor?: string;
   accentColor?: string;

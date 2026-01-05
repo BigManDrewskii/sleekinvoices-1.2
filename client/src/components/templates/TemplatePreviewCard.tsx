@@ -32,7 +32,7 @@ export function TemplatePreviewCard({
   // Load Google Font for preview
   useEffect(() => {
     const fonts = [template.headingFont, template.bodyFont].filter(Boolean);
-    const uniqueFonts = [...new Set(fonts)];
+    const uniqueFonts = Array.from(new Set(fonts));
     
     uniqueFonts.forEach(font => {
       const fontFamily = font.replace(/\s+/g, '+');

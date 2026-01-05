@@ -1687,21 +1687,21 @@ See TODO_PHASE6A_FRONTEND.md for detailed implementation plan
 ### Phase 4: Testing & Polish
 
 #### 4.1 Integration Tests
-- [ ] 4.1.1 Write E2E test: Create client with VAT → Create invoice → Send → Track view
-- [ ] 4.1.2 Write E2E test: Connect Stripe → Create invoice → Pay via Stripe
-- [ ] 4.1.3 Write E2E test: Add wallet → Create invoice → Mark as paid
-- [ ] 4.1.4 Write E2E test: Crypto invoice with 8 decimal precision
+- [x] 4.1.1 Write E2E test: Create client with VAT → Create invoice → Send → Track view
+- [x] 4.1.2 Write E2E test: Connect Stripe → Create invoice → Pay via Stripe
+- [x] 4.1.3 Write E2E test: Add wallet → Create invoice → Mark as paid
+- [x] 4.1.4 Write E2E test: Crypto invoice with 8 decimal precision
 
 #### 4.2 Error Handling
-- [ ] 4.2.1 Add error boundaries for payment components
-- [ ] 4.2.2 Add retry logic for webhook failures
+- [x] 4.2.1 Add error boundaries for payment components
+- [x] 4.2.2 Add retry logic for webhook failures
 - [ ] 4.2.3 Add user-friendly error messages for payment failures
 - [ ] 4.2.4 Add logging for payment events (for debugging)
 
 #### 4.3 Documentation
-- [ ] 4.3.1 Update ROADMAP.md with completion status
-- [ ] 4.3.2 Add inline code comments for complex payment logic
-- [ ] 4.3.3 Create user-facing help docs for payment setup
+- [x] 4.3.1 Update ROADMAP.md with completion status
+- [x] 4.3.2 Add inline code comments for complex payment logic
+- [x] 4.3.3 Create user-facing help docs for payment setup
 
 ---
 
@@ -1777,3 +1777,35 @@ Before marking a phase complete, verify:
 - [x] 3.3.2 Create crypto payment recording procedure
 - [x] 3.3.3 Add crypto payment option to payment recording UI
 - [x] 3.3.4 Display crypto payments in payment history
+
+
+---
+
+## Phase 4: NOWPayments Crypto Gateway Integration
+
+### 4.1 Backend Integration
+- [x] 4.1.1 Create NOWPayments API client utility
+- [x] 4.1.2 Add create payment invoice endpoint
+- [x] 4.1.3 Add check payment status endpoint
+- [x] 4.1.4 Add IPN webhook handler for payment notifications
+- [x] 4.1.5 Add supported currencies endpoint
+
+### 4.2 Database Updates
+- [x] 4.2.1 Add crypto payment tracking fields to invoices
+- [x] 4.2.2 Store NOWPayments payment IDs
+
+### 4.3 Frontend Integration
+- [x] 4.3.1 Add "Pay with Crypto" button to invoice view
+- [x] 4.3.2 Create crypto payment modal with QR code
+- [x] 4.3.3 Add payment status polling
+- [x] 4.3.4 Show crypto payment confirmation
+
+### 4.4 Client Portal Integration
+- [x] 4.4.1 Add crypto payment option to client portal
+- [x] 4.4.2 Display available cryptocurrencies
+- [x] 4.4.3 Show payment instructions and QR code
+
+### 4.5 Testing
+- [x] 4.5.1 Validate NOWPayments API credentials
+- [x] 4.5.2 Test payment creation flow
+- [x] 4.5.3 Test IPN webhook handling
