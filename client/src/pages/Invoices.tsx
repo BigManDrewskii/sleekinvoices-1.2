@@ -49,6 +49,7 @@ import {
   ChevronDown,
   CheckSquare,
   XSquare,
+  FileSpreadsheet,
 } from "lucide-react";
 import { useState, useMemo } from "react";
 import { useTableSort } from "@/hooks/useTableSort";
@@ -264,6 +265,56 @@ export default function Invoices() {
     createPaymentLink.mutate({ id: invoiceId });
   };
 
+  // Export invoices to CSV
+  const exportInvoicesCSV = () => {
+    if (!sortedInvoices || sortedInvoices.length === 0) {
+      toast.error("No invoices to export");
+      return;
+    }
+
+    // Build CSV content
+    const headers = [
+      "Invoice Number",
+      "Client",
+      "Status",
+      "Payment Status",
+      "Issue Date",
+      "Due Date",
+      "Total",
+      "Currency",
+    ];
+
+    const rows = sortedInvoices.map((invoice) => [
+      invoice.invoiceNumber,
+      invoice.client.name,
+      invoice.status,
+      invoice.paymentStatus || "unpaid",
+      new Date(invoice.issueDate).toLocaleDateString(),
+      new Date(invoice.dueDate).toLocaleDateString(),
+      parseFloat(invoice.total?.toString() || "0").toFixed(2),
+      invoice.currency || "USD",
+    ]);
+
+    // Convert to CSV string
+    const csvContent = [
+      headers.map(h => `"${h}"`).join(","),
+      ...rows.map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(","))
+    ].join("\n");
+
+    // Download file
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `sleek-invoices-export-${new Date().toISOString().split("T")[0]}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+    
+    toast.success(`Exported ${sortedInvoices.length} invoices to CSV`);
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <Navigation />
@@ -275,10 +326,20 @@ export default function Invoices() {
             <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Invoices</h1>
             <p className="text-sm sm:text-base text-muted-foreground">Manage and track all your invoices</p>
           </div>
-          <Button onClick={() => setLocation("/invoices/create")} className="w-full sm:w-auto">
-            <Plus className="h-4 w-4 mr-2" />
-            New Invoice
-          </Button>
+          <div className="flex gap-2 w-full sm:w-auto">
+            <Button
+              variant="outline"
+              onClick={() => exportInvoicesCSV()}
+              className="gap-2"
+            >
+              <FileSpreadsheet className="h-4 w-4" />
+              Export CSV
+            </Button>
+            <Button onClick={() => setLocation("/invoices/create")} className="flex-1 sm:flex-none">
+              <Plus className="h-4 w-4 mr-2" />
+              New Invoice
+            </Button>
+          </div>
         </div>
 
         {/* Bulk Actions Bar */}

@@ -982,3 +982,33 @@
 - [x] 1.5.2 Add deduplication logic or cleanup script
 - [ ] 1.5.3 Prevent duplicate template creation
 
+
+
+## Audit Phase 2: Core Features
+
+### 2.1 Products/Services Library
+- [x] 2.1.1 Create products table in database schema
+- [x] 2.1.2 Add CRUD operations for products in db.ts
+- [x] 2.1.3 Create tRPC router for products
+- [x] 2.1.4 Build Products management page UI
+- [x] 2.1.5 Add product selector to invoice creation form
+- [x] 2.1.6 Support quick-add from invoice form
+
+### 2.2 Recurring Invoices (Already Implemented)
+- [x] 2.2.1 Create recurringInvoices table in schema
+- [x] 2.2.2 Add recurring invoice CRUD operations
+- [x] 2.2.3 Create tRPC router for recurring invoices
+- [x] 2.2.4 Build Recurring Invoices management page
+- [x] 2.2.5 Verify invoice generation logic works (existing)
+- [x] 2.2.6 Test cron job for automatic generation (existing)
+### 2.3 Report Export
+- [x] 2.3.1 Add CSV export for invoice list
+- [x] 2.3.2 Add CSV export for analytics report
+- [x] 2.3.3 Include summary metrics in exports
+- [x] 2.3.4 Create export UI on Analytics page
+
+### 2.4 Testing
+- [x] 2.4.1 Write tests for products CRUD
+- [x] 2.4.2 Write tests for recurring invoices (existing)
+- [x] 2.4.3 Write tests for report export (frontend only)
+

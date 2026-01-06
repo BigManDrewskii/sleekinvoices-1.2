@@ -10,6 +10,7 @@ import { ClientSelector } from "@/components/invoices/ClientSelector";
 import { TemplateSelector } from "@/components/invoices/TemplateSelector";
 import { LineItemRow, LineItem } from "@/components/invoices/LineItemRow";
 import { BillableExpenseDialog } from "@/components/invoices/BillableExpenseDialog";
+import { ProductSelector } from "@/components/invoices/ProductSelector";
 import { InvoiceFormCalculations } from "@/components/invoices/InvoiceFormCalculations";
 import { InvoicePreviewModal } from "@/components/invoices/InvoicePreviewModal";
 import { getLoginUrl } from "@/const";
@@ -126,6 +127,19 @@ export default function CreateInvoice() {
     if (lineItems.length > 1) {
       setLineItems(lineItems.filter(item => item.id !== id));
     }
+  };
+
+  // Add product from library as line item
+  const addProductAsLineItem = (product: { name: string; description: string | null; rate: string; unit: string | null }) => {
+    const description = product.description 
+      ? `${product.name} - ${product.description}`
+      : product.name;
+    setLineItems([...lineItems, { 
+      id: nanoid(), 
+      description, 
+      quantity: 1, 
+      rate: parseFloat(product.rate) 
+    }]);
   };
 
   // Validation
@@ -352,6 +366,7 @@ export default function CreateInvoice() {
                     <CardDescription>Add products or services to the invoice</CardDescription>
                   </div>
                   <div className="flex gap-2">
+                    <ProductSelector onSelect={addProductAsLineItem} />
                     <Button 
                       type="button" 
                       variant="outline" 

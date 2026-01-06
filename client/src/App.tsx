@@ -30,6 +30,7 @@ const CreateRecurringInvoice = lazy(() => import("./pages/CreateRecurringInvoice
 const Templates = lazy(() => import("./pages/Templates"));
 const Expenses = lazy(() => import("./pages/Expenses"));
 const Payments = lazy(() => import("./pages/Payments"));
+const Products = lazy(() => import("./pages/Products"));
 
 // Loading fallback component
 function LoadingFallback() {
@@ -69,6 +70,7 @@ function Router() {
         <Route path={"/templates"} component={Templates} />
         <Route path={"/expenses"} component={Expenses} />
         <Route path={"/payments"} component={Payments} />
+        <Route path={"/products"} component={Products} />
         
         {/* 404 - eager loaded */}
         <Route path={"/404"} component={NotFound} />

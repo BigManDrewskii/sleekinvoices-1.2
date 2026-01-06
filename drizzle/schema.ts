@@ -624,3 +624,40 @@ export const cryptoSubscriptionPayments = mysqlTable("cryptoSubscriptionPayments
 
 export type CryptoSubscriptionPayment = typeof cryptoSubscriptionPayments.$inferSelect;
 export type InsertCryptoSubscriptionPayment = typeof cryptoSubscriptionPayments.$inferInsert;
+
+
+/**
+ * Products/Services library for quick invoice line item entry
+ * Users can save frequently used products/services with preset descriptions and rates
+ */
+export const products = mysqlTable("products", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  
+  // Product info
+  name: varchar("name", { length: 255 }).notNull(),
+  description: text("description"),
+  
+  // Pricing
+  rate: decimal("rate", { precision: 24, scale: 8 }).notNull(), // DECIMAL(24,8) for crypto precision
+  unit: varchar("unit", { length: 50 }).default("unit"), // e.g., "hour", "item", "project", "month"
+  
+  // Categorization
+  category: varchar("category", { length: 100 }), // Optional category for organization
+  sku: varchar("sku", { length: 100 }), // Optional SKU/product code
+  
+  // Tax settings
+  taxable: boolean("taxable").default(true).notNull(),
+  
+  // Status
+  isActive: boolean("isActive").default(true).notNull(),
+  
+  // Usage tracking
+  usageCount: int("usageCount").default(0).notNull(), // Track how often this product is used
+  
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type Product = typeof products.$inferSelect;
+export type InsertProduct = typeof products.$inferInsert;

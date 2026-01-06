@@ -14,7 +14,9 @@ import {
   Receipt,
   DollarSign,
   CheckCircle2,
-  AlertCircle
+  AlertCircle,
+  Download,
+  FileSpreadsheet
 } from "lucide-react";
 import { useState, useMemo } from "react";
 import {
@@ -73,6 +75,93 @@ export default function Analytics() {
     { limit: 5 },
     { enabled: isAuthenticated }
   );
+
+  // Export analytics data to CSV
+  const exportAnalyticsCSV = () => {
+    if (!analytics) return;
+
+    const timeRangeLabels = {
+      "7d": "Last 7 days",
+      "30d": "Last 30 days",
+      "90d": "Last 3 months",
+      "1y": "Last year",
+    };
+
+    // Build CSV content
+    const rows: string[][] = [];
+    
+    // Header
+    rows.push(["SleekInvoices Analytics Report"]);
+    rows.push([`Period: ${timeRangeLabels[timeRange]}`]);
+    rows.push([`Generated: ${new Date().toLocaleDateString()}`]);
+    rows.push([]);
+    
+    // Summary metrics
+    rows.push(["Summary Metrics"]);
+    rows.push(["Metric", "Value"]);
+    rows.push(["Total Revenue", `$${parseFloat(analytics.totalRevenue?.toString() || "0").toFixed(2)}`]);
+    rows.push(["Outstanding Amount", `$${parseFloat(analytics.outstandingAmount?.toString() || "0").toFixed(2)}`]);
+    rows.push(["Total Invoices", analytics.totalInvoices?.toString() || "0"]);
+    rows.push(["Paid Invoices", analytics.paidInvoices?.toString() || "0"]);
+    rows.push(["Collection Rate", `${analytics.collectionRate?.toFixed(1) || "0"}%`]);
+    rows.push(["Days Sales Outstanding (DSO)", `${analytics.dso?.toFixed(1) || "0"} days`]);
+    rows.push(["Average Invoice Value", `$${parseFloat(analytics.averageInvoiceValue?.toString() || "0").toFixed(2)}`]);
+    rows.push([]);
+    
+    // Status breakdown
+    rows.push(["Invoice Status Breakdown"]);
+    rows.push(["Status", "Count", "Amount"]);
+    analytics.statusBreakdown?.forEach((item: any) => {
+      rows.push([
+        item.status.charAt(0).toUpperCase() + item.status.slice(1),
+        item.count.toString(),
+        `$${parseFloat(item.totalAmount).toFixed(2)}`
+      ]);
+    });
+    rows.push([]);
+    
+    // Monthly revenue
+    if (analytics.monthlyRevenue?.length > 0) {
+      rows.push(["Monthly Revenue"]);
+      rows.push(["Date", "Revenue"]);
+      analytics.monthlyRevenue.forEach((item: any) => {
+        rows.push([
+          new Date(item.month).toLocaleDateString(),
+          `$${parseFloat(item.revenue).toFixed(2)}`
+        ]);
+      });
+      rows.push([]);
+    }
+    
+    // Top clients
+    if (topClients && topClients.length > 0) {
+      rows.push(["Top Clients"]);
+      rows.push(["Client", "Total Invoiced", "Invoice Count"]);
+      topClients.forEach((client: any) => {
+        rows.push([
+          client.name,
+          `$${parseFloat(client.totalInvoiced).toFixed(2)}`,
+          client.invoiceCount.toString()
+        ]);
+      });
+    }
+    
+    // Convert to CSV string
+    const csvContent = rows.map(row => 
+      row.map(cell => `"${cell.replace(/"/g, '""')}"`).join(",")
+    ).join("\n");
+    
+    // Download file
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `sleek-invoices-analytics-${timeRange}-${new Date().toISOString().split("T")[0]}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
 
   if (loading || isLoading) {
     return (
@@ -171,21 +260,32 @@ export default function Analytics() {
                 Financial overview and invoice performance
               </p>
             </div>
-            <div className="flex items-center gap-1 p-1 bg-secondary/50 rounded-lg">
-              {(["7d", "30d", "90d", "1y"] as const).map((range) => (
-                <Button
-                  key={range}
-                  variant={timeRange === range ? "default" : "ghost"}
-                  size="sm"
-                  onClick={() => setTimeRange(range)}
-                  className={timeRange === range 
-                    ? "bg-primary text-primary-foreground" 
-                    : "text-muted-foreground hover:text-foreground"
-                  }
-                >
-                  {range === "7d" ? "7D" : range === "30d" ? "30D" : range === "90d" ? "3M" : "1Y"}
-                </Button>
-              ))}
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-1 p-1 bg-secondary/50 rounded-lg">
+                {(["7d", "30d", "90d", "1y"] as const).map((range) => (
+                  <Button
+                    key={range}
+                    variant={timeRange === range ? "default" : "ghost"}
+                    size="sm"
+                    onClick={() => setTimeRange(range)}
+                    className={timeRange === range 
+                      ? "bg-primary text-primary-foreground" 
+                      : "text-muted-foreground hover:text-foreground"
+                    }
+                  >
+                    {range === "7d" ? "7D" : range === "30d" ? "30D" : range === "90d" ? "3M" : "1Y"}
+                  </Button>
+                ))}
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => exportAnalyticsCSV()}
+                className="gap-2"
+              >
+                <FileSpreadsheet className="h-4 w-4" />
+                Export CSV
+              </Button>
             </div>
           </div>
 
