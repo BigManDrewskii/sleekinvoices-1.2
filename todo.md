@@ -952,3 +952,33 @@
 ### 5.4 Testing
 - [x] 5.4.1 Write API tests for getHistory
 - [x] 5.4.2 Test empty state display
+
+
+## Audit Phase 1: Quick Wins
+
+### 1.1 Fix Upgrade to Pro Banner
+- [x] 1.1.1 Update Dashboard to hide upgrade banner for Pro users
+- [x] 1.1.2 Check subscription status before rendering banner
+
+### 1.2 Add Skeleton Loaders
+- [x] 1.2.1 Create SkeletonCard component for stats
+- [x] 1.2.2 Replace "..." loading text with skeleton loaders
+- [x] 1.2.3 Add skeleton for Recent Invoices section
+
+### 1.3 Fix Duplicate Invoice Numbers
+- [x] 1.3.1 Investigate duplicate invoice number issue
+- [x] 1.3.2 Add unique constraint validation on invoice creation
+- [x] 1.3.3 Auto-increment invoice numbers properly
+
+### 1.4 Add Bulk Actions for Invoices
+- [x] 1.4.1 Add checkbox column to invoice table
+- [x] 1.4.2 Add "Select All" checkbox in header
+- [x] 1.4.3 Add bulk actions dropdown (Delete)
+- [x] 1.4.4 Implement bulk delete mutation
+- [x] 1.4.5 Add confirmation dialog for bulk actions
+
+### 1.5 Clean Up Template Variations
+- [x] 1.5.1 Investigate duplicate "Professional Blue" templates
+- [x] 1.5.2 Add deduplication logic or cleanup script
+- [ ] 1.5.3 Prevent duplicate template creation
+

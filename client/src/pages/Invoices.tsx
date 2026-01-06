@@ -2,6 +2,7 @@ import { useAuth } from "@/_core/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Select,
   SelectContent,
@@ -17,6 +18,13 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { StatusBadge } from "@/components/shared/StatusBadge";
 import { PaymentStatusBadge } from "@/components/shared/PaymentStatusBadge";
 import { DeleteConfirmDialog } from "@/components/shared/DeleteConfirmDialog";
@@ -38,8 +46,11 @@ import {
   Mail,
   Link as LinkIcon,
   File,
+  ChevronDown,
+  CheckSquare,
+  XSquare,
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useTableSort } from "@/hooks/useTableSort";
 import { SortableTableHeader } from "@/components/shared/SortableTableHeader";
 import { Link, useLocation } from "wouter";
@@ -76,9 +87,13 @@ export default function Invoices() {
   const [paymentFilter, setPaymentFilter] = useState<string>("all");
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [invoiceToDelete, setInvoiceToDelete] = useState<Invoice | null>(null);
+  const [bulkDeleteDialogOpen, setBulkDeleteDialogOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(15);
   const { sort, handleSort, sortData } = useTableSort({ defaultKey: "invoiceNumber" });
+  
+  // Bulk selection state
+  const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
 
   const { data: invoices, isLoading: invoicesLoading } = trpc.invoices.list.useQuery(undefined, {
     enabled: isAuthenticated,
@@ -95,6 +110,18 @@ export default function Invoices() {
     },
     onError: (error) => {
       toast.error(error.message || "Failed to delete invoice");
+    },
+  });
+
+  const bulkDeleteInvoices = trpc.invoices.bulkDelete.useMutation({
+    onSuccess: (data) => {
+      toast.success(`${data.deletedCount} invoice(s) deleted successfully`);
+      utils.invoices.list.invalidate();
+      setBulkDeleteDialogOpen(false);
+      setSelectedIds(new Set());
+    },
+    onError: (error) => {
+      toast.error(error.message || "Failed to delete invoices");
     },
   });
 
@@ -171,6 +198,39 @@ export default function Invoices() {
     currentPage * pageSize
   );
 
+  // Bulk selection helpers
+  const currentPageIds = paginatedInvoices.map(inv => inv.id);
+  const allCurrentPageSelected = currentPageIds.length > 0 && currentPageIds.every(id => selectedIds.has(id));
+  const someCurrentPageSelected = currentPageIds.some(id => selectedIds.has(id));
+  
+  const toggleSelectAll = () => {
+    if (allCurrentPageSelected) {
+      // Deselect all on current page
+      const newSelected = new Set(selectedIds);
+      currentPageIds.forEach(id => newSelected.delete(id));
+      setSelectedIds(newSelected);
+    } else {
+      // Select all on current page
+      const newSelected = new Set(selectedIds);
+      currentPageIds.forEach(id => newSelected.add(id));
+      setSelectedIds(newSelected);
+    }
+  };
+
+  const toggleSelect = (id: number) => {
+    const newSelected = new Set(selectedIds);
+    if (newSelected.has(id)) {
+      newSelected.delete(id);
+    } else {
+      newSelected.add(id);
+    }
+    setSelectedIds(newSelected);
+  };
+
+  const clearSelection = () => {
+    setSelectedIds(new Set());
+  };
+
   // Reset to page 1 when filters change
   const handleFilterChange = (setter: (val: string) => void, val: string) => {
     setter(val);
@@ -186,6 +246,10 @@ export default function Invoices() {
     if (invoiceToDelete) {
       deleteInvoice.mutate({ id: invoiceToDelete.id });
     }
+  };
+
+  const confirmBulkDelete = () => {
+    bulkDeleteInvoices.mutate({ ids: Array.from(selectedIds) });
   };
 
   const handleDownloadPDF = (invoiceId: number) => {
@@ -216,6 +280,45 @@ export default function Invoices() {
             New Invoice
           </Button>
         </div>
+
+        {/* Bulk Actions Bar */}
+        {selectedIds.size > 0 && (
+          <div className="mb-4 p-3 bg-primary/10 border border-primary/20 rounded-lg flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+            <div className="flex items-center gap-2">
+              <CheckSquare className="h-4 w-4 text-primary" />
+              <span className="text-sm font-medium">
+                {selectedIds.size} invoice{selectedIds.size !== 1 ? 's' : ''} selected
+              </span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={clearSelection}
+              >
+                <XSquare className="h-4 w-4 mr-1" />
+                Clear
+              </Button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="sm">
+                    Bulk Actions
+                    <ChevronDown className="h-4 w-4 ml-1" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem
+                    onClick={() => setBulkDeleteDialogOpen(true)}
+                    className="text-destructive focus:text-destructive"
+                  >
+                    <Trash2 className="h-4 w-4 mr-2" />
+                    Delete Selected
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          </div>
+        )}
 
         {/* Filters */}
         <div className="flex flex-col sm:flex-row gap-4 mb-6">
@@ -289,6 +392,14 @@ export default function Invoices() {
                   <Table>
                     <TableHeader>
                       <TableRow>
+                        <TableHead className="w-[40px]">
+                          <Checkbox
+                            checked={allCurrentPageSelected}
+                            onCheckedChange={toggleSelectAll}
+                            aria-label="Select all invoices on this page"
+                            className={someCurrentPageSelected && !allCurrentPageSelected ? "data-[state=checked]:bg-primary/50" : ""}
+                          />
+                        </TableHead>
                         <SortableTableHeader
                           label="Invoice #"
                           sortKey="invoiceNumber"
@@ -336,7 +447,17 @@ export default function Invoices() {
                     </TableHeader>
                     <TableBody>
                       {paginatedInvoices?.map((invoice) => (
-                        <TableRow key={invoice.id} className="group">
+                        <TableRow 
+                          key={invoice.id} 
+                          className={`group ${selectedIds.has(invoice.id) ? 'bg-primary/5' : ''}`}
+                        >
+                          <TableCell>
+                            <Checkbox
+                              checked={selectedIds.has(invoice.id)}
+                              onCheckedChange={() => toggleSelect(invoice.id)}
+                              aria-label={`Select invoice ${invoice.invoiceNumber}`}
+                            />
+                          </TableCell>
                           <TableCell>
                             <InvoiceNumberCell invoiceNumber={invoice.invoiceNumber} />
                           </TableCell>
@@ -395,62 +516,23 @@ export default function Invoices() {
                 {/* Mobile Card View */}
                 <div className="md:hidden space-y-4">
                   {paginatedInvoices?.map((invoice) => (
-                    <div key={invoice.id} className="border rounded-lg p-4 space-y-3">
+                    <div 
+                      key={invoice.id} 
+                      className={`border rounded-lg p-4 space-y-3 ${selectedIds.has(invoice.id) ? 'border-primary bg-primary/5' : ''}`}
+                    >
                       <div className="flex items-start justify-between">
-                        <div>
-                          <p className="font-semibold text-foreground">{invoice.invoiceNumber}</p>
-                          <p className="text-sm text-muted-foreground">{invoice.client.name}</p>
+                        <div className="flex items-start gap-3">
+                          <Checkbox
+                            checked={selectedIds.has(invoice.id)}
+                            onCheckedChange={() => toggleSelect(invoice.id)}
+                            aria-label={`Select invoice ${invoice.invoiceNumber}`}
+                            className="mt-1"
+                          />
+                          <div>
+                            <InvoiceNumberCell invoiceNumber={invoice.invoiceNumber} />
+                            <p className="text-sm text-muted-foreground">{invoice.client.name}</p>
+                          </div>
                         </div>
-                        <div className="flex gap-1">
-                          <StatusBadge status={invoice.status} />
-                        </div>
-                      </div>
-                      
-                      <div className="grid grid-cols-2 gap-2 text-sm">
-                        <div>
-                          <p className="text-muted-foreground">Issue Date</p>
-                          <p className="font-medium">{formatDateShort(invoice.issueDate)}</p>
-                        </div>
-                        <div>
-                          <p className="text-muted-foreground">Due Date</p>
-                          <p className="font-medium">{formatDateShort(invoice.dueDate)}</p>
-                        </div>
-                      </div>
-                      
-                      <div className="flex items-center justify-between pt-2 border-t">
-                        <div>
-                          <p className="text-sm text-muted-foreground">Amount</p>
-                          <p className="text-lg font-bold">{formatCurrency(invoice.total)}</p>
-                          {invoice.paymentStatus && invoice.paymentStatus !== 'unpaid' && (
-                            <p className="text-xs text-muted-foreground">Paid: {formatCurrency(invoice.totalPaid || '0')}</p>
-                          )}
-                        </div>
-                        {invoice.paymentStatus ? (
-                          <PaymentStatusBadge status={invoice.paymentStatus} />
-                        ) : (
-                          <PaymentStatusBadge status="unpaid" />
-                        )}
-                      </div>
-                      
-                      <div className="flex flex-wrap gap-2 pt-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => setLocation(`/invoices/${invoice.id}`)}
-                          className="flex-1"
-                        >
-                          <Eye className="h-4 w-4 mr-1" />
-                          View
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => setLocation(`/invoices/${invoice.id}/edit`)}
-                          className="flex-1"
-                        >
-                          <Edit className="h-4 w-4 mr-1" />
-                          Edit
-                        </Button>
                         <InvoiceActionsMenu
                           invoiceId={invoice.id}
                           invoiceNumber={invoice.invoiceNumber}
@@ -468,30 +550,47 @@ export default function Invoices() {
                           }}
                         />
                       </div>
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <StatusBadge status={invoice.status} />
+                          <PaymentStatusBadge status={invoice.paymentStatus || 'unpaid'} />
+                        </div>
+                        <div className="text-right">
+                          <p className="font-semibold flex items-center gap-1 justify-end">
+                            {formatCurrency(invoice.total, invoice.currency)}
+                            {invoice.currency && invoice.currency !== 'USD' && (
+                              <CurrencyBadge code={invoice.currency} />
+                            )}
+                          </p>
+                          {invoice.paymentStatus && invoice.paymentStatus !== 'unpaid' && (
+                            <p className="text-xs text-muted-foreground">
+                              Paid: {formatCurrency(invoice.totalPaid || '0')}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                      <div className="flex justify-between text-xs text-muted-foreground pt-2 border-t">
+                        <span>Issued: {formatDateShort(invoice.issueDate)}</span>
+                        <span>Due: {formatDateShort(invoice.dueDate)}</span>
+                      </div>
                     </div>
                   ))}
                 </div>
-
+                
                 {/* Pagination */}
                 {totalPages > 1 && (
-                  <div className="border-t pt-4 mt-4">
+                  <div className="mt-6">
                     <Pagination
                       currentPage={currentPage}
                       totalPages={totalPages}
-                      pageSize={pageSize}
-                      totalItems={totalItems}
                       onPageChange={setCurrentPage}
+                      pageSize={pageSize}
                       onPageSizeChange={(size) => {
                         setPageSize(size);
                         setCurrentPage(1);
                       }}
-                      pageSizeOptions={[10, 15, 25, 50]}
+                      totalItems={totalItems}
                     />
-                  </div>
-                )}
-                {totalItems === 0 && (
-                  <div className="text-center py-8 text-muted-foreground">
-                    No invoices match your filters
                   </div>
                 )}
               </>
@@ -500,7 +599,7 @@ export default function Invoices() {
         </Card>
       </div>
 
-      {/* Delete Dialog */}
+      {/* Single Delete Confirmation Dialog */}
       <DeleteConfirmDialog
         open={deleteDialogOpen}
         onOpenChange={setDeleteDialogOpen}
@@ -508,6 +607,16 @@ export default function Invoices() {
         title="Delete Invoice"
         description={`Are you sure you want to delete invoice ${invoiceToDelete?.invoiceNumber}? This action cannot be undone.`}
         isLoading={deleteInvoice.isPending}
+      />
+
+      {/* Bulk Delete Confirmation Dialog */}
+      <DeleteConfirmDialog
+        open={bulkDeleteDialogOpen}
+        onOpenChange={setBulkDeleteDialogOpen}
+        onConfirm={confirmBulkDelete}
+        title="Delete Selected Invoices"
+        description={`Are you sure you want to delete ${selectedIds.size} invoice${selectedIds.size !== 1 ? 's' : ''}? This action cannot be undone.`}
+        isLoading={bulkDeleteInvoices.isPending}
       />
     </div>
   );

@@ -12,10 +12,10 @@ import { Check } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 
 export function UpgradePromoBanner() {
-  const { data: usage } = trpc.subscription.getUsage.useQuery();
+  const { data: usage, isLoading } = trpc.subscription.getUsage.useQuery();
 
-  // Don't show for Pro users
-  if (usage?.isPro) {
+  // Don't show while loading (prevents flash) or for Pro users
+  if (isLoading || usage?.isPro) {
     return null;
   }
 

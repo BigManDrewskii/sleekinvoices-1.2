@@ -184,6 +184,14 @@ export const appRouter = router({
           );
         }
         
+        // Check for duplicate invoice number
+        const existingInvoice = await db.getInvoiceByNumber(ctx.user.id, input.invoiceNumber);
+        if (existingInvoice) {
+          throw new Error(
+            `Invoice number "${input.invoiceNumber}" already exists. Please use a unique invoice number.`
+          );
+        }
+        
         // Calculate totals
         const subtotal = input.lineItems.reduce((sum, item) => 
           sum + (item.quantity * item.rate), 0
@@ -336,6 +344,21 @@ export const appRouter = router({
       .mutation(async ({ ctx, input }) => {
         await db.deleteInvoice(input.id, ctx.user.id);
         return { success: true };
+      }),
+    
+    bulkDelete: protectedProcedure
+      .input(z.object({ ids: z.array(z.number()) }))
+      .mutation(async ({ ctx, input }) => {
+        let deletedCount = 0;
+        for (const id of input.ids) {
+          try {
+            await db.deleteInvoice(id, ctx.user.id);
+            deletedCount++;
+          } catch (error) {
+            console.error(`Failed to delete invoice ${id}:`, error);
+          }
+        }
+        return { success: true, deletedCount };
       }),
     
     generatePDF: protectedProcedure

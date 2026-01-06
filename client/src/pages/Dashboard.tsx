@@ -8,6 +8,7 @@ import { Link } from "wouter";
 import { Navigation } from "@/components/Navigation";
 import { UpgradePromoBanner } from "@/components/UpgradePromoBanner";
 import { MonthlyUsageCard } from "@/components/dashboard/MonthlyUsageCard";
+import { StatsGridSkeleton, RecentInvoicesSkeleton } from "@/components/dashboard/DashboardSkeleton";
 import { formatCurrency } from "@/lib/utils";
 
 export default function Dashboard() {
@@ -73,6 +74,9 @@ export default function Dashboard() {
           />
 
           {/* Stats Grid - tweakcn style */}
+          {statsLoading ? (
+            <StatsGridSkeleton />
+          ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {/* Total Revenue */}
             <Card className="border-border">
@@ -85,7 +89,7 @@ export default function Dashboard() {
                   </span>
                 </div>
                 <p className="text-3xl font-bold mt-2 tracking-tight">
-                  {statsLoading ? "..." : formatCurrency(stats?.totalRevenue || 0)}
+                  {formatCurrency(stats?.totalRevenue || 0)}
                 </p>
                 <p className="text-xs text-muted-foreground mt-2 flex items-center gap-1">
                   <TrendingUp className="h-3 w-3 text-green-500" />
@@ -107,7 +111,7 @@ export default function Dashboard() {
                   )}
                 </div>
                 <p className="text-3xl font-bold mt-2 tracking-tight">
-                  {statsLoading ? "..." : formatCurrency(stats?.outstandingBalance || 0)}
+                  {formatCurrency(stats?.outstandingBalance || 0)}
                 </p>
                 <p className="text-xs text-muted-foreground mt-2">
                   Awaiting payment
@@ -122,7 +126,7 @@ export default function Dashboard() {
                   <p className="text-sm text-muted-foreground">Total Invoices</p>
                 </div>
                 <p className="text-3xl font-bold mt-2 tracking-tight">
-                  {statsLoading ? "..." : stats?.totalInvoices || 0}
+                  {stats?.totalInvoices || 0}
                 </p>
                 <p className="text-xs text-muted-foreground mt-2">
                   All time invoices created
@@ -141,7 +145,7 @@ export default function Dashboard() {
                   </span>
                 </div>
                 <p className="text-3xl font-bold mt-2 tracking-tight">
-                  {statsLoading ? "..." : stats?.paidInvoices || 0}
+                  {stats?.paidInvoices || 0}
                 </p>
                 <p className="text-xs text-muted-foreground mt-2">
                   Successfully collected
@@ -149,6 +153,7 @@ export default function Dashboard() {
               </CardContent>
             </Card>
           </div>
+          )}
 
           {/* Recent Invoices */}
           <Card className="border-border">
@@ -165,7 +170,23 @@ export default function Dashboard() {
             </CardHeader>
             <CardContent>
               {invoicesLoading ? (
-                <div className="text-center py-8 text-muted-foreground">Loading...</div>
+                <div className="space-y-2">
+                  {[1, 2, 3, 4, 5].map((i) => (
+                    <div key={i} className="flex items-center justify-between p-4 rounded-lg border border-border">
+                      <div className="flex items-center gap-4">
+                        <div className="h-10 w-10 rounded-full bg-accent animate-pulse" />
+                        <div className="space-y-2">
+                          <div className="h-4 w-24 bg-accent animate-pulse rounded" />
+                          <div className="h-3 w-20 bg-accent animate-pulse rounded" />
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-4">
+                        <div className="h-5 w-16 bg-accent animate-pulse rounded-full" />
+                        <div className="h-5 w-20 bg-accent animate-pulse rounded" />
+                      </div>
+                    </div>
+                  ))}
+                </div>
               ) : recentInvoices.length === 0 ? (
                 <div className="text-center py-12">
                   <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-4" />

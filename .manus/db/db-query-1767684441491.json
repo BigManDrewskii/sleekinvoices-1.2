@@ -1,0 +1,26 @@
+{
+  "query": "SELECT invoiceNumber, COUNT(*) as count FROM invoices GROUP BY invoiceNumber HAVING COUNT(*) > 1 ORDER BY count DESC LIMIT 20;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user REX6DRAh92xmf1o.58be8e717db2 --database coKdAkLfsbebvczbYNFn3V --execute SELECT invoiceNumber, COUNT(*) as count FROM invoices GROUP BY invoiceNumber HAVING COUNT(*) > 1 ORDER BY count DESC LIMIT 20;",
+  "rows": [
+    {
+      "invoiceNumber": "REM-001",
+      "count": "39"
+    },
+    {
+      "invoiceNumber": "REM-002",
+      "count": "39"
+    },
+    {
+      "invoiceNumber": "INV-0001",
+      "count": "2"
+    },
+    {
+      "invoiceNumber": "DASH-TEST-001",
+      "count": "2"
+    }
+  ],
+  "messages": [],
+  "stdout": "invoiceNumber\tcount\nREM-001\t39\nREM-002\t39\nINV-0001\t2\nDASH-TEST-001\t2\n",
+  "stderr": "",
+  "execution_time_ms": 99
+}

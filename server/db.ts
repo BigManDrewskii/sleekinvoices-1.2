@@ -302,6 +302,21 @@ export async function getInvoiceById(invoiceId: number, userId: number): Promise
   return result[0];
 }
 
+/**
+ * Get invoice by invoice number for a specific user
+ * Used to check for duplicate invoice numbers
+ */
+export async function getInvoiceByNumber(userId: number, invoiceNumber: string): Promise<Invoice | undefined> {
+  const db = await getDb();
+  if (!db) return undefined;
+  
+  const result = await db.select().from(invoices)
+    .where(and(eq(invoices.userId, userId), eq(invoices.invoiceNumber, invoiceNumber)))
+    .limit(1);
+  
+  return result[0];
+}
+
 export async function updateInvoice(invoiceId: number, userId: number, data: Partial<InsertInvoice>) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
