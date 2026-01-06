@@ -37,6 +37,7 @@ export function Navigation() {
   const navItems = [
     { href: "/dashboard", label: "Dashboard" },
     { href: "/invoices", label: "Invoices" },
+    { href: "/estimates", label: "Estimates" },
     { href: "/clients", label: "Clients" },
     { href: "/analytics", label: "Analytics" },
     { href: "/templates", label: "Templates" },

@@ -15,12 +15,13 @@ import { PortalAccessDialog } from "@/components/clients/PortalAccessDialog";
 import { DeleteConfirmDialog } from "@/components/shared/DeleteConfirmDialog";
 import { getLoginUrl } from "@/const";
 import { trpc } from "@/lib/trpc";
-import { FileText, Plus, Search, Edit, Trash2, Mail, Phone, MapPin, Users, Key, ShieldCheck } from "lucide-react";
+import { FileText, Plus, Search, Edit, Trash2, Mail, Phone, MapPin, Users, Key, ShieldCheck, Upload } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { useState } from "react";
 import { Link } from "wouter";
 import { toast } from "sonner";
 import { Navigation } from "@/components/Navigation";
+import { CSVImportDialog } from "@/components/clients/CSVImportDialog";
 
 interface Client {
   id: number;
@@ -44,6 +45,7 @@ export default function Clients() {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedClient, setSelectedClient] = useState<Client | null>(null);
   const [clientToDelete, setClientToDelete] = useState<Client | null>(null);
+  const [importDialogOpen, setImportDialogOpen] = useState(false);
 
   const { data: clients, isLoading: clientsLoading } = trpc.clients.list.useQuery(undefined, {
     enabled: isAuthenticated,
@@ -122,10 +124,16 @@ export default function Clients() {
             <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Clients</h1>
             <p className="text-sm sm:text-base text-muted-foreground">Manage your client database</p>
           </div>
-          <Button onClick={handleAddNew} className="w-full sm:w-auto">
-            <Plus className="h-4 w-4 mr-2" />
-            Add Client
-          </Button>
+          <div className="flex gap-2 w-full sm:w-auto">
+            <Button variant="outline" onClick={() => setImportDialogOpen(true)} className="flex-1 sm:flex-initial">
+              <Upload className="h-4 w-4 mr-2" />
+              Import CSV
+            </Button>
+            <Button onClick={handleAddNew} className="flex-1 sm:flex-initial">
+              <Plus className="h-4 w-4 mr-2" />
+              Add Client
+            </Button>
+          </div>
         </div>
 
         {/* Search Bar */}
@@ -376,6 +384,12 @@ export default function Clients() {
         title="Delete Client"
         description={`Are you sure you want to delete ${clientToDelete?.name}? This action cannot be undone.`}
         isLoading={deleteClient.isPending}
+      />
+
+      <CSVImportDialog
+        open={importDialogOpen}
+        onOpenChange={setImportDialogOpen}
+        onSuccess={() => utils.clients.list.invalidate()}
       />
     </div>
   );

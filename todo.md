@@ -1012,3 +1012,40 @@
 - [x] 2.4.2 Write tests for recurring invoices (existing)
 - [x] 2.4.3 Write tests for report export (frontend only)
 
+
+
+---
+
+## Phase 3: Client Import, Partial Payments, Estimates/Quotes
+
+### 3.1 Client CSV Import
+- [x] 3.1.1 Create CSV parser utility for client data
+- [x] 3.1.2 Add import endpoint with validation
+- [x] 3.1.3 Build CSV import dialog with file upload
+- [x] 3.1.4 Add preview table showing parsed data
+- [x] 3.1.5 Handle duplicate detection and error reporting
+- [x] 3.1.6 Add sample CSV template download
+
+### 3.2 Partial Payments
+- [x] 3.2.1 Update payments table schema for partial payments
+- [x] 3.2.2 Add recordPartialPayment mutation
+- [x] 3.2.3 Calculate remaining balance on invoices
+- [x] 3.2.4 Update invoice status logic (partial vs paid)
+- [x] 3.2.5 Build partial payment recording UI
+- [x] 3.2.6 Show payment history on invoice view
+
+### 3.3 Estimates/Quotes
+- [x] 3.3.1 Create estimates table in database schema
+- [x] 3.3.2 Add estimates CRUD operations
+- [x] 3.3.3 Build estimates list page
+- [x] 3.3.4 Build create/edit estimate form
+- [x] 3.3.5 Add convert-to-invoice functionality
+- [ ] 3.3.6 Add estimate PDF generation (future)
+- [ ] 3.3.7 Add estimate email sending (future)
+
+### 3.4 Testing
+- [x] 3.4.1 Write tests for CSV import
+- [x] 3.4.2 Write tests for partial payments
+- [x] 3.4.3 Write tests for estimates logic
+- [ ] 3.4.3 Write tests for estimates CRUD
+- [ ] 3.4.4 Write tests for estimate-to-invoice conversion

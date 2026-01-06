@@ -1,4 +1,4 @@
-import { eq, and, desc, sql, gte, lte, isNull } from "drizzle-orm";
+import { eq, and, desc, sql, gte, lte, or, isNull, inArray, lt } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
 import { 
   InsertUser, 
@@ -2694,4 +2694,478 @@ export async function searchProducts(userId: number, query: string) {
     ))
     .orderBy(desc(products.usageCount))
     .limit(10);
+}
+
+
+// ============================================================================
+// CLIENT IMPORT OPERATIONS
+// ============================================================================
+
+/**
+ * Get clients by email for duplicate detection during import
+ */
+export async function getClientsByEmails(userId: number, emails: string[]): Promise<Client[]> {
+  const db = await getDb();
+  if (!db) return [];
+  
+  if (emails.length === 0) return [];
+  
+  // Normalize emails to lowercase for comparison
+  const normalizedEmails = emails.map(e => e.toLowerCase());
+  
+  return db.select()
+    .from(clients)
+    .where(
+      and(
+        eq(clients.userId, userId),
+        sql`LOWER(${clients.email}) IN (${sql.join(normalizedEmails.map(e => sql`${e}`), sql`, `)})`
+      )
+    );
+}
+
+/**
+ * Bulk create clients for import
+ * Returns created clients and any errors
+ */
+export async function bulkCreateClients(
+  userId: number, 
+  clientsData: InsertClient[]
+): Promise<{ created: Client[], errors: { index: number, message: string }[] }> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const created: Client[] = [];
+  const errors: { index: number, message: string }[] = [];
+  
+  // Insert clients one by one to handle individual errors
+  for (let i = 0; i < clientsData.length; i++) {
+    try {
+      const clientData = { ...clientsData[i], userId };
+      const result = await db.insert(clients).values(clientData);
+      const insertedId = Number(result[0].insertId);
+      
+      const [newClient] = await db.select()
+        .from(clients)
+        .where(eq(clients.id, insertedId))
+        .limit(1);
+      
+      if (newClient) {
+        created.push(newClient);
+      }
+    } catch (error) {
+      errors.push({
+        index: i,
+        message: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  }
+  
+  return { created, errors };
+}
+
+
+// ============================================================================
+// PARTIAL PAYMENT OPERATIONS
+// ============================================================================
+
+/**
+ * Get total paid amount for an invoice
+ */
+export async function getInvoiceTotalPaid(invoiceId: number): Promise<number> {
+  const db = await getDb();
+  if (!db) return 0;
+  
+  const result = await db
+    .select({
+      totalPaid: sql<string>`COALESCE(SUM(CASE WHEN ${payments.status} = 'completed' THEN ${payments.amount} ELSE 0 END), 0)`,
+    })
+    .from(payments)
+    .where(eq(payments.invoiceId, invoiceId));
+  
+  return Number(result[0]?.totalPaid || 0);
+}
+
+/**
+ * Get invoice payment summary (total, paid, remaining)
+ */
+export async function getInvoicePaymentSummary(invoiceId: number, userId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  // Get invoice
+  const [invoice] = await db
+    .select()
+    .from(invoices)
+    .where(and(eq(invoices.id, invoiceId), eq(invoices.userId, userId)))
+    .limit(1);
+  
+  if (!invoice) return null;
+  
+  // Get all payments
+  const invoicePayments = await db
+    .select()
+    .from(payments)
+    .where(eq(payments.invoiceId, invoiceId))
+    .orderBy(desc(payments.paymentDate));
+  
+  const totalPaid = invoicePayments
+    .filter(p => p.status === 'completed')
+    .reduce((sum, p) => sum + Number(p.amount), 0);
+  
+  const invoiceTotal = Number(invoice.total);
+  const remaining = Math.max(0, invoiceTotal - totalPaid);
+  
+  return {
+    invoiceId,
+    invoiceNumber: invoice.invoiceNumber,
+    total: invoiceTotal,
+    totalPaid,
+    remaining,
+    currency: invoice.currency,
+    status: invoice.status,
+    payments: invoicePayments,
+    isFullyPaid: remaining <= 0,
+    isPartiallyPaid: totalPaid > 0 && remaining > 0,
+  };
+}
+
+/**
+ * Record a partial payment and update invoice status
+ */
+export async function recordPartialPayment(
+  invoiceId: number,
+  userId: number,
+  paymentData: {
+    amount: string;
+    paymentMethod: 'manual' | 'bank_transfer' | 'check' | 'cash' | 'crypto';
+    paymentDate: Date;
+    notes?: string;
+    cryptoCurrency?: string;
+    cryptoNetwork?: string;
+    cryptoTxHash?: string;
+  }
+): Promise<{ payment: Payment; newStatus: string; remaining: number }> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  // Verify invoice ownership
+  const [invoice] = await db
+    .select()
+    .from(invoices)
+    .where(and(eq(invoices.id, invoiceId), eq(invoices.userId, userId)))
+    .limit(1);
+  
+  if (!invoice) {
+    throw new Error("Invoice not found");
+  }
+  
+  // Create payment record
+  const payment = await createPayment({
+    invoiceId,
+    userId,
+    amount: paymentData.amount,
+    currency: invoice.currency,
+    paymentMethod: paymentData.paymentMethod,
+    paymentDate: paymentData.paymentDate,
+    notes: paymentData.notes || null,
+    cryptoCurrency: paymentData.cryptoCurrency || null,
+    cryptoNetwork: paymentData.cryptoNetwork || null,
+    cryptoTxHash: paymentData.cryptoTxHash || null,
+    status: 'completed',
+  });
+  
+  // Calculate new totals
+  const totalPaid = await getInvoiceTotalPaid(invoiceId);
+  const invoiceTotal = Number(invoice.total);
+  const remaining = Math.max(0, invoiceTotal - totalPaid);
+  
+  // Determine new status
+  let newStatus = invoice.status;
+  if (remaining <= 0) {
+    newStatus = 'paid';
+  } else if (totalPaid > 0) {
+    // Keep as sent/viewed but update amountPaid
+    // Status stays the same until fully paid
+  }
+  
+  // Update invoice
+  await db.update(invoices)
+    .set({
+      amountPaid: String(totalPaid),
+      status: newStatus,
+      paidAt: remaining <= 0 ? new Date() : null,
+    })
+    .where(eq(invoices.id, invoiceId));
+  
+  return { payment, newStatus, remaining };
+}
+
+
+// ============================================================================
+// ESTIMATES/QUOTES OPERATIONS
+// ============================================================================
+
+import { 
+  estimates, 
+  estimateLineItems, 
+  Estimate, 
+  EstimateLineItem,
+  InsertEstimate, 
+  InsertEstimateLineItem 
+} from "../drizzle/schema";
+
+/**
+ * Generate next estimate number for a user
+ */
+export async function generateEstimateNumber(userId: number): Promise<string> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const year = new Date().getFullYear();
+  const prefix = `EST-${year}-`;
+  
+  // Get the highest estimate number for this year
+  const lastEstimate = await db
+    .select({ estimateNumber: estimates.estimateNumber })
+    .from(estimates)
+    .where(
+      and(
+        eq(estimates.userId, userId),
+        sql`${estimates.estimateNumber} LIKE ${prefix + '%'}`
+      )
+    )
+    .orderBy(desc(estimates.estimateNumber))
+    .limit(1);
+  
+  let nextNumber = 1;
+  if (lastEstimate.length > 0) {
+    const lastNum = parseInt(lastEstimate[0].estimateNumber.replace(prefix, ''), 10);
+    if (!isNaN(lastNum)) {
+      nextNumber = lastNum + 1;
+    }
+  }
+  
+  return `${prefix}${String(nextNumber).padStart(4, '0')}`;
+}
+
+/**
+ * Create a new estimate
+ */
+export async function createEstimate(estimate: InsertEstimate): Promise<Estimate> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const result = await db.insert(estimates).values(estimate);
+  const insertedId = Number(result[0].insertId);
+  
+  const created = await db.select().from(estimates).where(eq(estimates.id, insertedId)).limit(1);
+  return created[0]!;
+}
+
+/**
+ * Get all estimates for a user
+ */
+export async function getEstimatesByUserId(userId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  
+  const results = await db.select({
+    id: estimates.id,
+    estimateNumber: estimates.estimateNumber,
+    status: estimates.status,
+    issueDate: estimates.issueDate,
+    validUntil: estimates.validUntil,
+    total: estimates.total,
+    currency: estimates.currency,
+    title: estimates.title,
+    clientId: estimates.clientId,
+    clientName: clients.name,
+    clientEmail: clients.email,
+    convertedToInvoiceId: estimates.convertedToInvoiceId,
+  })
+  .from(estimates)
+  .leftJoin(clients, eq(estimates.clientId, clients.id))
+  .where(eq(estimates.userId, userId))
+  .orderBy(desc(estimates.createdAt));
+  
+  return results;
+}
+
+/**
+ * Get a single estimate with line items
+ */
+export async function getEstimateById(estimateId: number, userId: number) {
+  const db = await getDb();
+  if (!db) return null;
+  
+  const [estimate] = await db
+    .select()
+    .from(estimates)
+    .where(and(eq(estimates.id, estimateId), eq(estimates.userId, userId)))
+    .limit(1);
+  
+  if (!estimate) return null;
+  
+  const lineItems = await db
+    .select()
+    .from(estimateLineItems)
+    .where(eq(estimateLineItems.estimateId, estimateId))
+    .orderBy(estimateLineItems.sortOrder);
+  
+  const [client] = await db
+    .select()
+    .from(clients)
+    .where(eq(clients.id, estimate.clientId))
+    .limit(1);
+  
+  return { estimate, lineItems, client };
+}
+
+/**
+ * Update an estimate
+ */
+export async function updateEstimate(estimateId: number, userId: number, data: Partial<InsertEstimate>) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  await db.update(estimates)
+    .set(data)
+    .where(and(eq(estimates.id, estimateId), eq(estimates.userId, userId)));
+}
+
+/**
+ * Delete an estimate and its line items
+ */
+export async function deleteEstimate(estimateId: number, userId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  // Delete line items first
+  await db.delete(estimateLineItems).where(eq(estimateLineItems.estimateId, estimateId));
+  
+  // Delete estimate
+  await db.delete(estimates).where(and(eq(estimates.id, estimateId), eq(estimates.userId, userId)));
+}
+
+/**
+ * Create estimate line items
+ */
+export async function createEstimateLineItems(items: InsertEstimateLineItem[]): Promise<EstimateLineItem[]> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  if (items.length === 0) return [];
+  
+  await db.insert(estimateLineItems).values(items);
+  
+  // Fetch the created items
+  const estimateId = items[0].estimateId;
+  return db
+    .select()
+    .from(estimateLineItems)
+    .where(eq(estimateLineItems.estimateId, estimateId))
+    .orderBy(estimateLineItems.sortOrder);
+}
+
+/**
+ * Delete all line items for an estimate
+ */
+export async function deleteEstimateLineItems(estimateId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  await db.delete(estimateLineItems).where(eq(estimateLineItems.estimateId, estimateId));
+}
+
+/**
+ * Convert estimate to invoice
+ */
+export async function convertEstimateToInvoice(
+  estimateId: number, 
+  userId: number
+): Promise<{ invoiceId: number; invoiceNumber: string }> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  // Get estimate with line items
+  const estimateData = await getEstimateById(estimateId, userId);
+  if (!estimateData) {
+    throw new Error("Estimate not found");
+  }
+  
+  const { estimate, lineItems } = estimateData;
+  
+  // Check if already converted
+  if (estimate.convertedToInvoiceId) {
+    throw new Error("Estimate has already been converted to an invoice");
+  }
+  
+  // Generate invoice number
+  const invoiceNumber = await getNextInvoiceNumber(userId);
+  
+  // Create invoice from estimate
+  const invoice = await createInvoice({
+    userId,
+    clientId: estimate.clientId,
+    invoiceNumber,
+    status: 'draft',
+    currency: estimate.currency,
+    subtotal: estimate.subtotal,
+    taxRate: estimate.taxRate,
+    taxAmount: estimate.taxAmount,
+    discountType: estimate.discountType,
+    discountValue: estimate.discountValue,
+    discountAmount: estimate.discountAmount,
+    total: estimate.total,
+    notes: estimate.notes,
+    paymentTerms: estimate.terms,
+    templateId: estimate.templateId,
+    issueDate: new Date(),
+    dueDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days from now
+  });
+  
+  // Create invoice line items from estimate line items
+  const invoiceItems = lineItems.map((item, index) => ({
+    invoiceId: invoice.id,
+    description: item.description,
+    quantity: item.quantity,
+    rate: item.rate,
+    amount: item.amount,
+    sortOrder: index,
+  }));
+  
+  if (invoiceItems.length > 0) {
+    for (const item of invoiceItems) {
+      await createLineItem(item);
+    }
+  }
+  
+  // Update estimate status
+  await updateEstimate(estimateId, userId, {
+    status: 'converted',
+    convertedToInvoiceId: invoice.id,
+    convertedAt: new Date(),
+  });
+  
+  return { invoiceId: invoice.id, invoiceNumber: invoice.invoiceNumber };
+}
+
+/**
+ * Check and update expired estimates
+ */
+export async function updateExpiredEstimates(userId: number) {
+  const db = await getDb();
+  if (!db) return;
+  
+  const now = new Date();
+  
+  await db.update(estimates)
+    .set({ status: 'expired' })
+    .where(
+      and(
+        eq(estimates.userId, userId),
+        sql`${estimates.status} IN ('draft', 'sent', 'viewed')`,
+        lt(estimates.validUntil, now)
+      )
+    );
 }

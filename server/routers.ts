@@ -112,6 +112,58 @@ export const appRouter = router({
         return { success: true };
       }),
     
+    // Bulk import clients from CSV
+    import: protectedProcedure
+      .input(z.object({
+        clients: z.array(z.object({
+          name: z.string(),
+          email: z.string().optional(),
+          companyName: z.string().optional(),
+          address: z.string().optional(),
+          phone: z.string().optional(),
+          notes: z.string().optional(),
+          vatNumber: z.string().optional(),
+        })),
+        skipDuplicates: z.boolean().optional().default(true),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        // Check for existing clients by email to detect duplicates
+        const emails = input.clients
+          .filter(c => c.email)
+          .map(c => c.email!.toLowerCase());
+        
+        const existingClients = await db.getClientsByEmails(ctx.user.id, emails);
+        const existingEmails = new Set(existingClients.map(c => c.email?.toLowerCase()));
+        
+        // Filter out duplicates if requested
+        const clientsToImport = input.skipDuplicates
+          ? input.clients.filter(c => !c.email || !existingEmails.has(c.email.toLowerCase()))
+          : input.clients;
+        
+        // Prepare client data for bulk insert
+        const clientsData = clientsToImport.map(c => ({
+          userId: ctx.user.id,
+          name: c.name,
+          email: c.email || null,
+          companyName: c.companyName || null,
+          address: c.address || null,
+          phone: c.phone || null,
+          notes: c.notes || null,
+          vatNumber: c.vatNumber || null,
+        }));
+        
+        const result = await db.bulkCreateClients(ctx.user.id, clientsData);
+        
+        return {
+          imported: result.created.length,
+          skipped: input.clients.length - clientsToImport.length,
+          errors: result.errors,
+          duplicateEmails: Array.from(existingEmails).filter(e => 
+            input.clients.some(c => c.email?.toLowerCase() === e)
+          ),
+        };
+      }),
+    
     // VIES VAT Validation
     validateVAT: protectedProcedure
       .input(z.object({
@@ -1360,6 +1412,29 @@ export const appRouter = router({
         return await db.getPaymentsByInvoice(input.invoiceId);
       }),
     
+    // Get payment summary for an invoice (total, paid, remaining)
+    getSummary: protectedProcedure
+      .input(z.object({ invoiceId: z.number() }))
+      .query(async ({ ctx, input }) => {
+        return await db.getInvoicePaymentSummary(input.invoiceId, ctx.user.id);
+      }),
+    
+    // Record a partial payment
+    recordPartial: protectedProcedure
+      .input(z.object({
+        invoiceId: z.number(),
+        amount: z.string(),
+        paymentMethod: z.enum(["manual", "bank_transfer", "check", "cash", "crypto"]),
+        paymentDate: z.date(),
+        notes: z.string().optional(),
+        cryptoCurrency: z.string().max(10).optional(),
+        cryptoNetwork: z.string().max(20).optional(),
+        cryptoTxHash: z.string().max(100).optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        return await db.recordPartialPayment(input.invoiceId, ctx.user.id, input);
+      }),
+    
     getStats: protectedProcedure
       .query(async ({ ctx }) => {
         return await db.getPaymentStats(ctx.user.id);
@@ -1926,6 +2001,169 @@ export const appRouter = router({
       .input(z.object({ currency: z.string() }))
       .query(({ input }) => {
         return { name: nowpayments.formatCurrencyName(input.currency) };
+      }),
+  }),
+
+  // Estimates/Quotes
+  estimates: router({
+    list: protectedProcedure.query(async ({ ctx }) => {
+      // Update expired estimates first
+      await db.updateExpiredEstimates(ctx.user.id);
+      return await db.getEstimatesByUserId(ctx.user.id);
+    }),
+
+    get: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .query(async ({ ctx, input }) => {
+        return await db.getEstimateById(input.id, ctx.user.id);
+      }),
+
+    generateNumber: protectedProcedure.query(async ({ ctx }) => {
+      return await db.generateEstimateNumber(ctx.user.id);
+    }),
+
+    create: protectedProcedure
+      .input(z.object({
+        clientId: z.number(),
+        estimateNumber: z.string(),
+        title: z.string().optional(),
+        currency: z.string().default("USD"),
+        subtotal: z.string(),
+        taxRate: z.string().default("0"),
+        taxAmount: z.string().default("0"),
+        discountType: z.enum(["percentage", "fixed"]).optional(),
+        discountValue: z.string().default("0"),
+        discountAmount: z.string().default("0"),
+        total: z.string(),
+        notes: z.string().optional(),
+        terms: z.string().optional(),
+        issueDate: z.date(),
+        validUntil: z.date(),
+        lineItems: z.array(z.object({
+          description: z.string(),
+          quantity: z.string(),
+          rate: z.string(),
+          amount: z.string(),
+        })),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const { lineItems, ...estimateData } = input;
+        
+        // Create estimate
+        const estimate = await db.createEstimate({
+          userId: ctx.user.id,
+          ...estimateData,
+        });
+        
+        // Create line items
+        if (lineItems.length > 0) {
+          await db.createEstimateLineItems(
+            lineItems.map((item, index) => ({
+              estimateId: estimate.id,
+              description: item.description,
+              quantity: item.quantity,
+              rate: item.rate,
+              amount: item.amount,
+              sortOrder: index,
+            }))
+          );
+        }
+        
+        return estimate;
+      }),
+
+    update: protectedProcedure
+      .input(z.object({
+        id: z.number(),
+        clientId: z.number().optional(),
+        title: z.string().nullable().optional(),
+        status: z.enum(["draft", "sent", "viewed", "accepted", "rejected", "expired", "converted"]).optional(),
+        currency: z.string().optional(),
+        subtotal: z.string().optional(),
+        taxRate: z.string().optional(),
+        taxAmount: z.string().optional(),
+        discountType: z.enum(["percentage", "fixed"]).optional(),
+        discountValue: z.string().optional(),
+        discountAmount: z.string().optional(),
+        total: z.string().optional(),
+        notes: z.string().nullable().optional(),
+        terms: z.string().nullable().optional(),
+        issueDate: z.date().optional(),
+        validUntil: z.date().optional(),
+        lineItems: z.array(z.object({
+          description: z.string(),
+          quantity: z.string(),
+          rate: z.string(),
+          amount: z.string(),
+        })).optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const { id, lineItems, ...data } = input;
+        
+        // Update estimate
+        await db.updateEstimate(id, ctx.user.id, data);
+        
+        // Update line items if provided
+        if (lineItems) {
+          await db.deleteEstimateLineItems(id);
+          if (lineItems.length > 0) {
+            await db.createEstimateLineItems(
+              lineItems.map((item, index) => ({
+                estimateId: id,
+                description: item.description,
+                quantity: item.quantity,
+                rate: item.rate,
+                amount: item.amount,
+                sortOrder: index,
+              }))
+            );
+          }
+        }
+        
+        return { success: true };
+      }),
+
+    delete: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ ctx, input }) => {
+        await db.deleteEstimate(input.id, ctx.user.id);
+        return { success: true };
+      }),
+
+    convertToInvoice: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ ctx, input }) => {
+        return await db.convertEstimateToInvoice(input.id, ctx.user.id);
+      }),
+
+    markAsSent: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ ctx, input }) => {
+        await db.updateEstimate(input.id, ctx.user.id, {
+          status: 'sent',
+          sentAt: new Date(),
+        });
+        return { success: true };
+      }),
+
+    markAsAccepted: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ ctx, input }) => {
+        await db.updateEstimate(input.id, ctx.user.id, {
+          status: 'accepted',
+          acceptedAt: new Date(),
+        });
+        return { success: true };
+      }),
+
+    markAsRejected: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ ctx, input }) => {
+        await db.updateEstimate(input.id, ctx.user.id, {
+          status: 'rejected',
+          rejectedAt: new Date(),
+        });
+        return { success: true };
       }),
   }),
 });

@@ -31,6 +31,10 @@ const Templates = lazy(() => import("./pages/Templates"));
 const Expenses = lazy(() => import("./pages/Expenses"));
 const Payments = lazy(() => import("./pages/Payments"));
 const Products = lazy(() => import("./pages/Products"));
+const Estimates = lazy(() => import("./pages/Estimates"));
+const CreateEstimate = lazy(() => import("./pages/CreateEstimate"));
+const ViewEstimate = lazy(() => import("./pages/ViewEstimate"));
+const EditEstimate = lazy(() => import("./pages/EditEstimate"));
 
 // Loading fallback component
 function LoadingFallback() {
@@ -71,6 +75,10 @@ function Router() {
         <Route path={"/expenses"} component={Expenses} />
         <Route path={"/payments"} component={Payments} />
         <Route path={"/products"} component={Products} />
+        <Route path={"/estimates"} component={Estimates} />
+        <Route path={"/estimates/create"} component={CreateEstimate} />
+        <Route path={"/estimates/:id/edit"} component={EditEstimate} />
+        <Route path={"/estimates/:id"} component={ViewEstimate} />
         
         {/* 404 - eager loaded */}
         <Route path={"/404"} component={NotFound} />

@@ -661,3 +661,73 @@ export const products = mysqlTable("products", {
 
 export type Product = typeof products.$inferSelect;
 export type InsertProduct = typeof products.$inferInsert;
+
+
+/**
+ * Estimates/Quotes table for pre-invoice proposals
+ * Estimates can be converted to invoices when accepted
+ */
+export const estimates = mysqlTable("estimates", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  clientId: int("clientId").notNull(),
+  
+  // Estimate identification
+  estimateNumber: varchar("estimateNumber", { length: 50 }).notNull(),
+  
+  // Status tracking
+  status: mysqlEnum("status", ["draft", "sent", "viewed", "accepted", "rejected", "expired", "converted"]).default("draft").notNull(),
+  
+  // Financial details - DECIMAL(24,8) for crypto precision
+  currency: varchar("currency", { length: 3 }).default("USD").notNull(),
+  subtotal: decimal("subtotal", { precision: 24, scale: 8 }).notNull(),
+  taxRate: decimal("taxRate", { precision: 5, scale: 2 }).default("0").notNull(),
+  taxAmount: decimal("taxAmount", { precision: 24, scale: 8 }).default("0").notNull(),
+  discountType: mysqlEnum("discountType", ["percentage", "fixed"]).default("percentage"),
+  discountValue: decimal("discountValue", { precision: 24, scale: 8 }).default("0").notNull(),
+  discountAmount: decimal("discountAmount", { precision: 24, scale: 8 }).default("0").notNull(),
+  total: decimal("total", { precision: 24, scale: 8 }).notNull(),
+  
+  // Estimate details
+  title: varchar("title", { length: 255 }), // Optional title/subject
+  notes: text("notes"),
+  terms: text("terms"), // Terms and conditions
+  
+  // Template reference (optional - uses default if not specified)
+  templateId: int("templateId"),
+  
+  // Dates
+  issueDate: timestamp("issueDate").notNull(),
+  validUntil: timestamp("validUntil").notNull(), // Expiration date
+  sentAt: timestamp("sentAt"),
+  viewedAt: timestamp("viewedAt"),
+  acceptedAt: timestamp("acceptedAt"),
+  rejectedAt: timestamp("rejectedAt"),
+  
+  // Conversion tracking
+  convertedToInvoiceId: int("convertedToInvoiceId"), // Reference to created invoice
+  convertedAt: timestamp("convertedAt"),
+  
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type Estimate = typeof estimates.$inferSelect;
+export type InsertEstimate = typeof estimates.$inferInsert;
+
+/**
+ * Estimate line items
+ */
+export const estimateLineItems = mysqlTable("estimateLineItems", {
+  id: int("id").autoincrement().primaryKey(),
+  estimateId: int("estimateId").notNull(),
+  description: text("description").notNull(),
+  quantity: decimal("quantity", { precision: 24, scale: 8 }).notNull(),
+  rate: decimal("rate", { precision: 24, scale: 8 }).notNull(),
+  amount: decimal("amount", { precision: 24, scale: 8 }).notNull(),
+  sortOrder: int("sortOrder").default(0).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type EstimateLineItem = typeof estimateLineItems.$inferSelect;
+export type InsertEstimateLineItem = typeof estimateLineItems.$inferInsert;

@@ -49,6 +49,8 @@ import { Link, useLocation, useParams } from "wouter";
 import { toast } from "sonner";
 import { Navigation } from "@/components/Navigation";
 import { CryptoPaymentDialog } from "@/components/payments/CryptoPaymentDialog";
+import { PartialPaymentDialog } from "@/components/payments/PartialPaymentDialog";
+import { DollarSign } from "lucide-react";
 
 export default function ViewInvoice() {
   const { user, loading, isAuthenticated } = useAuth();
@@ -58,6 +60,7 @@ export default function ViewInvoice() {
 
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [cryptoDialogOpen, setCryptoDialogOpen] = useState(false);
+  const [partialPaymentDialogOpen, setPartialPaymentDialogOpen] = useState(false);
 
   const { data, isLoading, error } = trpc.invoices.get.useQuery(
     { id: invoiceId },
@@ -265,6 +268,17 @@ export default function ViewInvoice() {
               >
                 <Bitcoin className="h-4 w-4 mr-2" />
                 Pay with Crypto
+              </Button>
+            )}
+            {(invoice.status === "sent" || invoice.status === "overdue" || invoice.status === "viewed") && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setPartialPaymentDialogOpen(true)}
+                className="text-green-600 hover:text-green-700 hover:bg-green-50"
+              >
+                <DollarSign className="h-4 w-4 mr-2" />
+                Record Payment
               </Button>
             )}
             {(invoice.status === "sent" || invoice.status === "overdue") && (
@@ -513,6 +527,20 @@ export default function ViewInvoice() {
         amount={parseFloat(invoice?.total || '0') - parseFloat(invoice?.amountPaid || '0')}
         currency={invoice?.currency || 'USD'}
         onPaymentCreated={() => utils.invoices.get.invalidate({ id: invoiceId })}
+      />
+
+      {/* Partial Payment Dialog */}
+      <PartialPaymentDialog
+        open={partialPaymentDialogOpen}
+        onOpenChange={setPartialPaymentDialogOpen}
+        invoiceId={invoiceId}
+        invoiceNumber={invoice.invoiceNumber}
+        total={parseFloat(invoice.total)}
+        currency={invoice.currency}
+        onSuccess={() => {
+          utils.invoices.get.invalidate({ id: invoiceId });
+          utils.invoices.list.invalidate();
+        }}
       />
     </div>
   );
