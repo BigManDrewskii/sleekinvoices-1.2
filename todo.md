@@ -891,3 +891,15 @@
 - [x] 2.14 Update getStatus query with daysRemaining and timeRemaining
 - [x] 2.15 Write unit tests for pricing calculations
 - [x] 2.16 Write unit tests for subscription date utilities
+
+
+## Phase 3: Frontend UI - Crypto Subscription Duration Selector
+
+- [x] 3.1 Create CryptoDurationSelector component with pricing tier cards
+- [x] 3.2 Add savings percentage badges and visual indicators
+- [x] 3.3 Update CryptoSubscriptionDialog to use duration selector
+- [x] 3.4 Add network selection (BSC, Polygon, Ethereum)
+- [x] 3.5 Update Subscription page with "Extend with Crypto" for Pro users
+- [x] 3.6 Add subscription end date display for crypto subscribers
+- [x] 3.7 Add expiring soon warning banner
+- [x] 3.8 Test duration selection and checkout flow

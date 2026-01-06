@@ -229,3 +229,146 @@ export function getRemainingInvoices(currentMonthCount: number): number {
   const remaining = limit - currentMonthCount;
   return Math.max(0, remaining);
 }
+
+
+/**
+ * ============================================================================
+ * CRYPTO SUBSCRIPTION TIERS
+ * ============================================================================
+ * 
+ * Mullvad-style duration-based pricing for crypto payments.
+ * Crypto payments offer discounted rates compared to card payments.
+ * 
+ * Card Price: $12/month
+ * Crypto Prices: $10/month (1mo) down to $8.50/month (12mo)
+ */
+
+/**
+ * Card price per month (baseline for savings calculation)
+ */
+export const CARD_PRICE_PER_MONTH = SUBSCRIPTION_PLANS.PRO.price; // $12
+
+/**
+ * Crypto subscription tier configuration
+ */
+export interface CryptoSubscriptionTier {
+  /** Duration in months */
+  months: number;
+  /** Display label */
+  label: string;
+  /** Price per month in USD */
+  pricePerMonth: number;
+  /** Total price in USD */
+  totalPrice: number;
+  /** Savings percentage compared to card price */
+  savingsPercent: number;
+  /** Whether this tier is recommended/popular */
+  recommended?: boolean;
+}
+
+/**
+ * Crypto subscription pricing tiers
+ * 
+ * Pricing Strategy:
+ * - 1 month:  $10.00/mo = $10.00 total  (17% savings vs $12 card)
+ * - 3 months: $9.50/mo  = $28.50 total  (21% savings vs $36 card)
+ * - 6 months: $9.00/mo  = $54.00 total  (25% savings vs $72 card)
+ * - 12 months: $8.50/mo = $102.00 total (29% savings vs $144 card)
+ */
+export const CRYPTO_SUBSCRIPTION_TIERS = {
+  MONTHLY: {
+    months: 1,
+    label: '1 Month',
+    pricePerMonth: 10.00,
+    totalPrice: 10.00,
+    savingsPercent: 17,
+  },
+  QUARTERLY: {
+    months: 3,
+    label: '3 Months',
+    pricePerMonth: 9.50,
+    totalPrice: 28.50,
+    savingsPercent: 21,
+    recommended: true,
+  },
+  BIANNUAL: {
+    months: 6,
+    label: '6 Months',
+    pricePerMonth: 9.00,
+    totalPrice: 54.00,
+    savingsPercent: 25,
+  },
+  ANNUAL: {
+    months: 12,
+    label: '12 Months',
+    pricePerMonth: 8.50,
+    totalPrice: 102.00,
+    savingsPercent: 29,
+  },
+} as const;
+
+/**
+ * Get crypto tier by duration in months
+ * 
+ * @param months - Duration in months (1, 3, 6, or 12)
+ * @returns Tier configuration or null if invalid
+ */
+export function getCryptoTierByMonths(months: number): CryptoSubscriptionTier | null {
+  const tiers = Object.values(CRYPTO_SUBSCRIPTION_TIERS);
+  return tiers.find(tier => tier.months === months) || null;
+}
+
+/**
+ * Get all crypto tiers sorted by duration
+ * 
+ * @returns Array of all tiers sorted by months ascending
+ */
+export function getAllCryptoTiers(): CryptoSubscriptionTier[] {
+  return Object.values(CRYPTO_SUBSCRIPTION_TIERS).sort((a, b) => a.months - b.months);
+}
+
+/**
+ * Get crypto price for a given duration
+ * 
+ * @param months - Duration in months
+ * @returns Total price in USD or 0 if invalid
+ */
+export function getCryptoPrice(months: number): number {
+  const tier = getCryptoTierByMonths(months);
+  return tier?.totalPrice || 0;
+}
+
+/**
+ * Get savings amount compared to card price
+ * 
+ * @param months - Duration in months
+ * @returns Savings in USD or 0 if invalid
+ */
+export function getCryptoSavings(months: number): number {
+  const tier = getCryptoTierByMonths(months);
+  if (!tier) return 0;
+  
+  const cardTotal = CARD_PRICE_PER_MONTH * months;
+  return cardTotal - tier.totalPrice;
+}
+
+/**
+ * Get savings percentage for a given duration
+ * 
+ * @param months - Duration in months
+ * @returns Savings percentage or 0 if invalid
+ */
+export function getCryptoSavingsPercent(months: number): number {
+  const tier = getCryptoTierByMonths(months);
+  return tier?.savingsPercent || 0;
+}
+
+/**
+ * Check if a duration is valid for crypto subscription
+ * 
+ * @param months - Duration to validate
+ * @returns true if valid (1, 3, 6, or 12)
+ */
+export function isValidCryptoDuration(months: number): boolean {
+  return [1, 3, 6, 12].includes(months);
+}

@@ -610,10 +610,14 @@ export const cryptoSubscriptionPayments = mysqlTable("cryptoSubscriptionPayments
   payCurrency: varchar("payCurrency", { length: 10 }).notNull(),
   payAmount: decimal("payAmount", { precision: 24, scale: 8 }).notNull(),
   
+  // Duration info
+  months: int("months").notNull().default(1),
+  isExtension: boolean("isExtension").notNull().default(false),
+  
   // Tracking
   confirmedAt: timestamp("confirmedAt"),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
-  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow(),
 });
 
 export type CryptoSubscriptionPayment = typeof cryptoSubscriptionPayments.$inferSelect;

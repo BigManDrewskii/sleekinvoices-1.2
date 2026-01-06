@@ -2452,6 +2452,8 @@ export async function createCryptoSubscriptionPayment(data: {
   priceCurrency: string;
   payCurrency: string;
   payAmount: string;
+  months?: number;
+  isExtension?: boolean;
 }) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
@@ -2464,6 +2466,8 @@ export async function createCryptoSubscriptionPayment(data: {
     priceCurrency: data.priceCurrency,
     payCurrency: data.payCurrency,
     payAmount: data.payAmount,
+    months: data.months ?? 1,
+    isExtension: data.isExtension ?? false,
   });
 
   return { success: true };

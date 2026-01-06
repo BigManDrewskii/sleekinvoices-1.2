@@ -1474,22 +1474,39 @@ export const appRouter = router({
      */
     createCryptoCheckout: protectedProcedure
       .input(z.object({
+        months: z.number().refine(m => [1, 3, 6, 12].includes(m), {
+          message: 'Duration must be 1, 3, 6, or 12 months',
+        }).default(1),
         payCurrency: z.string().default('btc'),
       }))
       .mutation(async ({ ctx, input }) => {
-        const { SUBSCRIPTION_PLANS } = await import('../shared/subscription.js');
+        const { getCryptoPrice, isValidCryptoDuration } = await import('../shared/subscription.js');
+        
+        // Validate duration
+        if (!isValidCryptoDuration(input.months)) {
+          throw new Error('Invalid subscription duration');
+        }
+        
+        // Get crypto price for the selected duration
+        const priceAmount = getCryptoPrice(input.months);
+        if (priceAmount === 0) {
+          throw new Error('Invalid subscription duration');
+        }
         
         // Create NOWPayments payment for Pro subscription
         const protocol = ctx.req.protocol || 'https';
         const host = ctx.req.get('host') || 'localhost:3000';
         const baseUrl = `${protocol}://${host}`;
         
+        // Include months in orderId for webhook processing
+        const orderId = `sub_${ctx.user.id}_${input.months}mo_${Date.now()}`;
+        
         const payment = await nowpayments.createPayment({
-          priceAmount: SUBSCRIPTION_PLANS.PRO.price,
+          priceAmount,
           priceCurrency: 'usd',
           payCurrency: input.payCurrency,
-          orderId: `sub_${ctx.user.id}_${Date.now()}`,
-          orderDescription: `SleekInvoices Pro Subscription - ${ctx.user.email}`,
+          orderId,
+          orderDescription: `SleekInvoices Pro - ${input.months} month${input.months > 1 ? 's' : ''} - ${ctx.user.email}`,
           ipnCallbackUrl: `${baseUrl}/api/webhooks/nowpayments`,
           successUrl: `${baseUrl}/subscription/success?crypto=true`,
           cancelUrl: `${baseUrl}/subscription`,
@@ -1500,10 +1517,74 @@ export const appRouter = router({
           userId: ctx.user.id,
           paymentId: payment.payment_id,
           paymentStatus: payment.payment_status,
-          priceAmount: SUBSCRIPTION_PLANS.PRO.price.toString(),
+          priceAmount: priceAmount.toString(),
           priceCurrency: 'usd',
           payCurrency: input.payCurrency,
           payAmount: payment.pay_amount?.toString() || '0',
+          months: input.months,
+          isExtension: false,
+        });
+        
+        return {
+          paymentUrl: payment.invoice_url || '',
+          paymentId: payment.payment_id,
+          cryptoAmount: payment.pay_amount?.toString() || '0',
+          cryptoCurrency: input.payCurrency,
+        };
+      }),
+    
+    /**
+     * Extend an existing Pro subscription with crypto payment
+     * For users who already have an active subscription
+     */
+    extendCryptoSubscription: protectedProcedure
+      .input(z.object({
+        months: z.number().refine(m => [1, 3, 6, 12].includes(m), {
+          message: 'Duration must be 1, 3, 6, or 12 months',
+        }),
+        payCurrency: z.string().default('btc'),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const { getCryptoPrice, isPro } = await import('../shared/subscription.js');
+        
+        // User must be Pro to extend
+        if (!isPro(ctx.user.subscriptionStatus)) {
+          throw new Error('Only Pro subscribers can extend their subscription');
+        }
+        
+        const priceAmount = getCryptoPrice(input.months);
+        if (priceAmount === 0) {
+          throw new Error('Invalid subscription duration');
+        }
+        
+        const protocol = ctx.req.protocol || 'https';
+        const host = ctx.req.get('host') || 'localhost:3000';
+        const baseUrl = `${protocol}://${host}`;
+        
+        // Include 'ext' in orderId to mark as extension
+        const orderId = `sub_${ctx.user.id}_${input.months}mo_ext_${Date.now()}`;
+        
+        const payment = await nowpayments.createPayment({
+          priceAmount,
+          priceCurrency: 'usd',
+          payCurrency: input.payCurrency,
+          orderId,
+          orderDescription: `SleekInvoices Pro Extension - ${input.months} month${input.months > 1 ? 's' : ''} - ${ctx.user.email}`,
+          ipnCallbackUrl: `${baseUrl}/api/webhooks/nowpayments`,
+          successUrl: `${baseUrl}/subscription/success?crypto=true&extended=true`,
+          cancelUrl: `${baseUrl}/subscription`,
+        });
+        
+        await db.createCryptoSubscriptionPayment({
+          userId: ctx.user.id,
+          paymentId: payment.payment_id,
+          paymentStatus: payment.payment_status,
+          priceAmount: priceAmount.toString(),
+          priceCurrency: 'usd',
+          payCurrency: input.payCurrency,
+          payAmount: payment.pay_amount?.toString() || '0',
+          months: input.months,
+          isExtension: true,
         });
         
         return {

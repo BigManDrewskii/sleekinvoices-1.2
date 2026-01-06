@@ -3,17 +3,28 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { getLoginUrl } from "@/const";
 import { trpc } from "@/lib/trpc";
-import { FileText, Check, CreditCard, ExternalLink, Bitcoin } from "lucide-react";
+import { 
+  FileText, 
+  Check, 
+  CreditCard, 
+  ExternalLink, 
+  Bitcoin, 
+  Clock, 
+  AlertTriangle,
+  Sparkles,
+  Calendar,
+} from "lucide-react";
 import { Link } from "wouter";
 import { useState } from "react";
 import { toast } from "sonner";
-import { SUBSCRIPTION_PLANS } from "@shared/subscription";
+import { SUBSCRIPTION_PLANS, getAllCryptoTiers } from "@shared/subscription";
 import { Navigation } from "@/components/Navigation";
 import { CryptoSubscriptionDialog } from "@/components/subscription/CryptoSubscriptionDialog";
 
 export default function Subscription() {
   const { user, loading, isAuthenticated } = useAuth();
   const [cryptoDialogOpen, setCryptoDialogOpen] = useState(false);
+  const [isExtendMode, setIsExtendMode] = useState(false);
 
   const { data: subscriptionStatus, isLoading: statusLoading } = trpc.subscription.getStatus.useQuery(
     undefined,
@@ -42,7 +53,6 @@ export default function Subscription() {
   const syncStatus = trpc.subscription.syncStatus.useMutation({
     onSuccess: (data) => {
       toast.success(data.message);
-      // Refresh subscription status
       utils.subscription.getStatus.invalidate();
       utils.auth.me.invalidate();
     },
@@ -63,6 +73,11 @@ export default function Subscription() {
     syncStatus.mutate();
   };
 
+  const handleOpenCryptoDialog = (extend: boolean = false) => {
+    setIsExtendMode(extend);
+    setCryptoDialogOpen(true);
+  };
+
   if (loading || statusLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
@@ -81,6 +96,10 @@ export default function Subscription() {
     ? new Date(subscriptionStatus.currentPeriodEnd).toLocaleDateString()
     : null;
 
+  // Get crypto tier info for display
+  const cryptoTiers = getAllCryptoTiers();
+  const lowestCryptoPrice = cryptoTiers[0]?.pricePerMonth || 10;
+
   return (
     <div className="min-h-screen bg-background">
       <Navigation />
@@ -97,7 +116,7 @@ export default function Subscription() {
             </p>
           </div>
 
-          {/* Current Status */}
+          {/* Current Status - Active Subscription */}
           {isActive && (
             <Card className="mb-8 border-primary">
               <CardHeader>
@@ -113,17 +132,17 @@ export default function Subscription() {
                     <strong>Plan:</strong> {SUBSCRIPTION_PLANS.PRO.name} (${SUBSCRIPTION_PLANS.PRO.price}/month)
                   </p>
                   {currentPeriodEnd && (
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-sm text-muted-foreground flex items-center gap-2">
+                      <Calendar className="h-4 w-4" />
                       <strong>Next billing date:</strong> {currentPeriodEnd}
                     </p>
                   )}
                 </div>
-                <div className="mt-6 flex gap-3">
+                <div className="mt-6 flex flex-wrap gap-3">
                   <Button
                     variant="outline"
                     onClick={handleManageBilling}
                     disabled={createPortalSession.isPending}
-                    className="flex-1"
                   >
                     {createPortalSession.isPending ? (
                       <>
@@ -153,6 +172,45 @@ export default function Subscription() {
                     )}
                   </Button>
                 </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Extend Subscription Card - For Pro Users */}
+          {isActive && (
+            <Card className="mb-8 bg-gradient-to-br from-amber-500/10 to-orange-500/10 border-amber-500/30">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Bitcoin className="h-5 w-5 text-amber-500" />
+                  Extend with Crypto
+                </CardTitle>
+                <CardDescription>
+                  Add more time to your subscription at discounted rates
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
+                  {cryptoTiers.map((tier) => (
+                    <div
+                      key={tier.months}
+                      className="bg-background/50 rounded-lg p-3 text-center border border-border/50"
+                    >
+                      <div className="text-sm font-medium">{tier.label}</div>
+                      <div className="text-lg font-bold">${tier.totalPrice}</div>
+                      <div className="text-xs text-green-500">Save {tier.savingsPercent}%</div>
+                    </div>
+                  ))}
+                </div>
+                <Button
+                  onClick={() => handleOpenCryptoDialog(true)}
+                  className="w-full bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600"
+                >
+                  <Bitcoin className="h-4 w-4 mr-2" />
+                  Extend Subscription
+                </Button>
+                <p className="text-xs text-center text-muted-foreground mt-2">
+                  Pay with BTC, ETH, USDT, and 300+ cryptocurrencies
+                </p>
               </CardContent>
             </Card>
           )}
@@ -197,20 +255,33 @@ export default function Subscription() {
             </Card>
 
             {/* Pro Plan */}
-            <Card className={isActive ? "border-primary" : ""}>
+            <Card className={isActive ? "border-primary" : "border-2 border-primary/50"}>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  Pro
-                  {isActive && (
-                    <span className="text-xs bg-primary text-primary-foreground px-2 py-1 rounded">
-                      Current
+                <div className="flex items-center justify-between">
+                  <CardTitle className="flex items-center gap-2">
+                    Pro
+                    {isActive && (
+                      <span className="text-xs bg-primary text-primary-foreground px-2 py-1 rounded">
+                        Current
+                      </span>
+                    )}
+                  </CardTitle>
+                  {!isActive && (
+                    <span className="text-xs bg-green-500/10 text-green-500 px-2 py-1 rounded flex items-center gap-1">
+                      <Sparkles className="h-3 w-3" />
+                      Save up to 29% with crypto
                     </span>
                   )}
-                </CardTitle>
+                </div>
                 <CardDescription>Everything you need to grow</CardDescription>
                 <div className="mt-4">
                   <span className="text-4xl font-bold text-foreground">${SUBSCRIPTION_PLANS.PRO.price}</span>
-                  <span className="text-muted-foreground">/month</span>
+                  <span className="text-muted-foreground">/month with card</span>
+                  {!isActive && (
+                    <div className="text-sm text-green-500 mt-1">
+                      or from ${lowestCryptoPrice}/month with crypto
+                    </div>
+                  )}
                 </div>
               </CardHeader>
               <CardContent>
@@ -259,17 +330,17 @@ export default function Subscription() {
                       ) : (
                         <>
                           <CreditCard className="h-4 w-4 mr-2" />
-                          Pay with Card
+                          Pay with Card - ${SUBSCRIPTION_PLANS.PRO.price}/mo
                         </>
                       )}
                     </Button>
                     <Button
                       variant="outline"
-                      onClick={() => setCryptoDialogOpen(true)}
-                      className="w-full"
+                      onClick={() => handleOpenCryptoDialog(false)}
+                      className="w-full border-amber-500/50 hover:bg-amber-500/10"
                     >
-                      <Bitcoin className="h-4 w-4 mr-2" />
-                      Pay with Crypto
+                      <Bitcoin className="h-4 w-4 mr-2 text-amber-500" />
+                      Pay with Crypto - Save up to 29%
                     </Button>
                     <p className="text-xs text-center text-muted-foreground">
                       BTC, ETH, USDT, and 300+ cryptocurrencies accepted
@@ -283,6 +354,62 @@ export default function Subscription() {
               </CardContent>
             </Card>
           </div>
+
+          {/* Crypto Pricing Table - Only show for non-Pro users */}
+          {!isActive && (
+            <Card className="mt-8">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Bitcoin className="h-5 w-5 text-amber-500" />
+                  Crypto Pricing
+                </CardTitle>
+                <CardDescription>
+                  Save more when you pay with cryptocurrency
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead>
+                      <tr className="border-b">
+                        <th className="text-left py-3 px-2 text-sm font-medium text-muted-foreground">Duration</th>
+                        <th className="text-right py-3 px-2 text-sm font-medium text-muted-foreground">Card Price</th>
+                        <th className="text-right py-3 px-2 text-sm font-medium text-muted-foreground">Crypto Price</th>
+                        <th className="text-right py-3 px-2 text-sm font-medium text-muted-foreground">You Save</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {cryptoTiers.map((tier) => {
+                        const cardPrice = SUBSCRIPTION_PLANS.PRO.price * tier.months;
+                        const savings = cardPrice - tier.totalPrice;
+                        return (
+                          <tr key={tier.months} className="border-b last:border-0">
+                            <td className="py-3 px-2">
+                              <span className="font-medium">{tier.label}</span>
+                              {tier.recommended && (
+                                <span className="ml-2 text-xs bg-primary/10 text-primary px-1.5 py-0.5 rounded">
+                                  Popular
+                                </span>
+                              )}
+                            </td>
+                            <td className="text-right py-3 px-2 text-muted-foreground line-through">
+                              ${cardPrice.toFixed(2)}
+                            </td>
+                            <td className="text-right py-3 px-2 font-semibold">
+                              ${tier.totalPrice.toFixed(2)}
+                            </td>
+                            <td className="text-right py-3 px-2 text-green-500 font-medium">
+                              ${savings.toFixed(2)} ({tier.savingsPercent}%)
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
           {/* FAQ */}
           <Card className="mt-8">
@@ -310,6 +437,15 @@ export default function Subscription() {
               </div>
               <div>
                 <h3 className="font-semibold text-foreground mb-1">
+                  Why is crypto cheaper?
+                </h3>
+                <p className="text-sm text-muted-foreground">
+                  Crypto payments have lower processing fees than credit cards, so we pass those
+                  savings on to you. The longer the duration, the bigger the discount.
+                </p>
+              </div>
+              <div>
+                <h3 className="font-semibold text-foreground mb-1">
                   Is there a free trial?
                 </h3>
                 <p className="text-sm text-muted-foreground">
@@ -326,6 +462,7 @@ export default function Subscription() {
       <CryptoSubscriptionDialog
         open={cryptoDialogOpen}
         onOpenChange={setCryptoDialogOpen}
+        isExtension={isExtendMode}
       />
     </div>
   );
