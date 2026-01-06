@@ -20,6 +20,7 @@ import { toast } from "sonner";
 import { SUBSCRIPTION_PLANS, getAllCryptoTiers } from "@shared/subscription";
 import { Navigation } from "@/components/Navigation";
 import { CryptoSubscriptionDialog } from "@/components/subscription/CryptoSubscriptionDialog";
+import { ExpirationWarningBanner } from "@/components/subscription/ExpirationWarningBanner";
 
 export default function Subscription() {
   const { user, loading, isAuthenticated } = useAuth();
@@ -95,6 +96,13 @@ export default function Subscription() {
   const currentPeriodEnd = subscriptionStatus?.currentPeriodEnd
     ? new Date(subscriptionStatus.currentPeriodEnd).toLocaleDateString()
     : null;
+  
+  // Enhanced subscription info from getStatus
+  const effectiveEndDate = subscriptionStatus?.effectiveEndDate;
+  const daysRemaining = subscriptionStatus?.daysRemaining ?? 0;
+  const timeRemaining = subscriptionStatus?.timeRemaining ?? '';
+  const isExpiringSoon = subscriptionStatus?.isExpiringSoon ?? false;
+  const subscriptionSource = subscriptionStatus?.subscriptionSource;
 
   // Get crypto tier info for display
   const cryptoTiers = getAllCryptoTiers();
@@ -116,6 +124,15 @@ export default function Subscription() {
             </p>
           </div>
 
+          {/* Expiration Warning Banner */}
+          {isActive && isExpiringSoon && (
+            <ExpirationWarningBanner
+              daysRemaining={daysRemaining}
+              timeRemaining={timeRemaining}
+              effectiveEndDate={effectiveEndDate ?? null}
+            />
+          )}
+
           {/* Current Status - Active Subscription */}
           {isActive && (
             <Card className="mb-8 border-primary">
@@ -124,7 +141,15 @@ export default function Subscription() {
                   <Check className="h-5 w-5 text-green-500" />
                   Active Subscription
                 </CardTitle>
-                <CardDescription>Your Pro subscription is active</CardDescription>
+                <CardDescription>
+                  Your Pro subscription is active
+                  {subscriptionSource === 'crypto' && (
+                    <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-amber-500/20 text-amber-500">
+                      <Bitcoin className="h-3 w-3 mr-1" />
+                      Crypto
+                    </span>
+                  )}
+                </CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-2">
@@ -135,6 +160,20 @@ export default function Subscription() {
                     <p className="text-sm text-muted-foreground flex items-center gap-2">
                       <Calendar className="h-4 w-4" />
                       <strong>Next billing date:</strong> {currentPeriodEnd}
+                    </p>
+                  )}
+                  {subscriptionSource === 'crypto' && effectiveEndDate && (
+                    <p className="text-sm text-muted-foreground flex items-center gap-2">
+                      <Clock className="h-4 w-4" />
+                      <strong>Subscription ends:</strong>{' '}
+                      {new Date(effectiveEndDate).toLocaleDateString('en-US', {
+                        month: 'long',
+                        day: 'numeric',
+                        year: 'numeric',
+                      })}
+                      <span className={`ml-2 ${isExpiringSoon ? 'text-amber-500' : 'text-green-500'}`}>
+                        ({timeRemaining})
+                      </span>
                     </p>
                   )}
                 </div>

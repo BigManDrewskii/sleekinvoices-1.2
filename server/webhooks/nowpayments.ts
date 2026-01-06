@@ -10,6 +10,8 @@ import * as nowpayments from '../lib/nowpayments';
 import * as db from '../db';
 import { invoices, payments, users, cryptoSubscriptionPayments } from '../../drizzle/schema';
 import { eq, and, sql } from 'drizzle-orm';
+import { calculateExtendedEndDate, calculateNewEndDate } from '../lib/subscription-utils';
+import { sendSubscriptionConfirmationEmail } from '../lib/email-notifications';
 
 const router = Router();
 
@@ -31,6 +33,39 @@ interface IPNPayload {
   outcome_currency: string;
 }
 
+/**
+ * Parse subscription order_id to extract userId, months, and isExtension
+ * Format: sub_{userId}_{months}mo_{timestamp} or sub_{userId}_{months}mo_ext_{timestamp}
+ * Legacy format: sub_{userId}_{timestamp} (defaults to 1 month)
+ */
+function parseSubscriptionOrderId(orderId: string): {
+  userId: number;
+  months: number;
+  isExtension: boolean;
+} | null {
+  // New format: sub_{userId}_{months}mo_{timestamp} or sub_{userId}_{months}mo_ext_{timestamp}
+  const newFormatMatch = orderId.match(/^sub_(\d+)_(\d+)mo(?:_(ext))?_(\d+)$/);
+  if (newFormatMatch) {
+    return {
+      userId: parseInt(newFormatMatch[1], 10),
+      months: parseInt(newFormatMatch[2], 10),
+      isExtension: newFormatMatch[3] === 'ext',
+    };
+  }
+  
+  // Legacy format: sub_{userId}_{timestamp} (defaults to 1 month)
+  const legacyMatch = orderId.match(/^sub_(\d+)_(\d+)$/);
+  if (legacyMatch) {
+    return {
+      userId: parseInt(legacyMatch[1], 10),
+      months: 1,
+      isExtension: false,
+    };
+  }
+  
+  return null;
+}
+
 router.post('/nowpayments', async (req: Request, res: Response) => {
   try {
     const signature = req.headers['x-nowpayments-sig'] as string;
@@ -48,11 +83,10 @@ router.post('/nowpayments', async (req: Request, res: Response) => {
       return res.status(401).json({ error: 'Invalid signature' });
     }
 
-    // Check if this is a subscription payment (format: sub_{userId}_{timestamp})
-    const subMatch = payload.order_id?.match(/^sub_(\d+)_/);
-    if (subMatch) {
-      // Handle subscription payment
-      return await handleSubscriptionPayment(payload, res);
+    // Check if this is a subscription payment
+    const subData = parseSubscriptionOrderId(payload.order_id || '');
+    if (subData) {
+      return await handleSubscriptionPayment(payload, subData, res);
     }
 
     // Extract invoice ID from order_id (format: INV-{invoiceId}-{timestamp})
@@ -157,13 +191,13 @@ router.post('/nowpayments', async (req: Request, res: Response) => {
 /**
  * Handle subscription payment from NOWPayments
  */
-async function handleSubscriptionPayment(payload: IPNPayload, res: Response) {
-  const userIdMatch = payload.order_id?.match(/^sub_(\d+)_/);
-  if (!userIdMatch) {
-    return res.status(400).json({ error: 'Invalid subscription order_id' });
-  }
-
-  const userId = parseInt(userIdMatch[1], 10);
+async function handleSubscriptionPayment(
+  payload: IPNPayload,
+  subData: { userId: number; months: number; isExtension: boolean },
+  res: Response
+) {
+  const { userId, months, isExtension } = subData;
+  
   const database = await db.getDb();
   if (!database) {
     return res.status(500).json({ error: 'Database not available' });
@@ -172,6 +206,8 @@ async function handleSubscriptionPayment(payload: IPNPayload, res: Response) {
   const status = payload.payment_status;
   console.log('[NOWPayments IPN] Processing subscription payment:', {
     userId,
+    months,
+    isExtension,
     status,
     paymentId: payload.payment_id,
   });
@@ -184,17 +220,68 @@ async function handleSubscriptionPayment(payload: IPNPayload, res: Response) {
   );
 
   if (nowpayments.isPaymentComplete(status)) {
-    // Activate Pro subscription
+    // Get current user to calculate end date
+    const [user] = await database
+      .select()
+      .from(users)
+      .where(eq(users.id, userId));
+
+    if (!user) {
+      console.error('[NOWPayments IPN] User not found:', userId);
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    // Calculate new subscription end date
+    let newEndDate: Date;
+    
+    if (isExtension && user.subscriptionStatus === 'active') {
+      // Extension: add months to existing end date
+      newEndDate = calculateExtendedEndDate({
+        currentPeriodEnd: user.currentPeriodEnd,
+        subscriptionEndDate: user.subscriptionEndDate,
+      }, months);
+    } else {
+      // New subscription: start from now
+      newEndDate = calculateNewEndDate(months);
+    }
+
+    // Update user subscription
     await database
       .update(users)
       .set({
         subscriptionStatus: 'active',
-        // Set period end to 30 days from now
-        currentPeriodEnd: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+        subscriptionEndDate: newEndDate,
+        subscriptionSource: 'crypto',
+        // Also update currentPeriodEnd for compatibility
+        currentPeriodEnd: newEndDate,
       })
       .where(eq(users.id, userId));
 
-    console.log('[NOWPayments IPN] Pro subscription activated for user:', userId);
+    console.log('[NOWPayments IPN] Subscription activated:', {
+      userId,
+      months,
+      isExtension,
+      newEndDate: newEndDate.toISOString(),
+    });
+
+    // Send confirmation email
+    try {
+      await sendSubscriptionConfirmationEmail({
+        userEmail: user.email,
+        userName: user.name || 'Valued Customer',
+        months,
+        isExtension,
+        endDate: newEndDate,
+        amountPaid: payload.price_amount,
+        currency: payload.price_currency.toUpperCase(),
+        cryptoCurrency: payload.pay_currency.toUpperCase(),
+        cryptoAmount: payload.actually_paid || payload.pay_amount,
+      });
+      console.log('[NOWPayments IPN] Confirmation email sent to:', user.email);
+    } catch (emailError) {
+      // Don't fail the webhook if email fails
+      console.error('[NOWPayments IPN] Failed to send confirmation email:', emailError);
+    }
   }
 
   return res.status(200).json({ success: true });

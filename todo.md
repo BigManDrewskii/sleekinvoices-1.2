@@ -903,3 +903,28 @@
 - [x] 3.6 Add subscription end date display for crypto subscribers
 - [x] 3.7 Add expiring soon warning banner
 - [x] 3.8 Test duration selection and checkout flow
+
+
+## Phase 4: Webhook, Expiration Display & Email Notifications
+
+### 4.1 NOWPayments Webhook Updates
+- [x] 4.1.1 Parse duration from order_id (format: sub_userId_Xmo_timestamp)
+- [x] 4.1.2 Calculate subscription end date based on duration
+- [x] 4.1.3 Handle extensions vs new subscriptions
+- [x] 4.1.4 Update user subscriptionEndDate and subscriptionSource
+
+### 4.2 Subscription Expiration Display
+- [x] 4.2.1 Update getStatus query to return end date info
+- [x] 4.2.2 Create ExpirationWarningBanner component
+- [x] 4.2.3 Add end date display to Subscription page
+- [x] 4.2.4 Show warning banner when expiring within 7 days
+
+### 4.3 Email Notifications
+- [x] 4.3.1 Create subscription confirmation email template
+- [x] 4.3.2 Send email on successful crypto payment
+- [x] 4.3.3 Include subscription details and end date in email
+
+### 4.4 Testing
+- [x] 4.4.1 Write webhook handler tests
+- [x] 4.4.2 Test expiration display
+- [x] 4.4.3 Test email sending

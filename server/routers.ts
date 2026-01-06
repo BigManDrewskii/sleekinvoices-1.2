@@ -1384,9 +1384,29 @@ export const appRouter = router({
   
   subscription: router({
     getStatus: protectedProcedure.query(async ({ ctx }) => {
+      const { getEffectiveEndDate, getDaysRemaining, formatTimeRemaining, isExpiringSoon, isExpired } = await import('./lib/subscription-utils.js');
+      
+      const userData = {
+        currentPeriodEnd: ctx.user.currentPeriodEnd,
+        subscriptionEndDate: ctx.user.subscriptionEndDate,
+      };
+      
+      const effectiveEndDate = getEffectiveEndDate(userData);
+      const daysRemaining = getDaysRemaining(userData);
+      const timeRemaining = formatTimeRemaining(userData);
+      const expiringSoon = isExpiringSoon(userData);
+      const expired = isExpired(userData);
+      
       return {
         status: ctx.user.subscriptionStatus,
         currentPeriodEnd: ctx.user.currentPeriodEnd,
+        subscriptionEndDate: ctx.user.subscriptionEndDate,
+        subscriptionSource: ctx.user.subscriptionSource,
+        effectiveEndDate,
+        daysRemaining,
+        timeRemaining,
+        isExpiringSoon: expiringSoon,
+        isExpired: expired,
       };
     }),
     

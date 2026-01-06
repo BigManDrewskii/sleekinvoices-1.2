@@ -24,7 +24,9 @@ export const users = mysqlTable("users", {
   subscriptionStatus: mysqlEnum("subscriptionStatus", ["free", "active", "canceled", "past_due"]).default("free").notNull(),
   subscriptionId: varchar("subscriptionId", { length: 255 }),
   currentPeriodEnd: timestamp("currentPeriodEnd"),
-  
+  subscriptionEndDate: timestamp("subscriptionEndDate"), // End date for crypto subscriptions
+  subscriptionSource: mysqlEnum("subscriptionSource", ["stripe", "crypto"]), // Payment source
+
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
   lastSignedIn: timestamp("lastSignedIn").defaultNow().notNull(),
