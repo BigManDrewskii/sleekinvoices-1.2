@@ -22,6 +22,7 @@ import { Link } from "wouter";
 import { toast } from "sonner";
 import { Navigation } from "@/components/Navigation";
 import { CSVImportDialog } from "@/components/clients/CSVImportDialog";
+import { EmptyState, EmptyStatePresets } from "@/components/EmptyState";
 import { ClientsTableSkeleton } from "@/components/skeletons";
 import { useKeyboardShortcuts } from "@/contexts/KeyboardShortcutsContext";
 
@@ -211,7 +212,7 @@ export default function Clients() {
       <Navigation />
 
       {/* Main Content */}
-      <div className="page-content">
+      <div className="page-content page-transition">
         {/* Page Header */}
         <div className="page-header">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
@@ -259,19 +260,21 @@ export default function Clients() {
             {clientsLoading ? (
               <ClientsTableSkeleton rows={8} />
             ) : !clients || clients.length === 0 ? (
-              <div className="text-center py-12">
-                <Users className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                <h3 className="text-lg font-semibold text-foreground mb-2">No clients yet</h3>
-                <p className="text-muted-foreground mb-4">Add your first client to get started</p>
-                <Button onClick={handleAddNew}>
-                  <Plus className="h-4 w-4 mr-2" />
-                  Add Client
-                </Button>
-              </div>
+              <EmptyState
+                icon={Users}
+                {...EmptyStatePresets.clients}
+                action={{
+                  label: "Add Client",
+                  onClick: handleAddNew,
+                  icon: Plus,
+                }}
+              />
             ) : filteredClients && filteredClients.length === 0 ? (
-              <div className="text-center py-8 text-muted-foreground">
-                No clients match your search query
-              </div>
+              <EmptyState
+                icon={Search}
+                {...EmptyStatePresets.search}
+                size="sm"
+              />
             ) : (
               <>
               {/* Desktop Table View */}

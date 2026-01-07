@@ -58,6 +58,7 @@ import { Link, useLocation } from "wouter";
 import { toast } from "sonner";
 import { Navigation } from "@/components/Navigation";
 import { CurrencyBadge } from "@/components/CurrencySelector";
+import { EmptyState, EmptyStatePresets } from "@/components/EmptyState";
 import { useKeyboardShortcuts } from "@/contexts/KeyboardShortcutsContext";
 
 interface Invoice {
@@ -439,7 +440,7 @@ export default function Invoices() {
       <Navigation />
 
       {/* Main Content */}
-      <div className="page-content">
+      <div className="page-content page-transition">
         {/* Page Header */}
         <div className="page-header">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
@@ -557,19 +558,21 @@ export default function Invoices() {
             {invoicesLoading ? (
               <InvoiceListSkeleton />
             ) : !invoices || invoices.length === 0 ? (
-              <div className="text-center py-12">
-                <File className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                <h3 className="text-lg font-semibold text-foreground mb-2">No invoices yet</h3>
-                <p className="text-muted-foreground mb-4">Create your first invoice to get started</p>
-                <Button onClick={() => setLocation("/invoices/create")}>
-                  <Plus className="h-4 w-4 mr-2" />
-                  Create Invoice
-                </Button>
-              </div>
+              <EmptyState
+                icon={FileText}
+                {...EmptyStatePresets.invoices}
+                action={{
+                  label: "Create Invoice",
+                  onClick: () => setLocation("/invoices/create"),
+                  icon: Plus,
+                }}
+              />
             ) : filteredInvoices.length === 0 ? (
-              <div className="text-center py-8 text-muted-foreground">
-                No invoices match your filters
-              </div>
+              <EmptyState
+                icon={Search}
+                {...EmptyStatePresets.search}
+                size="sm"
+              />
             ) : (
               <>
                 {/* Desktop Table View */}

@@ -14,6 +14,7 @@ import { toast } from "sonner";
 import { formatCurrency } from "@/lib/utils";
 import { PageLayout } from "@/components/layout/PageLayout";
 import { ExpensesPageSkeleton } from "@/components/skeletons/ExpensesPageSkeleton";
+import { EmptyState, EmptyStatePresets } from "@/components/EmptyState";
 import { useKeyboardShortcuts } from "@/contexts/KeyboardShortcutsContext";
 
 // Payment method display names
@@ -819,28 +820,29 @@ export default function Expenses() {
 
       {/* Expense List */}
       {!expenses || expenses.length === 0 ? (
-        <Card className="p-12 text-center">
-          <DollarSign className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
-          <h3 className="text-lg font-semibold mb-2">No expenses yet</h3>
-          <p className="text-muted-foreground mb-6">
-            Start tracking your business expenses to monitor spending
-          </p>
-          <Button onClick={() => setIsExpenseDialogOpen(true)}>
-            <Plus className="w-4 h-4 mr-2" />
-            Add Your First Expense
-          </Button>
+        <Card className="p-4">
+          <EmptyState
+            icon={Receipt}
+            {...EmptyStatePresets.expenses}
+            action={{
+              label: "Add Your First Expense",
+              onClick: () => setIsExpenseDialogOpen(true),
+              icon: Plus,
+            }}
+          />
         </Card>
       ) : filteredExpenses.length === 0 ? (
-        <Card className="p-12 text-center">
-          <Filter className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
-          <h3 className="text-lg font-semibold mb-2">No matching expenses</h3>
-          <p className="text-muted-foreground mb-6">
-            No expenses match your current filters
-          </p>
-          <Button variant="outline" onClick={clearAllFilters}>
-            <X className="w-4 h-4 mr-2" />
-            Clear Filters
-          </Button>
+        <Card className="p-4">
+          <EmptyState
+            icon={Filter}
+            title="No matching expenses"
+            description="No expenses match your current filters"
+            action={{
+              label: "Clear Filters",
+              onClick: clearAllFilters,
+            }}
+            size="sm"
+          />
         </Card>
       ) : (
         <Card>

@@ -32,7 +32,11 @@ import {
   InsertCryptoSubscriptionPayment,
   products,
   Product,
-  InsertProduct
+  InsertProduct,
+  aiCredits,
+  AiCredits,
+  aiUsageLogs,
+  InsertAiUsageLog
 } from "../drizzle/schema";
 import { ENV } from './_core/env';
 import { DEFAULT_REMINDER_TEMPLATE } from './email';
@@ -3200,4 +3204,145 @@ export async function updateExpiredEstimates(userId: number) {
         lt(estimates.validUntil, now)
       )
     );
+}
+
+
+// ============================================================================
+// AI CREDITS OPERATIONS
+// ============================================================================
+
+/**
+ * Get current month's AI credits for a user
+ * Creates a new record if one doesn't exist
+ */
+export async function getAiCredits(userId: number, isPro: boolean = false): Promise<AiCredits> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const currentMonth = new Date().toISOString().slice(0, 7); // YYYY-MM
+  const creditsLimit = isPro ? 50 : 5; // Pro gets 50, free gets 5
+  
+  // Try to get existing record
+  const existing = await db
+    .select()
+    .from(aiCredits)
+    .where(and(
+      eq(aiCredits.userId, userId),
+      eq(aiCredits.month, currentMonth)
+    ))
+    .limit(1);
+  
+  if (existing.length > 0) {
+    // Update limit if subscription status changed
+    if (existing[0].creditsLimit !== creditsLimit) {
+      await db
+        .update(aiCredits)
+        .set({ creditsLimit })
+        .where(eq(aiCredits.id, existing[0].id));
+      return { ...existing[0], creditsLimit };
+    }
+    return existing[0];
+  }
+  
+  // Create new record for this month
+  const result = await db.insert(aiCredits).values({
+    userId,
+    month: currentMonth,
+    creditsUsed: 0,
+    creditsLimit,
+  });
+  
+  const insertedId = Number(result[0].insertId);
+  const created = await db.select().from(aiCredits).where(eq(aiCredits.id, insertedId)).limit(1);
+  return created[0]!;
+}
+
+/**
+ * Check if user has available AI credits
+ */
+export async function hasAiCredits(userId: number, isPro: boolean = false): Promise<boolean> {
+  const credits = await getAiCredits(userId, isPro);
+  return credits.creditsUsed < credits.creditsLimit;
+}
+
+/**
+ * Use one AI credit
+ * Returns false if no credits available
+ */
+export async function useAiCredit(userId: number, isPro: boolean = false): Promise<boolean> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const credits = await getAiCredits(userId, isPro);
+  
+  if (credits.creditsUsed >= credits.creditsLimit) {
+    return false;
+  }
+  
+  await db
+    .update(aiCredits)
+    .set({ creditsUsed: credits.creditsUsed + 1 })
+    .where(eq(aiCredits.id, credits.id));
+  
+  return true;
+}
+
+/**
+ * Log AI usage for analytics and debugging
+ */
+export async function logAiUsage(data: {
+  userId: number;
+  feature: 'smart_compose' | 'categorization' | 'prediction';
+  inputTokens: number;
+  outputTokens: number;
+  model: string;
+  success: boolean;
+  errorMessage?: string;
+  latencyMs?: number;
+}): Promise<void> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  await db.insert(aiUsageLogs).values({
+    userId: data.userId,
+    feature: data.feature,
+    inputTokens: data.inputTokens,
+    outputTokens: data.outputTokens,
+    model: data.model,
+    success: data.success,
+    errorMessage: data.errorMessage || null,
+    latencyMs: data.latencyMs || null,
+  });
+}
+
+/**
+ * Get AI usage stats for a user
+ */
+export async function getAiUsageStats(userId: number, days: number = 30) {
+  const db = await getDb();
+  if (!db) return { totalCalls: 0, successRate: 0, avgLatency: 0 };
+  
+  const startDate = new Date();
+  startDate.setDate(startDate.getDate() - days);
+  
+  const logs = await db
+    .select()
+    .from(aiUsageLogs)
+    .where(and(
+      eq(aiUsageLogs.userId, userId),
+      gte(aiUsageLogs.createdAt, startDate)
+    ));
+  
+  const totalCalls = logs.length;
+  const successfulCalls = logs.filter(l => l.success).length;
+  const successRate = totalCalls > 0 ? (successfulCalls / totalCalls) * 100 : 0;
+  const avgLatency = totalCalls > 0 
+    ? logs.reduce((sum, l) => sum + (l.latencyMs || 0), 0) / totalCalls 
+    : 0;
+  
+  return {
+    totalCalls,
+    successRate: Math.round(successRate * 10) / 10,
+    avgLatency: Math.round(avgLatency),
+  };
 }

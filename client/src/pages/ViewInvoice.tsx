@@ -49,6 +49,7 @@ import { Link, useLocation, useParams } from "wouter";
 import { toast } from "sonner";
 import { Navigation } from "@/components/Navigation";
 import { CryptoPaymentDialog } from "@/components/payments/CryptoPaymentDialog";
+import { triggerConfetti } from "@/components/Confetti";
 import { PartialPaymentDialog } from "@/components/payments/PartialPaymentDialog";
 import { DollarSign } from "lucide-react";
 import { ViewInvoicePageSkeleton } from "@/components/skeletons";
@@ -93,6 +94,7 @@ export default function ViewInvoice() {
   const sendEmail = trpc.invoices.sendEmail.useMutation({
     onSuccess: () => {
       toast.success("Invoice sent successfully");
+      triggerConfetti.invoiceSent();
       utils.invoices.get.invalidate({ id: invoiceId });
     },
     onError: (error) => {
@@ -125,6 +127,7 @@ export default function ViewInvoice() {
   const markAsPaid = trpc.invoices.update.useMutation({
     onSuccess: () => {
       toast.success("Invoice marked as paid");
+      triggerConfetti.paymentReceived();
       utils.invoices.get.invalidate({ id: invoiceId });
       utils.invoices.list.invalidate();
     },

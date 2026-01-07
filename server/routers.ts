@@ -10,6 +10,7 @@ import { sendInvoiceEmail, sendPaymentReminderEmail } from "./email";
 import * as nowpayments from "./lib/nowpayments";
 import { storagePut } from "./storage";
 import { nanoid } from "nanoid";
+import { extractInvoiceData } from "./ai/smartCompose";
 
 export const appRouter = router({
   system: systemRouter,
@@ -2167,6 +2168,58 @@ export const appRouter = router({
         });
         return { success: true };
       }),
+  }),
+
+  // AI Features Router
+  ai: router({
+    // Get current AI credits status
+    getCredits: protectedProcedure.query(async ({ ctx }) => {
+      const isPro = ctx.user.subscriptionStatus === 'active';
+      const credits = await db.getAiCredits(ctx.user.id, isPro);
+      return {
+        used: credits.creditsUsed,
+        limit: credits.creditsLimit,
+        remaining: credits.creditsLimit - credits.creditsUsed,
+        isPro,
+      };
+    }),
+
+    // Smart Compose - Extract invoice data from natural language
+    smartCompose: protectedProcedure
+      .input(z.object({
+        text: z.string().min(3).max(2000),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const isPro = ctx.user.subscriptionStatus === 'active';
+        
+        // Get existing clients for better matching
+        const clients = await db.getClientsByUserId(ctx.user.id);
+        const clientList = clients.map(c => ({
+          id: c.id,
+          name: c.name || '',
+          email: c.email || undefined,
+        }));
+
+        const result = await extractInvoiceData(
+          input.text,
+          ctx.user.id,
+          isPro,
+          clientList
+        );
+
+        // Get updated credits
+        const credits = await db.getAiCredits(ctx.user.id, isPro);
+
+        return {
+          ...result,
+          creditsRemaining: credits.creditsLimit - credits.creditsUsed,
+        };
+      }),
+
+    // Get AI usage stats
+    getUsageStats: protectedProcedure.query(async ({ ctx }) => {
+      return await db.getAiUsageStats(ctx.user.id, 30);
+    }),
   }),
 });
 

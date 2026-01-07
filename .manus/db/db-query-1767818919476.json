@@ -1,0 +1,9 @@
+{
+  "query": "CREATE TABLE IF NOT EXISTS `aiUsageLogs` (\n  `id` int AUTO_INCREMENT NOT NULL,\n  `userId` int NOT NULL,\n  `feature` enum('smart_compose', 'categorization', 'prediction') NOT NULL,\n  `inputTokens` int NOT NULL DEFAULT 0,\n  `outputTokens` int NOT NULL DEFAULT 0,\n  `model` varchar(100) NOT NULL,\n  `success` boolean DEFAULT true NOT NULL,\n  `errorMessage` text,\n  `latencyMs` int,\n  `createdAt` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,\n  CONSTRAINT `aiUsageLogs_id` PRIMARY KEY(`id`)\n);",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user REX6DRAh92xmf1o.58be8e717db2 --database coKdAkLfsbebvczbYNFn3V --execute CREATE TABLE IF NOT EXISTS `aiUsageLogs` (\n  `id` int AUTO_INCREMENT NOT NULL,\n  `userId` int NOT NULL,\n  `feature` enum('smart_compose', 'categorization', 'prediction') NOT NULL,\n  `inputTokens` int NOT NULL DEFAULT 0,\n  `outputTokens` int NOT NULL DEFAULT 0,\n  `model` varchar(100) NOT NULL,\n  `success` boolean DEFAULT true NOT NULL,\n  `errorMessage` text,\n  `latencyMs` int,\n  `createdAt` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,\n  CONSTRAINT `aiUsageLogs_id` PRIMARY KEY(`id`)\n);",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 506
+}

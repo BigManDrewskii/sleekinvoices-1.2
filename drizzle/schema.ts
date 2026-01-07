@@ -735,3 +735,45 @@ export const estimateLineItems = mysqlTable("estimateLineItems", {
 
 export type EstimateLineItem = typeof estimateLineItems.$inferSelect;
 export type InsertEstimateLineItem = typeof estimateLineItems.$inferInsert;
+
+
+/**
+ * AI Credits tracking for Smart Compose and other AI features
+ * Free tier: 5 credits/month
+ * Pro tier: 50 credits/month
+ * Each Smart Compose = 1 credit
+ */
+export const aiCredits = mysqlTable("aiCredits", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  month: varchar("month", { length: 7 }).notNull(), // Format: YYYY-MM
+  creditsUsed: int("creditsUsed").default(0).notNull(),
+  creditsLimit: int("creditsLimit").default(5).notNull(), // 5 for free, 50 for pro
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+}, (table) => ({
+  // Unique constraint: one record per user per month
+  userMonthIdx: uniqueIndex("ai_credits_user_month_idx").on(table.userId, table.month),
+}));
+
+export type AiCredits = typeof aiCredits.$inferSelect;
+export type InsertAiCredits = typeof aiCredits.$inferInsert;
+
+/**
+ * AI Usage logs for tracking and debugging AI features
+ */
+export const aiUsageLogs = mysqlTable("aiUsageLogs", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  feature: mysqlEnum("feature", ["smart_compose", "categorization", "prediction"]).notNull(),
+  inputTokens: int("inputTokens").default(0).notNull(),
+  outputTokens: int("outputTokens").default(0).notNull(),
+  model: varchar("model", { length: 100 }).notNull(),
+  success: boolean("success").default(true).notNull(),
+  errorMessage: text("errorMessage"),
+  latencyMs: int("latencyMs"), // Response time in milliseconds
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type AiUsageLog = typeof aiUsageLogs.$inferSelect;
+export type InsertAiUsageLog = typeof aiUsageLogs.$inferInsert;

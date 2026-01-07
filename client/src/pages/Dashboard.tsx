@@ -7,6 +7,8 @@ import { DollarSign, FileText, TrendingUp, TrendingDown, AlertCircle, Plus, Arro
 import { Link } from "wouter";
 import { Navigation } from "@/components/Navigation";
 import { UpgradePromoBanner } from "@/components/UpgradePromoBanner";
+import { MagicInput } from "@/components/MagicInput";
+import { useLocation } from "wouter";
 import { MonthlyUsageCard } from "@/components/dashboard/MonthlyUsageCard";
 import { StatsGridSkeleton, RecentInvoicesSkeleton } from "@/components/dashboard/DashboardSkeleton";
 import { formatCurrency } from "@/lib/utils";
@@ -48,7 +50,7 @@ export default function Dashboard() {
       <Navigation />
 
       {/* Main Content */}
-      <div className="page-content">
+      <div className="page-content page-transition">
         <div className="section-stack">
           {/* Header */}
           <div className="page-header">
@@ -66,6 +68,9 @@ export default function Dashboard() {
               </Button>
             </div>
           </div>
+
+          {/* Magic Invoice - AI-powered quick creation */}
+          <MagicInvoiceSection />
 
           {/* Upgrade Promo Banner */}
           <UpgradePromoBanner />
@@ -233,6 +238,39 @@ export default function Dashboard() {
         </div>
       </div>
     </div>
+  );
+}
+
+function MagicInvoiceSection() {
+  const [, setLocation] = useLocation();
+  
+  const handleExtract = (data: {
+    clientName?: string;
+    clientEmail?: string;
+    lineItems: Array<{ description: string; quantity: number; rate: number }>;
+    dueDate?: string;
+    notes?: string;
+    currency?: string;
+  }) => {
+    // Navigate to create invoice with pre-filled data
+    const params = new URLSearchParams();
+    if (data.clientName) params.set('clientName', data.clientName);
+    if (data.clientEmail) params.set('clientEmail', data.clientEmail);
+    if (data.dueDate) params.set('dueDate', data.dueDate);
+    if (data.notes) params.set('notes', data.notes);
+    if (data.currency) params.set('currency', data.currency);
+    if (data.lineItems.length > 0) {
+      params.set('lineItems', JSON.stringify(data.lineItems));
+    }
+    setLocation(`/invoices/create?${params.toString()}`);
+  };
+
+  return (
+    <Card className="border-primary/20 bg-gradient-to-br from-primary/5 to-transparent">
+      <CardContent className="p-6">
+        <MagicInput onExtract={handleExtract} className="w-full" />
+      </CardContent>
+    </Card>
   );
 }
 

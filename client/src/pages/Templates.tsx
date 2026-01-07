@@ -119,7 +119,7 @@ export default function InvoiceTemplates() {
       <Navigation />
       
       {/* Page Content */}
-      <div className="page-content">
+      <div className="page-content page-transition">
         {/* Page Header */}
         <div className="page-header">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">

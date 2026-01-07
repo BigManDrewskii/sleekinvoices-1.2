@@ -16,8 +16,8 @@ import { InvoicePreviewModal } from "@/components/invoices/InvoicePreviewModal";
 import { getLoginUrl } from "@/const";
 import { trpc } from "@/lib/trpc";
 import { FileText, Plus, Save, Send, Eye } from "lucide-react";
-import { useState, useMemo } from "react";
-import { Link, useLocation } from "wouter";
+import { useState, useMemo, useEffect } from "react";
+import { Link, useLocation, useSearch } from "wouter";
 import { toast } from "sonner";
 import { nanoid } from "nanoid";
 import { Navigation } from "@/components/Navigation";
@@ -36,9 +36,11 @@ import {
 export default function CreateInvoice() {
   const { user, loading, isAuthenticated } = useAuth();
   const [, setLocation] = useLocation();
+  const searchString = useSearch();
 
   // Form state
   const [clientId, setClientId] = useState<number | null>(null);
+  const [prefillClientName, setPrefillClientName] = useState<string | null>(null);
   const [issueDate, setIssueDate] = useState<string>(
     new Date().toISOString().split('T')[0]
   );
@@ -55,6 +57,59 @@ export default function CreateInvoice() {
   const [paymentTerms, setPaymentTerms] = useState<string>('Net 30');
   const [templateId, setTemplateId] = useState<number | null>(null);
   const [currency, setCurrency] = useState<string>('USD');
+
+  // Parse URL parameters from Magic Invoice AI
+  useEffect(() => {
+    if (!searchString) return;
+    
+    const params = new URLSearchParams(searchString);
+    
+    // Pre-fill client name (for display, will need to match or create)
+    const clientName = params.get('clientName');
+    if (clientName && clientName !== 'null') {
+      setPrefillClientName(clientName);
+    }
+    
+    // Pre-fill currency
+    const urlCurrency = params.get('currency');
+    if (urlCurrency && urlCurrency !== 'null') {
+      setCurrency(urlCurrency);
+    }
+    
+    // Pre-fill due date
+    const urlDueDate = params.get('dueDate');
+    if (urlDueDate && urlDueDate !== 'null' && urlDueDate.match(/^\d{4}-\d{2}-\d{2}$/)) {
+      setDueDate(urlDueDate);
+    }
+    
+    // Pre-fill notes
+    const urlNotes = params.get('notes');
+    if (urlNotes && urlNotes !== 'null') {
+      setNotes(urlNotes);
+    }
+    
+    // Pre-fill line items
+    const lineItemsParam = params.get('lineItems');
+    if (lineItemsParam) {
+      try {
+        const parsedItems = JSON.parse(lineItemsParam) as Array<{
+          description: string;
+          quantity: number;
+          rate: number;
+        }>;
+        if (Array.isArray(parsedItems) && parsedItems.length > 0) {
+          setLineItems(parsedItems.map(item => ({
+            id: nanoid(),
+            description: item.description || '',
+            quantity: item.quantity || 1,
+            rate: item.rate || 0,
+          })));
+        }
+      } catch (e) {
+        console.error('Failed to parse line items from URL:', e);
+      }
+    }
+  }, [searchString]);
 
   // Validation errors
   const [errors, setErrors] = useState<Record<string, string>>({});
