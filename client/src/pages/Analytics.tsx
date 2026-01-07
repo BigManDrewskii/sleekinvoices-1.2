@@ -289,176 +289,162 @@ export default function Analytics() {
           {/* Key Metrics - 4 primary stat cards */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {/* Total Revenue */}
-            <Card className="border-border bg-card">
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center gap-2">
-                    <div className="p-1.5 rounded-md bg-primary/10">
-                      <DollarSign className="h-4 w-4 text-primary" />
-                    </div>
-                    <span className="text-sm text-muted-foreground">Revenue</span>
+            <div className="rounded-2xl bg-gradient-to-br from-card to-card/80 border border-border/50 p-5 backdrop-blur-sm transition-all duration-200 hover:border-border hover:shadow-lg hover:shadow-primary/5">
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary/10">
+                    <DollarSign className="h-4 w-4 text-primary" />
                   </div>
-                  {revenueChangePercent !== 0 && (
-                    <span className={`flex items-center gap-0.5 text-xs font-medium px-1.5 py-0.5 rounded ${
-                      revenueChangePercent >= 0 
-                        ? "bg-green-500/10 text-green-500" 
-                        : "bg-red-500/10 text-red-500"
-                    }`}>
-                      {revenueChangePercent >= 0 ? <ArrowUpRight className="h-3 w-3" /> : <ArrowDownRight className="h-3 w-3" />}
-                      {Math.abs(revenueChangePercent)}%
-                    </span>
-                  )}
+                  <span className="text-sm font-medium text-muted-foreground">Revenue</span>
                 </div>
-                <p className="text-2xl font-bold tracking-tight">{formatCurrency(revenueNum)}</p>
-                <p className="text-xs text-muted-foreground mt-1">
-                  {timeRangeLabels[timeRange]}
-                </p>
-              </CardContent>
-            </Card>
+                {revenueChangePercent !== 0 && (
+                  <span className={`inline-flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-full ${
+                    revenueChangePercent >= 0 
+                      ? "bg-emerald-500/10 text-emerald-500" 
+                      : "bg-red-500/10 text-red-500"
+                  }`}>
+                    {revenueChangePercent >= 0 ? <ArrowUpRight className="h-3 w-3" /> : <ArrowDownRight className="h-3 w-3" />}
+                    {Math.abs(revenueChangePercent)}%
+                  </span>
+                )}
+              </div>
+              <p className="text-2xl font-bold tracking-tight text-foreground">{formatCurrency(revenueNum)}</p>
+              <p className="text-xs text-muted-foreground mt-2">
+                {timeRangeLabels[timeRange]}
+              </p>
+            </div>
 
             {/* Outstanding */}
-            <Card className="border-border bg-card">
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center gap-2">
-                    <div className="p-1.5 rounded-md bg-yellow-500/10">
-                      <AlertCircle className="h-4 w-4 text-yellow-500" />
-                    </div>
-                    <span className="text-sm text-muted-foreground">Outstanding</span>
+            <div className="rounded-2xl bg-gradient-to-br from-card to-card/80 border border-border/50 p-5 backdrop-blur-sm transition-all duration-200 hover:border-border hover:shadow-lg">
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-amber-500/10">
+                    <AlertCircle className="h-4 w-4 text-amber-500" />
                   </div>
-                  {outstandingNum > 0 && (
-                    <span className="text-xs font-medium px-1.5 py-0.5 rounded bg-yellow-500/10 text-yellow-500">
-                      Pending
-                    </span>
-                  )}
+                  <span className="text-sm font-medium text-muted-foreground">Outstanding</span>
                 </div>
-                <p className="text-2xl font-bold tracking-tight">{formatCurrency(outstandingNum)}</p>
-                <p className="text-xs text-muted-foreground mt-1">
-                  {totalInvoices - paidInvoices} unpaid invoice{totalInvoices - paidInvoices !== 1 ? 's' : ''}
-                </p>
-              </CardContent>
-            </Card>
+                {outstandingNum > 0 && (
+                  <span className="inline-flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-full bg-amber-500/10 text-amber-500">
+                    Pending
+                  </span>
+                )}
+              </div>
+              <p className="text-2xl font-bold tracking-tight text-foreground">{formatCurrency(outstandingNum)}</p>
+              <p className="text-xs text-muted-foreground mt-2">
+                {totalInvoices - paidInvoices} unpaid invoice{totalInvoices - paidInvoices !== 1 ? 's' : ''}
+              </p>
+            </div>
 
             {/* DSO (Days Sales Outstanding) */}
-            <Card className="border-border bg-card">
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center gap-2">
-                    <div className="p-1.5 rounded-md bg-blue-500/10">
-                      <Clock className="h-4 w-4 text-blue-500" />
-                    </div>
-                    <span className="text-sm text-muted-foreground">Avg. Days to Pay</span>
+            <div className="rounded-2xl bg-gradient-to-br from-card to-card/80 border border-border/50 p-5 backdrop-blur-sm transition-all duration-200 hover:border-border hover:shadow-lg">
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-500/10">
+                    <Clock className="h-4 w-4 text-blue-500" />
                   </div>
-                  <span className={`text-xs font-medium px-1.5 py-0.5 rounded ${
-                    dso <= 30 ? "bg-green-500/10 text-green-500" : 
-                    dso <= 45 ? "bg-yellow-500/10 text-yellow-500" : 
-                    "bg-red-500/10 text-red-500"
-                  }`}>
-                    {dso <= 30 ? "Good" : dso <= 45 ? "Fair" : "Slow"}
-                  </span>
+                  <span className="text-sm font-medium text-muted-foreground">Avg. Days to Pay</span>
                 </div>
-                <p className="text-2xl font-bold tracking-tight">{dso} <span className="text-base font-normal text-muted-foreground">days</span></p>
-                <p className="text-xs text-muted-foreground mt-1">
-                  Industry avg: 30-45 days
-                </p>
-              </CardContent>
-            </Card>
+                <span className={`inline-flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-full ${
+                  dso <= 30 ? "bg-emerald-500/10 text-emerald-500" : 
+                  dso <= 45 ? "bg-amber-500/10 text-amber-500" : 
+                  "bg-red-500/10 text-red-500"
+                }`}>
+                  {dso <= 30 ? "Good" : dso <= 45 ? "Fair" : "Slow"}
+                </span>
+              </div>
+              <p className="text-2xl font-bold tracking-tight text-foreground">{dso} <span className="text-base font-normal text-muted-foreground">days</span></p>
+              <p className="text-xs text-muted-foreground mt-2">
+                Industry avg: 30-45 days
+              </p>
+            </div>
 
             {/* Collection Rate */}
-            <Card className="border-border bg-card">
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center gap-2">
-                    <div className="p-1.5 rounded-md bg-green-500/10">
-                      <CheckCircle2 className="h-4 w-4 text-green-500" />
-                    </div>
-                    <span className="text-sm text-muted-foreground">Collection Rate</span>
+            <div className="rounded-2xl bg-gradient-to-br from-card to-card/80 border border-border/50 p-5 backdrop-blur-sm transition-all duration-200 hover:border-border hover:shadow-lg hover:shadow-emerald/5">
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-500/10">
+                    <CheckCircle2 className="h-4 w-4 text-emerald-500" />
                   </div>
-                  <span className={`text-xs font-medium px-1.5 py-0.5 rounded ${
-                    collectionRate >= 80 ? "bg-green-500/10 text-green-500" : 
-                    collectionRate >= 60 ? "bg-yellow-500/10 text-yellow-500" : 
-                    "bg-red-500/10 text-red-500"
-                  }`}>
-                    {collectionRate >= 80 ? "Excellent" : collectionRate >= 60 ? "Good" : "Needs Work"}
-                  </span>
+                  <span className="text-sm font-medium text-muted-foreground">Collection Rate</span>
                 </div>
-                <p className="text-2xl font-bold tracking-tight">{collectionRate}%</p>
-                <p className="text-xs text-muted-foreground mt-1">
-                  {paidInvoices} of {totalInvoices} invoices paid
-                </p>
-              </CardContent>
-            </Card>
+                <span className={`inline-flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-full ${
+                  collectionRate >= 80 ? "bg-emerald-500/10 text-emerald-500" : 
+                  collectionRate >= 60 ? "bg-amber-500/10 text-amber-500" : 
+                  "bg-red-500/10 text-red-500"
+                }`}>
+                  {collectionRate >= 80 ? "Excellent" : collectionRate >= 60 ? "Good" : "Needs Work"}
+                </span>
+              </div>
+              <p className="text-2xl font-bold tracking-tight text-foreground">{collectionRate}%</p>
+              <p className="text-xs text-muted-foreground mt-2">
+                {paidInvoices} of {totalInvoices} invoices paid
+              </p>
+            </div>
           </div>
 
           {/* Secondary metrics row */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             {/* Total Invoices */}
-            <Card className="border-border bg-card">
-              <CardContent className="p-4">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-secondary">
-                    <Receipt className="h-5 w-5 text-muted-foreground" />
-                  </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">Total Invoices</p>
-                    <p className="text-xl font-bold">{totalInvoices}</p>
-                  </div>
+            <div className="rounded-2xl bg-gradient-to-br from-card to-card/80 border border-border/50 p-5 backdrop-blur-sm transition-all duration-200 hover:border-border">
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-secondary">
+                  <Receipt className="h-5 w-5 text-muted-foreground" />
                 </div>
-              </CardContent>
-            </Card>
+                <div>
+                  <p className="text-sm text-muted-foreground">Total Invoices</p>
+                  <p className="text-xl font-bold text-foreground">{totalInvoices}</p>
+                </div>
+              </div>
+            </div>
 
             {/* Average Invoice Value */}
-            <Card className="border-border bg-card">
-              <CardContent className="p-4">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-secondary">
-                    <DollarSign className="h-5 w-5 text-muted-foreground" />
-                  </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">Avg. Invoice Value</p>
-                    <p className="text-xl font-bold">{formatCurrency(avgInvoiceNum)}</p>
-                  </div>
+            <div className="rounded-2xl bg-gradient-to-br from-card to-card/80 border border-border/50 p-5 backdrop-blur-sm transition-all duration-200 hover:border-border">
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-secondary">
+                  <DollarSign className="h-5 w-5 text-muted-foreground" />
                 </div>
-              </CardContent>
-            </Card>
+                <div>
+                  <p className="text-sm text-muted-foreground">Avg. Invoice Value</p>
+                  <p className="text-xl font-bold text-foreground">{formatCurrency(avgInvoiceNum)}</p>
+                </div>
+              </div>
+            </div>
 
             {/* Net Profit */}
-            <Card className="border-border bg-card">
-              <CardContent className="p-4">
-                <div className="flex items-center gap-3">
-                  <div className={`p-2 rounded-lg ${netProfit >= 0 ? "bg-green-500/10" : "bg-red-500/10"}`}>
-                    {netProfit >= 0 ? (
-                      <TrendingUp className="h-5 w-5 text-green-500" />
-                    ) : (
-                      <TrendingDown className="h-5 w-5 text-red-500" />
-                    )}
-                  </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">Net Profit</p>
-                    <p className={`text-xl font-bold ${netProfit >= 0 ? "text-green-500" : "text-red-500"}`}>
-                      {formatCurrency(netProfit)}
-                    </p>
-                  </div>
+            <div className="rounded-2xl bg-gradient-to-br from-card to-card/80 border border-border/50 p-5 backdrop-blur-sm transition-all duration-200 hover:border-border">
+              <div className="flex items-center gap-3">
+                <div className={`flex h-10 w-10 items-center justify-center rounded-xl ${netProfit >= 0 ? "bg-emerald-500/10" : "bg-red-500/10"}`}>
+                  {netProfit >= 0 ? (
+                    <TrendingUp className="h-5 w-5 text-emerald-500" />
+                  ) : (
+                    <TrendingDown className="h-5 w-5 text-red-500" />
+                  )}
                 </div>
-              </CardContent>
-            </Card>
+                <div>
+                  <p className="text-sm text-muted-foreground">Net Profit</p>
+                  <p className={`text-xl font-bold ${netProfit >= 0 ? "text-emerald-500" : "text-red-500"}`}>
+                    {formatCurrency(netProfit)}
+                  </p>
+                </div>
+              </div>
+            </div>
           </div>
 
           {/* Revenue Chart - Full width */}
-          <Card className="border-border bg-card">
-            <CardHeader className="pb-2">
+          <div className="rounded-2xl bg-gradient-to-br from-card to-card/80 border border-border/50 backdrop-blur-sm overflow-hidden">
+            <div className="p-5 pb-2">
               <div className="flex items-center justify-between">
                 <div>
-                  <CardTitle className="text-base font-medium">Revenue Trend</CardTitle>
-                  <CardDescription className="text-sm">
+                  <h3 className="text-base font-semibold text-foreground">Revenue Trend</h3>
+                  <p className="text-sm text-muted-foreground">
                     {timeRangeLabels[timeRange]}
-                  </CardDescription>
+                  </p>
                 </div>
                 <div className="text-right">
-                  <p className="text-2xl font-bold">{formatCurrency(revenueNum)}</p>
+                  <p className="text-2xl font-bold text-foreground">{formatCurrency(revenueNum)}</p>
                   {revenueChangePercent !== 0 && (
                     <p className={`text-xs flex items-center justify-end gap-1 ${
-                      revenueChangePercent >= 0 ? "text-green-500" : "text-red-500"
+                      revenueChangePercent >= 0 ? "text-emerald-500" : "text-red-500"
                     }`}>
                       {revenueChangePercent >= 0 ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
                       {revenueChangePercent >= 0 ? "+" : ""}{revenueChangePercent}% vs prev period
@@ -466,8 +452,8 @@ export default function Analytics() {
                   )}
                 </div>
               </div>
-            </CardHeader>
-            <CardContent>
+            </div>
+            <div className="px-5 pb-5">
               {revenueChartData.length > 0 ? (
                 <ResponsiveContainer width="100%" height={260}>
                   <AreaChart data={revenueChartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
@@ -515,18 +501,18 @@ export default function Analytics() {
                   No revenue data for this period
                 </div>
               )}
-            </CardContent>
-          </Card>
+            </div>
+          </div>
 
           {/* Two column: Invoice Status + Top Clients */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Invoice Status */}
-            <Card className="border-border bg-card">
-              <CardHeader className="pb-3">
-                <CardTitle className="text-base font-medium">Invoice Status</CardTitle>
-                <CardDescription className="text-sm">Distribution by status</CardDescription>
-              </CardHeader>
-              <CardContent>
+            <div className="rounded-2xl bg-gradient-to-br from-card to-card/80 border border-border/50 backdrop-blur-sm overflow-hidden">
+              <div className="p-5 pb-3">
+                <h3 className="text-base font-semibold text-foreground">Invoice Status</h3>
+                <p className="text-sm text-muted-foreground">Distribution by status</p>
+              </div>
+              <div className="px-5 pb-5">
                 {statusChartData.length > 0 ? (
                   <div className="space-y-4">
                     {statusChartData.map((entry: any) => {
@@ -568,21 +554,23 @@ export default function Analytics() {
                     No invoices yet
                   </div>
                 )}
-              </CardContent>
-            </Card>
+              </div>
+            </div>
 
             {/* Top Clients */}
-            <Card className="border-border bg-card">
-              <CardHeader className="pb-3">
+            <div className="rounded-2xl bg-gradient-to-br from-card to-card/80 border border-border/50 backdrop-blur-sm overflow-hidden">
+              <div className="p-5 pb-3">
                 <div className="flex items-center justify-between">
                   <div>
-                    <CardTitle className="text-base font-medium">Top Clients</CardTitle>
-                    <CardDescription className="text-sm">By total invoiced amount</CardDescription>
+                    <h3 className="text-base font-semibold text-foreground">Top Clients</h3>
+                    <p className="text-sm text-muted-foreground">By total invoiced amount</p>
                   </div>
-                  <Users className="h-4 w-4 text-muted-foreground" />
+                  <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-secondary">
+                    <Users className="h-4 w-4 text-muted-foreground" />
+                  </div>
                 </div>
-              </CardHeader>
-              <CardContent>
+              </div>
+              <div className="px-5 pb-5">
                 {topClients && topClients.length > 0 ? (
                   <div className="space-y-4">
                     {topClients.map((client: any, index: number) => {
@@ -620,21 +608,21 @@ export default function Analytics() {
                     No client data yet
                   </div>
                 )}
-              </CardContent>
-            </Card>
+              </div>
+            </div>
           </div>
 
           {/* Accounts Receivable Aging */}
-          <Card className="border-border bg-card">
-            <CardHeader className="pb-3">
+          <div className="rounded-2xl bg-gradient-to-br from-card to-card/80 border border-border/50 backdrop-blur-sm overflow-hidden">
+            <div className="p-5 pb-3">
               <div className="flex items-center justify-between">
                 <div>
-                  <CardTitle className="text-base font-medium">Receivables Aging</CardTitle>
-                  <CardDescription className="text-sm">Outstanding invoices by days overdue</CardDescription>
+                  <h3 className="text-base font-semibold text-foreground">Receivables Aging</h3>
+                  <p className="text-sm text-muted-foreground">Outstanding invoices by days overdue</p>
                 </div>
               </div>
-            </CardHeader>
-            <CardContent>
+            </div>
+            <div className="px-5 pb-5">
               {agingReport ? (
                 <div className="grid grid-cols-1 sm:grid-cols-5 gap-4">
                   {[
@@ -684,17 +672,17 @@ export default function Analytics() {
                   Loading aging report...
                 </div>
               )}
-            </CardContent>
-          </Card>
+            </div>
+          </div>
 
           {/* Expenses by Category - only show if data exists */}
           {expenseStats?.expensesByCategory && expenseStats.expensesByCategory.length > 0 && (
-            <Card className="border-border bg-card">
-              <CardHeader className="pb-3">
-                <CardTitle className="text-base font-medium">Expenses by Category</CardTitle>
-                <CardDescription className="text-sm">Last 6 months breakdown</CardDescription>
-              </CardHeader>
-              <CardContent>
+            <div className="rounded-2xl bg-gradient-to-br from-card to-card/80 border border-border/50 backdrop-blur-sm overflow-hidden">
+              <div className="p-5 pb-3">
+                <h3 className="text-base font-semibold text-foreground">Expenses by Category</h3>
+                <p className="text-sm text-muted-foreground">Last 6 months breakdown</p>
+              </div>
+              <div className="px-5 pb-5">
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                   {expenseStats.expensesByCategory.slice(0, 6).map((cat: any) => {
                     const percentage = totalExpenses > 0 
@@ -726,8 +714,8 @@ export default function Analytics() {
                     );
                   })}
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
           )}
         </div>
       </div>

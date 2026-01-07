@@ -478,7 +478,7 @@ export default function Invoices() {
 
         {/* Bulk Actions Bar */}
         {selectedIds.size > 0 && (
-          <div className="mb-4 p-3 bg-primary/10 border border-primary/20 rounded-lg flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+          <div className="mb-4 p-4 bg-gradient-to-r from-primary/10 to-primary/5 border border-primary/20 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 backdrop-blur-sm">
             <div className="flex items-center gap-2">
               <CheckSquare className="h-4 w-4 text-primary" />
               <span className="text-sm font-medium">
@@ -556,14 +556,14 @@ export default function Invoices() {
         </div>
 
         {/* Invoices Table */}
-        <Card>
-          <CardHeader>
-            <CardTitle>All Invoices</CardTitle>
-            <CardDescription>
+        <div className="rounded-2xl bg-gradient-to-br from-card to-card/80 border border-border/50 backdrop-blur-sm overflow-hidden">
+          <div className="p-5 pb-4">
+            <h3 className="text-lg font-semibold text-foreground">All Invoices</h3>
+            <p className="text-sm text-muted-foreground">
               {totalItems} invoice{totalItems !== 1 ? "s" : ""} found
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
+            </p>
+          </div>
+          <div className="px-5 pb-5">
             {invoicesLoading ? (
               <InvoiceListSkeleton />
             ) : !invoices || invoices.length === 0 ? (
@@ -792,8 +792,8 @@ export default function Invoices() {
                 )}
               </>
             )}
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </div>
 
       {/* Single Delete Confirmation Dialog */}

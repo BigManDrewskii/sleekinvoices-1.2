@@ -249,14 +249,14 @@ export default function Clients() {
         </div>
 
         {/* Clients Table */}
-        <Card>
-          <CardHeader>
-            <CardTitle>All Clients</CardTitle>
-            <CardDescription>
+        <div className="rounded-2xl bg-gradient-to-br from-card to-card/80 border border-border/50 backdrop-blur-sm overflow-hidden">
+          <div className="p-5 pb-4">
+            <h3 className="text-lg font-semibold text-foreground">All Clients</h3>
+            <p className="text-sm text-muted-foreground">
               {filteredClients?.length || 0} client{filteredClients?.length !== 1 ? "s" : ""} found
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
+            </p>
+          </div>
+          <div className="px-5 pb-5">
             {clientsLoading ? (
               <ClientsTableSkeleton rows={8} />
             ) : !clients || clients.length === 0 ? (
@@ -379,9 +379,9 @@ export default function Clients() {
               </div>
               
               {/* Mobile Card View */}
-              <div className="md:hidden space-y-4">
+              <div className="md:hidden space-y-3">
                 {filteredClients?.map((client) => (
-                  <div key={client.id} className="border rounded-lg p-4 space-y-3">
+                  <div key={client.id} className="rounded-xl border border-border/50 bg-card/50 p-4 space-y-3 hover:border-border transition-colors">
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
                         <p className="font-semibold text-foreground">{client.name}</p>
@@ -460,8 +460,8 @@ export default function Clients() {
               </div>
               </>
             )}
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </div>
 
       {/* Dialogs */}
