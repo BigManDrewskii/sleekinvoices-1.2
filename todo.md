@@ -1158,3 +1158,19 @@
 
 ## Orb Component Fix
 - [x] Fix orb rendering issues (gradient, sparkle icon, glass reflection, animated overlay)
+
+
+## Integration Research
+- [ ] Research payment processing solutions (Stripe alternatives, modern options)
+- [ ] Research Whop and similar partnership/monetization platforms
+- [ ] Identify strategic integrations for invoice app modernization
+- [ ] Compile recommendations report
+
+
+## Integration Research (Completed)
+- [x] Research payment processing solutions (Paddle, LemonSqueezy, crypto payments)
+- [x] Research partnership tools (Whop, PartnerStack, affiliate platforms)
+- [x] Research accounting integrations (QuickBooks, Xero)
+- [x] Research AI automation and e-signature integrations
+- [x] Identify strategic integrations aligned with market preferences
+- [x] Compile comprehensive recommendations report (see research/integration-recommendations.md)
