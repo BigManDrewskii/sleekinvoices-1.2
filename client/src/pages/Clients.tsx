@@ -326,30 +326,30 @@ export default function Clients() {
                       )}
                     </div>
                     
-                    <div className="flex gap-2 pt-2 border-t">
+                    <div className="flex gap-2 pt-3 border-t">
                       <Button
                         variant="outline"
-                        size="sm"
+                        size="default"
                         onClick={() => handlePortalAccess(client)}
-                        className="flex-1"
+                        className="flex-1 h-11"
                       >
-                        <Key className="h-4 w-4 mr-1" />
+                        <Key className="h-4 w-4 mr-2" />
                         Portal
                       </Button>
                       <Button
                         variant="outline"
-                        size="sm"
+                        size="default"
                         onClick={() => handleEdit(client)}
-                        className="flex-1"
+                        className="flex-1 h-11"
                       >
-                        <Edit className="h-4 w-4 mr-1" />
+                        <Edit className="h-4 w-4 mr-2" />
                         Edit
                       </Button>
                       <Button
                         variant="outline"
-                        size="sm"
+                        size="default"
                         onClick={() => handleDelete(client)}
-                        className="text-red-600 hover:text-red-700"
+                        className="text-red-600 hover:text-red-700 h-11 px-3"
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>

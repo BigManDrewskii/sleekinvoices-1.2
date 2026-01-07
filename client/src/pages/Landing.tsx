@@ -241,7 +241,55 @@ export default function Landing() {
             </p>
           </div>
 
-          <div className="overflow-x-auto">
+          {/* Mobile Comparison Cards */}
+          <div className="md:hidden space-y-4">
+            <MobileComparisonCard
+              feature="Unlimited Invoices"
+              sleek={true}
+              freshbooks="Premium only"
+              quickbooks={true}
+              wave={true}
+            />
+            <MobileComparisonCard
+              feature="Unlimited Clients"
+              sleek={true}
+              freshbooks="5 on Lite"
+              quickbooks={true}
+              wave={true}
+            />
+            <MobileComparisonCard
+              feature="Crypto Payments"
+              sleek={true}
+              freshbooks={false}
+              quickbooks={false}
+              wave={false}
+              highlight
+            />
+            <MobileComparisonCard
+              feature="Auto Reminders"
+              sleek={true}
+              freshbooks={true}
+              quickbooks={true}
+              wave={false}
+            />
+            <MobileComparisonCard
+              feature="Recurring Invoices"
+              sleek={true}
+              freshbooks={true}
+              quickbooks="$20+ tier"
+              wave={true}
+            />
+            <MobileComparisonCard
+              feature="Client Portal"
+              sleek={true}
+              freshbooks={true}
+              quickbooks={true}
+              wave={false}
+            />
+          </div>
+
+          {/* Desktop Comparison Table */}
+          <div className="hidden md:block overflow-x-auto">
             <table className="w-full border-collapse">
               <thead>
                 <tr className="border-b border-border">
@@ -828,6 +876,70 @@ function FAQItem({ question, answer }: { question: string; answer: string }) {
     <div className="p-5 rounded-xl border border-border bg-card">
       <h4 className="font-semibold text-foreground mb-2">{question}</h4>
       <p className="text-muted-foreground text-sm leading-relaxed">{answer}</p>
+    </div>
+  );
+}
+
+
+// Mobile Comparison Card Component (for responsive design)
+function MobileComparisonCard({
+  feature,
+  sleek,
+  freshbooks,
+  quickbooks,
+  wave,
+  highlight = false,
+}: {
+  feature: string;
+  sleek: boolean | string;
+  freshbooks: boolean | string;
+  quickbooks: boolean | string;
+  wave: boolean | string;
+  highlight?: boolean;
+}) {
+  const renderValue = (value: boolean | string, label: string) => {
+    if (value === true) {
+      return (
+        <div className="flex items-center justify-between py-2">
+          <span className="text-sm text-muted-foreground">{label}</span>
+          <Check className="h-5 w-5 text-green-500" />
+        </div>
+      );
+    }
+    if (value === false) {
+      return (
+        <div className="flex items-center justify-between py-2">
+          <span className="text-sm text-muted-foreground">{label}</span>
+          <X className="h-5 w-5 text-red-500/50" />
+        </div>
+      );
+    }
+    return (
+      <div className="flex items-center justify-between py-2">
+        <span className="text-sm text-muted-foreground">{label}</span>
+        <span className="text-sm text-muted-foreground">{value}</span>
+      </div>
+    );
+  };
+
+  return (
+    <div className={`rounded-xl border p-4 ${highlight ? "border-primary bg-primary/5" : "border-border bg-card"}`}>
+      <h4 className="font-semibold text-foreground mb-3">{feature}</h4>
+      <div className="divide-y divide-border">
+        <div className="flex items-center justify-between py-2">
+          <span className="text-sm font-medium text-primary">SleekInvoices</span>
+          {sleek === true ? (
+            <Check className="h-5 w-5 text-green-500" />
+          ) : sleek === false ? (
+            <X className="h-5 w-5 text-red-500/50" />
+          ) : (
+            <span className="text-sm text-muted-foreground">{sleek}</span>
+          )}
+        </div>
+        {renderValue(freshbooks, "FreshBooks")}
+        {renderValue(quickbooks, "QuickBooks")}
+        {renderValue(wave, "Wave")}
+      </div>
     </div>
   );
 }
