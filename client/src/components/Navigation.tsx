@@ -34,20 +34,24 @@ import {
   Receipt,
   Package,
   BarChart3,
-  ChevronDown
+  ChevronDown,
+  Users,
+  LayoutTemplate,
+  LayoutDashboard,
+  Sparkles,
 } from "lucide-react";
 import { Link, useLocation } from "wouter";
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { GlobalSearch } from "@/components/GlobalSearch";
 import { cn } from "@/lib/utils";
 
-// Navigation structure with grouped items
+// Navigation structure with grouped items and icons
 const navigationConfig = {
   direct: [
-    { href: "/dashboard", label: "Dashboard" },
+    { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   ],
   billing: {
     label: "Billing",
@@ -58,7 +62,7 @@ const navigationConfig = {
       { href: "/payments", label: "Payments", icon: CreditCard, description: "Track payments received" },
     ],
   },
-  clients: { href: "/clients", label: "Clients" },
+  clients: { href: "/clients", label: "Clients", icon: Users },
   finances: {
     label: "Finances",
     items: [
@@ -67,13 +71,44 @@ const navigationConfig = {
       { href: "/analytics", label: "Analytics", icon: BarChart3, description: "Revenue insights" },
     ],
   },
-  templates: { href: "/templates", label: "Templates" },
+  templates: { href: "/templates", label: "Templates", icon: LayoutTemplate },
 };
+
+// Custom hook for scroll-based navbar effects
+function useScrollEffect() {
+  const [scrolled, setScrolled] = useState(false);
+  const [scrollDirection, setScrollDirection] = useState<'up' | 'down'>('up');
+  const [lastScrollY, setLastScrollY] = useState(0);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      
+      // Determine if scrolled past threshold
+      setScrolled(currentScrollY > 10);
+      
+      // Determine scroll direction
+      if (currentScrollY > lastScrollY && currentScrollY > 50) {
+        setScrollDirection('down');
+      } else {
+        setScrollDirection('up');
+      }
+      
+      setLastScrollY(currentScrollY);
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [lastScrollY]);
+
+  return { scrolled, scrollDirection };
+}
 
 export function Navigation() {
   const [location, setLocation] = useLocation();
   const { user } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { scrolled, scrollDirection } = useScrollEffect();
   
   const logout = trpc.auth.logout.useMutation({
     onSuccess: () => {
@@ -82,62 +117,110 @@ export function Navigation() {
     },
   });
 
-  const isActive = (href: string) => {
+  const isActive = useCallback((href: string) => {
     if (href === "/dashboard") {
       return location === "/" || location === "/dashboard";
     }
     return location.startsWith(href);
-  };
+  }, [location]);
 
-  const isGroupActive = (items: { href: string }[]) => {
+  const isGroupActive = useCallback((items: { href: string }[]) => {
     return items.some(item => location.startsWith(item.href));
-  };
+  }, [location]);
 
-  // Quick Actions Menu
+  // Quick Actions Menu with enhanced styling
   const QuickActionsMenu = () => (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button size="sm" className="h-10 min-w-[44px] gap-1.5 px-3">
-          <Plus className="h-4 w-4" />
+        <Button 
+          size="sm" 
+          className="h-10 min-w-[44px] gap-1.5 px-3 group relative overflow-hidden"
+        >
+          <Plus className="h-4 w-4 transition-transform duration-200 group-hover:rotate-90" />
           <span className="hidden sm:inline">New</span>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-48">
-        <DropdownMenuItem onClick={() => setLocation("/invoices/create")} className="cursor-pointer h-10">
-          <FileText className="mr-2 h-4 w-4" />
-          New Invoice
+      <DropdownMenuContent 
+        align="end" 
+        className="w-52 animate-in fade-in-0 zoom-in-95 slide-in-from-top-2"
+        sideOffset={8}
+      >
+        <DropdownMenuItem 
+          onClick={() => setLocation("/invoices/create")} 
+          className="cursor-pointer h-11 gap-3 transition-colors"
+        >
+          <div className="flex h-8 w-8 items-center justify-center rounded-md bg-primary/10 text-primary">
+            <FileText className="h-4 w-4" />
+          </div>
+          <div className="flex flex-col">
+            <span className="font-medium">New Invoice</span>
+            <span className="text-xs text-muted-foreground">Create a new invoice</span>
+          </div>
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => setLocation("/estimates/create")} className="cursor-pointer h-10">
-          <FileCheck className="mr-2 h-4 w-4" />
-          New Estimate
+        <DropdownMenuItem 
+          onClick={() => setLocation("/estimates/create")} 
+          className="cursor-pointer h-11 gap-3 transition-colors"
+        >
+          <div className="flex h-8 w-8 items-center justify-center rounded-md bg-blue-500/10 text-blue-500">
+            <FileCheck className="h-4 w-4" />
+          </div>
+          <div className="flex flex-col">
+            <span className="font-medium">New Estimate</span>
+            <span className="text-xs text-muted-foreground">Create a quote</span>
+          </div>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={() => setLocation("/clients")} className="cursor-pointer h-10">
-          <User className="mr-2 h-4 w-4" />
-          New Client
+        <DropdownMenuItem 
+          onClick={() => setLocation("/clients")} 
+          className="cursor-pointer h-11 gap-3 transition-colors"
+        >
+          <div className="flex h-8 w-8 items-center justify-center rounded-md bg-green-500/10 text-green-500">
+            <User className="h-4 w-4" />
+          </div>
+          <div className="flex flex-col">
+            <span className="font-medium">New Client</span>
+            <span className="text-xs text-muted-foreground">Add a client</span>
+          </div>
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => setLocation("/expenses")} className="cursor-pointer h-10">
-          <Receipt className="mr-2 h-4 w-4" />
-          New Expense
+        <DropdownMenuItem 
+          onClick={() => setLocation("/expenses")} 
+          className="cursor-pointer h-11 gap-3 transition-colors"
+        >
+          <div className="flex h-8 w-8 items-center justify-center rounded-md bg-orange-500/10 text-orange-500">
+            <Receipt className="h-4 w-4" />
+          </div>
+          <div className="flex flex-col">
+            <span className="font-medium">New Expense</span>
+            <span className="text-xs text-muted-foreground">Track an expense</span>
+          </div>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   );
 
-  // Desktop Navigation with Grouped Dropdowns - Only visible at lg (1024px+)
+  // Desktop Navigation with enhanced hover effects
   const DesktopNav = () => (
     <NavigationMenu className="hidden lg:flex">
-      <NavigationMenuList className="gap-0.5">
+      <NavigationMenuList className="gap-1">
         {/* Dashboard - Direct Link */}
         <NavigationMenuItem>
           <Link href="/dashboard">
             <NavigationMenuLink
               className={cn(
-                "group inline-flex h-10 w-max items-center justify-center rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50",
-                isActive("/dashboard") ? "bg-accent/50 text-foreground" : "text-muted-foreground"
+                "group inline-flex h-10 w-max items-center justify-center rounded-lg px-4 py-2 text-sm font-medium transition-all duration-200",
+                "hover:bg-accent/80 hover:text-accent-foreground",
+                "focus:bg-accent focus:text-accent-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+                "disabled:pointer-events-none disabled:opacity-50",
+                "relative overflow-hidden",
+                isActive("/dashboard") 
+                  ? "bg-accent text-foreground" 
+                  : "text-muted-foreground"
               )}
             >
-              Dashboard
+              <span className="relative z-10">Dashboard</span>
+              {isActive("/dashboard") && (
+                <span className="absolute bottom-0 left-1/2 h-0.5 w-8 -translate-x-1/2 rounded-full bg-primary" />
+              )}
             </NavigationMenuLink>
           </Link>
         </NavigationMenuItem>
@@ -146,31 +229,46 @@ export function Navigation() {
         <NavigationMenuItem>
           <NavigationMenuTrigger 
             className={cn(
-              "h-10 px-3 text-sm font-medium",
-              isGroupActive(navigationConfig.billing.items) ? "bg-accent/50 text-foreground" : "text-muted-foreground"
+              "h-10 px-4 text-sm font-medium rounded-lg transition-all duration-200",
+              "hover:bg-accent/80",
+              "data-[state=open]:bg-accent",
+              isGroupActive(navigationConfig.billing.items) 
+                ? "bg-accent/50 text-foreground" 
+                : "text-muted-foreground"
             )}
           >
             Billing
           </NavigationMenuTrigger>
           <NavigationMenuContent>
-            <ul className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2">
+            <ul className="grid w-[420px] gap-2 p-4 md:w-[520px] md:grid-cols-2">
               {navigationConfig.billing.items.map((item) => (
                 <li key={item.href}>
                   <NavigationMenuLink asChild>
                     <Link
                       href={item.href}
                       className={cn(
-                        "block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground",
-                        isActive(item.href) && "bg-accent/50"
+                        "group block select-none rounded-lg p-3 leading-none no-underline outline-none transition-all duration-200",
+                        "hover:bg-accent hover:text-accent-foreground hover:shadow-sm",
+                        "focus:bg-accent focus:text-accent-foreground focus-visible:ring-2 focus-visible:ring-ring",
+                        isActive(item.href) && "bg-accent/60 shadow-sm"
                       )}
                     >
-                      <div className="flex items-center gap-2">
-                        <item.icon className="h-4 w-4" />
-                        <div className="text-sm font-medium leading-none">{item.label}</div>
+                      <div className="flex items-center gap-3">
+                        <div className={cn(
+                          "flex h-9 w-9 items-center justify-center rounded-md transition-colors duration-200",
+                          isActive(item.href) 
+                            ? "bg-primary text-primary-foreground" 
+                            : "bg-muted text-muted-foreground group-hover:bg-primary/10 group-hover:text-primary"
+                        )}>
+                          <item.icon className="h-4 w-4" />
+                        </div>
+                        <div className="flex-1">
+                          <div className="text-sm font-medium leading-none mb-1">{item.label}</div>
+                          <p className="line-clamp-1 text-xs leading-snug text-muted-foreground">
+                            {item.description}
+                          </p>
+                        </div>
                       </div>
-                      <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
-                        {item.description}
-                      </p>
                     </Link>
                   </NavigationMenuLink>
                 </li>
@@ -184,11 +282,20 @@ export function Navigation() {
           <Link href="/clients">
             <NavigationMenuLink
               className={cn(
-                "group inline-flex h-10 w-max items-center justify-center rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50",
-                isActive("/clients") ? "bg-accent/50 text-foreground" : "text-muted-foreground"
+                "group inline-flex h-10 w-max items-center justify-center rounded-lg px-4 py-2 text-sm font-medium transition-all duration-200",
+                "hover:bg-accent/80 hover:text-accent-foreground",
+                "focus:bg-accent focus:text-accent-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+                "disabled:pointer-events-none disabled:opacity-50",
+                "relative overflow-hidden",
+                isActive("/clients") 
+                  ? "bg-accent text-foreground" 
+                  : "text-muted-foreground"
               )}
             >
-              Clients
+              <span className="relative z-10">Clients</span>
+              {isActive("/clients") && (
+                <span className="absolute bottom-0 left-1/2 h-0.5 w-8 -translate-x-1/2 rounded-full bg-primary" />
+              )}
             </NavigationMenuLink>
           </Link>
         </NavigationMenuItem>
@@ -197,31 +304,46 @@ export function Navigation() {
         <NavigationMenuItem>
           <NavigationMenuTrigger 
             className={cn(
-              "h-10 px-3 text-sm font-medium",
-              isGroupActive(navigationConfig.finances.items) ? "bg-accent/50 text-foreground" : "text-muted-foreground"
+              "h-10 px-4 text-sm font-medium rounded-lg transition-all duration-200",
+              "hover:bg-accent/80",
+              "data-[state=open]:bg-accent",
+              isGroupActive(navigationConfig.finances.items) 
+                ? "bg-accent/50 text-foreground" 
+                : "text-muted-foreground"
             )}
           >
             Finances
           </NavigationMenuTrigger>
           <NavigationMenuContent>
-            <ul className="grid w-[400px] gap-3 p-4 md:w-[450px] md:grid-cols-2">
+            <ul className="grid w-[380px] gap-2 p-4 md:w-[460px] md:grid-cols-2">
               {navigationConfig.finances.items.map((item) => (
                 <li key={item.href}>
                   <NavigationMenuLink asChild>
                     <Link
                       href={item.href}
                       className={cn(
-                        "block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground",
-                        isActive(item.href) && "bg-accent/50"
+                        "group block select-none rounded-lg p-3 leading-none no-underline outline-none transition-all duration-200",
+                        "hover:bg-accent hover:text-accent-foreground hover:shadow-sm",
+                        "focus:bg-accent focus:text-accent-foreground focus-visible:ring-2 focus-visible:ring-ring",
+                        isActive(item.href) && "bg-accent/60 shadow-sm"
                       )}
                     >
-                      <div className="flex items-center gap-2">
-                        <item.icon className="h-4 w-4" />
-                        <div className="text-sm font-medium leading-none">{item.label}</div>
+                      <div className="flex items-center gap-3">
+                        <div className={cn(
+                          "flex h-9 w-9 items-center justify-center rounded-md transition-colors duration-200",
+                          isActive(item.href) 
+                            ? "bg-primary text-primary-foreground" 
+                            : "bg-muted text-muted-foreground group-hover:bg-primary/10 group-hover:text-primary"
+                        )}>
+                          <item.icon className="h-4 w-4" />
+                        </div>
+                        <div className="flex-1">
+                          <div className="text-sm font-medium leading-none mb-1">{item.label}</div>
+                          <p className="line-clamp-1 text-xs leading-snug text-muted-foreground">
+                            {item.description}
+                          </p>
+                        </div>
                       </div>
-                      <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
-                        {item.description}
-                      </p>
                     </Link>
                   </NavigationMenuLink>
                 </li>
@@ -235,11 +357,20 @@ export function Navigation() {
           <Link href="/templates">
             <NavigationMenuLink
               className={cn(
-                "group inline-flex h-10 w-max items-center justify-center rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50",
-                isActive("/templates") ? "bg-accent/50 text-foreground" : "text-muted-foreground"
+                "group inline-flex h-10 w-max items-center justify-center rounded-lg px-4 py-2 text-sm font-medium transition-all duration-200",
+                "hover:bg-accent/80 hover:text-accent-foreground",
+                "focus:bg-accent focus:text-accent-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+                "disabled:pointer-events-none disabled:opacity-50",
+                "relative overflow-hidden",
+                isActive("/templates") 
+                  ? "bg-accent text-foreground" 
+                  : "text-muted-foreground"
               )}
             >
-              Templates
+              <span className="relative z-10">Templates</span>
+              {isActive("/templates") && (
+                <span className="absolute bottom-0 left-1/2 h-0.5 w-8 -translate-x-1/2 rounded-full bg-primary" />
+              )}
             </NavigationMenuLink>
           </Link>
         </NavigationMenuItem>
@@ -247,7 +378,7 @@ export function Navigation() {
     </NavigationMenu>
   );
 
-  // Mobile Navigation with Collapsible Sections
+  // Mobile Navigation with improved animations
   const MobileNav = () => {
     const [billingOpen, setBillingOpen] = useState(false);
     const [financesOpen, setFinancesOpen] = useState(false);
@@ -258,99 +389,150 @@ export function Navigation() {
         <Link
           href="/dashboard"
           className={cn(
-            "block px-4 py-3 text-base font-medium rounded-md transition-colors min-h-[48px] flex items-center",
-            isActive("/dashboard") ? "bg-accent text-foreground" : "text-muted-foreground hover:text-foreground hover:bg-accent/50"
+            "flex items-center gap-3 px-4 py-3 text-base font-medium rounded-lg transition-all duration-200 min-h-[48px]",
+            isActive("/dashboard") 
+              ? "bg-accent text-foreground shadow-sm" 
+              : "text-muted-foreground hover:text-foreground hover:bg-accent/50"
           )}
           onClick={() => setMobileMenuOpen(false)}
         >
+          <LayoutDashboard className="h-5 w-5" />
           Dashboard
         </Link>
 
         {/* Billing Section */}
-        <div>
+        <div className="space-y-1">
           <button
             onClick={() => setBillingOpen(!billingOpen)}
             className={cn(
-              "w-full flex items-center justify-between px-4 py-3 text-base font-medium rounded-md transition-colors min-h-[48px]",
-              isGroupActive(navigationConfig.billing.items) ? "bg-accent/50 text-foreground" : "text-muted-foreground hover:text-foreground hover:bg-accent/50"
+              "w-full flex items-center justify-between px-4 py-3 text-base font-medium rounded-lg transition-all duration-200 min-h-[48px]",
+              isGroupActive(navigationConfig.billing.items) 
+                ? "bg-accent/50 text-foreground" 
+                : "text-muted-foreground hover:text-foreground hover:bg-accent/50"
+            )}
+            aria-expanded={billingOpen}
+            aria-controls="billing-submenu"
+          >
+            <span className="flex items-center gap-3">
+              <FileText className="h-5 w-5" />
+              Billing
+            </span>
+            <ChevronDown className={cn(
+              "h-4 w-4 transition-transform duration-300 ease-out",
+              billingOpen && "rotate-180"
+            )} />
+          </button>
+          <div 
+            id="billing-submenu"
+            className={cn(
+              "ml-4 space-y-1 overflow-hidden transition-all duration-300 ease-out",
+              billingOpen ? "max-h-96 opacity-100" : "max-h-0 opacity-0"
             )}
           >
-            Billing
-            <ChevronDown className={cn("h-4 w-4 transition-transform", billingOpen && "rotate-180")} />
-          </button>
-          {billingOpen && (
-            <div className="ml-4 mt-1 space-y-1">
-              {navigationConfig.billing.items.map((item) => (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className={cn(
-                    "flex items-center gap-2 px-4 py-3 text-sm rounded-md transition-colors min-h-[48px]",
-                    isActive(item.href) ? "bg-accent text-foreground" : "text-muted-foreground hover:text-foreground hover:bg-accent/50"
-                  )}
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  <item.icon className="h-4 w-4" />
-                  {item.label}
-                </Link>
-              ))}
-            </div>
-          )}
+            {navigationConfig.billing.items.map((item, index) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={cn(
+                  "flex items-center gap-3 px-4 py-3 text-sm rounded-lg transition-all duration-200 min-h-[48px]",
+                  isActive(item.href) 
+                    ? "bg-accent text-foreground shadow-sm" 
+                    : "text-muted-foreground hover:text-foreground hover:bg-accent/50"
+                )}
+                style={{ 
+                  transitionDelay: billingOpen ? `${index * 50}ms` : '0ms',
+                  transform: billingOpen ? 'translateX(0)' : 'translateX(-8px)',
+                  opacity: billingOpen ? 1 : 0
+                }}
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                <item.icon className="h-4 w-4" />
+                {item.label}
+              </Link>
+            ))}
+          </div>
         </div>
 
         {/* Clients */}
         <Link
           href="/clients"
           className={cn(
-            "block px-4 py-3 text-base font-medium rounded-md transition-colors min-h-[48px] flex items-center",
-            isActive("/clients") ? "bg-accent text-foreground" : "text-muted-foreground hover:text-foreground hover:bg-accent/50"
+            "flex items-center gap-3 px-4 py-3 text-base font-medium rounded-lg transition-all duration-200 min-h-[48px]",
+            isActive("/clients") 
+              ? "bg-accent text-foreground shadow-sm" 
+              : "text-muted-foreground hover:text-foreground hover:bg-accent/50"
           )}
           onClick={() => setMobileMenuOpen(false)}
         >
+          <Users className="h-5 w-5" />
           Clients
         </Link>
 
         {/* Finances Section */}
-        <div>
+        <div className="space-y-1">
           <button
             onClick={() => setFinancesOpen(!financesOpen)}
             className={cn(
-              "w-full flex items-center justify-between px-4 py-3 text-base font-medium rounded-md transition-colors min-h-[48px]",
-              isGroupActive(navigationConfig.finances.items) ? "bg-accent/50 text-foreground" : "text-muted-foreground hover:text-foreground hover:bg-accent/50"
+              "w-full flex items-center justify-between px-4 py-3 text-base font-medium rounded-lg transition-all duration-200 min-h-[48px]",
+              isGroupActive(navigationConfig.finances.items) 
+                ? "bg-accent/50 text-foreground" 
+                : "text-muted-foreground hover:text-foreground hover:bg-accent/50"
+            )}
+            aria-expanded={financesOpen}
+            aria-controls="finances-submenu"
+          >
+            <span className="flex items-center gap-3">
+              <BarChart3 className="h-5 w-5" />
+              Finances
+            </span>
+            <ChevronDown className={cn(
+              "h-4 w-4 transition-transform duration-300 ease-out",
+              financesOpen && "rotate-180"
+            )} />
+          </button>
+          <div 
+            id="finances-submenu"
+            className={cn(
+              "ml-4 space-y-1 overflow-hidden transition-all duration-300 ease-out",
+              financesOpen ? "max-h-96 opacity-100" : "max-h-0 opacity-0"
             )}
           >
-            Finances
-            <ChevronDown className={cn("h-4 w-4 transition-transform", financesOpen && "rotate-180")} />
-          </button>
-          {financesOpen && (
-            <div className="ml-4 mt-1 space-y-1">
-              {navigationConfig.finances.items.map((item) => (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className={cn(
-                    "flex items-center gap-2 px-4 py-3 text-sm rounded-md transition-colors min-h-[48px]",
-                    isActive(item.href) ? "bg-accent text-foreground" : "text-muted-foreground hover:text-foreground hover:bg-accent/50"
-                  )}
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  <item.icon className="h-4 w-4" />
-                  {item.label}
-                </Link>
-              ))}
-            </div>
-          )}
+            {navigationConfig.finances.items.map((item, index) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={cn(
+                  "flex items-center gap-3 px-4 py-3 text-sm rounded-lg transition-all duration-200 min-h-[48px]",
+                  isActive(item.href) 
+                    ? "bg-accent text-foreground shadow-sm" 
+                    : "text-muted-foreground hover:text-foreground hover:bg-accent/50"
+                )}
+                style={{ 
+                  transitionDelay: financesOpen ? `${index * 50}ms` : '0ms',
+                  transform: financesOpen ? 'translateX(0)' : 'translateX(-8px)',
+                  opacity: financesOpen ? 1 : 0
+                }}
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                <item.icon className="h-4 w-4" />
+                {item.label}
+              </Link>
+            ))}
+          </div>
         </div>
 
         {/* Templates */}
         <Link
           href="/templates"
           className={cn(
-            "block px-4 py-3 text-base font-medium rounded-md transition-colors min-h-[48px] flex items-center",
-            isActive("/templates") ? "bg-accent text-foreground" : "text-muted-foreground hover:text-foreground hover:bg-accent/50"
+            "flex items-center gap-3 px-4 py-3 text-base font-medium rounded-lg transition-all duration-200 min-h-[48px]",
+            isActive("/templates") 
+              ? "bg-accent text-foreground shadow-sm" 
+              : "text-muted-foreground hover:text-foreground hover:bg-accent/50"
           )}
           onClick={() => setMobileMenuOpen(false)}
         >
+          <LayoutTemplate className="h-5 w-5" />
           Templates
         </Link>
       </div>
@@ -358,21 +540,33 @@ export function Navigation() {
   };
 
   return (
-    <nav className="navbar-sticky">
+    <nav 
+      className={cn(
+        "navbar-sticky transition-all duration-300",
+        scrolled && "shadow-md",
+        scrollDirection === 'down' && scrolled && "translate-y-0"
+      )}
+      role="navigation"
+      aria-label="Main navigation"
+    >
       <div className="navbar-container">
         <div className="navbar-inner">
           {/* Logo - Dynamic sizing based on breakpoint */}
-          <Link href="/dashboard" className="navbar-logo">
+          <Link 
+            href="/dashboard" 
+            className="navbar-logo group"
+            aria-label="SleekInvoices - Go to Dashboard"
+          >
             <img
               src="/logos/wide/SleekInvoices-Logo-Wide.svg"
               alt="SleekInvoices"
-              className="navbar-logo-wide"
+              className="navbar-logo-wide transition-transform duration-200 group-hover:scale-[1.02]"
               style={{ height: '32px', width: 'auto', maxWidth: '200px' }}
             />
             <img
               src="/logos/monogram/SleekInvoices-Monogram-White.svg"
               alt="SleekInvoices"
-              className="navbar-logo-compact"
+              className="navbar-logo-compact transition-transform duration-200 group-hover:scale-105"
               style={{ height: '36px', width: '36px', maxWidth: '36px' }}
             />
           </Link>
@@ -393,77 +587,111 @@ export function Navigation() {
             {/* User Menu */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="rounded-full h-10 w-10 min-w-[44px]" aria-label="User menu">
-                  <Avatar className="h-8 w-8">
-                    <AvatarFallback className="text-sm">
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  className="rounded-full h-10 w-10 min-w-[44px] transition-all duration-200 hover:ring-2 hover:ring-primary/20" 
+                  aria-label="User menu"
+                >
+                  <Avatar className="h-8 w-8 transition-transform duration-200 hover:scale-105">
+                    <AvatarFallback className="text-sm bg-primary/10 text-primary font-medium">
                       {user?.name?.charAt(0).toUpperCase() || "U"}
                     </AvatarFallback>
                   </Avatar>
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56">
-                <div className="px-2 py-1.5">
-                  <p className="text-sm font-medium">{user?.name}</p>
-                  <p className="text-xs text-muted-foreground truncate">{user?.email}</p>
+              <DropdownMenuContent 
+                align="end" 
+                className="w-60 animate-in fade-in-0 zoom-in-95 slide-in-from-top-2"
+                sideOffset={8}
+              >
+                <div className="px-3 py-3 border-b border-border/50">
+                  <div className="flex items-center gap-3">
+                    <Avatar className="h-10 w-10">
+                      <AvatarFallback className="bg-primary/10 text-primary font-medium">
+                        {user?.name?.charAt(0).toUpperCase() || "U"}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium truncate">{user?.name}</p>
+                      <p className="text-xs text-muted-foreground truncate">{user?.email}</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="py-1">
+                  <DropdownMenuItem asChild className="h-11 gap-3 cursor-pointer">
+                    <Link href="/settings">
+                      <Settings className="h-4 w-4 text-muted-foreground" />
+                      <span>Settings</span>
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild className="h-11 gap-3 cursor-pointer">
+                    <Link href="/subscription">
+                      <Sparkles className="h-4 w-4 text-muted-foreground" />
+                      <span>Subscription</span>
+                    </Link>
+                  </DropdownMenuItem>
                 </div>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem asChild className="h-10">
-                  <Link href="/settings" className="cursor-pointer">
-                    <Settings className="mr-2 h-4 w-4" />
-                    Settings
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild className="h-10">
-                  <Link href="/subscription" className="cursor-pointer">
-                    <User className="mr-2 h-4 w-4" />
-                    Subscription
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem
-                  className="cursor-pointer text-red-600 h-10"
-                  onClick={() => logout.mutate()}
-                >
-                  <LogOut className="mr-2 h-4 w-4" />
-                  Log Out
-                </DropdownMenuItem>
+                <div className="py-1">
+                  <DropdownMenuItem
+                    className="h-11 gap-3 cursor-pointer text-red-600 focus:text-red-600 focus:bg-red-50 dark:focus:bg-red-950/20"
+                    onClick={() => logout.mutate()}
+                  >
+                    <LogOut className="h-4 w-4" />
+                    <span>Log Out</span>
+                  </DropdownMenuItem>
+                </div>
               </DropdownMenuContent>
             </DropdownMenu>
 
             {/* Mobile/Tablet Menu - Visible below lg (1024px) */}
             <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
               <SheetTrigger asChild className="lg:hidden">
-                <Button variant="ghost" size="icon" className="h-10 w-10 min-w-[44px]" aria-label="Open navigation menu">
-                  <Menu className="h-5 w-5" />
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  className="h-10 w-10 min-w-[44px] transition-all duration-200" 
+                  aria-label="Open navigation menu"
+                >
+                  <Menu className={cn(
+                    "h-5 w-5 transition-transform duration-300",
+                    mobileMenuOpen && "rotate-90"
+                  )} />
                 </Button>
               </SheetTrigger>
-              <SheetContent side="right" className="w-80 max-w-[85vw]">
+              <SheetContent 
+                side="right" 
+                className="w-80 max-w-[85vw] p-0"
+              >
                 <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
-                <div className="flex flex-col gap-4 mt-6">
-                  {/* Mobile Search */}
-                  <div className="px-2">
+                <div className="flex flex-col h-full">
+                  {/* Mobile Menu Header */}
+                  <div className="p-4 border-b border-border/50">
                     <GlobalSearch />
                   </div>
                   
-                  <div className="border-t pt-4">
+                  {/* Mobile Navigation */}
+                  <div className="flex-1 overflow-y-auto p-4">
                     <MobileNav />
                   </div>
                   
-                  <div className="border-t pt-4 mt-2">
+                  {/* Mobile Menu Footer */}
+                  <div className="p-4 border-t border-border/50 space-y-1">
                     <Link
                       href="/settings"
-                      className="flex items-center gap-2 px-4 py-3 text-base font-medium text-muted-foreground hover:text-foreground rounded-md transition-colors min-h-[48px]"
+                      className="flex items-center gap-3 px-4 py-3 text-base font-medium text-muted-foreground hover:text-foreground hover:bg-accent/50 rounded-lg transition-all duration-200 min-h-[48px]"
                       onClick={() => setMobileMenuOpen(false)}
                     >
-                      <Settings className="h-4 w-4" />
+                      <Settings className="h-5 w-5" />
                       Settings
                     </Link>
                     <Link
                       href="/subscription"
-                      className="flex items-center gap-2 px-4 py-3 text-base font-medium text-muted-foreground hover:text-foreground rounded-md transition-colors min-h-[48px]"
+                      className="flex items-center gap-3 px-4 py-3 text-base font-medium text-muted-foreground hover:text-foreground hover:bg-accent/50 rounded-lg transition-all duration-200 min-h-[48px]"
                       onClick={() => setMobileMenuOpen(false)}
                     >
-                      <User className="h-4 w-4" />
+                      <Sparkles className="h-5 w-5" />
                       Subscription
                     </Link>
                     <button
@@ -471,9 +699,9 @@ export function Navigation() {
                         setMobileMenuOpen(false);
                         logout.mutate();
                       }}
-                      className="w-full flex items-center gap-2 px-4 py-3 text-base font-medium text-red-600 hover:bg-red-50 dark:hover:bg-red-950/20 rounded-md transition-colors min-h-[48px]"
+                      className="w-full flex items-center gap-3 px-4 py-3 text-base font-medium text-red-600 hover:bg-red-50 dark:hover:bg-red-950/20 rounded-lg transition-all duration-200 min-h-[48px]"
                     >
-                      <LogOut className="h-4 w-4" />
+                      <LogOut className="h-5 w-5" />
                       Log Out
                     </button>
                   </div>
