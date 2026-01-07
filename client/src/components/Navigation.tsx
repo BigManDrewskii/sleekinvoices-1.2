@@ -42,7 +42,6 @@ import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { GlobalSearch } from "@/components/GlobalSearch";
-import { ResponsiveLogoEnhanced } from "@/components/ResponsiveLogoEnhanced";
 import { cn } from "@/lib/utils";
 
 // Navigation structure with grouped items
@@ -98,26 +97,26 @@ export function Navigation() {
   const QuickActionsMenu = () => (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button size="sm" className="gap-1.5">
+        <Button size="sm" className="h-10 min-w-[44px] gap-1.5 px-3">
           <Plus className="h-4 w-4" />
           <span className="hidden sm:inline">New</span>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-48">
-        <DropdownMenuItem onClick={() => setLocation("/invoices/create")} className="cursor-pointer">
+        <DropdownMenuItem onClick={() => setLocation("/invoices/create")} className="cursor-pointer h-10">
           <FileText className="mr-2 h-4 w-4" />
           New Invoice
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => setLocation("/estimates/create")} className="cursor-pointer">
+        <DropdownMenuItem onClick={() => setLocation("/estimates/create")} className="cursor-pointer h-10">
           <FileCheck className="mr-2 h-4 w-4" />
           New Estimate
         </DropdownMenuItem>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={() => setLocation("/clients")} className="cursor-pointer">
+        <DropdownMenuItem onClick={() => setLocation("/clients")} className="cursor-pointer h-10">
           <User className="mr-2 h-4 w-4" />
           New Client
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => setLocation("/expenses")} className="cursor-pointer">
+        <DropdownMenuItem onClick={() => setLocation("/expenses")} className="cursor-pointer h-10">
           <Receipt className="mr-2 h-4 w-4" />
           New Expense
         </DropdownMenuItem>
@@ -125,16 +124,16 @@ export function Navigation() {
     </DropdownMenu>
   );
 
-  // Desktop Navigation with Grouped Dropdowns
+  // Desktop Navigation with Grouped Dropdowns - Only visible at lg (1024px+)
   const DesktopNav = () => (
-    <NavigationMenu className="hidden md:flex">
-      <NavigationMenuList className="gap-1">
+    <NavigationMenu className="hidden lg:flex">
+      <NavigationMenuList className="gap-0.5">
         {/* Dashboard - Direct Link */}
         <NavigationMenuItem>
           <Link href="/dashboard">
             <NavigationMenuLink
               className={cn(
-                "group inline-flex h-9 w-max items-center justify-center rounded-md px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50",
+                "group inline-flex h-10 w-max items-center justify-center rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50",
                 isActive("/dashboard") ? "bg-accent/50 text-foreground" : "text-muted-foreground"
               )}
             >
@@ -147,7 +146,7 @@ export function Navigation() {
         <NavigationMenuItem>
           <NavigationMenuTrigger 
             className={cn(
-              "text-sm font-medium",
+              "h-10 px-3 text-sm font-medium",
               isGroupActive(navigationConfig.billing.items) ? "bg-accent/50 text-foreground" : "text-muted-foreground"
             )}
           >
@@ -185,7 +184,7 @@ export function Navigation() {
           <Link href="/clients">
             <NavigationMenuLink
               className={cn(
-                "group inline-flex h-9 w-max items-center justify-center rounded-md px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50",
+                "group inline-flex h-10 w-max items-center justify-center rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50",
                 isActive("/clients") ? "bg-accent/50 text-foreground" : "text-muted-foreground"
               )}
             >
@@ -198,7 +197,7 @@ export function Navigation() {
         <NavigationMenuItem>
           <NavigationMenuTrigger 
             className={cn(
-              "text-sm font-medium",
+              "h-10 px-3 text-sm font-medium",
               isGroupActive(navigationConfig.finances.items) ? "bg-accent/50 text-foreground" : "text-muted-foreground"
             )}
           >
@@ -236,7 +235,7 @@ export function Navigation() {
           <Link href="/templates">
             <NavigationMenuLink
               className={cn(
-                "group inline-flex h-9 w-max items-center justify-center rounded-md px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50",
+                "group inline-flex h-10 w-max items-center justify-center rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50",
                 isActive("/templates") ? "bg-accent/50 text-foreground" : "text-muted-foreground"
               )}
             >
@@ -254,12 +253,12 @@ export function Navigation() {
     const [financesOpen, setFinancesOpen] = useState(false);
 
     return (
-      <div className="flex flex-col gap-2">
+      <div className="flex flex-col gap-1">
         {/* Dashboard */}
         <Link
           href="/dashboard"
           className={cn(
-            "block px-4 py-3 text-base font-medium rounded-md transition-colors",
+            "block px-4 py-3 text-base font-medium rounded-md transition-colors min-h-[48px] flex items-center",
             isActive("/dashboard") ? "bg-accent text-foreground" : "text-muted-foreground hover:text-foreground hover:bg-accent/50"
           )}
           onClick={() => setMobileMenuOpen(false)}
@@ -272,7 +271,7 @@ export function Navigation() {
           <button
             onClick={() => setBillingOpen(!billingOpen)}
             className={cn(
-              "w-full flex items-center justify-between px-4 py-3 text-base font-medium rounded-md transition-colors",
+              "w-full flex items-center justify-between px-4 py-3 text-base font-medium rounded-md transition-colors min-h-[48px]",
               isGroupActive(navigationConfig.billing.items) ? "bg-accent/50 text-foreground" : "text-muted-foreground hover:text-foreground hover:bg-accent/50"
             )}
           >
@@ -286,7 +285,7 @@ export function Navigation() {
                   key={item.href}
                   href={item.href}
                   className={cn(
-                    "flex items-center gap-2 px-4 py-2 text-sm rounded-md transition-colors",
+                    "flex items-center gap-2 px-4 py-3 text-sm rounded-md transition-colors min-h-[48px]",
                     isActive(item.href) ? "bg-accent text-foreground" : "text-muted-foreground hover:text-foreground hover:bg-accent/50"
                   )}
                   onClick={() => setMobileMenuOpen(false)}
@@ -303,7 +302,7 @@ export function Navigation() {
         <Link
           href="/clients"
           className={cn(
-            "block px-4 py-3 text-base font-medium rounded-md transition-colors",
+            "block px-4 py-3 text-base font-medium rounded-md transition-colors min-h-[48px] flex items-center",
             isActive("/clients") ? "bg-accent text-foreground" : "text-muted-foreground hover:text-foreground hover:bg-accent/50"
           )}
           onClick={() => setMobileMenuOpen(false)}
@@ -316,7 +315,7 @@ export function Navigation() {
           <button
             onClick={() => setFinancesOpen(!financesOpen)}
             className={cn(
-              "w-full flex items-center justify-between px-4 py-3 text-base font-medium rounded-md transition-colors",
+              "w-full flex items-center justify-between px-4 py-3 text-base font-medium rounded-md transition-colors min-h-[48px]",
               isGroupActive(navigationConfig.finances.items) ? "bg-accent/50 text-foreground" : "text-muted-foreground hover:text-foreground hover:bg-accent/50"
             )}
           >
@@ -330,7 +329,7 @@ export function Navigation() {
                   key={item.href}
                   href={item.href}
                   className={cn(
-                    "flex items-center gap-2 px-4 py-2 text-sm rounded-md transition-colors",
+                    "flex items-center gap-2 px-4 py-3 text-sm rounded-md transition-colors min-h-[48px]",
                     isActive(item.href) ? "bg-accent text-foreground" : "text-muted-foreground hover:text-foreground hover:bg-accent/50"
                   )}
                   onClick={() => setMobileMenuOpen(false)}
@@ -347,7 +346,7 @@ export function Navigation() {
         <Link
           href="/templates"
           className={cn(
-            "block px-4 py-3 text-base font-medium rounded-md transition-colors",
+            "block px-4 py-3 text-base font-medium rounded-md transition-colors min-h-[48px] flex items-center",
             isActive("/templates") ? "bg-accent text-foreground" : "text-muted-foreground hover:text-foreground hover:bg-accent/50"
           )}
           onClick={() => setMobileMenuOpen(false)}
@@ -359,37 +358,44 @@ export function Navigation() {
   };
 
   return (
-    <nav className="border-b bg-card/50 backdrop-blur-sm sticky top-0 z-50">
-      <div className="container mx-auto px-4 py-3">
-        <div className="flex items-center justify-between gap-4">
-          {/* Logo */}
-          <Link href="/dashboard" className="flex items-center shrink-0">
-            <ResponsiveLogoEnhanced
-              variant="wide"
-              responsive={true}
-              showBrand={false}
+    <nav className="navbar-sticky">
+      <div className="navbar-container">
+        <div className="navbar-inner">
+          {/* Logo - Dynamic sizing based on breakpoint */}
+          <Link href="/dashboard" className="navbar-logo">
+            <img
+              src="/logos/wide/SleekInvoices-Logo-Wide.svg"
+              alt="SleekInvoices"
+              className="navbar-logo-wide"
+              style={{ height: '32px', width: 'auto', maxWidth: '200px' }}
+            />
+            <img
+              src="/logos/monogram/SleekInvoices-Monogram-White.svg"
+              alt="SleekInvoices"
+              className="navbar-logo-compact"
+              style={{ height: '36px', width: '36px', maxWidth: '36px' }}
             />
           </Link>
 
-          {/* Desktop Navigation */}
+          {/* Desktop Navigation - Only at lg (1024px+) */}
           <DesktopNav />
 
-          {/* Global Search - Desktop */}
-          <div className="hidden lg:block flex-1 max-w-sm">
+          {/* Global Search - Only at xl (1280px+) */}
+          <div className="hidden xl:block flex-1 max-w-xs ml-4">
             <GlobalSearch />
           </div>
 
           {/* Right Side Actions */}
-          <div className="flex items-center gap-2">
+          <div className="navbar-actions">
             {/* Quick Actions */}
             <QuickActionsMenu />
 
             {/* User Menu */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="rounded-full" aria-label="User menu">
+                <Button variant="ghost" size="icon" className="rounded-full h-10 w-10 min-w-[44px]" aria-label="User menu">
                   <Avatar className="h-8 w-8">
-                    <AvatarFallback>
+                    <AvatarFallback className="text-sm">
                       {user?.name?.charAt(0).toUpperCase() || "U"}
                     </AvatarFallback>
                   </Avatar>
@@ -398,16 +404,16 @@ export function Navigation() {
               <DropdownMenuContent align="end" className="w-56">
                 <div className="px-2 py-1.5">
                   <p className="text-sm font-medium">{user?.name}</p>
-                  <p className="text-xs text-muted-foreground">{user?.email}</p>
+                  <p className="text-xs text-muted-foreground truncate">{user?.email}</p>
                 </div>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem asChild>
+                <DropdownMenuItem asChild className="h-10">
                   <Link href="/settings" className="cursor-pointer">
                     <Settings className="mr-2 h-4 w-4" />
                     Settings
                   </Link>
                 </DropdownMenuItem>
-                <DropdownMenuItem asChild>
+                <DropdownMenuItem asChild className="h-10">
                   <Link href="/subscription" className="cursor-pointer">
                     <User className="mr-2 h-4 w-4" />
                     Subscription
@@ -415,7 +421,7 @@ export function Navigation() {
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
-                  className="cursor-pointer text-red-600"
+                  className="cursor-pointer text-red-600 h-10"
                   onClick={() => logout.mutate()}
                 >
                   <LogOut className="mr-2 h-4 w-4" />
@@ -424,14 +430,14 @@ export function Navigation() {
               </DropdownMenuContent>
             </DropdownMenu>
 
-            {/* Mobile Menu */}
+            {/* Mobile/Tablet Menu - Visible below lg (1024px) */}
             <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
-              <SheetTrigger asChild className="md:hidden">
-                <Button variant="ghost" size="icon" aria-label="Open navigation menu">
+              <SheetTrigger asChild className="lg:hidden">
+                <Button variant="ghost" size="icon" className="h-10 w-10 min-w-[44px]" aria-label="Open navigation menu">
                   <Menu className="h-5 w-5" />
                 </Button>
               </SheetTrigger>
-              <SheetContent side="right" className="w-72">
+              <SheetContent side="right" className="w-80 max-w-[85vw]">
                 <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
                 <div className="flex flex-col gap-4 mt-6">
                   {/* Mobile Search */}
@@ -446,7 +452,7 @@ export function Navigation() {
                   <div className="border-t pt-4 mt-2">
                     <Link
                       href="/settings"
-                      className="flex items-center gap-2 px-4 py-3 text-base font-medium text-muted-foreground hover:text-foreground rounded-md transition-colors"
+                      className="flex items-center gap-2 px-4 py-3 text-base font-medium text-muted-foreground hover:text-foreground rounded-md transition-colors min-h-[48px]"
                       onClick={() => setMobileMenuOpen(false)}
                     >
                       <Settings className="h-4 w-4" />
@@ -454,7 +460,7 @@ export function Navigation() {
                     </Link>
                     <Link
                       href="/subscription"
-                      className="flex items-center gap-2 px-4 py-3 text-base font-medium text-muted-foreground hover:text-foreground rounded-md transition-colors"
+                      className="flex items-center gap-2 px-4 py-3 text-base font-medium text-muted-foreground hover:text-foreground rounded-md transition-colors min-h-[48px]"
                       onClick={() => setMobileMenuOpen(false)}
                     >
                       <User className="h-4 w-4" />
@@ -465,7 +471,7 @@ export function Navigation() {
                         setMobileMenuOpen(false);
                         logout.mutate();
                       }}
-                      className="w-full flex items-center gap-2 px-4 py-3 text-base font-medium text-red-600 hover:bg-red-50 dark:hover:bg-red-950/20 rounded-md transition-colors"
+                      className="w-full flex items-center gap-2 px-4 py-3 text-base font-medium text-red-600 hover:bg-red-50 dark:hover:bg-red-950/20 rounded-md transition-colors min-h-[48px]"
                     >
                       <LogOut className="h-4 w-4" />
                       Log Out

@@ -2070,3 +2070,39 @@ Before marking a phase complete, verify:
 - [done] 6.6.2 Test all pages at 768px (tablet) - Breakpoints verified
 - [done] 6.6.3 Test all pages at 1024px+ (desktop) - Screenshot verified
 - [done] 6.6.4 Verify all TypeScript compiles without errors - No errors
+
+
+---
+
+## Phase 7: Critical Responsive Fixes (MANDATORY PREREQUISITE)
+
+**Trade-off Analysis:** UI/UX polish IS more critical than feature additions because:
+- Broken responsiveness damages user trust and professional perception
+- Features built on unstable UI foundation require rework
+- Mobile/tablet users represent 60%+ of traffic
+
+### 7.1 Navbar Breakpoint Fixes
+- [done] 7.1.1 Fix navbar overflow at 768px-1024px (tablet) - hamburger menu for <1024px
+- [done] 7.1.2 Fix navbar at 1200px - full nav visible with proper spacing
+- [done] 7.1.3 Fix navbar at 1440px+ (desktop) - search bar + full nav
+- [done] 7.1.4 Ensure touch targets ≥48px on all interactive elements - min-h-[48px] applied
+
+### 7.2 Logo Treatment
+- [done] 7.2.1 Implement dynamic logo scaling - wide logo (200px max) on desktop, monogram on mobile/tablet
+- [done] 7.2.2 Apply max-width: 100% + height: auto to prevent clipping - in design-system.css
+- [done] 7.2.3 Maintain 16px padding at all viewport widths - navbar-container padding
+- [done] 7.2.4 Test logo visibility at 768px, 1200px, 1440px - CSS breakpoints configured
+
+### 7.3 Floaty Sticky Navbar Implementation
+- [done] 7.3.1 Fixed position for desktop (top: 0px, sticky behavior) - position: sticky; top: 0
+- [done] 7.3.2 Collapsible hamburger menu for mobile/tablet (<1024px) - Sheet component
+- [done] 7.3.3 Smooth transitions between breakpoints - CSS transitions applied
+- [done] 7.3.4 Proper z-index layering for dropdown menus - z-50 on navbar
+- [done] 7.3.5 Backdrop blur effect for modern aesthetic - backdrop-filter: blur(12px)
+
+### 7.4 Validation
+- [done] 7.4.1 Test at 375px (mobile) - hamburger menu at <1024px
+- [done] 7.4.2 Test at 768px (tablet) - hamburger menu, compact logo
+- [done] 7.4.3 Test at 1200px (small desktop) - full nav visible, wide logo
+- [done] 7.4.4 Test at 1440px (desktop) - proper visual hierarchy with search
+- [done] 7.4.5 Verify no horizontal scroll at any breakpoint - navbar constrained
