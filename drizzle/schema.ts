@@ -765,7 +765,7 @@ export type InsertAiCredits = typeof aiCredits.$inferInsert;
 export const aiUsageLogs = mysqlTable("aiUsageLogs", {
   id: int("id").autoincrement().primaryKey(),
   userId: int("userId").notNull(),
-  feature: mysqlEnum("feature", ["smart_compose", "categorization", "prediction"]).notNull(),
+  feature: mysqlEnum("feature", ["smart_compose", "categorization", "prediction", "ai_assistant"]).notNull(),
   inputTokens: int("inputTokens").default(0).notNull(),
   outputTokens: int("outputTokens").default(0).notNull(),
   model: varchar("model", { length: 100 }).notNull(),

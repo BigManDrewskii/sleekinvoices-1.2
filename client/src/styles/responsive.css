@@ -405,3 +405,380 @@
     padding: 0;
   }
 }
+
+
+/* ===========================================
+   DESKTOP & TABLET OPTIMIZATION
+   Enhanced layouts for larger screens
+   =========================================== */
+
+/* ===========================================
+   DESKTOP LAYOUT ENHANCEMENTS
+   Multi-column layouts for wide screens
+   =========================================== */
+
+/* Dashboard grid for desktop */
+.dashboard-grid {
+  display: grid;
+  gap: 1.5rem;
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 768px) {
+  .dashboard-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .dashboard-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (min-width: 1280px) {
+  .dashboard-grid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 2rem;
+  }
+}
+
+/* Stats grid - 2 cols on tablet, 4 on desktop */
+.stats-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(2, 1fr);
+}
+
+@media (min-width: 1024px) {
+  .stats-grid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.5rem;
+  }
+}
+
+/* Two-column layout for forms */
+.form-two-column {
+  display: grid;
+  gap: 1.5rem;
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 1024px) {
+  .form-two-column {
+    grid-template-columns: 2fr 1fr;
+    gap: 2rem;
+  }
+}
+
+/* Invoice preview layout - side by side on desktop */
+.invoice-preview-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+@media (min-width: 1280px) {
+  .invoice-preview-layout {
+    flex-direction: row;
+    gap: 2rem;
+  }
+  
+  .invoice-preview-layout > .invoice-form {
+    flex: 1;
+    max-width: 60%;
+  }
+  
+  .invoice-preview-layout > .invoice-preview {
+    flex: 1;
+    position: sticky;
+    top: 1rem;
+    max-height: calc(100vh - 2rem);
+    overflow-y: auto;
+  }
+}
+
+/* ===========================================
+   TABLET-SPECIFIC OPTIMIZATIONS
+   Touch-friendly layouts for tablets
+   =========================================== */
+
+/* Tablet navigation - horizontal scrolling tabs */
+.tablet-nav-scroll {
+  display: flex;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  gap: 0.5rem;
+  padding-bottom: 0.5rem;
+}
+
+.tablet-nav-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+@media (min-width: 1024px) {
+  .tablet-nav-scroll {
+    overflow-x: visible;
+    flex-wrap: wrap;
+  }
+}
+
+/* Touch-optimized card actions */
+.card-actions-touch {
+  display: flex;
+  gap: 0.5rem;
+  padding-top: 1rem;
+  margin-top: 1rem;
+  border-top: 1px solid var(--border);
+}
+
+.card-actions-touch > button,
+.card-actions-touch > a {
+  flex: 1;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@media (min-width: 1024px) {
+  .card-actions-touch {
+    padding-top: 0;
+    margin-top: 0;
+    border-top: none;
+    gap: 0.25rem;
+  }
+  
+  .card-actions-touch > button,
+  .card-actions-touch > a {
+    flex: none;
+    min-height: auto;
+  }
+}
+
+/* ===========================================
+   SPLIT VIEW SUPPORT (iPad)
+   Optimized for multitasking
+   =========================================== */
+
+/* Compact mode for split view */
+@media (min-width: 320px) and (max-width: 500px) and (min-height: 600px) {
+  .split-view-compact {
+    padding: 0.75rem;
+  }
+  
+  .split-view-compact .card {
+    padding: 0.75rem;
+  }
+  
+  .split-view-compact .heading-responsive-xl {
+    font-size: 1.5rem;
+  }
+}
+
+/* ===========================================
+   KEYBOARD NAVIGATION ENHANCEMENTS
+   Focus states for power users
+   =========================================== */
+
+/* Enhanced focus ring for keyboard navigation */
+.focus-ring-enhanced:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+/* Skip to main content link */
+.skip-to-main {
+  position: absolute;
+  top: -100%;
+  left: 0;
+  padding: 1rem;
+  background: var(--primary);
+  color: var(--primary-foreground);
+  z-index: 100;
+  transition: top 0.2s;
+}
+
+.skip-to-main:focus {
+  top: 0;
+}
+
+/* ===========================================
+   WIDE SCREEN OPTIMIZATIONS
+   Layouts for ultrawide monitors
+   =========================================== */
+
+@media (min-width: 1536px) {
+  /* Max width container for ultrawide */
+  .max-content-width {
+    max-width: 1400px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  
+  /* Larger gaps on ultrawide */
+  .ultrawide-spacing {
+    gap: 2.5rem;
+  }
+  
+  /* Three-column layout for ultrawide */
+  .ultrawide-three-col {
+    grid-template-columns: 1fr 2fr 1fr;
+  }
+}
+
+/* ===========================================
+   RESPONSIVE DATA TABLES
+   Optimized for different screen sizes
+   =========================================== */
+
+/* Table with horizontal scroll on tablet */
+.table-responsive-tablet {
+  width: 100%;
+}
+
+@media (min-width: 768px) and (max-width: 1023px) {
+  .table-responsive-tablet {
+    display: block;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  .table-responsive-tablet table {
+    min-width: 800px;
+  }
+}
+
+/* Compact table for tablet */
+.table-compact-tablet {
+  font-size: 0.875rem;
+}
+
+@media (min-width: 768px) and (max-width: 1023px) {
+  .table-compact-tablet th,
+  .table-compact-tablet td {
+    padding: 0.5rem 0.75rem;
+  }
+}
+
+/* ===========================================
+   RESPONSIVE MODAL/DIALOG SIZES
+   Appropriate sizes for each viewport
+   =========================================== */
+
+/* Dialog responsive widths */
+.dialog-responsive {
+  width: calc(100vw - 2rem);
+  max-width: 100%;
+}
+
+@media (min-width: 640px) {
+  .dialog-responsive {
+    width: 90vw;
+    max-width: 500px;
+  }
+}
+
+@media (min-width: 768px) {
+  .dialog-responsive {
+    max-width: 600px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .dialog-responsive {
+    max-width: 700px;
+  }
+}
+
+/* Large dialog for complex forms */
+.dialog-large {
+  width: calc(100vw - 2rem);
+  max-width: 100%;
+  max-height: calc(100vh - 2rem);
+}
+
+@media (min-width: 768px) {
+  .dialog-large {
+    width: 90vw;
+    max-width: 900px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .dialog-large {
+    max-width: 1000px;
+    max-height: 85vh;
+  }
+}
+
+/* ===========================================
+   SIDEBAR RESPONSIVE BEHAVIOR
+   Collapsible sidebar for tablets
+   =========================================== */
+
+/* Sidebar collapsed state for tablet */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .sidebar-collapsible {
+    width: 64px;
+    transition: width 0.2s ease;
+  }
+  
+  .sidebar-collapsible:hover,
+  .sidebar-collapsible.expanded {
+    width: 240px;
+  }
+  
+  .sidebar-collapsible .sidebar-label {
+    opacity: 0;
+    transition: opacity 0.2s ease;
+  }
+  
+  .sidebar-collapsible:hover .sidebar-label,
+  .sidebar-collapsible.expanded .sidebar-label {
+    opacity: 1;
+  }
+}
+
+/* ===========================================
+   PRINT STYLES
+   Optimized for printing invoices
+   =========================================== */
+
+@media print {
+  /* Hide non-essential elements */
+  .no-print,
+  .sidebar,
+  .mobile-action-bar,
+  .ai-assistant-trigger,
+  nav,
+  header {
+    display: none !important;
+  }
+  
+  /* Full width content */
+  .print-full-width {
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+  
+  /* Reset backgrounds for printing */
+  body,
+  .card,
+  .bg-background {
+    background: white !important;
+    color: black !important;
+  }
+  
+  /* Ensure text is readable */
+  * {
+    color: black !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+}

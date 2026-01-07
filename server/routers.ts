@@ -2220,6 +2220,38 @@ export const appRouter = router({
     getUsageStats: protectedProcedure.query(async ({ ctx }) => {
       return await db.getAiUsageStats(ctx.user.id, 30);
     }),
+
+    // AI Chat - Conversational assistant
+    chat: protectedProcedure
+      .input(z.object({
+        message: z.string().min(1).max(2000),
+        context: z.object({
+          currentPage: z.string().optional(),
+          conversationHistory: z.array(z.object({
+            role: z.enum(['user', 'assistant']),
+            content: z.string(),
+          })).optional(),
+          stats: z.object({
+            totalRevenue: z.number().optional(),
+            outstandingBalance: z.number().optional(),
+            totalInvoices: z.number().optional(),
+            paidInvoices: z.number().optional(),
+          }).optional(),
+        }).optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const { chatWithAssistant } = await import('./ai/assistant');
+        const isPro = ctx.user.subscriptionStatus === 'active';
+        
+        const result = await chatWithAssistant(
+          input.message,
+          ctx.user.id,
+          isPro,
+          input.context
+        );
+
+        return result;
+      }),
   }),
 });
 

@@ -3292,7 +3292,7 @@ export async function useAiCredit(userId: number, isPro: boolean = false): Promi
  */
 export async function logAiUsage(data: {
   userId: number;
-  feature: 'smart_compose' | 'categorization' | 'prediction';
+  feature: 'smart_compose' | 'categorization' | 'prediction' | 'ai_assistant';
   inputTokens: number;
   outputTokens: number;
   model: string;
