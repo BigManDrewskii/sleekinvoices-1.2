@@ -212,6 +212,104 @@ export function Navigation() {
     </DropdownMenu>
   );
 
+  // Tablet Navigation - simplified horizontal nav for medium screens
+  const TabletNav = () => (
+    <div className="hidden md:flex lg:hidden navbar-tablet-nav">
+      <Link
+        href="/dashboard"
+        className={cn(
+          "flex items-center gap-1.5 px-3 py-2 text-sm font-medium rounded-lg transition-all",
+          isActive("/dashboard") 
+            ? "bg-accent text-foreground" 
+            : "text-muted-foreground hover:bg-accent/50 hover:text-foreground"
+        )}
+      >
+        <LayoutDashboard className="h-4 w-4" />
+        <span>Dashboard</span>
+      </Link>
+      
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <button
+            className={cn(
+              "flex items-center gap-1.5 px-3 py-2 text-sm font-medium rounded-lg transition-all",
+              isGroupActive(navigationConfig.billing.items)
+                ? "bg-accent text-foreground"
+                : "text-muted-foreground hover:bg-accent/50 hover:text-foreground"
+            )}
+          >
+            <FileText className="h-4 w-4" />
+            <span>Billing</span>
+            <ChevronDown className="h-3 w-3 opacity-60" />
+          </button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="start" className="w-48">
+          {navigationConfig.billing.items.map((item) => (
+            <DropdownMenuItem key={item.href} asChild>
+              <Link href={item.href} className="flex items-center gap-2">
+                <item.icon className="h-4 w-4" />
+                {item.label}
+              </Link>
+            </DropdownMenuItem>
+          ))}
+        </DropdownMenuContent>
+      </DropdownMenu>
+      
+      <Link
+        href="/clients"
+        className={cn(
+          "flex items-center gap-1.5 px-3 py-2 text-sm font-medium rounded-lg transition-all",
+          isActive("/clients")
+            ? "bg-accent text-foreground"
+            : "text-muted-foreground hover:bg-accent/50 hover:text-foreground"
+        )}
+      >
+        <Users className="h-4 w-4" />
+        <span>Clients</span>
+      </Link>
+      
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <button
+            className={cn(
+              "flex items-center gap-1.5 px-3 py-2 text-sm font-medium rounded-lg transition-all",
+              isGroupActive(navigationConfig.finances.items)
+                ? "bg-accent text-foreground"
+                : "text-muted-foreground hover:bg-accent/50 hover:text-foreground"
+            )}
+          >
+            <BarChart3 className="h-4 w-4" />
+            <span>Finances</span>
+            <ChevronDown className="h-3 w-3 opacity-60" />
+          </button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="start" className="w-48">
+          {navigationConfig.finances.items.map((item) => (
+            <DropdownMenuItem key={item.href} asChild>
+              <Link href={item.href} className="flex items-center gap-2">
+                <item.icon className="h-4 w-4" />
+                {item.label}
+              </Link>
+            </DropdownMenuItem>
+          ))}
+        </DropdownMenuContent>
+      </DropdownMenu>
+      
+      <Link
+        href="/templates"
+        className={cn(
+          "flex items-center gap-1.5 px-3 py-2 text-sm font-medium rounded-lg transition-all",
+          isActive("/templates")
+            ? "bg-accent text-foreground"
+            : "text-muted-foreground hover:bg-accent/50 hover:text-foreground"
+        )}
+      >
+        <LayoutTemplate className="h-4 w-4" />
+        <span>Templates</span>
+      </Link>
+    </div>
+  );
+
   // Desktop Navigation with enhanced hover effects
   const DesktopNav = () => (
     <NavigationMenu className="hidden lg:flex">
@@ -557,8 +655,7 @@ export function Navigation() {
     <nav 
       className={cn(
         "navbar-sticky transition-all duration-300",
-        scrolled && "shadow-md",
-        scrollDirection === 'down' && scrolled && "translate-y-0"
+        scrolled && "scrolled"
       )}
       role="navigation"
       aria-label="Main navigation"
@@ -586,6 +683,9 @@ export function Navigation() {
               style={{ height: '32px', width: '32px', maxWidth: '32px' }}
             />
           </Link>
+
+          {/* Tablet Navigation - Only at md to lg (768px - 1023px) */}
+          <TabletNav />
 
           {/* Desktop Navigation - Only at lg (1024px+) */}
           <DesktopNav />
@@ -661,9 +761,9 @@ export function Navigation() {
               </DropdownMenuContent>
             </DropdownMenu>
 
-            {/* Mobile/Tablet Menu - Visible below lg (1024px) */}
+            {/* Mobile Menu - Visible below md (768px) */}
             <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
-              <SheetTrigger asChild className="lg:hidden">
+              <SheetTrigger asChild className="md:hidden">
                 <Button 
                   variant="ghost" 
                   size="icon" 
