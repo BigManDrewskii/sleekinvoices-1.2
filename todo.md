@@ -1073,3 +1073,37 @@
 - [x] 4.3.2 Identify missing essential features
 - [x] 4.3.3 Prioritize competitive advantage features
 - [x] 4.3.4 Create phased implementation roadmap
+
+---
+## Guided Invoice Creator (Typeform-style)
+
+### Phase 1: Architecture & Design
+- [x] Create GuidedInvoiceCreator page component
+- [x] Design step flow: Client → Services → Amounts → Due Date → Review
+- [x] Create reusable QuestionStep component with animations
+- [x] Design progress indicator component
+
+### Phase 2: Question Components
+- [x] ClientStep: Select existing or create new client inline
+- [x] ServicesStep: Add line items with descriptions
+- [x] AmountsStep: Quantity, rate, tax configuration
+- [x] DueDateStep: Payment terms and due date selection
+- [x] ReviewStep: Summary with edit capabilities
+
+### Phase 3: Data & Generation
+- [x] Implement step state management with useReducer
+- [x] Connect to existing client/invoice tRPC procedures
+- [x] Auto-save draft as user progresses
+- [x] Generate invoice on completion
+
+### Phase 4: Polish & UX
+- [x] Keyboard navigation (Enter to advance, Escape to go back)
+- [x] Smooth slide/fade transitions between steps
+- [x] Mobile-responsive design
+- [x] Exit confirmation dialog
+
+### Phase 5: Testing & Delivery
+- [x] Write vitest tests for guided flow (11 tests passing)
+- [x] Test all step transitions
+- [x] Add entry point to navigation/dashboard
+- [x] Save checkpoint and deliver

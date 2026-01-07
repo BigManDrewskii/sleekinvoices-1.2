@@ -50,6 +50,7 @@ import {
   CheckSquare,
   XSquare,
   FileSpreadsheet,
+  Sparkles,
 } from "lucide-react";
 import { useState, useMemo, useRef } from "react";
 import { useTableSort } from "@/hooks/useTableSort";
@@ -457,6 +458,14 @@ export default function Invoices() {
                 <FileSpreadsheet className="h-4 w-4" />
                 <span className="hidden sm:inline">Export CSV</span>
                 <span className="sm:hidden">Export</span>
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => setLocation("/invoices/guided")}
+                className="gap-2 touch-target border-purple-500/30 hover:border-purple-500/50 hover:bg-purple-500/5"
+              >
+                <Sparkles className="h-4 w-4 text-purple-500" />
+                <span className="hidden sm:inline">Guided</span>
               </Button>
               <Button onClick={() => setLocation("/invoices/create")} className="flex-1 sm:flex-none touch-target">
                 <Plus className="h-4 w-4 mr-2" />

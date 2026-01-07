@@ -148,6 +148,18 @@ export function Navigation() {
         sideOffset={8}
       >
         <DropdownMenuItem 
+          onClick={() => setLocation("/invoices/guided")} 
+          className="cursor-pointer h-11 gap-3 transition-colors"
+        >
+          <div className="flex h-8 w-8 items-center justify-center rounded-md bg-purple-500/10 text-purple-500">
+            <Sparkles className="h-4 w-4" />
+          </div>
+          <div className="flex flex-col">
+            <span className="font-medium">Guided Creator</span>
+            <span className="text-xs text-muted-foreground">Step-by-step invoice</span>
+          </div>
+        </DropdownMenuItem>
+        <DropdownMenuItem 
           onClick={() => setLocation("/invoices/create")} 
           className="cursor-pointer h-11 gap-3 transition-colors"
         >
@@ -156,7 +168,7 @@ export function Navigation() {
           </div>
           <div className="flex flex-col">
             <span className="font-medium">New Invoice</span>
-            <span className="text-xs text-muted-foreground">Create a new invoice</span>
+            <span className="text-xs text-muted-foreground">Standard form</span>
           </div>
         </DropdownMenuItem>
         <DropdownMenuItem 

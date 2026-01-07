@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { getLoginUrl } from "@/const";
 import { trpc } from "@/lib/trpc";
-import { DollarSign, FileText, TrendingUp, TrendingDown, AlertCircle, Plus, ArrowUpRight, ArrowDownRight } from "lucide-react";
+import { DollarSign, FileText, TrendingUp, TrendingDown, AlertCircle, Plus, ArrowUpRight, ArrowDownRight, Sparkles, ChevronDown } from "lucide-react";
 import { Link } from "wouter";
 import { Navigation } from "@/components/Navigation";
 import { UpgradePromoBanner } from "@/components/UpgradePromoBanner";
@@ -59,13 +59,21 @@ export default function Dashboard() {
                 <h1 className="page-header-title">Dashboard</h1>
                 <p className="page-header-subtitle">Welcome back, {user?.name || "there"}!</p>
               </div>
-              <Button asChild className="touch-target">
-                <Link href="/invoices/create" className="flex items-center gap-2 justify-center">
-                  <Plus className="h-4 w-4" />
-                  <span className="hidden sm:inline">New Invoice</span>
-                  <span className="sm:hidden">New</span>
-                </Link>
-              </Button>
+              <div className="flex gap-2">
+                <Button asChild variant="outline" className="touch-target gap-2 border-purple-500/30 hover:border-purple-500/50 hover:bg-purple-500/5">
+                  <Link href="/invoices/guided" className="flex items-center gap-2 justify-center">
+                    <Sparkles className="h-4 w-4 text-purple-500" />
+                    <span className="hidden sm:inline">Guided</span>
+                  </Link>
+                </Button>
+                <Button asChild className="touch-target">
+                  <Link href="/invoices/create" className="flex items-center gap-2 justify-center">
+                    <Plus className="h-4 w-4" />
+                    <span className="hidden sm:inline">New Invoice</span>
+                    <span className="sm:hidden">New</span>
+                  </Link>
+                </Button>
+              </div>
             </div>
           </div>
 

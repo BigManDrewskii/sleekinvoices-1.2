@@ -40,6 +40,7 @@ const Estimates = lazy(() => import("./pages/Estimates"));
 const CreateEstimate = lazy(() => import("./pages/CreateEstimate"));
 const ViewEstimate = lazy(() => import("./pages/ViewEstimate"));
 const EditEstimate = lazy(() => import("./pages/EditEstimate"));
+const GuidedInvoiceCreator = lazy(() => import("./pages/GuidedInvoiceCreator"));
 
 // Loading fallback component
 function LoadingFallback() {
@@ -67,6 +68,7 @@ function Router() {
         <Route path={"/clients"} component={Clients} />
         <Route path={"/invoices"} component={Invoices} />
         <Route path={"/invoices/create"} component={CreateInvoice} />
+        <Route path={"/invoices/guided"} component={GuidedInvoiceCreator} />
         <Route path={"/invoices/:id/edit"} component={EditInvoice} />
         <Route path={"/invoices/:id"} component={ViewInvoice} />
         <Route path={"/analytics"} component={Analytics} />
