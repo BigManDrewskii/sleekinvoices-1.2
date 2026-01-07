@@ -95,96 +95,86 @@ export default function Dashboard() {
           ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {/* Total Revenue */}
-            <Card className="border-border">
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between">
-                  <p className="text-sm text-muted-foreground">Total Revenue</p>
-                  <span className="flex items-center gap-1 text-xs px-2 py-0.5 rounded-full bg-green-500/10 text-green-500">
-                    <ArrowUpRight className="h-3 w-3" />
-                    +12.5%
-                  </span>
-                </div>
-                <p className="text-3xl font-bold mt-2 tracking-tight">
-                  {formatCurrency(stats?.totalRevenue || 0)}
-                </p>
-                <p className="text-xs text-muted-foreground mt-2 flex items-center gap-1">
-                  <TrendingUp className="h-3 w-3 text-green-500" />
-                  Trending up this month
-                </p>
-              </CardContent>
-            </Card>
+            <div className="rounded-2xl bg-gradient-to-br from-card to-card/80 border border-border/50 p-5 backdrop-blur-sm transition-all duration-200 hover:border-border hover:shadow-lg hover:shadow-primary/5">
+              <div className="flex items-center justify-between mb-3">
+                <p className="text-sm font-medium text-muted-foreground">Total Revenue</p>
+                <span className="inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-500 font-medium">
+                  <ArrowUpRight className="h-3 w-3" />
+                  +{stats?.revenueChangePercent?.toFixed(1) || 12.5}%
+                </span>
+              </div>
+              <p className="text-2xl font-bold tracking-tight text-foreground">
+                {formatCurrency(stats?.totalRevenue || 0)}
+              </p>
+              <p className="text-xs text-muted-foreground mt-2 flex items-center gap-1.5">
+                <TrendingUp className="h-3 w-3 text-emerald-500" />
+                Trending up this month
+              </p>
+            </div>
 
             {/* Outstanding */}
-            <Card className="border-border">
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between">
-                  <p className="text-sm text-muted-foreground">Outstanding</p>
-                  {(stats?.outstandingBalance || 0) > 0 && (
-                    <span className="flex items-center gap-1 text-xs px-2 py-0.5 rounded-full bg-yellow-500/10 text-yellow-500">
-                      <AlertCircle className="h-3 w-3" />
-                      Pending
-                    </span>
-                  )}
-                </div>
-                <p className="text-3xl font-bold mt-2 tracking-tight">
-                  {formatCurrency(stats?.outstandingBalance || 0)}
-                </p>
-                <p className="text-xs text-muted-foreground mt-2">
-                  Awaiting payment
-                </p>
-              </CardContent>
-            </Card>
+            <div className="rounded-2xl bg-gradient-to-br from-card to-card/80 border border-border/50 p-5 backdrop-blur-sm transition-all duration-200 hover:border-border hover:shadow-lg hover:shadow-amber/5">
+              <div className="flex items-center justify-between mb-3">
+                <p className="text-sm font-medium text-muted-foreground">Outstanding</p>
+                {(stats?.outstandingBalance || 0) > 0 && (
+                  <span className="inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-full bg-amber-500/10 text-amber-500 font-medium">
+                    <AlertCircle className="h-3 w-3" />
+                    Pending
+                  </span>
+                )}
+              </div>
+              <p className="text-2xl font-bold tracking-tight text-foreground">
+                {formatCurrency(stats?.outstandingBalance || 0)}
+              </p>
+              <p className="text-xs text-muted-foreground mt-2">
+                Awaiting payment
+              </p>
+            </div>
 
             {/* Total Invoices */}
-            <Card className="border-border">
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between">
-                  <p className="text-sm text-muted-foreground">Total Invoices</p>
-                </div>
-                <p className="text-3xl font-bold mt-2 tracking-tight">
-                  {stats?.totalInvoices || 0}
-                </p>
-                <p className="text-xs text-muted-foreground mt-2">
-                  All time invoices created
-                </p>
-              </CardContent>
-            </Card>
+            <div className="rounded-2xl bg-gradient-to-br from-card to-card/80 border border-border/50 p-5 backdrop-blur-sm transition-all duration-200 hover:border-border hover:shadow-lg">
+              <div className="flex items-center justify-between mb-3">
+                <p className="text-sm font-medium text-muted-foreground">Total Invoices</p>
+              </div>
+              <p className="text-2xl font-bold tracking-tight text-foreground">
+                {stats?.totalInvoices || 0}
+              </p>
+              <p className="text-xs text-muted-foreground mt-2">
+                All time invoices created
+              </p>
+            </div>
 
             {/* Paid Invoices */}
-            <Card className="border-border">
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between">
-                  <p className="text-sm text-muted-foreground">Paid Invoices</p>
-                  <span className="flex items-center gap-1 text-xs px-2 py-0.5 rounded-full bg-green-500/10 text-green-500">
-                    <TrendingUp className="h-3 w-3" />
-                    Paid
-                  </span>
-                </div>
-                <p className="text-3xl font-bold mt-2 tracking-tight">
-                  {stats?.paidInvoices || 0}
-                </p>
-                <p className="text-xs text-muted-foreground mt-2">
-                  Successfully collected
-                </p>
-              </CardContent>
-            </Card>
+            <div className="rounded-2xl bg-gradient-to-br from-card to-card/80 border border-border/50 p-5 backdrop-blur-sm transition-all duration-200 hover:border-border hover:shadow-lg hover:shadow-emerald/5">
+              <div className="flex items-center justify-between mb-3">
+                <p className="text-sm font-medium text-muted-foreground">Paid Invoices</p>
+                <span className="inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-500 font-medium">
+                  <TrendingUp className="h-3 w-3" />
+                  Paid
+                </span>
+              </div>
+              <p className="text-2xl font-bold tracking-tight text-foreground">
+                {stats?.paidInvoices || 0}
+              </p>
+              <p className="text-xs text-muted-foreground mt-2">
+                Successfully collected
+              </p>
+            </div>
           </div>
           )}
 
           {/* Recent Invoices */}
-          <Card className="border-border">
-            <CardHeader className="pb-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <CardTitle className="text-lg font-medium">Recent Invoices</CardTitle>
-                  <CardDescription>Your latest invoices and their status</CardDescription>
-                </div>
-                <Button variant="outline" size="sm" asChild>
-                  <Link href="/invoices">View All</Link>
-                </Button>
+          <div className="rounded-2xl bg-gradient-to-br from-card to-card/80 border border-border/50 backdrop-blur-sm overflow-hidden">
+            <div className="flex items-center justify-between p-5 pb-4">
+              <div>
+                <h3 className="text-lg font-semibold text-foreground">Recent Invoices</h3>
+                <p className="text-sm text-muted-foreground">Your latest invoices and their status</p>
               </div>
-            </CardHeader>
-            <CardContent>
+              <Button variant="outline" size="sm" asChild className="rounded-xl border-border/50 hover:border-border hover:bg-accent/50">
+                <Link href="/invoices">View All</Link>
+              </Button>
+            </div>
+            <div className="px-5 pb-5">
               {invoicesLoading ? (
                 <div className="space-y-2">
                   {[1, 2, 3, 4, 5].map((i) => (
@@ -218,22 +208,22 @@ export default function Dashboard() {
                     <Link 
                       key={invoice.id} 
                       href={`/invoices/${invoice.id}`}
-                      className="flex items-center justify-between p-4 rounded-lg border border-border hover:bg-secondary/50 transition-colors"
+                      className="group flex items-center justify-between p-4 rounded-xl border border-border/50 hover:border-border hover:bg-accent/30 transition-all duration-200"
                     >
                       <div className="flex items-center gap-4">
-                        <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
+                        <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center group-hover:bg-primary/15 transition-colors">
                           <FileText className="h-5 w-5 text-primary" />
                         </div>
                         <div>
                           <p className="font-medium text-foreground">{invoice.invoiceNumber}</p>
-                          <p className="text-sm text-muted-foreground">
+                          <p className="text-xs text-muted-foreground">
                             {new Date(invoice.issueDate).toLocaleDateString()}
                           </p>
                         </div>
                       </div>
                       <div className="flex items-center gap-4">
                         <StatusBadge status={invoice.status} />
-                        <span className="font-semibold text-foreground min-w-[80px] text-right">
+                        <span className="font-semibold text-foreground min-w-[80px] text-right tabular-nums">
                           {formatCurrency(Number(invoice.total))}
                         </span>
                       </div>
@@ -241,8 +231,8 @@ export default function Dashboard() {
                   ))}
                 </div>
               )}
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -274,11 +264,11 @@ function MagicInvoiceSection() {
   };
 
   return (
-    <Card className="border-primary/20 bg-gradient-to-br from-primary/5 to-transparent">
-      <CardContent className="p-6">
+    <div className="rounded-2xl bg-gradient-to-br from-primary/5 via-card to-card/80 border border-primary/20 backdrop-blur-sm overflow-hidden">
+      <div className="p-5">
         <MagicInput onExtract={handleExtract} className="w-full" />
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }
 

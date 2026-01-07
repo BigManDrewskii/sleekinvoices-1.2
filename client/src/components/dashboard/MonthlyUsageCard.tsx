@@ -1,6 +1,4 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
-import { AlertCircle, CheckCircle2, TrendingUp } from "lucide-react";
+import { CheckCircle2, AlertCircle, TrendingUp } from "lucide-react";
 
 interface MonthlyUsageCardProps {
   invoicesCreatedThisMonth: number;
@@ -11,85 +9,88 @@ export function MonthlyUsageCard({
   invoicesCreatedThisMonth,
   invoiceLimit,
 }: MonthlyUsageCardProps) {
-  // If no limit, show unlimited message
+  // If no limit, show compact unlimited message
   if (!invoiceLimit) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Monthly Usage</CardTitle>
-          <CardDescription>Track your invoice creation limit</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
+      <div className="rounded-2xl bg-gradient-to-br from-card to-card/80 border border-border/50 p-5 backdrop-blur-sm">
+        <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <CheckCircle2 className="h-5 w-5 text-green-500" />
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-500/10">
+              <CheckCircle2 className="h-5 w-5 text-emerald-500" />
+            </div>
             <div>
-              <p className="text-sm font-medium text-foreground">Unlimited Invoices</p>
+              <p className="text-sm font-semibold text-foreground">Unlimited Invoices</p>
               <p className="text-xs text-muted-foreground">
-                {invoicesCreatedThisMonth} invoice{invoicesCreatedThisMonth !== 1 ? "s" : ""} created this month
+                {invoicesCreatedThisMonth} created this month
               </p>
             </div>
           </div>
-        </CardContent>
-      </Card>
+          <div className="text-right">
+            <span className="inline-flex items-center rounded-full bg-emerald-500/10 px-2.5 py-0.5 text-xs font-medium text-emerald-500">
+              Pro
+            </span>
+          </div>
+        </div>
+      </div>
     );
   }
 
   const percentage = Math.round((invoicesCreatedThisMonth / invoiceLimit) * 100);
   const remaining = Math.max(0, invoiceLimit - invoicesCreatedThisMonth);
 
-  // Determine color based on usage percentage
-  let statusColor = "bg-green-500"; // 0-70%
-  let statusLabel = "Good";
-  let statusIcon = CheckCircle2;
+  // Determine status styling
+  let statusColor = "emerald";
+  let StatusIcon = CheckCircle2;
+  let statusBg = "bg-emerald-500/10";
+  let statusText = "text-emerald-500";
+  let progressBg = "bg-emerald-500";
 
   if (percentage >= 90) {
-    statusColor = "bg-red-500";
-    statusLabel = "Critical";
-    statusIcon = AlertCircle;
+    statusColor = "red";
+    StatusIcon = AlertCircle;
+    statusBg = "bg-red-500/10";
+    statusText = "text-red-500";
+    progressBg = "bg-red-500";
   } else if (percentage >= 70) {
-    statusColor = "bg-yellow-500";
-    statusLabel = "Warning";
-    statusIcon = TrendingUp;
+    statusColor = "amber";
+    StatusIcon = TrendingUp;
+    statusBg = "bg-amber-500/10";
+    statusText = "text-amber-500";
+    progressBg = "bg-amber-500";
   }
 
-  const StatusIcon = statusIcon;
-
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Monthly Usage</CardTitle>
-        <CardDescription>Track your invoice creation limit</CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        {/* Usage Stats */}
-        <div className="flex items-center justify-between">
+    <div className="rounded-2xl bg-gradient-to-br from-card to-card/80 border border-border/50 p-5 backdrop-blur-sm">
+      {/* Header Row */}
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-3">
+          <div className={`flex h-10 w-10 items-center justify-center rounded-xl ${statusBg}`}>
+            <StatusIcon className={`h-5 w-5 ${statusText}`} />
+          </div>
           <div>
-            <p className="text-2xl font-bold text-foreground">{invoicesCreatedThisMonth}</p>
-            <p className="text-xs text-muted-foreground">invoices created</p>
-          </div>
-          <div className="text-right">
-            <p className="text-2xl font-bold text-muted-foreground">{remaining}</p>
-            <p className="text-xs text-muted-foreground">remaining</p>
+            <p className="text-sm font-semibold text-foreground">Monthly Usage</p>
+            <p className="text-xs text-muted-foreground">Invoice creation limit</p>
           </div>
         </div>
+        <div className="text-right">
+          <p className="text-2xl font-bold tabular-nums text-foreground">{invoicesCreatedThisMonth}</p>
+          <p className="text-xs text-muted-foreground">of {invoiceLimit}</p>
+        </div>
+      </div>
 
-        {/* Progress Bar */}
-        <div className="space-y-2">
-          <Progress value={percentage} className="h-2" />
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-medium text-foreground">{percentage}%</span>
-            <span className="text-xs text-muted-foreground">
-              {invoicesCreatedThisMonth} of {invoiceLimit}
-            </span>
-          </div>
+      {/* Progress Bar */}
+      <div className="space-y-2">
+        <div className="h-2 w-full overflow-hidden rounded-full bg-muted/50">
+          <div
+            className={`h-full rounded-full transition-all duration-500 ease-out ${progressBg}`}
+            style={{ width: `${Math.min(percentage, 100)}%` }}
+          />
         </div>
-
-        {/* Status Indicator */}
-        <div className="flex items-center gap-2 pt-2">
-          <StatusIcon className={`h-4 w-4 ${statusColor === "bg-green-500" ? "text-green-500" : statusColor === "bg-yellow-500" ? "text-yellow-500" : "text-red-500"}`} />
-          <span className="text-sm font-medium text-foreground">{statusLabel}</span>
+        <div className="flex items-center justify-between text-xs">
+          <span className={`font-medium ${statusText}`}>{percentage}% used</span>
+          <span className="text-muted-foreground">{remaining} remaining</span>
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }
