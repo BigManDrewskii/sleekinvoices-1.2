@@ -50,6 +50,7 @@ import {
   Tag,
   BarChart3
 } from "lucide-react";
+import { PageLayout } from "@/components/layout/PageLayout";
 
 type Product = {
   id: number;
@@ -221,7 +222,7 @@ export default function Products() {
 
   if (loading) {
     return (
-      <div className="container py-8">
+      <PageLayout title="Products & Services" subtitle="Loading...">
         <Skeleton className="h-8 w-48 mb-8" />
         <div className="grid gap-4 md:grid-cols-3 mb-8">
           {[1, 2, 3].map((i) => (
@@ -229,25 +230,22 @@ export default function Products() {
           ))}
         </div>
         <Skeleton className="h-96" />
-      </div>
+      </PageLayout>
     );
   }
 
   return (
-    <div className="container py-8">
-      {/* Header */}
-      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between mb-8">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Products & Services</h1>
-          <p className="text-muted-foreground mt-1">
-            Manage your product catalog for quick invoice creation
-          </p>
-        </div>
+    <PageLayout
+      title="Products & Services"
+      subtitle="Manage your product catalog for quick invoice creation"
+      headerActions={
         <Button onClick={() => { resetForm(); setIsCreateDialogOpen(true); }}>
           <Plus className="mr-2 h-4 w-4" />
-          Add Product
+          <span className="hidden sm:inline">Add Product</span>
+          <span className="sm:hidden">Add</span>
         </Button>
-      </div>
+      }
+    >
 
       {/* Stats Cards */}
       <div className="grid gap-4 md:grid-cols-3 mb-8">
@@ -659,6 +657,6 @@ export default function Products() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
+    </PageLayout>
   );
 }

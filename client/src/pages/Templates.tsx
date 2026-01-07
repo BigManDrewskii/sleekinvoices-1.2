@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link } from "wouter";
 import { Plus, Edit, Trash2, Star, Sparkles, Palette } from "lucide-react";
+import { Navigation } from "@/components/Navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { trpc } from "@/lib/trpc";
@@ -114,38 +115,36 @@ export default function InvoiceTemplates() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <div className="border-b bg-card">
-        <div className="container flex items-center justify-between py-4">
-          <div className="flex items-center gap-4">
-            <Link href="/dashboard" className="text-muted-foreground hover:text-foreground transition-colors">
-              <img src="/SleekInvoices-Wide.svg" alt="SleekInvoices" className="h-6" />
-            </Link>
+    <div className="page-wrapper">
+      <Navigation />
+      
+      {/* Page Content */}
+      <div className="page-content">
+        {/* Page Header */}
+        <div className="page-header">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
-              <h1 className="text-2xl font-bold">Templates</h1>
-              <p className="text-sm text-muted-foreground">
-                Customize your invoice style
-              </p>
+              <h1 className="page-header-title">Templates</h1>
+              <p className="page-header-subtitle">Customize your invoice style</p>
             </div>
+            {templates && templates.length > 0 && (
+              <Button
+                onClick={() => {
+                  setSelectedTemplateId(null);
+                  setIsEditing(true);
+                }}
+                variant="outline"
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                <span className="hidden sm:inline">New Variation</span>
+                <span className="sm:hidden">New</span>
+              </Button>
+            )}
           </div>
-          {templates && templates.length > 0 && (
-            <Button
-              onClick={() => {
-                setSelectedTemplateId(null);
-                setIsEditing(true);
-              }}
-              variant="outline"
-            >
-              <Plus className="h-4 w-4 mr-2" />
-              New Variation
-            </Button>
-          )}
         </div>
-      </div>
 
-      {/* Content */}
-      <div className="container py-8">
+        {/* Content */}
+        <div className="section-stack">
         {isLoading ? (
           // Loading State
           <div className="max-w-2xl mx-auto">
@@ -375,28 +374,29 @@ export default function InvoiceTemplates() {
             )}
           </div>
         )}
-      </div>
+        </div>
 
-      {/* Delete Confirmation Dialog */}
-      <AlertDialog open={!!deleteTemplateId} onOpenChange={() => setDeleteTemplateId(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Delete Template?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This action cannot be undone. This template will be permanently deleted.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleDelete}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
-              Delete
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+        {/* Delete Confirmation Dialog */}
+        <AlertDialog open={!!deleteTemplateId} onOpenChange={() => setDeleteTemplateId(null)}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Delete Template?</AlertDialogTitle>
+              <AlertDialogDescription>
+                This action cannot be undone. This template will be permanently deleted.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={handleDelete}
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              >
+                Delete
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      </div>
     </div>
   );
 }

@@ -2,9 +2,11 @@ import { useState } from "react";
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { Plus, Calendar, RefreshCw, Pause, Play, Trash2, Edit } from "lucide-react";
 import { toast } from "sonner";
 import { useLocation } from "wouter";
+import { PageLayout } from "@/components/layout/PageLayout";
 
 export default function RecurringInvoices() {
   const [, setLocation] = useLocation();
@@ -46,34 +48,31 @@ export default function RecurringInvoices() {
 
   if (isLoading) {
     return (
-      <div className="container py-8">
+      <PageLayout title="Recurring Invoices" subtitle="Loading...">
         <div className="flex items-center justify-center h-64">
           <RefreshCw className="w-8 h-8 animate-spin text-muted-foreground" />
         </div>
-      </div>
+      </PageLayout>
     );
   }
 
   return (
-    <div className="container py-8">
-      <div className="flex items-center justify-between mb-8">
-        <div>
-          <h1 className="text-3xl font-bold">Recurring Invoices</h1>
-          <p className="text-muted-foreground mt-2">
-            Automate invoice generation for subscription-based clients
-          </p>
-        </div>
+    <PageLayout
+      title="Recurring Invoices"
+      subtitle="Automate invoice generation for subscription-based clients"
+      headerActions={
         <Button onClick={() => setLocation("/recurring-invoices/create")}>
           <Plus className="w-4 h-4 mr-2" />
-          Create Recurring Invoice
+          <span className="hidden sm:inline">Create Recurring Invoice</span>
+          <span className="sm:hidden">New</span>
         </Button>
-      </div>
-
+      }
+    >
       {!recurringInvoices || recurringInvoices.length === 0 ? (
-        <Card className="p-12 text-center">
-          <Calendar className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
+        <Card className="p-8 sm:p-12 text-center">
+          <Calendar className="w-12 h-12 sm:w-16 sm:h-16 mx-auto text-muted-foreground mb-4" />
           <h3 className="text-lg font-semibold mb-2">No recurring invoices yet</h3>
-          <p className="text-muted-foreground mb-6">
+          <p className="text-muted-foreground mb-6 max-w-md mx-auto">
             Set up automatic invoice generation for your subscription clients
           </p>
           <Button onClick={() => setLocation("/recurring-invoices/create")}>
@@ -82,85 +81,153 @@ export default function RecurringInvoices() {
           </Button>
         </Card>
       ) : (
-        <div className="grid gap-4">
-          {recurringInvoices.map((recurring: any) => (
-            <Card key={recurring.id} className="p-6">
-              <div className="flex items-start justify-between">
-                <div className="flex-1">
-                  <div className="flex items-center gap-3 mb-2">
-                    <h3 className="text-lg font-semibold">
-                      {recurring.clientName || 'Unknown Client'}
-                    </h3>
-                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                      recurring.isActive 
-                        ? "bg-green-100 text-green-700" 
-                        : "bg-gray-100 text-gray-700"
-                    }`}>
-                      {recurring.isActive ? "Active" : "Paused"}
-                    </span>
-                    <span className="px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-700">
-                      {getFrequencyLabel(recurring.frequency)}
-                    </span>
+        <>
+          {/* Desktop Table View */}
+          <div className="hidden md:block">
+            <div className="space-y-4">
+              {recurringInvoices.map((recurring: any) => (
+                <Card key={recurring.id} className="p-6">
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-3 mb-2">
+                        <h3 className="text-lg font-semibold">
+                          {recurring.clientName || 'Unknown Client'}
+                        </h3>
+                        <Badge variant={recurring.isActive ? "default" : "secondary"}>
+                          {recurring.isActive ? "Active" : "Paused"}
+                        </Badge>
+                        <Badge variant="outline">
+                          {getFrequencyLabel(recurring.frequency)}
+                        </Badge>
+                      </div>
+                      
+                      <p className="text-sm text-muted-foreground mb-2">
+                        {recurring.invoiceNumberPrefix} • {recurring.clientEmail || 'No email'}
+                      </p>
+                      
+                      <div className="grid grid-cols-3 gap-4 mt-4 text-sm">
+                        <div>
+                          <p className="text-muted-foreground">Start Date</p>
+                          <p className="font-medium">{formatDate(recurring.startDate)}</p>
+                        </div>
+                        <div>
+                          <p className="text-muted-foreground">Next Invoice</p>
+                          <p className="font-medium">{formatDate(recurring.nextInvoiceDate)}</p>
+                        </div>
+                        <div>
+                          <p className="text-muted-foreground">End Date</p>
+                          <p className="font-medium">{formatDate(recurring.endDate)}</p>
+                        </div>
+                      </div>
+
+                      {recurring.notes && (
+                        <p className="text-sm text-muted-foreground mt-3">
+                          {recurring.notes}
+                        </p>
+                      )}
+                    </div>
+
+                    <div className="flex gap-2 ml-4">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleToggle(recurring.id, recurring.isActive)}
+                      >
+                        {recurring.isActive ? (
+                          <><Pause className="w-4 h-4 mr-1" /> Pause</>
+                        ) : (
+                          <><Play className="w-4 h-4 mr-1" /> Activate</>
+                        )}
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setLocation(`/recurring-invoices/edit/${recurring.id}`)}
+                      >
+                        <Edit className="w-4 h-4" />
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleDelete(recurring.id)}
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </div>
                   </div>
-                  
-                  <p className="text-sm text-muted-foreground mb-2">
-                    {recurring.invoiceNumberPrefix} • {recurring.clientEmail || 'No email'}
-                  </p>
-                  
-                  <div className="grid grid-cols-3 gap-4 mt-4 text-sm">
+                </Card>
+              ))}
+            </div>
+          </div>
+
+          {/* Mobile Card View */}
+          <div className="md:hidden space-y-4">
+            {recurringInvoices.map((recurring: any) => (
+              <Card key={recurring.id} className="p-4">
+                <div className="space-y-3">
+                  <div className="flex items-start justify-between">
                     <div>
-                      <p className="text-muted-foreground">Start Date</p>
-                      <p className="font-medium">{formatDate(recurring.startDate)}</p>
+                      <h3 className="font-semibold">
+                        {recurring.clientName || 'Unknown Client'}
+                      </h3>
+                      <p className="text-sm text-muted-foreground">
+                        {recurring.invoiceNumberPrefix}
+                      </p>
+                    </div>
+                    <div className="flex gap-2">
+                      <Badge variant={recurring.isActive ? "default" : "secondary"} className="text-xs">
+                        {recurring.isActive ? "Active" : "Paused"}
+                      </Badge>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3 text-sm">
+                    <div>
+                      <p className="text-muted-foreground">Frequency</p>
+                      <p className="font-medium">{getFrequencyLabel(recurring.frequency)}</p>
                     </div>
                     <div>
                       <p className="text-muted-foreground">Next Invoice</p>
                       <p className="font-medium">{formatDate(recurring.nextInvoiceDate)}</p>
                     </div>
-                    <div>
-                      <p className="text-muted-foreground">End Date</p>
-                      <p className="font-medium">{formatDate(recurring.endDate)}</p>
-                    </div>
                   </div>
 
-                  {recurring.notes && (
-                    <p className="text-sm text-muted-foreground mt-3">
-                      {recurring.notes}
-                    </p>
-                  )}
+                  <div className="flex gap-2 pt-3 border-t">
+                    <Button
+                      variant="outline"
+                      size="default"
+                      className="flex-1 h-11"
+                      onClick={() => handleToggle(recurring.id, recurring.isActive)}
+                    >
+                      {recurring.isActive ? (
+                        <><Pause className="w-4 h-4 mr-2" /> Pause</>
+                      ) : (
+                        <><Play className="w-4 h-4 mr-2" /> Activate</>
+                      )}
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="default"
+                      className="h-11 px-3"
+                      onClick={() => setLocation(`/recurring-invoices/edit/${recurring.id}`)}
+                    >
+                      <Edit className="w-4 h-4" />
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="default"
+                      className="h-11 px-3"
+                      onClick={() => handleDelete(recurring.id)}
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  </div>
                 </div>
-
-                <div className="flex gap-2 ml-4">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleToggle(recurring.id, recurring.isActive)}
-                  >
-                    {recurring.isActive ? (
-                      <><Pause className="w-4 h-4 mr-1" /> Pause</>
-                    ) : (
-                      <><Play className="w-4 h-4 mr-1" /> Activate</>
-                    )}
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setLocation(`/recurring-invoices/edit/${recurring.id}`)}
-                  >
-                    <Edit className="w-4 h-4" />
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleDelete(recurring.id)}
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </Button>
-                </div>
-              </div>
-            </Card>
-          ))}
-        </div>
+              </Card>
+            ))}
+          </div>
+        </>
       )}
-    </div>
+    </PageLayout>
   );
 }

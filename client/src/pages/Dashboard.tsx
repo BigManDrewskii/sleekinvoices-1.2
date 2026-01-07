@@ -44,24 +44,27 @@ export default function Dashboard() {
   }).length || 0;
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="page-wrapper">
       <Navigation />
 
       {/* Main Content */}
-      <div className="container mx-auto px-4 py-6 md:py-8">
-        <div className="max-w-7xl mx-auto space-y-6">
+      <div className="page-content">
+        <div className="section-stack">
           {/* Header */}
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-            <div>
-              <h1 className="text-2xl font-semibold text-foreground">Dashboard</h1>
-              <p className="text-sm text-muted-foreground mt-1">Welcome back, {user?.name || "there"}!</p>
+          <div className="page-header">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div>
+                <h1 className="page-header-title">Dashboard</h1>
+                <p className="page-header-subtitle">Welcome back, {user?.name || "there"}!</p>
+              </div>
+              <Button asChild className="touch-target">
+                <Link href="/invoices/create" className="flex items-center gap-2 justify-center">
+                  <Plus className="h-4 w-4" />
+                  <span className="hidden sm:inline">New Invoice</span>
+                  <span className="sm:hidden">New</span>
+                </Link>
+              </Button>
             </div>
-            <Button asChild>
-              <Link href="/invoices/create" className="flex items-center gap-2 justify-center">
-                <Plus className="h-4 w-4" />
-                New Invoice
-              </Link>
-            </Button>
           </div>
 
           {/* Upgrade Promo Banner */}

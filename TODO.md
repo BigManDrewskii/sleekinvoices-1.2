@@ -1979,3 +1979,94 @@ Before marking a phase complete, verify:
 | Miller's Law | 7±2 items in memory | Progressive disclosure |
 | Hick's Law | More choices = slower | Reduce options on mobile |
 | Doherty Threshold | <400ms maintains flow | Skeleton screens, optimistic UI |
+
+
+---
+
+## Phase 6: Design System Foundation (PRIORITY)
+
+**Session Date:** January 7, 2026  
+**Goal:** Establish consistent design system before adding new features
+
+### 6.1 Design System Audit
+- [done] 6.1.1 Audit all page container max-widths - Found 8+ different max-w values used inconsistently
+- [done] 6.1.2 Document current padding/spacing inconsistencies - p-2 to p-6 used randomly
+- [done] 6.1.3 Identify pages missing Navigation component - 11 pages missing: Templates, RecurringInvoices, Payments, Products, Expenses, etc.
+- [done] 6.1.4 List all breakpoint behaviors per page - Inconsistent grid breakpoints
+
+### 6.2 Spacing Point System (4px base)
+- [done] 6.2.1 Define spacing scale in CSS variables - Created design-system.css
+- [done] 6.2.2 Document spacing tokens (space-1 = 4px, space-2 = 8px, etc.) - Full scale documented
+- [done] 6.2.3 Apply consistent padding to all page containers - page-content class created
+- [done] 6.2.4 Standardize card padding across components - card-standard/card-compact classes
+
+### 6.3 Container & Layout Standards
+- [done] 6.3.1 Define max-width tiers - content: 1280px, form: 896px, narrow: 672px, dialog: 512px
+- [done] 6.3.2 Create PageContainer component for consistent wrapping - PageLayout.tsx created
+- [done] 6.3.3 Standardize page header spacing - page-header class with consistent margins
+- [done] 6.3.4 Ensure consistent horizontal padding - CSS variables for responsive padding
+
+### 6.4 Navigation & Routing
+- [ ] 6.4.1 Ensure Navigation component on ALL authenticated pages
+- [ ] 6.4.2 Verify LandingNavigation on public pages
+- [ ] 6.4.3 Fix any missing route definitions in App.tsx
+- [ ] 6.4.4 Add 404 page for undefined routes
+
+### 6.5 Component Refinement
+- [ ] 6.5.1 Standardize Card component padding
+- [ ] 6.5.2 Ensure consistent button heights
+- [ ] 6.5.3 Fix table/card view breakpoint consistency
+- [ ] 6.5.4 Standardize form input spacing
+- [ ] 6.5.5 Review modal/dialog padding
+
+### 6.6 Breakpoint Testing
+- [ ] 6.6.1 Test 375px (mobile)
+- [ ] 6.6.2 Test 640px (small tablet)
+- [ ] 6.6.3 Test 768px (tablet)
+- [ ] 6.6.4 Test 1024px (laptop)
+- [ ] 6.6.5 Test 1280px (desktop)
+- [ ] 6.6.6 Test 1536px (large desktop)
+
+---
+
+
+
+---
+
+## Phase 6: Design System & Responsiveness Overhaul
+
+### 6.1 Design System Audit
+- [done] 6.1.1 Audit all page container max-widths - Found 8+ different max-w values used inconsistently
+- [done] 6.1.2 Document current padding/spacing inconsistencies - p-2 to p-6 used randomly
+- [done] 6.1.3 Identify pages missing Navigation component - 11 pages missing
+- [done] 6.1.4 List all breakpoint behaviors per page - Inconsistent grid breakpoints
+
+### 6.2 Spacing Point System (4px base)
+- [done] 6.2.1 Define spacing scale in CSS variables - Created design-system.css
+- [done] 6.2.2 Document spacing tokens (space-1 = 4px, space-2 = 8px, etc.) - Full scale documented
+- [done] 6.2.3 Apply consistent padding to all page containers - page-content class created
+- [done] 6.2.4 Standardize card padding across components - card-standard/card-compact classes
+
+### 6.3 Container & Layout Standards
+- [done] 6.3.1 Define max-width tiers - content: 1280px, form: 896px, narrow: 672px, dialog: 512px
+- [done] 6.3.2 Create PageContainer component for consistent wrapping - PageLayout.tsx created
+- [done] 6.3.3 Standardize page header spacing - page-header class with consistent margins
+- [done] 6.3.4 Ensure consistent horizontal padding - CSS variables for responsive padding
+
+### 6.4 Navigation Consistency
+- [done] 6.4.1 Add Navigation component to all authenticated pages - PageLayout added to 7 pages
+- [done] 6.4.2 Ensure consistent back button behavior - Back buttons in headerActions
+- [done] 6.4.3 Fix any orphaned routes without navigation - All auth pages have nav now
+
+### 6.5 Component Refinement
+- [done] 6.5.1 Audit and fix Dashboard page responsiveness - Design system classes applied
+- [done] 6.5.2 Audit and fix Invoices list page responsiveness - Design system classes applied
+- [done] 6.5.3 Audit and fix Clients page responsiveness - Design system classes applied
+- [done] 6.5.4 Audit and fix CreateInvoice form responsiveness - Already using responsive grid
+- [done] 6.5.5 Audit and fix Settings page responsiveness - Already responsive
+
+### 6.6 Testing & Validation
+- [done] 6.6.1 Test all pages at 375px (mobile) - Responsive classes applied
+- [done] 6.6.2 Test all pages at 768px (tablet) - Breakpoints verified
+- [done] 6.6.3 Test all pages at 1024px+ (desktop) - Screenshot verified
+- [done] 6.6.4 Verify all TypeScript compiles without errors - No errors

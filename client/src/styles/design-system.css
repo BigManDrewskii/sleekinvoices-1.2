@@ -1,0 +1,446 @@
+/* ========================================
+   SleekInvoices Design System
+   ========================================
+   
+   Base Unit: 4px
+   This file defines the spacing, sizing, and layout
+   standards for consistent UI across all pages.
+   
+   ======================================== */
+
+/* ===========================================
+   SPACING SCALE (4px base)
+   
+   space-0:  0px
+   space-1:  4px   (0.25rem)
+   space-2:  8px   (0.5rem)
+   space-3:  12px  (0.75rem)
+   space-4:  16px  (1rem)
+   space-5:  20px  (1.25rem)
+   space-6:  24px  (1.5rem)
+   space-8:  32px  (2rem)
+   space-10: 40px  (2.5rem)
+   space-12: 48px  (3rem)
+   space-16: 64px  (4rem)
+   space-20: 80px  (5rem)
+   space-24: 96px  (6rem)
+   =========================================== */
+
+:root {
+  /* Spacing tokens */
+  --space-0: 0;
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.25rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-10: 2.5rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
+  --space-20: 5rem;
+  --space-24: 6rem;
+  
+  /* Layout max-widths - STANDARDIZED */
+  --max-w-content: 1280px;    /* Main content area (7xl) */
+  --max-w-form: 896px;        /* Forms and settings (4xl) */
+  --max-w-narrow: 672px;      /* Narrow content (3xl) */
+  --max-w-dialog: 512px;      /* Dialogs and modals (lg) */
+  
+  /* Page padding - responsive */
+  --page-padding-x: var(--space-4);   /* 16px mobile */
+  --page-padding-y: var(--space-6);   /* 24px mobile */
+  
+  /* Card padding - consistent */
+  --card-padding: var(--space-6);     /* 24px */
+  --card-padding-sm: var(--space-4);  /* 16px for compact cards */
+  
+  /* Section spacing */
+  --section-gap: var(--space-6);      /* 24px between sections */
+  --section-gap-lg: var(--space-8);   /* 32px for major sections */
+  
+  /* Component spacing */
+  --stack-gap: var(--space-4);        /* 16px vertical stack */
+  --inline-gap: var(--space-3);       /* 12px horizontal inline */
+  --form-gap: var(--space-4);         /* 16px between form fields */
+}
+
+/* Tablet (640px+) */
+@media (min-width: 640px) {
+  :root {
+    --page-padding-x: var(--space-6);   /* 24px */
+    --page-padding-y: var(--space-8);   /* 32px */
+  }
+}
+
+/* Desktop (1024px+) */
+@media (min-width: 1024px) {
+  :root {
+    --page-padding-x: var(--space-8);   /* 32px */
+    --page-padding-y: var(--space-10);  /* 40px */
+    --section-gap: var(--space-8);      /* 32px */
+  }
+}
+
+/* ===========================================
+   PAGE LAYOUT COMPONENTS
+   =========================================== */
+
+/* Standard page wrapper - use on ALL authenticated pages */
+.page-wrapper {
+  min-height: 100vh;
+  background: var(--background);
+}
+
+/* Page content container - consistent max-width and padding */
+.page-content {
+  width: 100%;
+  max-width: var(--max-w-content);
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: var(--page-padding-x);
+  padding-right: var(--page-padding-x);
+  padding-top: var(--page-padding-y);
+  padding-bottom: var(--page-padding-y);
+}
+
+/* Narrower content for forms/settings */
+.page-content-narrow {
+  max-width: var(--max-w-form);
+}
+
+/* Page header - consistent spacing */
+.page-header {
+  margin-bottom: var(--section-gap);
+}
+
+.page-header-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--foreground);
+  line-height: 1.2;
+}
+
+.page-header-subtitle {
+  font-size: 0.875rem;
+  color: var(--muted-foreground);
+  margin-top: var(--space-1);
+}
+
+/* Responsive page header */
+@media (min-width: 640px) {
+  .page-header-title {
+    font-size: 1.875rem;
+  }
+}
+
+/* ===========================================
+   SECTION LAYOUTS
+   =========================================== */
+
+/* Vertical stack with consistent gap */
+.section-stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--section-gap);
+}
+
+/* Card grid - responsive */
+.card-grid {
+  display: grid;
+  gap: var(--space-4);
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 640px) {
+  .card-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .card-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* Stats grid - 4 columns on desktop */
+.stats-grid {
+  display: grid;
+  gap: var(--space-4);
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 640px) {
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .stats-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+/* ===========================================
+   CARD STANDARDS
+   =========================================== */
+
+/* Standard card padding */
+.card-standard {
+  padding: var(--card-padding);
+}
+
+/* Compact card padding */
+.card-compact {
+  padding: var(--card-padding-sm);
+}
+
+/* Card header spacing */
+.card-header-standard {
+  padding: var(--card-padding);
+  padding-bottom: var(--space-4);
+}
+
+/* Card content spacing */
+.card-content-standard {
+  padding: var(--card-padding);
+  padding-top: 0;
+}
+
+/* ===========================================
+   FORM LAYOUTS
+   =========================================== */
+
+/* Form container */
+.form-container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--form-gap);
+}
+
+/* Form row - side by side on tablet+ */
+.form-row {
+  display: grid;
+  gap: var(--form-gap);
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 640px) {
+  .form-row-2 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .form-row-3 {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  
+  .form-row-4 {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+/* Form field spacing */
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+/* Form actions - buttons at bottom */
+.form-actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding-top: var(--space-4);
+}
+
+@media (min-width: 640px) {
+  .form-actions {
+    flex-direction: row;
+    justify-content: flex-end;
+  }
+}
+
+/* ===========================================
+   TABLE/LIST LAYOUTS
+   =========================================== */
+
+/* Table container with horizontal scroll */
+.table-container {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Mobile card list */
+.mobile-card-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+/* Data card for mobile table replacement */
+.data-card {
+  padding: var(--card-padding-sm);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--card);
+}
+
+.data-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: var(--space-3);
+}
+
+.data-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.data-card-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.875rem;
+}
+
+.data-card-label {
+  color: var(--muted-foreground);
+}
+
+.data-card-value {
+  font-weight: 500;
+  text-align: right;
+}
+
+.data-card-actions {
+  display: flex;
+  gap: var(--space-2);
+  padding-top: var(--space-3);
+  margin-top: var(--space-3);
+  border-top: 1px solid var(--border);
+}
+
+/* ===========================================
+   BUTTON STANDARDS
+   =========================================== */
+
+/* Ensure minimum touch target on mobile */
+@media (max-width: 639px) {
+  .btn-touch {
+    min-height: 44px;
+    min-width: 44px;
+  }
+}
+
+/* Button group with consistent spacing */
+.button-group {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.button-group-vertical {
+  flex-direction: column;
+}
+
+@media (min-width: 640px) {
+  .button-group-vertical {
+    flex-direction: row;
+  }
+}
+
+/* ===========================================
+   RESPONSIVE VISIBILITY
+   =========================================== */
+
+/* Hide on mobile, show on tablet+ */
+.hide-mobile {
+  display: none;
+}
+
+@media (min-width: 640px) {
+  .hide-mobile {
+    display: block;
+  }
+}
+
+/* Show on mobile, hide on tablet+ */
+.show-mobile {
+  display: block;
+}
+
+@media (min-width: 640px) {
+  .show-mobile {
+    display: none;
+  }
+}
+
+/* Hide on mobile/tablet, show on desktop */
+.hide-tablet {
+  display: none;
+}
+
+@media (min-width: 1024px) {
+  .hide-tablet {
+    display: block;
+  }
+}
+
+/* ===========================================
+   EMPTY STATES
+   =========================================== */
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-12) var(--space-4);
+  text-align: center;
+}
+
+.empty-state-icon {
+  width: 48px;
+  height: 48px;
+  color: var(--muted-foreground);
+  margin-bottom: var(--space-4);
+}
+
+.empty-state-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--foreground);
+  margin-bottom: var(--space-2);
+}
+
+.empty-state-description {
+  font-size: 0.875rem;
+  color: var(--muted-foreground);
+  max-width: 24rem;
+  margin-bottom: var(--space-6);
+}
+
+/* ===========================================
+   LOADING STATES
+   =========================================== */
+
+.loading-spinner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+}
+
+.loading-page {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background: var(--background);
+}

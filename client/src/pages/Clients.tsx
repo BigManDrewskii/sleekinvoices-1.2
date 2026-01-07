@@ -114,25 +114,30 @@ export default function Clients() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="page-wrapper">
       <Navigation />
 
       {/* Main Content */}
-      <div className="container mx-auto px-4 py-6 md:py-8">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6 md:mb-8">
-          <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Clients</h1>
-            <p className="text-sm sm:text-base text-muted-foreground">Manage your client database</p>
-          </div>
-          <div className="flex gap-2 w-full sm:w-auto">
-            <Button variant="outline" onClick={() => setImportDialogOpen(true)} className="flex-1 sm:flex-initial">
-              <Upload className="h-4 w-4 mr-2" />
-              Import CSV
-            </Button>
-            <Button onClick={handleAddNew} className="flex-1 sm:flex-initial">
-              <Plus className="h-4 w-4 mr-2" />
-              Add Client
-            </Button>
+      <div className="page-content">
+        {/* Page Header */}
+        <div className="page-header">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div>
+              <h1 className="page-header-title">Clients</h1>
+              <p className="page-header-subtitle">Manage your client database</p>
+            </div>
+            <div className="flex gap-2 w-full sm:w-auto">
+              <Button variant="outline" onClick={() => setImportDialogOpen(true)} className="flex-1 sm:flex-initial touch-target">
+                <Upload className="h-4 w-4 mr-2" />
+                <span className="hidden sm:inline">Import CSV</span>
+                <span className="sm:hidden">Import</span>
+              </Button>
+              <Button onClick={handleAddNew} className="flex-1 sm:flex-initial touch-target">
+                <Plus className="h-4 w-4 mr-2" />
+                <span className="hidden sm:inline">Add Client</span>
+                <span className="sm:hidden">Add</span>
+              </Button>
+            </div>
           </div>
         </div>
 

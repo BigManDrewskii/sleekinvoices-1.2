@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { toast } from "sonner";
 import { useLocation } from "wouter";
 import { ArrowLeft, Plus, Trash2 } from "lucide-react";
+import { PageLayout } from "@/components/layout/PageLayout";
 import { ClientSelector } from "@/components/invoices/ClientSelector";
 import { LineItemRow, LineItem } from "@/components/invoices/LineItemRow";
 import { InvoiceFormCalculations } from "@/components/invoices/InvoiceFormCalculations";
@@ -104,17 +105,20 @@ export default function CreateRecurringInvoice() {
   };
 
   return (
-    <div className="container py-8 max-w-4xl">
-      <Button
-        variant="ghost"
-        onClick={() => setLocation("/recurring-invoices")}
-        className="mb-6"
-      >
-        <ArrowLeft className="w-4 h-4 mr-2" />
-        Back to Recurring Invoices
-      </Button>
-
-      <h1 className="text-3xl font-bold mb-8">Create Recurring Invoice</h1>
+    <PageLayout
+      title="Create Recurring Invoice"
+      subtitle="Set up automatic invoice generation"
+      narrow
+      headerActions={
+        <Button
+          variant="ghost"
+          onClick={() => setLocation("/recurring-invoices")}
+        >
+          <ArrowLeft className="w-4 h-4 mr-2" />
+          Back
+        </Button>
+      }
+    >
 
       <form onSubmit={handleSubmit} className="space-y-6">
         <Card className="p-6">
@@ -249,6 +253,6 @@ export default function CreateRecurringInvoice() {
           </Button>
         </div>
       </form>
-    </div>
+    </PageLayout>
   );
 }

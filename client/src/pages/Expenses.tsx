@@ -12,6 +12,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import ReceiptUpload from "@/components/expenses/ReceiptUpload";
 import { toast } from "sonner";
 import { formatCurrency } from "@/lib/utils";
+import { PageLayout } from "@/components/layout/PageLayout";
 
 // Payment method display names
 const PAYMENT_METHOD_LABELS: Record<string, string> = {
@@ -254,24 +255,19 @@ export default function Expenses() {
 
   if (isLoading) {
     return (
-      <div className="container py-8">
+      <PageLayout title="Expenses" subtitle="Loading...">
         <div className="flex items-center justify-center h-64">
           <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
         </div>
-      </div>
+      </PageLayout>
     );
   }
 
   return (
-    <div className="container py-8">
-      <div className="flex items-center justify-between mb-8">
-        <div>
-          <h1 className="text-3xl font-bold">Expenses</h1>
-          <p className="text-muted-foreground mt-2">
-            Track your business expenses and categorize spending
-          </p>
-        </div>
-
+    <PageLayout
+      title="Expenses"
+      subtitle="Track your business expenses and categorize spending"
+      headerActions={
         <div className="flex gap-2">
           <Dialog open={isCategoryDialogOpen} onOpenChange={setIsCategoryDialogOpen}>
             <DialogTrigger asChild>
@@ -538,8 +534,8 @@ export default function Expenses() {
             </DialogContent>
           </Dialog>
         </div>
-      </div>
-
+      }
+    >
       {/* Enhanced Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         <Card className="p-4">
@@ -877,6 +873,6 @@ export default function Expenses() {
           </div>
         </Card>
       )}
-    </div>
+    </PageLayout>
   );
 }

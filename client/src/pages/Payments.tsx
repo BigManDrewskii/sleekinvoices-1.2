@@ -31,6 +31,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { Plus, DollarSign, CreditCard, Banknote, FileCheck, Bitcoin } from "lucide-react";
 import { toast } from "sonner";
+import { PageLayout } from "@/components/layout/PageLayout";
 
 export default function Payments() {
   const [recordPaymentOpen, setRecordPaymentOpen] = useState(false);
@@ -145,17 +146,17 @@ export default function Payments() {
   };
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold">Payments</h1>
-          <p className="text-muted-foreground">Track and manage invoice payments</p>
-        </div>
+    <PageLayout
+      title="Payments"
+      subtitle="Track and manage invoice payments"
+      headerActions={
         <Button onClick={() => setRecordPaymentOpen(true)}>
           <Plus className="h-4 w-4 mr-2" />
-          Record Payment
+          <span className="hidden sm:inline">Record Payment</span>
+          <span className="sm:hidden">Record</span>
         </Button>
-      </div>
+      }
+    >
 
       {/* Stats Cards */}
       {stats && (
@@ -457,6 +458,6 @@ export default function Payments() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
+    </PageLayout>
   );
 }

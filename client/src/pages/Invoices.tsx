@@ -316,29 +316,34 @@ export default function Invoices() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="page-wrapper">
       <Navigation />
 
       {/* Main Content */}
-      <div className="container mx-auto px-4 py-6 md:py-8">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6 md:mb-8">
-          <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Invoices</h1>
-            <p className="text-sm sm:text-base text-muted-foreground">Manage and track all your invoices</p>
-          </div>
-          <div className="flex gap-2 w-full sm:w-auto">
-            <Button
-              variant="outline"
-              onClick={() => exportInvoicesCSV()}
-              className="gap-2"
-            >
-              <FileSpreadsheet className="h-4 w-4" />
-              Export CSV
-            </Button>
-            <Button onClick={() => setLocation("/invoices/create")} className="flex-1 sm:flex-none">
-              <Plus className="h-4 w-4 mr-2" />
-              New Invoice
-            </Button>
+      <div className="page-content">
+        {/* Page Header */}
+        <div className="page-header">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div>
+              <h1 className="page-header-title">Invoices</h1>
+              <p className="page-header-subtitle">Manage and track all your invoices</p>
+            </div>
+            <div className="flex gap-2 w-full sm:w-auto">
+              <Button
+                variant="outline"
+                onClick={() => exportInvoicesCSV()}
+                className="gap-2 touch-target"
+              >
+                <FileSpreadsheet className="h-4 w-4" />
+                <span className="hidden sm:inline">Export CSV</span>
+                <span className="sm:hidden">Export</span>
+              </Button>
+              <Button onClick={() => setLocation("/invoices/create")} className="flex-1 sm:flex-none touch-target">
+                <Plus className="h-4 w-4 mr-2" />
+                <span className="hidden sm:inline">New Invoice</span>
+                <span className="sm:hidden">New</span>
+              </Button>
+            </div>
           </div>
         </div>
 
