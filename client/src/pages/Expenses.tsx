@@ -13,6 +13,7 @@ import ReceiptUpload from "@/components/expenses/ReceiptUpload";
 import { toast } from "sonner";
 import { formatCurrency } from "@/lib/utils";
 import { PageLayout } from "@/components/layout/PageLayout";
+import { ExpensesPageSkeleton } from "@/components/skeletons/ExpensesPageSkeleton";
 
 // Payment method display names
 const PAYMENT_METHOD_LABELS: Record<string, string> = {
@@ -255,10 +256,8 @@ export default function Expenses() {
 
   if (isLoading) {
     return (
-      <PageLayout title="Expenses" subtitle="Loading...">
-        <div className="flex items-center justify-center h-64">
-          <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-        </div>
+      <PageLayout title="Expenses" subtitle="Track your business expenses and categorize spending">
+        <ExpensesPageSkeleton />
       </PageLayout>
     );
   }

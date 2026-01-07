@@ -9,7 +9,7 @@ import { toast } from "sonner";
 import { SleekTemplateEditor } from "@/components/templates/SleekTemplateEditor";
 import { TemplatePreviewCard, CompactTemplatePreview } from "@/components/templates/TemplatePreviewCard";
 import { Badge } from "@/components/ui/badge";
-import { Skeleton } from "@/components/ui/skeleton";
+import { TemplatesPageSkeleton } from "@/components/skeletons/TemplatesPageSkeleton";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -147,9 +147,7 @@ export default function InvoiceTemplates() {
         <div className="section-stack">
         {isLoading ? (
           // Loading State
-          <div className="max-w-2xl mx-auto">
-            <Skeleton className="h-64 w-full rounded-xl" />
-          </div>
+          <TemplatesPageSkeleton />
         ) : !templates || templates.length === 0 ? (
           // Empty State - No templates at all
           <div className="flex flex-col items-center justify-center py-16 px-4">

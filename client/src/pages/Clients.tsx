@@ -22,6 +22,7 @@ import { Link } from "wouter";
 import { toast } from "sonner";
 import { Navigation } from "@/components/Navigation";
 import { CSVImportDialog } from "@/components/clients/CSVImportDialog";
+import { ClientsTableSkeleton } from "@/components/skeletons";
 
 interface Client {
   id: number;
@@ -164,7 +165,7 @@ export default function Clients() {
           </CardHeader>
           <CardContent>
             {clientsLoading ? (
-              <div className="text-center py-8 text-muted-foreground">Loading clients...</div>
+              <ClientsTableSkeleton rows={8} />
             ) : !clients || clients.length === 0 ? (
               <div className="text-center py-12">
                 <Users className="h-12 w-12 text-muted-foreground mx-auto mb-4" />

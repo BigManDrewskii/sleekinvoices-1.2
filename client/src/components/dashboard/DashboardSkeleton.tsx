@@ -6,7 +6,7 @@
  */
 
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Skeleton, SkeletonBadge, SkeletonCircle } from "@/components/ui/skeleton";
 
 /**
  * Skeleton for individual stat cards on the dashboard
@@ -14,10 +14,10 @@ import { Skeleton } from "@/components/ui/skeleton";
 export function StatCardSkeleton() {
   return (
     <Card className="border-border">
-      <CardContent className="pt-6">
+      <CardContent className="p-4">
         <div className="flex items-center justify-between">
           <Skeleton className="h-4 w-24" />
-          <Skeleton className="h-5 w-16 rounded-full" />
+          <SkeletonBadge />
         </div>
         <Skeleton className="h-9 w-32 mt-2" />
         <Skeleton className="h-3 w-28 mt-3" />
@@ -47,14 +47,14 @@ export function InvoiceRowSkeleton() {
   return (
     <div className="flex items-center justify-between p-4 rounded-lg border border-border">
       <div className="flex items-center gap-4">
-        <Skeleton className="h-10 w-10 rounded-full" />
+        <SkeletonCircle size="md" />
         <div className="space-y-2">
           <Skeleton className="h-4 w-24" />
           <Skeleton className="h-3 w-20" />
         </div>
       </div>
       <div className="flex items-center gap-4">
-        <Skeleton className="h-5 w-16 rounded-full" />
+        <SkeletonBadge />
         <Skeleton className="h-5 w-20" />
       </div>
     </div>
@@ -73,7 +73,7 @@ export function RecentInvoicesSkeleton() {
             <Skeleton className="h-5 w-32" />
             <Skeleton className="h-4 w-48" />
           </div>
-          <Skeleton className="h-9 w-20" />
+          <Skeleton className="h-9 w-20 rounded-lg" />
         </div>
       </CardHeader>
       <CardContent>
@@ -83,6 +83,28 @@ export function RecentInvoicesSkeleton() {
           <InvoiceRowSkeleton />
           <InvoiceRowSkeleton />
           <InvoiceRowSkeleton />
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+/**
+ * Skeleton for monthly usage card
+ */
+export function MonthlyUsageCardSkeleton() {
+  return (
+    <Card className="border-border">
+      <CardContent className="py-4">
+        <div className="flex items-center justify-between">
+          <div className="space-y-2">
+            <Skeleton className="h-5 w-28" />
+            <Skeleton className="h-4 w-44" />
+          </div>
+          <div className="flex items-center gap-2">
+            <SkeletonCircle size="sm" />
+            <Skeleton className="h-5 w-40" />
+          </div>
         </div>
       </CardContent>
     </Card>
@@ -101,21 +123,11 @@ export function DashboardSkeleton() {
           <Skeleton className="h-8 w-32" />
           <Skeleton className="h-4 w-48" />
         </div>
-        <Skeleton className="h-10 w-32" />
+        <Skeleton className="h-10 w-32 rounded-lg" />
       </div>
 
       {/* Monthly usage skeleton */}
-      <Card className="border-border">
-        <CardContent className="py-4">
-          <div className="flex items-center justify-between">
-            <div className="space-y-2">
-              <Skeleton className="h-4 w-24" />
-              <Skeleton className="h-3 w-40" />
-            </div>
-            <Skeleton className="h-5 w-32" />
-          </div>
-        </CardContent>
-      </Card>
+      <MonthlyUsageCardSkeleton />
 
       {/* Stats grid skeleton */}
       <StatsGridSkeleton />
