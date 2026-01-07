@@ -4,6 +4,7 @@ import {
   SheetContent,
   SheetTrigger,
   SheetTitle,
+  SheetClose,
 } from "@/components/ui/sheet";
 import {
   DropdownMenu,
@@ -28,6 +29,7 @@ import {
   LogOut, 
   Plus,
   FileText,
+  X,
   FileCheck,
   RefreshCw,
   CreditCard,
@@ -663,12 +665,21 @@ export function Navigation() {
               <SheetContent 
                 side="right" 
                 className="w-80 max-w-[85vw] p-0"
+                hideCloseButton
               >
                 <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
                 <div className="flex flex-col h-full">
-                  {/* Mobile Menu Header */}
-                  <div className="p-4 border-b border-border/50">
-                    <GlobalSearch />
+                  {/* Mobile Menu Header with integrated close button */}
+                  <div className="flex items-center gap-3 p-4 border-b border-border/50">
+                    <SheetClose 
+                      className="flex-shrink-0 rounded-full p-2 bg-accent/50 text-muted-foreground hover:text-foreground hover:bg-accent transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-ring"
+                    >
+                      <X className="size-4" />
+                      <span className="sr-only">Close menu</span>
+                    </SheetClose>
+                    <div className="flex-1 min-w-0">
+                      <GlobalSearch />
+                    </div>
                   </div>
                   
                   {/* Mobile Navigation */}
@@ -677,10 +688,10 @@ export function Navigation() {
                   </div>
                   
                   {/* Mobile Menu Footer */}
-                  <div className="p-4 border-t border-border/50 space-y-1">
+                  <div className="p-4 border-t border-border/50 bg-accent/20 space-y-1">
                     <Link
                       href="/settings"
-                      className="flex items-center gap-3 px-4 py-3 text-base font-medium text-muted-foreground hover:text-foreground hover:bg-accent/50 rounded-lg transition-all duration-200 min-h-[48px]"
+                      className="flex items-center gap-3 px-4 py-3 text-base font-medium text-muted-foreground hover:text-foreground hover:bg-accent rounded-lg transition-all duration-200 min-h-[48px]"
                       onClick={() => setMobileMenuOpen(false)}
                     >
                       <Settings className="h-5 w-5" />
@@ -688,22 +699,24 @@ export function Navigation() {
                     </Link>
                     <Link
                       href="/subscription"
-                      className="flex items-center gap-3 px-4 py-3 text-base font-medium text-muted-foreground hover:text-foreground hover:bg-accent/50 rounded-lg transition-all duration-200 min-h-[48px]"
+                      className="flex items-center gap-3 px-4 py-3 text-base font-medium text-muted-foreground hover:text-foreground hover:bg-accent rounded-lg transition-all duration-200 min-h-[48px]"
                       onClick={() => setMobileMenuOpen(false)}
                     >
-                      <Sparkles className="h-5 w-5" />
+                      <Sparkles className="h-5 w-5 text-amber-500" />
                       Subscription
                     </Link>
-                    <button
-                      onClick={() => {
-                        setMobileMenuOpen(false);
-                        logout.mutate();
-                      }}
-                      className="w-full flex items-center gap-3 px-4 py-3 text-base font-medium text-red-600 hover:bg-red-50 dark:hover:bg-red-950/20 rounded-lg transition-all duration-200 min-h-[48px]"
-                    >
-                      <LogOut className="h-5 w-5" />
-                      Log Out
-                    </button>
+                    <div className="pt-2 mt-2 border-t border-border/30">
+                      <button
+                        onClick={() => {
+                          setMobileMenuOpen(false);
+                          logout.mutate();
+                        }}
+                        className="w-full flex items-center gap-3 px-4 py-3 text-base font-medium text-red-500 hover:text-red-600 hover:bg-red-500/10 rounded-lg transition-all duration-200 min-h-[48px]"
+                      >
+                        <LogOut className="h-5 w-5" />
+                        Log Out
+                      </button>
+                    </div>
                   </div>
                 </div>
               </SheetContent>
