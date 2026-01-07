@@ -3,7 +3,15 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { getLoginUrl } from "@/const";
 import { trpc } from "@/lib/trpc";
-import { DollarSign, FileText, TrendingUp, TrendingDown, AlertCircle, Plus, ArrowUpRight, ArrowDownRight, Sparkles, ChevronDown } from "lucide-react";
+import { DollarSign, FileText, TrendingUp, TrendingDown, AlertCircle, Plus, ArrowUpRight, ArrowDownRight, Sparkles, ChevronDown, Wand2, ClipboardList } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { Link } from "wouter";
 import { Navigation } from "@/components/Navigation";
 import { UpgradePromoBanner } from "@/components/UpgradePromoBanner";
@@ -59,21 +67,60 @@ export default function Dashboard() {
                 <h1 className="page-header-title">Dashboard</h1>
                 <p className="page-header-subtitle">Welcome back, {user?.name || "there"}!</p>
               </div>
-              <div className="flex gap-2">
-                <Button asChild variant="outline" className="touch-target gap-2 border-purple-500/30 hover:border-purple-500/50 hover:bg-purple-500/5">
-                  <Link href="/invoices/guided" className="flex items-center gap-2 justify-center">
-                    <Sparkles className="h-4 w-4 text-purple-500" />
-                    <span className="hidden sm:inline">Guided</span>
-                  </Link>
-                </Button>
-                <Button asChild className="touch-target">
-                  <Link href="/invoices/create" className="flex items-center gap-2 justify-center">
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button className="touch-target gap-2">
                     <Plus className="h-4 w-4" />
                     <span className="hidden sm:inline">New Invoice</span>
                     <span className="sm:hidden">New</span>
-                  </Link>
-                </Button>
-              </div>
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-md">
+                  <DialogHeader>
+                    <DialogTitle>Create New Invoice</DialogTitle>
+                    <DialogDescription>
+                      Choose how you'd like to create your invoice
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div className="grid gap-4 py-4">
+                    <Link href="/invoices/guided">
+                      <div className="group relative rounded-xl border border-purple-500/30 bg-gradient-to-br from-purple-500/5 to-purple-500/10 p-4 cursor-pointer transition-all duration-200 hover:border-purple-500/50 hover:shadow-lg hover:shadow-purple-500/10">
+                        <div className="flex items-start gap-4">
+                          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-purple-500/10 text-purple-500 group-hover:bg-purple-500/20 transition-colors">
+                            <Wand2 className="h-6 w-6" />
+                          </div>
+                          <div className="flex-1">
+                            <h3 className="font-semibold text-foreground mb-1">Smart Invoice Builder</h3>
+                            <p className="text-sm text-muted-foreground leading-relaxed">
+                              Answer simple questions step-by-step. Perfect for beginners or when you want guidance through the process.
+                            </p>
+                          </div>
+                        </div>
+                        <div className="absolute top-3 right-3">
+                          <span className="inline-flex items-center rounded-full bg-purple-500/10 px-2 py-0.5 text-xs font-medium text-purple-500">
+                            Recommended
+                          </span>
+                        </div>
+                      </div>
+                    </Link>
+                    <Link href="/invoices/create">
+                      <div className="group rounded-xl border border-border/50 bg-card/50 p-4 cursor-pointer transition-all duration-200 hover:border-border hover:bg-card hover:shadow-md">
+                        <div className="flex items-start gap-4">
+                          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground group-hover:bg-accent group-hover:text-foreground transition-colors">
+                            <ClipboardList className="h-6 w-6" />
+                          </div>
+                          <div className="flex-1">
+                            <h3 className="font-semibold text-foreground mb-1">Classic Form</h3>
+                            <p className="text-sm text-muted-foreground leading-relaxed">
+                              Traditional invoice form with all fields visible. Best for experienced users who prefer full control.
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </Link>
+                  </div>
+                </DialogContent>
+              </Dialog>
             </div>
           </div>
 

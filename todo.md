@@ -1130,3 +1130,10 @@
 - [x] Optimize navigation for tablet viewports (768px-1023px) with horizontal nav and dropdowns
 - [x] Optimize navigation for mobile viewports (< 768px) with hamburger menu
 - [x] Improve navigation aesthetics and usability
+
+
+## Invoice Creation UX Improvement
+- [x] Replace separate Guided/New Invoice buttons with single "New Invoice" button
+- [x] Create overlay/dialog with two choices: Smart Invoice Builder and Classic Form
+- [x] Add explanations for each invoice creation method
+- [x] Style Navigation "New" button with purple outline and darker fill for differentiation
