@@ -460,20 +460,23 @@
   position: sticky;
   top: 0;
   z-index: 50;
-  border-bottom: 1px solid oklch(from var(--border) l c h / 0.5);
+  border-bottom: 1px solid oklch(from var(--border) l c h / 0.3);
   background: linear-gradient(
     180deg,
-    oklch(from var(--card) l c h / 0.95) 0%,
-    oklch(from var(--card) l c h / 0.88) 100%
+    oklch(from var(--card) l c h / 0.97) 0%,
+    oklch(from var(--card) l c h / 0.92) 100%
   );
-  backdrop-filter: blur(16px) saturate(1.2);
-  -webkit-backdrop-filter: blur(16px) saturate(1.2);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  backdrop-filter: blur(20px) saturate(1.3);
+  -webkit-backdrop-filter: blur(20px) saturate(1.3);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .navbar-sticky.scrolled {
-  box-shadow: 0 4px 20px -4px oklch(from var(--foreground) l c h / 0.08),
-              0 2px 8px -2px oklch(from var(--foreground) l c h / 0.04);
+  border-bottom-color: oklch(from var(--border) l c h / 0.15);
+  box-shadow: 
+    0 1px 3px oklch(from var(--foreground) l c h / 0.04),
+    0 4px 16px -4px oklch(from var(--foreground) l c h / 0.08),
+    0 8px 24px -8px oklch(from var(--foreground) l c h / 0.06);
 }
 
 .navbar-container {
@@ -620,20 +623,29 @@
     font-weight: 500;
     border-radius: var(--radius);
     color: var(--muted-foreground);
-    transition: all 0.2s ease;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     white-space: nowrap;
+    position: relative;
   }
   
   .navbar-tablet-nav a:hover,
   .navbar-tablet-nav button:hover {
-    background: var(--accent);
+    background: oklch(from var(--accent) l c h / 0.8);
     color: var(--foreground);
+    transform: translateY(-1px);
   }
   
   .navbar-tablet-nav a.active,
   .navbar-tablet-nav button.active {
     background: var(--accent);
     color: var(--foreground);
+    font-weight: 600;
+  }
+  
+  .navbar-tablet-nav a:focus-visible,
+  .navbar-tablet-nav button:focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
   }
 }
 
@@ -669,4 +681,307 @@
     min-height: 40px;
     min-width: auto;
   }
+}
+
+
+/* ===========================================
+   ENHANCED NAVBAR LINK STYLES
+   
+   Seamless navigation with refined interactions
+   =========================================== */
+
+/* Desktop navigation link base styles */
+.navbar-link {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 40px;
+  padding: 0 16px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--muted-foreground);
+  border-radius: var(--radius);
+  transition: 
+    color 0.15s ease,
+    background-color 0.2s ease,
+    transform 0.15s ease;
+  overflow: hidden;
+}
+
+.navbar-link::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--accent);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  border-radius: inherit;
+}
+
+.navbar-link:hover {
+  color: var(--foreground);
+}
+
+.navbar-link:hover::before {
+  opacity: 0.6;
+}
+
+.navbar-link:active {
+  transform: scale(0.98);
+}
+
+.navbar-link.active {
+  color: var(--foreground);
+  font-weight: 600;
+}
+
+.navbar-link.active::before {
+  opacity: 1;
+}
+
+/* Active indicator underline */
+.navbar-link-indicator {
+  position: absolute;
+  bottom: 4px;
+  left: 50%;
+  transform: translateX(-50%) scaleX(0);
+  width: 24px;
+  height: 2px;
+  background: var(--primary);
+  border-radius: 1px;
+  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.navbar-link.active .navbar-link-indicator {
+  transform: translateX(-50%) scaleX(1);
+}
+
+/* Focus states for accessibility */
+.navbar-link:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+/* Dropdown trigger enhancements */
+.navbar-dropdown-trigger {
+  gap: 4px;
+}
+
+.navbar-dropdown-trigger svg {
+  transition: transform 0.2s ease;
+}
+
+.navbar-dropdown-trigger[data-state="open"] svg {
+  transform: rotate(180deg);
+}
+
+/* Dropdown content animations */
+.navbar-dropdown-content {
+  animation: navbar-dropdown-in 0.2s ease-out;
+}
+
+@keyframes navbar-dropdown-in {
+  from {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Dropdown item styles */
+.navbar-dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border-radius: var(--radius);
+  transition: 
+    background-color 0.15s ease,
+    transform 0.1s ease;
+}
+
+.navbar-dropdown-item:hover {
+  background: var(--accent);
+  transform: translateX(2px);
+}
+
+.navbar-dropdown-item:active {
+  transform: translateX(2px) scale(0.99);
+}
+
+.navbar-dropdown-item-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background: var(--muted);
+  color: var(--muted-foreground);
+  transition: 
+    background-color 0.15s ease,
+    color 0.15s ease;
+}
+
+.navbar-dropdown-item:hover .navbar-dropdown-item-icon {
+  background: oklch(from var(--primary) l c h / 0.15);
+  color: var(--primary);
+}
+
+.navbar-dropdown-item.active .navbar-dropdown-item-icon {
+  background: var(--primary);
+  color: var(--primary-foreground);
+}
+
+/* Mobile menu enhancements */
+.navbar-mobile-menu {
+  animation: navbar-mobile-slide-in 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes navbar-mobile-slide-in {
+  from {
+    opacity: 0;
+    transform: translateX(-100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.navbar-mobile-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--muted-foreground);
+  border-radius: var(--radius);
+  transition: 
+    background-color 0.15s ease,
+    color 0.15s ease,
+    transform 0.1s ease;
+  min-height: 48px;
+}
+
+.navbar-mobile-link:hover {
+  background: oklch(from var(--accent) l c h / 0.5);
+  color: var(--foreground);
+}
+
+.navbar-mobile-link:active {
+  transform: scale(0.98);
+}
+
+.navbar-mobile-link.active {
+  background: var(--accent);
+  color: var(--foreground);
+  font-weight: 600;
+}
+
+/* Mobile submenu animations */
+.navbar-mobile-submenu {
+  overflow: hidden;
+  transition: 
+    max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+    opacity 0.2s ease;
+}
+
+.navbar-mobile-submenu.collapsed {
+  max-height: 0;
+  opacity: 0;
+}
+
+.navbar-mobile-submenu.expanded {
+  max-height: 400px;
+  opacity: 1;
+}
+
+/* Chevron rotation for expandable items */
+.navbar-mobile-chevron {
+  transition: transform 0.2s ease;
+}
+
+.navbar-mobile-chevron.expanded {
+  transform: rotate(180deg);
+}
+
+/* Quick actions button enhancement */
+.navbar-quick-action {
+  position: relative;
+  overflow: hidden;
+}
+
+.navbar-quick-action::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    135deg,
+    oklch(from var(--primary) l c h / 0) 0%,
+    oklch(from var(--primary) l c h / 0.1) 100%
+  );
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.navbar-quick-action:hover::after {
+  opacity: 1;
+}
+
+/* Search bar in navbar */
+.navbar-search {
+  position: relative;
+  display: flex;
+  align-items: center;
+  height: 40px;
+  padding: 0 12px;
+  background: var(--muted);
+  border: 1px solid transparent;
+  border-radius: var(--radius);
+  transition: 
+    border-color 0.2s ease,
+    background-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.navbar-search:hover {
+  background: oklch(from var(--muted) l c h / 0.8);
+  border-color: var(--border);
+}
+
+.navbar-search:focus-within {
+  background: var(--background);
+  border-color: var(--ring);
+  box-shadow: 0 0 0 3px oklch(from var(--ring) l c h / 0.15);
+}
+
+/* User avatar in navbar */
+.navbar-avatar {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--muted);
+  border: 2px solid transparent;
+  transition: 
+    border-color 0.2s ease,
+    transform 0.15s ease;
+}
+
+.navbar-avatar:hover {
+  border-color: var(--primary);
+  transform: scale(1.05);
+}
+
+.navbar-avatar:active {
+  transform: scale(0.95);
 }

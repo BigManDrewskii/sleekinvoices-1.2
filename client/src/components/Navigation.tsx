@@ -138,7 +138,7 @@ export function Navigation() {
         <Button 
           size="sm" 
           variant="outline"
-          className="h-10 min-w-[44px] gap-1.5 px-3 group relative overflow-hidden border-primary/50 hover:border-primary hover:bg-primary/10 text-primary transition-all duration-200"
+          className="navbar-quick-action h-10 min-w-[44px] gap-1.5 px-3 group relative overflow-hidden border-primary/50 hover:border-primary hover:bg-primary/10 text-primary transition-all duration-200"
         >
           <Plus weight="bold" className="h-4 w-4 transition-transform duration-200 group-hover:rotate-90" />
           <span className="hidden sm:inline">New</span>
@@ -711,10 +711,10 @@ export function Navigation() {
                 <Button 
                   variant="ghost" 
                   size="icon" 
-                  className="rounded-full h-10 w-10 min-w-[44px] transition-all duration-200 hover:ring-2 hover:ring-primary/20" 
+                  className="navbar-avatar rounded-full h-10 w-10 min-w-[44px] transition-all duration-200" 
                   aria-label="User menu"
                 >
-                  <Avatar className="h-8 w-8 transition-transform duration-200 hover:scale-105">
+                  <Avatar className="h-8 w-8">
                     <AvatarFallback className="text-sm bg-primary/10 text-primary font-medium">
                       {user?.name?.charAt(0).toUpperCase() || "U"}
                     </AvatarFallback>
@@ -783,7 +783,7 @@ export function Navigation() {
               </SheetTrigger>
               <SheetContent 
                 side="right" 
-                className="w-80 max-w-[85vw] p-0"
+                className="navbar-mobile-menu w-80 max-w-[85vw] p-0"
                 hideCloseButton
               >
                 <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
