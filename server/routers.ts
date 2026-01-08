@@ -191,6 +191,92 @@ export const appRouter = router({
         const { validateVATNumber } = await import('./lib/vat-validation');
         return await validateVATNumber(input.vatNumber);
       }),
+    
+    // Client Tags
+    listTags: protectedProcedure.query(async ({ ctx }) => {
+      return await db.getClientTagsByUserId(ctx.user.id);
+    }),
+    
+    createTag: protectedProcedure
+      .input(z.object({
+        name: z.string().min(1).max(50),
+        color: z.string().regex(/^#[0-9A-Fa-f]{6}$/).optional(),
+        description: z.string().optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        return await db.createClientTag({
+          userId: ctx.user.id,
+          name: input.name,
+          color: input.color || '#6366f1',
+          description: input.description || null,
+        });
+      }),
+    
+    updateTag: protectedProcedure
+      .input(z.object({
+        id: z.number(),
+        name: z.string().min(1).max(50).optional(),
+        color: z.string().regex(/^#[0-9A-Fa-f]{6}$/).optional(),
+        description: z.string().nullable().optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const { id, ...data } = input;
+        await db.updateClientTag(id, ctx.user.id, data);
+        return { success: true };
+      }),
+    
+    deleteTag: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ ctx, input }) => {
+        await db.deleteClientTag(input.id, ctx.user.id);
+        return { success: true };
+      }),
+    
+    // Tag assignments
+    getClientTags: protectedProcedure
+      .input(z.object({ clientId: z.number() }))
+      .query(async ({ ctx, input }) => {
+        return await db.getTagsForClient(input.clientId, ctx.user.id);
+      }),
+    
+    assignTag: protectedProcedure
+      .input(z.object({
+        clientId: z.number(),
+        tagId: z.number(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        await db.assignTagToClient(input.clientId, input.tagId, ctx.user.id);
+        return { success: true };
+      }),
+    
+    removeTag: protectedProcedure
+      .input(z.object({
+        clientId: z.number(),
+        tagId: z.number(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        await db.removeTagFromClient(input.clientId, input.tagId, ctx.user.id);
+        return { success: true };
+      }),
+    
+    // Bulk tag assignment
+    bulkAssignTag: protectedProcedure
+      .input(z.object({
+        clientIds: z.array(z.number()),
+        tagId: z.number(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        let assignedCount = 0;
+        for (const clientId of input.clientIds) {
+          try {
+            await db.assignTagToClient(clientId, input.tagId, ctx.user.id);
+            assignedCount++;
+          } catch (error) {
+            // Continue with other assignments if one fails (e.g., already assigned)
+          }
+        }
+        return { success: true, assignedCount };
+      }),
   }),
 
   // Products/Services Library

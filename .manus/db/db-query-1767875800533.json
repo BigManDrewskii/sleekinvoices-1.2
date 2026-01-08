@@ -1,0 +1,9 @@
+{
+  "query": "CREATE TABLE IF NOT EXISTS `clientTagAssignments` (\n  `id` int AUTO_INCREMENT PRIMARY KEY,\n  `clientId` int NOT NULL,\n  `tagId` int NOT NULL,\n  `assignedAt` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,\n  UNIQUE INDEX `client_tag_assignment_idx` (`clientId`, `tagId`)\n);",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user REX6DRAh92xmf1o.58be8e717db2 --database coKdAkLfsbebvczbYNFn3V --execute CREATE TABLE IF NOT EXISTS `clientTagAssignments` (\n  `id` int AUTO_INCREMENT PRIMARY KEY,\n  `clientId` int NOT NULL,\n  `tagId` int NOT NULL,\n  `assignedAt` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,\n  UNIQUE INDEX `client_tag_assignment_idx` (`clientId`, `tagId`)\n);",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 500
+}

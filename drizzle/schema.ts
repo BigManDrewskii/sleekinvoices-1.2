@@ -892,3 +892,40 @@ export const quickbooksSyncSettings = mysqlTable("quickbooksSyncSettings", {
 });
 export type QuickBooksSyncSettings = typeof quickbooksSyncSettings.$inferSelect;
 export type InsertQuickBooksSyncSettings = typeof quickbooksSyncSettings.$inferInsert;
+
+
+/**
+ * Client Tags - user-defined tags for organizing clients
+ * Examples: "VIP", "Recurring", "New", "Enterprise", "Small Business"
+ */
+export const clientTags = mysqlTable("clientTags", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  name: varchar("name", { length: 50 }).notNull(),
+  color: varchar("color", { length: 7 }).default("#6366f1").notNull(), // Hex color code
+  description: text("description"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+}, (table) => ({
+  // Unique tag name per user
+  userTagIdx: uniqueIndex("client_tag_user_idx").on(table.userId, table.name),
+}));
+
+export type ClientTag = typeof clientTags.$inferSelect;
+export type InsertClientTag = typeof clientTags.$inferInsert;
+
+/**
+ * Client-Tag assignments - many-to-many relationship
+ */
+export const clientTagAssignments = mysqlTable("clientTagAssignments", {
+  id: int("id").autoincrement().primaryKey(),
+  clientId: int("clientId").notNull(),
+  tagId: int("tagId").notNull(),
+  assignedAt: timestamp("assignedAt").defaultNow().notNull(),
+}, (table) => ({
+  // Unique assignment per client-tag pair
+  clientTagIdx: uniqueIndex("client_tag_assignment_idx").on(table.clientId, table.tagId),
+}));
+
+export type ClientTagAssignment = typeof clientTagAssignments.$inferSelect;
+export type InsertClientTagAssignment = typeof clientTagAssignments.$inferInsert;

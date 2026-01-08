@@ -52,7 +52,12 @@ import {
   XSquare,
   FileSpreadsheet,
   Sparkles,
+  Filter,
+  X,
+  Calendar,
+  DollarSign,
 } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import { useState, useMemo, useRef } from "react";
 import { useTableSort } from "@/hooks/useTableSort";
 import { SortableTableHeader } from "@/components/shared/SortableTableHeader";
@@ -102,6 +107,11 @@ export default function Invoices() {
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [paymentFilter, setPaymentFilter] = useState<string>("all");
+  const [clientFilter, setClientFilter] = useState<string>("all");
+  const [dateRangeFilter, setDateRangeFilter] = useState<string>("all");
+  const [minAmount, setMinAmount] = useState<string>("");
+  const [maxAmount, setMaxAmount] = useState<string>("");
+  const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [invoiceToDelete, setInvoiceToDelete] = useState<Invoice | null>(null);
   const [bulkDeleteDialogOpen, setBulkDeleteDialogOpen] = useState(false);
@@ -330,20 +340,87 @@ export default function Invoices() {
     return null;
   }
 
-  const filteredInvoices = invoices?.filter((invoice) => {
-    const query = searchQuery.toLowerCase();
-    const matchesSearch =
-      invoice.invoiceNumber.toLowerCase().includes(query) ||
-      invoice.client.name.toLowerCase().includes(query);
+  // Get unique clients for filter dropdown
+  const uniqueClients = useMemo(() => {
+    if (!invoices) return [];
+    const clients = invoices
+      .map(inv => ({ id: inv.client.id, name: inv.client.name }))
+      .filter((c, i, arr) => arr.findIndex(x => x.id === c.id) === i)
+      .sort((a, b) => a.name.localeCompare(b.name));
+    return clients;
+  }, [invoices]);
+
+  // Count active filters
+  const activeFilterCount = useMemo(() => {
+    let count = 0;
+    if (clientFilter !== 'all') count++;
+    if (dateRangeFilter !== 'all') count++;
+    if (minAmount || maxAmount) count++;
+    return count;
+  }, [clientFilter, dateRangeFilter, minAmount, maxAmount]);
+
+  const filteredInvoices = useMemo(() => {
+    if (!invoices) return [];
     
-    const matchesStatus = statusFilter === "all" || invoice.status.toLowerCase() === statusFilter;
-    
-    const matchesPayment = 
-      paymentFilter === "all" || 
-      (invoice.paymentStatus || "unpaid") === paymentFilter;
-    
-    return matchesSearch && matchesStatus && matchesPayment;
-  }) || [];
+    return invoices.filter((invoice) => {
+      const query = searchQuery.toLowerCase();
+      const matchesSearch =
+        invoice.invoiceNumber.toLowerCase().includes(query) ||
+        invoice.client.name.toLowerCase().includes(query);
+      
+      const matchesStatus = statusFilter === "all" || invoice.status.toLowerCase() === statusFilter;
+      
+      const matchesPayment = 
+        paymentFilter === "all" || 
+        (invoice.paymentStatus || "unpaid") === paymentFilter;
+      
+      // Client filter
+      const matchesClient = clientFilter === "all" || invoice.client.id.toString() === clientFilter;
+      
+      // Date range filter (based on issue date)
+      let matchesDateRange = true;
+      if (dateRangeFilter !== 'all') {
+        const issueDate = new Date(invoice.issueDate);
+        const now = new Date();
+        let cutoffDate: Date;
+        
+        switch (dateRangeFilter) {
+          case 'today':
+            cutoffDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+            break;
+          case 'week':
+            cutoffDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+            break;
+          case 'month':
+            cutoffDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+            break;
+          case 'quarter':
+            cutoffDate = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000);
+            break;
+          case 'year':
+            cutoffDate = new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000);
+            break;
+          default:
+            cutoffDate = new Date(0);
+        }
+        matchesDateRange = issueDate >= cutoffDate;
+      }
+      
+      // Amount range filter
+      let matchesAmount = true;
+      const invoiceTotal = parseFloat(invoice.total?.toString() || '0');
+      if (minAmount) {
+        const min = parseFloat(minAmount);
+        if (!isNaN(min)) matchesAmount = matchesAmount && invoiceTotal >= min;
+      }
+      if (maxAmount) {
+        const max = parseFloat(maxAmount);
+        if (!isNaN(max)) matchesAmount = matchesAmount && invoiceTotal <= max;
+      }
+      
+      return matchesSearch && matchesStatus && matchesPayment && matchesClient && matchesDateRange && matchesAmount;
+    });
+  }, [invoices, searchQuery, statusFilter, paymentFilter, clientFilter, dateRangeFilter, minAmount, maxAmount]);
 
   // Sort the filtered invoices
   const sortedInvoices = sortData(filteredInvoices);
@@ -552,43 +629,156 @@ export default function Invoices() {
         )}
 
         {/* Filters */}
-        <div className="flex flex-col sm:flex-row gap-4 mb-6">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Search by invoice number or client name..."
-              value={searchQuery}
-              onChange={(e) => {
-                setSearchQuery(e.target.value);
-                setCurrentPage(1);
-              }}
-              className="pl-10"
-            />
+        <div className="space-y-4 mb-6">
+          {/* Primary Filters Row */}
+          <div className="flex flex-col sm:flex-row gap-4">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Search by invoice number or client name..."
+                value={searchQuery}
+                onChange={(e) => {
+                  setSearchQuery(e.target.value);
+                  setCurrentPage(1);
+                }}
+                className="pl-10"
+              />
+            </div>
+            <Select value={statusFilter} onValueChange={(val) => handleFilterChange(setStatusFilter, val)}>
+              <SelectTrigger className="w-full sm:w-[150px]">
+                <SelectValue placeholder="Status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Status</SelectItem>
+                <SelectItem value="draft">Draft</SelectItem>
+                <SelectItem value="sent">Sent</SelectItem>
+                <SelectItem value="paid">Paid</SelectItem>
+                <SelectItem value="overdue">Overdue</SelectItem>
+                <SelectItem value="canceled">Canceled</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select value={paymentFilter} onValueChange={(val) => handleFilterChange(setPaymentFilter, val)}>
+              <SelectTrigger className="w-full sm:w-[150px]">
+                <SelectValue placeholder="Payment" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Payments</SelectItem>
+                <SelectItem value="unpaid">Unpaid</SelectItem>
+                <SelectItem value="partial">Partial</SelectItem>
+                <SelectItem value="paid">Fully Paid</SelectItem>
+              </SelectContent>
+            </Select>
+            <Button
+              variant="outline"
+              onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
+              className="gap-2"
+            >
+              <Filter className="h-4 w-4" />
+              Filters
+              {activeFilterCount > 0 && (
+                <Badge variant="secondary" className="ml-1 h-5 w-5 p-0 flex items-center justify-center text-xs">
+                  {activeFilterCount}
+                </Badge>
+              )}
+            </Button>
           </div>
-          <Select value={statusFilter} onValueChange={(val) => handleFilterChange(setStatusFilter, val)}>
-            <SelectTrigger className="w-full sm:w-[180px]">
-              <SelectValue placeholder="Filter by status" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Status</SelectItem>
-              <SelectItem value="draft">Draft</SelectItem>
-              <SelectItem value="sent">Sent</SelectItem>
-              <SelectItem value="paid">Paid</SelectItem>
-              <SelectItem value="overdue">Overdue</SelectItem>
-              <SelectItem value="canceled">Canceled</SelectItem>
-            </SelectContent>
-          </Select>
-          <Select value={paymentFilter} onValueChange={(val) => handleFilterChange(setPaymentFilter, val)}>
-            <SelectTrigger className="w-full sm:w-[180px]">
-              <SelectValue placeholder="Payment status" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Payments</SelectItem>
-              <SelectItem value="unpaid">Unpaid</SelectItem>
-              <SelectItem value="partial">Partially Paid</SelectItem>
-              <SelectItem value="paid">Fully Paid</SelectItem>
-            </SelectContent>
-          </Select>
+
+          {/* Advanced Filters Panel */}
+          {showAdvancedFilters && (
+            <div className="p-4 rounded-xl bg-card/50 border border-border/50 space-y-4">
+              <div className="flex items-center justify-between">
+                <h4 className="text-sm font-medium text-foreground">Advanced Filters</h4>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    setClientFilter('all');
+                    setDateRangeFilter('all');
+                    setMinAmount('');
+                    setMaxAmount('');
+                    setCurrentPage(1);
+                  }}
+                  className="text-xs text-muted-foreground hover:text-foreground"
+                >
+                  <X className="h-3 w-3 mr-1" />
+                  Clear All
+                </Button>
+              </div>
+              
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                {/* Client Filter */}
+                <div className="space-y-2">
+                  <label className="text-xs font-medium text-muted-foreground flex items-center gap-1">
+                    Client
+                  </label>
+                  <Select value={clientFilter} onValueChange={(val) => { setClientFilter(val); setCurrentPage(1); }}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="All Clients" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Clients</SelectItem>
+                      {uniqueClients.map(client => (
+                        <SelectItem key={client.id} value={client.id.toString()}>
+                          {client.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Date Range Filter */}
+                <div className="space-y-2">
+                  <label className="text-xs font-medium text-muted-foreground flex items-center gap-1">
+                    <Calendar className="h-3 w-3" />
+                    Date Range
+                  </label>
+                  <Select value={dateRangeFilter} onValueChange={(val) => { setDateRangeFilter(val); setCurrentPage(1); }}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="All Time" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Time</SelectItem>
+                      <SelectItem value="today">Today</SelectItem>
+                      <SelectItem value="week">Last 7 Days</SelectItem>
+                      <SelectItem value="month">Last 30 Days</SelectItem>
+                      <SelectItem value="quarter">Last 90 Days</SelectItem>
+                      <SelectItem value="year">Last Year</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Min Amount */}
+                <div className="space-y-2">
+                  <label className="text-xs font-medium text-muted-foreground flex items-center gap-1">
+                    <DollarSign className="h-3 w-3" />
+                    Min Amount
+                  </label>
+                  <Input
+                    type="number"
+                    placeholder="0.00"
+                    value={minAmount}
+                    onChange={(e) => { setMinAmount(e.target.value); setCurrentPage(1); }}
+                    className="h-10"
+                  />
+                </div>
+
+                {/* Max Amount */}
+                <div className="space-y-2">
+                  <label className="text-xs font-medium text-muted-foreground flex items-center gap-1">
+                    <DollarSign className="h-3 w-3" />
+                    Max Amount
+                  </label>
+                  <Input
+                    type="number"
+                    placeholder="No limit"
+                    value={maxAmount}
+                    onChange={(e) => { setMaxAmount(e.target.value); setCurrentPage(1); }}
+                    className="h-10"
+                  />
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Invoices Table */}

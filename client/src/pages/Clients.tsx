@@ -25,10 +25,29 @@ import { DeleteConfirmDialog } from "@/components/shared/DeleteConfirmDialog";
 import { Pagination } from "@/components/shared/Pagination";
 import { getLoginUrl } from "@/const";
 import { trpc } from "@/lib/trpc";
-import { FileText, Plus, Search, Edit, Trash2, Mail, Phone, MapPin, Users, Key, ShieldCheck, Upload, ArrowUpDown, ArrowUp, ArrowDown, Filter, Download, X, Calendar } from "lucide-react";
+import { FileText, Plus, Search, Edit, Trash2, Mail, Phone, MapPin, Users, Key, ShieldCheck, Upload, ArrowUpDown, ArrowUp, ArrowDown, Filter, Download, X, Calendar, Tag, Tags, MoreHorizontal } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { useState, useRef, useEffect, useMemo } from "react";
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import { toast } from "sonner";
 import { Navigation } from "@/components/Navigation";
 import { CSVImportDialog } from "@/components/clients/CSVImportDialog";
@@ -48,6 +67,13 @@ interface Client {
   taxExempt: boolean | null;
   createdAt: Date;
   updatedAt: Date;
+}
+
+interface ClientTag {
+  id: number;
+  name: string;
+  color: string;
+  description: string | null;
 }
 
 type SortField = 'name' | 'email' | 'createdAt';
@@ -72,7 +98,15 @@ export default function Clients() {
   const [companyFilter, setCompanyFilter] = useState<string>('all');
   const [taxExemptFilter, setTaxExemptFilter] = useState<string>('all');
   const [dateRangeFilter, setDateRangeFilter] = useState<string>('all');
+  const [tagFilter, setTagFilter] = useState<string>('all');
   const [showFilters, setShowFilters] = useState(false);
+  
+  // Tag management state
+  const [tagDialogOpen, setTagDialogOpen] = useState(false);
+  const [editingTag, setEditingTag] = useState<ClientTag | null>(null);
+  const [newTagName, setNewTagName] = useState('');
+  const [newTagColor, setNewTagColor] = useState('#6366f1');
+  const [clientTagsMap, setClientTagsMap] = useState<Map<number, ClientTag[]>>(new Map());
   
   // Selection state for bulk delete
   const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
@@ -120,6 +154,129 @@ export default function Clients() {
       toast.error(error.message || "Failed to delete clients");
     },
   });
+
+  // Tag queries and mutations
+  const { data: tags } = trpc.clients.listTags.useQuery(undefined, {
+    enabled: isAuthenticated,
+  });
+
+  const createTag = trpc.clients.createTag.useMutation({
+    onSuccess: () => {
+      utils.clients.listTags.invalidate();
+      setTagDialogOpen(false);
+      setNewTagName('');
+      setNewTagColor('#6366f1');
+      toast.success('Tag created successfully');
+    },
+    onError: (error) => {
+      toast.error(error.message || 'Failed to create tag');
+    },
+  });
+
+  const updateTag = trpc.clients.updateTag.useMutation({
+    onSuccess: () => {
+      utils.clients.listTags.invalidate();
+      setTagDialogOpen(false);
+      setEditingTag(null);
+      setNewTagName('');
+      setNewTagColor('#6366f1');
+      toast.success('Tag updated successfully');
+    },
+    onError: (error) => {
+      toast.error(error.message || 'Failed to update tag');
+    },
+  });
+
+  const deleteTag = trpc.clients.deleteTag.useMutation({
+    onSuccess: () => {
+      utils.clients.listTags.invalidate();
+      toast.success('Tag deleted successfully');
+    },
+    onError: (error) => {
+      toast.error(error.message || 'Failed to delete tag');
+    },
+  });
+
+  const assignTag = trpc.clients.assignTag.useMutation({
+    onSuccess: (_, variables) => {
+      // Update local state immediately
+      const tag = tags?.find(t => t.id === variables.tagId);
+      if (tag) {
+        setClientTagsMap(prev => {
+          const newMap = new Map(prev);
+          const existing = newMap.get(variables.clientId) || [];
+          if (!existing.find(t => t.id === tag.id)) {
+            newMap.set(variables.clientId, [...existing, tag]);
+          }
+          return newMap;
+        });
+      }
+      toast.success('Tag assigned');
+    },
+    onError: (error) => {
+      toast.error(error.message || 'Failed to assign tag');
+    },
+  });
+
+  const removeTagMutation = trpc.clients.removeTag.useMutation({
+    onSuccess: (_, variables) => {
+      // Update local state immediately
+      setClientTagsMap(prev => {
+        const newMap = new Map(prev);
+        const existing = newMap.get(variables.clientId) || [];
+        newMap.set(variables.clientId, existing.filter(t => t.id !== variables.tagId));
+        return newMap;
+      });
+      toast.success('Tag removed');
+    },
+    onError: (error) => {
+      toast.error(error.message || 'Failed to remove tag');
+    },
+  });
+
+  const bulkAssignTag = trpc.clients.bulkAssignTag.useMutation({
+    onSuccess: (result, variables) => {
+      // Update local state for all assigned clients
+      const tag = tags?.find(t => t.id === variables.tagId);
+      if (tag) {
+        setClientTagsMap(prev => {
+          const newMap = new Map(prev);
+          for (const clientId of variables.clientIds) {
+            const existing = newMap.get(clientId) || [];
+            if (!existing.find(t => t.id === tag.id)) {
+              newMap.set(clientId, [...existing, tag]);
+            }
+          }
+          return newMap;
+        });
+      }
+      setSelectedIds(new Set());
+      toast.success(`Tag assigned to ${result.assignedCount} client(s)`);
+    },
+    onError: (error) => {
+      toast.error(error.message || 'Failed to assign tags');
+    },
+  });
+
+  // Load tags for each client
+  useEffect(() => {
+    if (clients && isAuthenticated) {
+      // Load tags for visible clients
+      const loadClientTags = async () => {
+        const newMap = new Map<number, ClientTag[]>();
+        for (const client of clients) {
+          try {
+            const clientTags = await utils.clients.getClientTags.fetch({ clientId: client.id });
+            newMap.set(client.id, clientTags);
+          } catch {
+            newMap.set(client.id, []);
+          }
+        }
+        setClientTagsMap(newMap);
+      };
+      loadClientTags();
+    }
+  }, [clients, isAuthenticated]);
 
   // Get unique companies for filter dropdown
   const uniqueCompanies = useMemo(() => {
@@ -191,6 +348,22 @@ export default function Clients() {
       filtered = filtered.filter(c => new Date(c.createdAt) >= cutoffDate);
     }
     
+    // Tag filter
+    if (tagFilter !== 'all') {
+      if (tagFilter === 'no-tags') {
+        filtered = filtered.filter(c => {
+          const clientTags = clientTagsMap.get(c.id) || [];
+          return clientTags.length === 0;
+        });
+      } else {
+        const tagId = parseInt(tagFilter);
+        filtered = filtered.filter(c => {
+          const clientTags = clientTagsMap.get(c.id) || [];
+          return clientTags.some(t => t.id === tagId);
+        });
+      }
+    }
+    
     // Sort
     filtered.sort((a, b) => {
       let aValue: string | Date | null;
@@ -225,7 +398,7 @@ export default function Clients() {
     });
     
     return filtered;
-  }, [clients, searchQuery, sortField, sortDirection, companyFilter, taxExemptFilter, dateRangeFilter]);
+  }, [clients, searchQuery, sortField, sortDirection, companyFilter, taxExemptFilter, dateRangeFilter, tagFilter, clientTagsMap]);
 
   // Calculate pagination
   const totalItems = filteredAndSortedClients.length;
@@ -234,7 +407,7 @@ export default function Clients() {
   // Reset to page 1 when search, sort, or filters change
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchQuery, sortField, sortDirection, companyFilter, taxExemptFilter, dateRangeFilter]);
+  }, [searchQuery, sortField, sortDirection, companyFilter, taxExemptFilter, dateRangeFilter, tagFilter]);
 
   // Ensure current page is valid
   useEffect(() => {
@@ -539,9 +712,9 @@ export default function Clients() {
           >
             <Filter className="h-4 w-4" />
             Filters
-            {(companyFilter !== 'all' || taxExemptFilter !== 'all' || dateRangeFilter !== 'all') && (
+            {(companyFilter !== 'all' || taxExemptFilter !== 'all' || dateRangeFilter !== 'all' || tagFilter !== 'all') && (
               <Badge variant="secondary" className="ml-1 h-5 w-5 p-0 flex items-center justify-center text-xs">
-                {[companyFilter !== 'all', taxExemptFilter !== 'all', dateRangeFilter !== 'all'].filter(Boolean).length}
+                {[companyFilter !== 'all', taxExemptFilter !== 'all', dateRangeFilter !== 'all', tagFilter !== 'all'].filter(Boolean).length}
               </Badge>
             )}
           </Button>
@@ -570,23 +743,40 @@ export default function Clients() {
           <div className="mb-6 p-4 rounded-lg border border-border bg-card/50">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-sm font-medium">Filter Clients</h3>
-              {(companyFilter !== 'all' || taxExemptFilter !== 'all' || dateRangeFilter !== 'all') && (
+              <div className="flex items-center gap-2">
                 <Button
-                  variant="ghost"
+                  variant="outline"
                   size="sm"
                   onClick={() => {
-                    setCompanyFilter('all');
-                    setTaxExemptFilter('all');
-                    setDateRangeFilter('all');
+                    setEditingTag(null);
+                    setNewTagName('');
+                    setNewTagColor('#6366f1');
+                    setTagDialogOpen(true);
                   }}
-                  className="text-muted-foreground hover:text-foreground"
+                  className="gap-1"
                 >
-                  <X className="h-4 w-4 mr-1" />
-                  Clear All
+                  <Tags className="h-4 w-4" />
+                  Manage Tags
                 </Button>
-              )}
+                {(companyFilter !== 'all' || taxExemptFilter !== 'all' || dateRangeFilter !== 'all' || tagFilter !== 'all') && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      setCompanyFilter('all');
+                      setTaxExemptFilter('all');
+                      setDateRangeFilter('all');
+                      setTagFilter('all');
+                    }}
+                    className="text-muted-foreground hover:text-foreground"
+                  >
+                    <X className="h-4 w-4 mr-1" />
+                    Clear All
+                  </Button>
+                )}
+              </div>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               {/* Company Filter */}
               <div className="space-y-2">
                 <label className="text-sm text-muted-foreground">Company</label>
@@ -636,6 +826,28 @@ export default function Clients() {
                   </SelectContent>
                 </Select>
               </div>
+              
+              {/* Tag Filter */}
+              <div className="space-y-2">
+                <label className="text-sm text-muted-foreground">Tag</label>
+                <Select value={tagFilter} onValueChange={setTagFilter}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="All Tags" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Tags</SelectItem>
+                    <SelectItem value="no-tags">No Tags</SelectItem>
+                    {tags?.map(tag => (
+                      <SelectItem key={tag.id} value={tag.id.toString()}>
+                        <div className="flex items-center gap-2">
+                          <div className="w-3 h-3 rounded-full" style={{ backgroundColor: tag.color }} />
+                          {tag.name}
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
           </div>
         )}
@@ -650,6 +862,33 @@ export default function Clients() {
               <Button variant="ghost" size="sm" onClick={() => setSelectedIds(new Set())}>
                 Clear Selection
               </Button>
+              <Link href={`/invoices/batch?clients=${Array.from(selectedIds).join(',')}`}>
+                <Button variant="default" size="sm">
+                  <FileText className="h-4 w-4 mr-2" />
+                  Create Invoices
+                </Button>
+              </Link>
+              {tags && tags.length > 0 && (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" size="sm">
+                      <Tag className="h-4 w-4 mr-2" />
+                      Add Tag
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent>
+                    {tags.map(tag => (
+                      <DropdownMenuItem
+                        key={tag.id}
+                        onClick={() => bulkAssignTag.mutate({ clientIds: Array.from(selectedIds), tagId: tag.id })}
+                      >
+                        <div className="w-3 h-3 rounded-full mr-2" style={{ backgroundColor: tag.color }} />
+                        {tag.name}
+                      </DropdownMenuItem>
+                    ))}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              )}
               <Button variant="destructive" size="sm" onClick={handleBulkDelete}>
                 <Trash2 className="h-4 w-4 mr-2" />
                 Delete Selected
@@ -716,6 +955,7 @@ export default function Clients() {
                         </button>
                       </TableHead>
                       <TableHead>Company</TableHead>
+                      <TableHead>Tags</TableHead>
                       <TableHead>VAT</TableHead>
                       <TableHead>Address</TableHead>
                       <TableHead className="text-right">Actions</TableHead>
@@ -755,6 +995,55 @@ export default function Clients() {
                           {client.companyName || (
                             <span className="text-muted-foreground">—</span>
                           )}
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex flex-wrap gap-1">
+                            {(clientTagsMap.get(client.id) || []).map(tag => (
+                              <Badge
+                                key={tag.id}
+                                variant="secondary"
+                                className="text-xs cursor-pointer hover:opacity-80"
+                                style={{ backgroundColor: tag.color + '20', color: tag.color, borderColor: tag.color }}
+                                onClick={() => removeTagMutation.mutate({ clientId: client.id, tagId: tag.id })}
+                                title="Click to remove"
+                              >
+                                {tag.name}
+                                <X className="h-3 w-3 ml-1" />
+                              </Badge>
+                            ))}
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
+                                  <Tag className="h-3 w-3" />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent>
+                                {tags && tags.length > 0 ? (
+                                  tags.map(tag => {
+                                    const isAssigned = (clientTagsMap.get(client.id) || []).some(t => t.id === tag.id);
+                                    return (
+                                      <DropdownMenuItem
+                                        key={tag.id}
+                                        onClick={() => {
+                                          if (isAssigned) {
+                                            removeTagMutation.mutate({ clientId: client.id, tagId: tag.id });
+                                          } else {
+                                            assignTag.mutate({ clientId: client.id, tagId: tag.id });
+                                          }
+                                        }}
+                                      >
+                                        <div className="w-3 h-3 rounded-full mr-2" style={{ backgroundColor: tag.color }} />
+                                        {tag.name}
+                                        {isAssigned && <span className="ml-auto text-primary">✓</span>}
+                                      </DropdownMenuItem>
+                                    );
+                                  })
+                                ) : (
+                                  <DropdownMenuItem disabled>No tags created</DropdownMenuItem>
+                                )}
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </div>
                         </TableCell>
                         <TableCell>
                           <div className="space-y-1">
@@ -942,6 +1231,126 @@ export default function Clients() {
         onOpenChange={setImportDialogOpen}
         onSuccess={() => utils.clients.list.invalidate()}
       />
+
+      {/* Tag Management Dialog */}
+      <Dialog open={tagDialogOpen} onOpenChange={setTagDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>{editingTag ? 'Edit Tag' : 'Manage Tags'}</DialogTitle>
+            <DialogDescription>
+              {editingTag ? 'Update the tag details below.' : 'Create and manage tags to organize your clients.'}
+            </DialogDescription>
+          </DialogHeader>
+          
+          {!editingTag && tags && tags.length > 0 && (
+            <div className="space-y-2 mb-4">
+              <Label className="text-sm font-medium">Existing Tags</Label>
+              <div className="flex flex-wrap gap-2">
+                {tags.map(tag => (
+                  <Badge
+                    key={tag.id}
+                    variant="secondary"
+                    className="text-sm cursor-pointer hover:opacity-80 pr-1"
+                    style={{ backgroundColor: tag.color + '20', color: tag.color, borderColor: tag.color }}
+                  >
+                    {tag.name}
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-4 w-4 p-0 ml-1 hover:bg-transparent"
+                      onClick={() => {
+                        setEditingTag(tag);
+                        setNewTagName(tag.name);
+                        setNewTagColor(tag.color);
+                      }}
+                    >
+                      <Edit className="h-3 w-3" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-4 w-4 p-0 hover:bg-transparent text-destructive"
+                      onClick={() => {
+                        if (confirm(`Delete tag "${tag.name}"?`)) {
+                          deleteTag.mutate({ id: tag.id });
+                        }
+                      }}
+                    >
+                      <X className="h-3 w-3" />
+                    </Button>
+                  </Badge>
+                ))}
+              </div>
+            </div>
+          )}
+          
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="tagName">{editingTag ? 'Tag Name' : 'New Tag Name'}</Label>
+              <Input
+                id="tagName"
+                value={newTagName}
+                onChange={(e) => setNewTagName(e.target.value)}
+                placeholder="e.g., VIP, Recurring, New"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="tagColor">Tag Color</Label>
+              <div className="flex items-center gap-3">
+                <input
+                  type="color"
+                  id="tagColor"
+                  value={newTagColor}
+                  onChange={(e) => setNewTagColor(e.target.value)}
+                  className="w-10 h-10 rounded cursor-pointer border-0"
+                />
+                <div className="flex gap-2">
+                  {['#6366f1', '#22c55e', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4', '#ec4899'].map(color => (
+                    <button
+                      key={color}
+                      type="button"
+                      className={`w-6 h-6 rounded-full border-2 ${newTagColor === color ? 'border-foreground' : 'border-transparent'}`}
+                      style={{ backgroundColor: color }}
+                      onClick={() => setNewTagColor(color)}
+                    />
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <DialogFooter className="gap-2">
+            {editingTag && (
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setEditingTag(null);
+                  setNewTagName('');
+                  setNewTagColor('#6366f1');
+                }}
+              >
+                Cancel Edit
+              </Button>
+            )}
+            <Button
+              onClick={() => {
+                if (!newTagName.trim()) {
+                  toast.error('Please enter a tag name');
+                  return;
+                }
+                if (editingTag) {
+                  updateTag.mutate({ id: editingTag.id, name: newTagName.trim(), color: newTagColor });
+                } else {
+                  createTag.mutate({ name: newTagName.trim(), color: newTagColor });
+                }
+              }}
+              disabled={createTag.isPending || updateTag.isPending}
+            >
+              {editingTag ? 'Update Tag' : 'Create Tag'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

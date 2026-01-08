@@ -1500,3 +1500,28 @@
 - [x] Generate CSV with all client fields (name, email, phone, company, address, VAT, tax exempt, notes, created)
 - [x] Handle large datasets efficiently (client-side generation)
 - [x] Include proper CSV escaping for special characters (quotes, commas, newlines)
+
+
+## Advanced Features (Round 3)
+
+### Invoice Filters
+- [x] Add status filter dropdown (All/Draft/Sent/Paid/Overdue)
+- [x] Add date range filter (today, week, month, quarter, year)
+- [x] Add client filter dropdown (auto-populated from invoices)
+- [x] Add amount range filter (min/max)
+- [x] Combine filters with existing search and sort
+- [x] Add collapsible advanced filters panel with badge count
+
+### Client Tags/Categories
+- [x] Create client_tags database table (clientTags + clientTagAssignments)
+- [x] Add tag management UI (create, edit, delete tags with color picker)
+- [x] Add tag assignment to clients (inline in table + bulk assign)
+- [x] Filter clients by tags
+- [x] Display tags on client cards/rows
+
+### Batch Invoice Creation
+- [x] Add multi-select mode to clients list (already exists with checkboxes)
+- [x] Create batch invoice page (/invoices/batch)
+- [x] Allow setting common line items for batch
+- [x] Generate invoices for selected clients (sequential creation)
+- [x] Show progress/results of batch creation (real-time status updates)
