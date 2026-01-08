@@ -7,7 +7,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Progress } from "@/components/ui/progress";
-import { DollarSign, Calendar, CreditCard, Loader2, CheckCircle2, FileText, Check } from "lucide-react";
+import { DollarSign, Calendar, CreditCard, Loader2, CheckCircle2, FileText } from "lucide-react";
+import { Check } from "@phosphor-icons/react";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
 import { format } from "date-fns";
@@ -367,7 +368,7 @@ export function PartialPaymentDialog({
                 </>
               ) : (
                 <>
-                  <Check className="size-4" />
+                  <Check weight="bold" className="size-4" />
                   Record Payment
                 </>
               )}

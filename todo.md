@@ -1704,3 +1704,15 @@
 - [x] Evaluate visual consistency with SleekInvoices brand
 - [x] Check licensing for commercial use
 - [x] Create recommendation document (docs/ICON_LIBRARY_RECOMMENDATIONS.md)
+
+
+## Phosphor Icons Implementation
+- [x] Install @phosphor-icons/react package
+- [x] Replace primary action button icons with Bold weight variants
+- [x] Update "New Invoice" button icon (Dashboard, Navigation)
+- [x] Update "Save" button icons (SleekTemplateEditor, TemplateEditor)
+- [x] Update "Create/Update Client" button icon (ClientDialog)
+- [x] Update "Record Payment" button icon (PartialPaymentDialog)
+- [x] Update "Add Expense" button icon (BillableExpenseDialog)
+- [x] Update "Import Clients" button icon (CSVImportDialog)
+- [x] Update "Export" button icon (InvoiceExportDialog)

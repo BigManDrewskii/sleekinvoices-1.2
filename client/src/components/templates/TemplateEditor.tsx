@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import { ArrowLeft, Save, Loader2, Upload, X } from "lucide-react";
+import { ArrowLeft, Loader2, Upload, X } from "lucide-react";
+import { FloppyDisk } from "@phosphor-icons/react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -277,7 +278,7 @@ export function TemplateEditor({ templateId, onComplete, onCancel }: TemplateEdi
                 </>
               ) : (
                 <>
-                  <Save className="h-3.5 w-3.5 mr-1.5" />
+                  <FloppyDisk weight="bold" className="h-3.5 w-3.5 mr-1.5" />
                   Save Template
                 </>
               )}

@@ -6,7 +6,8 @@ import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Upload, FileText, AlertCircle, CheckCircle2, Download, X, Loader2, FileUp } from "lucide-react";
+import { FileText, AlertCircle, CheckCircle2, Download, X, Loader2, FileUp, Upload as LucideUpload } from "lucide-react";
+import { Upload } from "@phosphor-icons/react";
 import { trpc } from "@/lib/trpc";
 import { parseCSV, generateSampleCSV, type ParseResult, type ParsedClient } from "../../../../shared/csv-parser";
 import { toast } from "sonner";
@@ -122,7 +123,7 @@ export function CSVImportDialog({ open, onOpenChange, onSuccess }: CSVImportDial
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
       >
-        <Upload className="h-10 w-10 mx-auto text-muted-foreground mb-4" />
+        <LucideUpload className="h-10 w-10 mx-auto text-muted-foreground mb-4" />
         <p className="text-sm text-muted-foreground mb-2">
           Drag and drop your CSV file here, or
         </p>
@@ -360,7 +361,7 @@ export function CSVImportDialog({ open, onOpenChange, onSuccess }: CSVImportDial
                 onClick={handleImport}
                 disabled={!parseResult || parseResult.clients.length === 0}
               >
-                <Upload className="size-4" />
+                <Upload weight="bold" className="size-4" />
                 Import {parseResult?.clients.length || 0} Clients
               </Button>
             </>

@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
-import { ArrowLeft, Save, Loader2, Upload, X, RotateCcw } from "lucide-react";
+import { ArrowLeft, Loader2, Upload, X, RotateCcw } from "lucide-react";
+import { FloppyDisk } from "@phosphor-icons/react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -213,7 +214,7 @@ export function SleekTemplateEditor({ templateId, onComplete, onCancel }: SleekT
               {isSaving ? (
                 <Loader2 className="h-4 w-4 mr-2 animate-spin" />
               ) : (
-                <Save className="h-4 w-4 mr-2" />
+                <FloppyDisk weight="bold" className="h-4 w-4 mr-2" />
               )}
               Save Template
             </Button>

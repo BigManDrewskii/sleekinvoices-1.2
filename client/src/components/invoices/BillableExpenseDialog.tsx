@@ -4,7 +4,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { trpc } from "@/lib/trpc";
 import { useState } from "react";
 import { toast } from "sonner";
-import { Receipt, Loader2, Plus, Check } from "lucide-react";
+import { Receipt, Loader2, Check } from "lucide-react";
+import { Plus } from "@phosphor-icons/react";
 
 interface BillableExpense {
   id: number;
@@ -190,12 +191,12 @@ export function BillableExpenseDialog({
           >
             {selectedExpenseIds.size > 0 ? (
               <>
-                <Plus className="size-4" />
+                <Plus weight="bold" className="size-4" />
                 Add {selectedExpenseIds.size} Expense(s)
               </>
             ) : (
               <>
-                <Plus className="size-4" />
+                <Plus weight="bold" className="size-4" />
                 Add Expense(s)
               </>
             )}

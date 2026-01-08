@@ -27,7 +27,6 @@ import {
   User, 
   Settings, 
   LogOut, 
-  Plus,
   FileText,
   X,
   FileCheck,
@@ -43,6 +42,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import { Link, useLocation } from "wouter";
+import { Plus } from "@phosphor-icons/react";
 import { useState, useEffect, useCallback } from "react";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
@@ -139,7 +139,7 @@ export function Navigation() {
           variant="outline"
           className="h-10 min-w-[44px] gap-1.5 px-3 group relative overflow-hidden border-primary/50 hover:border-primary hover:bg-primary/10 text-primary transition-all duration-200"
         >
-          <Plus className="h-4 w-4 transition-transform duration-200 group-hover:rotate-90" />
+          <Plus weight="bold" className="h-4 w-4 transition-transform duration-200 group-hover:rotate-90" />
           <span className="hidden sm:inline">New</span>
         </Button>
       </DropdownMenuTrigger>

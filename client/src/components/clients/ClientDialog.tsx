@@ -14,7 +14,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { trpc } from "@/lib/trpc";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
-import { Check, X, Loader2, Shield, UserPlus, User, Mail, Phone, MapPin, Building2, FileText } from "lucide-react";
+import { X, Loader2, Shield, UserPlus, User, Mail, Phone, MapPin, Building2, FileText, Check as LucideCheck } from "lucide-react";
+import { Check } from "@phosphor-icons/react";
 
 interface Client {
   id: number;
@@ -265,7 +266,7 @@ export function ClientDialog({ open, onOpenChange, client, onSuccess }: ClientDi
       case 'validating':
         return <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />;
       case 'valid':
-        return <Check className="h-4 w-4 text-green-500" />;
+        return <LucideCheck className="h-4 w-4 text-green-500" />;
       case 'invalid':
         return <X className="h-4 w-4 text-red-500" />;
       default:
@@ -460,7 +461,7 @@ export function ClientDialog({ open, onOpenChange, client, onSuccess }: ClientDi
                 </>
               ) : (
                 <>
-                  <Check className="size-4" />
+                  <Check weight="bold" className="size-4" />
                   {client ? "Update Client" : "Create Client"}
                 </>
               )}

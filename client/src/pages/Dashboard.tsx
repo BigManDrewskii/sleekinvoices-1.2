@@ -4,7 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { getLoginUrl } from "@/const";
 import { trpc } from "@/lib/trpc";
-import { DollarSign, FileText, TrendingUp, TrendingDown, AlertCircle, Plus, ArrowUpRight, ArrowDownRight, Sparkles, ChevronDown, Wand2, ClipboardList } from "lucide-react";
+import { DollarSign, FileText, TrendingUp, TrendingDown, AlertCircle, ArrowUpRight, ArrowDownRight, Sparkles, ChevronDown, Wand2, ClipboardList } from "lucide-react";
+import { Plus } from "@phosphor-icons/react";
 import {
   Dialog,
   DialogContent,
@@ -71,7 +72,7 @@ export default function Dashboard() {
               <Dialog>
                 <DialogTrigger asChild>
                   <Button className="touch-target gap-2">
-                    <Plus className="h-4 w-4" />
+                    <Plus weight="bold" className="h-4 w-4" />
                     <span className="hidden sm:inline">New Invoice</span>
                     <span className="sm:hidden">New</span>
                   </Button>

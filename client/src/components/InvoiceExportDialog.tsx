@@ -10,7 +10,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Loader2, FileSpreadsheet, FileText, Download } from "lucide-react";
+import { Loader2, FileSpreadsheet, FileText } from "lucide-react";
+import { Download } from "@phosphor-icons/react";
 import { formatCurrency, formatDateShort } from "@/lib/utils";
 
 interface Invoice {
@@ -228,7 +229,7 @@ export function InvoiceExportDialog({
               </>
             ) : (
               <>
-                <Download className="h-4 w-4 mr-2" />
+                <Download weight="bold" className="h-4 w-4 mr-2" />
                 Export {exportFormat.toUpperCase()}
               </>
             )}
