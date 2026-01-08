@@ -10,16 +10,18 @@ import {
   Download,
   DollarSign,
   Clock,
-  AlertTriangle
+  AlertTriangle,
+  BarChart3
 } from "lucide-react";
 import { useState } from "react";
 import {
-  AreaChart,
-  Area,
+  BarChart,
+  Bar,
   XAxis,
   YAxis,
   Tooltip,
   ResponsiveContainer,
+  Cell,
 } from "recharts";
 import { Navigation } from "@/components/Navigation";
 import { AnalyticsPageSkeleton } from "@/components/skeletons";
@@ -116,7 +118,7 @@ export default function Analytics() {
       (agingReport.days_90_plus?.count || 0)
     : 0;
 
-  // Format chart data
+  // Format chart data - use bar chart for better visibility
   const chartData = monthlyRevenue.map((item: { month: string; revenue: string | number }) => ({
     date: new Date(item.month).toLocaleDateString("en-US", { month: "short", day: "numeric" }),
     revenue: parseFloat(item.revenue?.toString() || "0"),
@@ -129,13 +131,13 @@ export default function Analytics() {
     "1y": "1Y",
   };
 
-  // Custom tooltip
+  // Custom tooltip with better styling
   const CustomTooltip = ({ active, payload, label }: { active?: boolean; payload?: Array<{ value: number }>; label?: string }) => {
     if (active && payload && payload.length) {
       return (
-        <div className="bg-card border border-border rounded-lg px-3 py-2 shadow-lg">
-          <p className="text-xs text-muted-foreground">{label}</p>
-          <p className="text-sm font-semibold text-foreground">
+        <div className="bg-card border border-border rounded-lg px-4 py-3 shadow-xl">
+          <p className="text-xs text-muted-foreground mb-1">{label}</p>
+          <p className="text-lg font-bold text-primary">
             {formatCurrency(payload[0].value)}
           </p>
         </div>
@@ -143,6 +145,9 @@ export default function Analytics() {
     }
     return null;
   };
+
+  // Calculate max revenue for chart scaling
+  const maxRevenue = Math.max(...chartData.map(d => d.revenue), 1);
 
   return (
     <div className="min-h-screen bg-background">
@@ -246,53 +251,76 @@ export default function Analytics() {
           </Card>
         </div>
 
-        {/* Revenue Chart */}
+        {/* Revenue Chart - Using Bar Chart for better visibility */}
         <Card className="mb-6">
           <CardContent className="p-6">
             <div className="flex items-center justify-between mb-6">
-              <div>
-                <h3 className="text-lg font-semibold text-foreground">Revenue Trend</h3>
-                <p className="text-sm text-muted-foreground">Income over time</p>
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-primary/10 rounded-lg">
+                  <BarChart3 className="h-5 w-5 text-primary" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-foreground">Revenue Trend</h3>
+                  <p className="text-sm text-muted-foreground">Income over time</p>
+                </div>
               </div>
+              {chartData.length > 0 && (
+                <div className="text-right">
+                  <p className="text-2xl font-bold text-primary">{formatCurrency(revenueNum)}</p>
+                  <p className="text-xs text-muted-foreground">Total for period</p>
+                </div>
+              )}
             </div>
             
-            <div className="h-[280px]">
+            <div className="h-[300px]">
               {chartData.length > 0 ? (
                 <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={chartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                  <BarChart data={chartData} margin={{ top: 20, right: 20, left: 20, bottom: 20 }}>
                     <defs>
-                      <linearGradient id="revenueGradient" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor="#6695ff" stopOpacity={0.3} />
-                        <stop offset="100%" stopColor="#6695ff" stopOpacity={0} />
+                      <linearGradient id="barGradient" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="#6695ff" stopOpacity={1} />
+                        <stop offset="100%" stopColor="#4f7df5" stopOpacity={0.8} />
                       </linearGradient>
                     </defs>
                     <XAxis 
                       dataKey="date" 
                       axisLine={false}
                       tickLine={false}
-                      tick={{ fill: '#64748b', fontSize: 12 }}
+                      tick={{ fill: '#94a3b8', fontSize: 12 }}
                       dy={10}
                     />
                     <YAxis 
                       axisLine={false}
                       tickLine={false}
-                      tick={{ fill: '#64748b', fontSize: 12 }}
-                      tickFormatter={(value) => `$${(value / 1000).toFixed(0)}k`}
+                      tick={{ fill: '#94a3b8', fontSize: 12 }}
+                      tickFormatter={(value) => value >= 1000 ? `$${(value / 1000).toFixed(0)}k` : `$${value}`}
                       dx={-10}
+                      domain={[0, maxRevenue * 1.2]}
                     />
-                    <Tooltip content={<CustomTooltip />} />
-                    <Area
-                      type="monotone"
-                      dataKey="revenue"
-                      stroke="#6695ff"
-                      strokeWidth={2}
-                      fill="url(#revenueGradient)"
+                    <Tooltip 
+                      content={<CustomTooltip />} 
+                      cursor={{ fill: 'rgba(102, 149, 255, 0.1)', radius: 4 }}
                     />
-                  </AreaChart>
+                    <Bar 
+                      dataKey="revenue" 
+                      radius={[6, 6, 0, 0]}
+                      maxBarSize={80}
+                    >
+                      {chartData.map((_, index) => (
+                        <Cell 
+                          key={`cell-${index}`} 
+                          fill="url(#barGradient)"
+                          className="hover:opacity-80 transition-opacity cursor-pointer"
+                        />
+                      ))}
+                    </Bar>
+                  </BarChart>
                 </ResponsiveContainer>
               ) : (
-                <div className="h-full flex items-center justify-center text-muted-foreground">
-                  No revenue data for this period
+                <div className="h-full flex flex-col items-center justify-center text-muted-foreground">
+                  <BarChart3 className="h-12 w-12 mb-3 opacity-30" />
+                  <p className="text-sm">No revenue data for this period</p>
+                  <p className="text-xs mt-1">Create invoices to see your revenue trend</p>
                 </div>
               )}
             </div>
@@ -301,81 +329,111 @@ export default function Analytics() {
 
         {/* Secondary Metrics */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-          <Card>
-            <CardContent className="p-4">
-              <p className="text-xs text-muted-foreground mb-1">Total Invoices</p>
-              <p className="text-2xl font-bold text-foreground">{totalInvoices}</p>
+          <Card className="hover:border-primary/30 transition-colors">
+            <CardContent className="p-5">
+              <p className="text-xs text-muted-foreground mb-2 uppercase tracking-wide">Total Invoices</p>
+              <p className="text-3xl font-bold text-foreground">{totalInvoices}</p>
             </CardContent>
           </Card>
           
-          <Card>
-            <CardContent className="p-4">
-              <p className="text-xs text-muted-foreground mb-1">Paid Invoices</p>
-              <p className="text-2xl font-bold text-green-500">{paidInvoices}</p>
+          <Card className="hover:border-green-500/30 transition-colors">
+            <CardContent className="p-5">
+              <p className="text-xs text-muted-foreground mb-2 uppercase tracking-wide">Paid Invoices</p>
+              <p className="text-3xl font-bold text-green-500">{paidInvoices}</p>
             </CardContent>
           </Card>
           
-          <Card>
-            <CardContent className="p-4">
-              <p className="text-xs text-muted-foreground mb-1">Collection Rate</p>
-              <p className="text-2xl font-bold text-foreground">{collectionRate}%</p>
+          <Card className="hover:border-primary/30 transition-colors">
+            <CardContent className="p-5">
+              <p className="text-xs text-muted-foreground mb-2 uppercase tracking-wide">Collection Rate</p>
+              <p className="text-3xl font-bold text-foreground">{collectionRate}%</p>
             </CardContent>
           </Card>
           
-          <Card>
-            <CardContent className="p-4">
-              <p className="text-xs text-muted-foreground mb-1">Avg Days to Pay</p>
-              <p className="text-2xl font-bold text-foreground">{dso}</p>
+          <Card className="hover:border-primary/30 transition-colors">
+            <CardContent className="p-5">
+              <p className="text-xs text-muted-foreground mb-2 uppercase tracking-wide">Avg Days to Pay</p>
+              <p className="text-3xl font-bold text-foreground">{dso}</p>
             </CardContent>
           </Card>
         </div>
 
-        {/* Aging Breakdown */}
-        {agingReport && (
-          <Card>
-            <CardContent className="p-6">
-              <div className="mb-6">
+        {/* Receivables Aging */}
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="p-2 bg-amber-500/10 rounded-lg">
+                <Clock className="h-5 w-5 text-amber-500" />
+              </div>
+              <div>
                 <h3 className="text-lg font-semibold text-foreground">Receivables Aging</h3>
                 <p className="text-sm text-muted-foreground">Outstanding invoices by age</p>
               </div>
-              
-              <div className="space-y-4">
-                {[
-                  { label: "Current", amount: agingReport.current?.amount, count: agingReport.current?.count, color: "bg-green-500" },
-                  { label: "1-30 Days", amount: agingReport.days_0_30?.amount, count: agingReport.days_0_30?.count, color: "bg-amber-500" },
-                  { label: "31-60 Days", amount: agingReport.days_31_60?.amount, count: agingReport.days_31_60?.count, color: "bg-orange-500" },
-                  { label: "61-90 Days", amount: agingReport.days_61_90?.amount, count: agingReport.days_61_90?.count, color: "bg-red-400" },
-                  { label: "90+ Days", amount: agingReport.days_90_plus?.amount, count: agingReport.days_90_plus?.count, color: "bg-red-600" },
-                ].map((bucket) => {
-                  const amount = parseFloat(bucket.amount?.toString() || "0");
-                  const count = bucket.count || 0;
-                  const total = outstandingNum || 1;
-                  const percentage = total > 0 ? (amount / total) * 100 : 0;
-                  
-                  return (
-                    <div key={bucket.label} className="flex items-center gap-4">
-                      <div className="w-24 text-sm text-muted-foreground">{bucket.label}</div>
-                      <div className="flex-1">
-                        <div className="h-2 bg-muted rounded-full overflow-hidden">
-                          <div 
-                            className={`h-full ${bucket.color} rounded-full transition-all`}
-                            style={{ width: `${Math.max(percentage, amount > 0 ? 2 : 0)}%` }}
-                          />
-                        </div>
-                      </div>
-                      <div className="w-28 text-right">
-                        <span className="text-sm font-medium text-foreground">{formatCurrency(amount)}</span>
-                      </div>
-                      <div className="w-20 text-right text-xs text-muted-foreground">
-                        {count} inv
+            </div>
+            
+            <div className="space-y-4">
+              {[
+                { 
+                  label: "Current", 
+                  amount: agingReport?.current?.amount || 0, 
+                  count: agingReport?.current?.count || 0,
+                  color: "bg-green-500",
+                  bgColor: "bg-green-500/20"
+                },
+                { 
+                  label: "1-30 Days", 
+                  amount: agingReport?.days_0_30?.amount || 0, 
+                  count: agingReport?.days_0_30?.count || 0,
+                  color: "bg-amber-500",
+                  bgColor: "bg-amber-500/20"
+                },
+                { 
+                  label: "31-60 Days", 
+                  amount: agingReport?.days_31_60?.amount || 0, 
+                  count: agingReport?.days_31_60?.count || 0,
+                  color: "bg-orange-500",
+                  bgColor: "bg-orange-500/20"
+                },
+                { 
+                  label: "61-90 Days", 
+                  amount: agingReport?.days_61_90?.amount || 0, 
+                  count: agingReport?.days_61_90?.count || 0,
+                  color: "bg-red-400",
+                  bgColor: "bg-red-400/20"
+                },
+                { 
+                  label: "90+ Days", 
+                  amount: agingReport?.days_90_plus?.amount || 0, 
+                  count: agingReport?.days_90_plus?.count || 0,
+                  color: "bg-red-600",
+                  bgColor: "bg-red-600/20"
+                },
+              ].map((bucket) => {
+                const amount = parseFloat(bucket.amount?.toString() || "0");
+                const totalOutstanding = outstandingNum || 1;
+                const percentage = totalOutstanding > 0 ? (amount / totalOutstanding) * 100 : 0;
+                
+                return (
+                  <div key={bucket.label} className="group">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-sm font-medium text-foreground">{bucket.label}</span>
+                      <div className="flex items-center gap-3">
+                        <span className="text-sm font-semibold text-foreground">{formatCurrency(amount)}</span>
+                        <span className="text-xs text-muted-foreground w-16 text-right">{bucket.count} inv</span>
                       </div>
                     </div>
-                  );
-                })}
-              </div>
-            </CardContent>
-          </Card>
-        )}
+                    <div className={`h-3 ${bucket.bgColor} rounded-full overflow-hidden`}>
+                      <div 
+                        className={`h-full ${bucket.color} rounded-full transition-all duration-500 group-hover:opacity-80`}
+                        style={{ width: `${Math.max(percentage, amount > 0 ? 2 : 0)}%` }}
+                      />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

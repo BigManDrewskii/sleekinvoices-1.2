@@ -1560,3 +1560,17 @@
 - [x] Show export progress for large datasets
 - [x] Write tests for export functionality (included in UI component)
 
+
+
+## Analytics Chart Fix
+
+### Issues Reported
+- [ ] Revenue chart is not visible
+- [ ] Chart UX is not user-friendly
+
+### Fixes Needed
+- [ ] Investigate why chart is not rendering properly
+- [ ] Add proper chart container with fixed height
+- [ ] Improve chart styling and colors
+- [ ] Add chart legend and tooltips
+- [ ] Ensure chart data is properly formatted
