@@ -3,7 +3,8 @@ import { useLocation } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { CheckCircle2, XCircle, Loader2 } from "lucide-react";
+import { CheckCircle2, XCircle } from "lucide-react";
+import { GearLoader } from "@/components/ui/gear-loader";
 
 export default function QuickBooksCallback() {
   const [, setLocation] = useLocation();
@@ -38,7 +39,11 @@ export default function QuickBooksCallback() {
           <CardDescription>{status === "loading" ? "Please wait while we complete the connection" : status === "success" ? "Your QuickBooks account has been connected" : "There was a problem connecting your account"}</CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col items-center gap-4">
-          {status === "loading" && <Loader2 className="h-12 w-12 animate-spin text-primary" />}
+          {status === "loading" && (
+            <div className="opacity-70">
+              <GearLoader size="sm" />
+            </div>
+          )}
           {status === "success" && <><CheckCircle2 className="h-12 w-12 text-green-600" /><p className="text-sm text-muted-foreground">Redirecting to settings...</p></>}
           {status === "error" && <><XCircle className="h-12 w-12 text-red-600" /><p className="text-sm text-red-600 text-center">{errorMessage}</p><Button onClick={() => setLocation("/settings")}>Back to Settings</Button></>}
         </CardContent>

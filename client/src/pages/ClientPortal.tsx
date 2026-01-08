@@ -5,7 +5,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/shared/StatusBadge";
 import { formatCurrency, formatDate } from "@/lib/utils";
-import { ExternalLink, Loader2, Bitcoin } from "lucide-react";
+import { ExternalLink, Bitcoin } from "lucide-react";
+import { GearLoader } from "@/components/ui/gear-loader";
 
 /**
  * Public client portal - no authentication required
@@ -50,8 +51,10 @@ export default function ClientPortal() {
   
   if (clientLoading || invoicesLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="opacity-70">
+          <GearLoader size="md" />
+        </div>
       </div>
     );
   }

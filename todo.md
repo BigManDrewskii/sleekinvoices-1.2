@@ -1302,3 +1302,17 @@
 ### Phase 3: Landing Page Integration
 - [x] Add Terms link to landing page footer
 - [x] Add Privacy link to landing page footer
+
+
+## Bug Fixes - January 2026
+
+### QuickBooks Redirect URI Fix
+- [x] Check current QUICKBOOKS_REDIRECT_URI value (https://sleekinvoices.com/quickbooks/callback)
+- [x] User added redirect URI to Intuit Developer Portal
+- [x] OAuth flow working after fix
+
+### Loading Spinner Standardization
+- [x] Find all instances of old crescent-style spinner (13 pages)
+- [x] Replace with new GearLoader cog animation component
+- [x] Lower opacity to 70% on all full-page loading screens
+- [x] Small inline button spinners kept as-is (appropriate for button states)

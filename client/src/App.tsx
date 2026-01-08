@@ -51,7 +51,7 @@ import { GearLoader } from "@/components/ui/gear-loader";
 function LoadingFallback() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-background">
-      <div className="flex flex-col items-center gap-6">
+      <div className="flex flex-col items-center gap-6 opacity-70">
         <GearLoader size="lg" />
         <p className="text-sm text-muted-foreground animate-pulse">Loading...</p>
       </div>
