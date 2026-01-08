@@ -43,6 +43,7 @@ import {
 } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import { Plus } from "@phosphor-icons/react";
+import { NavigationIcon } from "@/components/NavigationIcon";
 import { useState, useEffect, useCallback } from "react";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
@@ -225,7 +226,7 @@ export function Navigation() {
             : "text-muted-foreground hover:bg-accent/50 hover:text-foreground"
         )}
       >
-        <LayoutDashboard className="h-4 w-4" />
+        <NavigationIcon icon={LayoutDashboard} isActive={isActive("/dashboard")} className="h-4 w-4" />
         <span>Dashboard</span>
       </Link>
       
@@ -239,7 +240,7 @@ export function Navigation() {
                 : "text-muted-foreground hover:bg-accent/50 hover:text-foreground"
             )}
           >
-            <FileText className="h-4 w-4" />
+            <NavigationIcon icon={FileText} isActive={isGroupActive(navigationConfig.billing.items)} className="h-4 w-4" />
             <span>Billing</span>
             <ChevronDown className="h-3 w-3 opacity-60" />
           </button>
@@ -248,7 +249,7 @@ export function Navigation() {
           {navigationConfig.billing.items.map((item) => (
             <DropdownMenuItem key={item.href} asChild>
               <Link href={item.href} className="flex items-center gap-2">
-                <item.icon className="h-4 w-4" />
+                <NavigationIcon icon={item.icon} isActive={isActive(item.href)} className="h-4 w-4" />
                 {item.label}
               </Link>
             </DropdownMenuItem>
@@ -265,7 +266,7 @@ export function Navigation() {
             : "text-muted-foreground hover:bg-accent/50 hover:text-foreground"
         )}
       >
-        <Users className="h-4 w-4" />
+        <NavigationIcon icon={Users} isActive={isActive("/clients")} className="h-4 w-4" />
         <span>Clients</span>
       </Link>
       
@@ -279,7 +280,7 @@ export function Navigation() {
                 : "text-muted-foreground hover:bg-accent/50 hover:text-foreground"
             )}
           >
-            <BarChart3 className="h-4 w-4" />
+            <NavigationIcon icon={BarChart3} isActive={isGroupActive(navigationConfig.finances.items)} className="h-4 w-4" />
             <span>Finances</span>
             <ChevronDown className="h-3 w-3 opacity-60" />
           </button>
@@ -288,7 +289,7 @@ export function Navigation() {
           {navigationConfig.finances.items.map((item) => (
             <DropdownMenuItem key={item.href} asChild>
               <Link href={item.href} className="flex items-center gap-2">
-                <item.icon className="h-4 w-4" />
+                <NavigationIcon icon={item.icon} isActive={isActive(item.href)} className="h-4 w-4" />
                 {item.label}
               </Link>
             </DropdownMenuItem>
@@ -305,7 +306,7 @@ export function Navigation() {
             : "text-muted-foreground hover:bg-accent/50 hover:text-foreground"
         )}
       >
-        <LayoutTemplate className="h-4 w-4" />
+        <NavigationIcon icon={LayoutTemplate} isActive={isActive("/templates")} className="h-4 w-4" />
         <span>Templates</span>
       </Link>
     </div>
@@ -374,7 +375,7 @@ export function Navigation() {
                             ? "bg-primary text-primary-foreground" 
                             : "bg-muted text-muted-foreground group-hover:bg-primary/10 group-hover:text-primary"
                         )}>
-                          <item.icon className="h-4 w-4" />
+                          <NavigationIcon icon={item.icon} isActive={isActive(item.href)} className="h-4 w-4" />
                         </div>
                         <div className="flex-1">
                           <div className="text-sm font-medium leading-none mb-1">{item.label}</div>
@@ -450,7 +451,7 @@ export function Navigation() {
                             ? "bg-primary text-primary-foreground" 
                             : "bg-muted text-muted-foreground group-hover:bg-primary/10 group-hover:text-primary"
                         )}>
-                          <item.icon className="h-4 w-4" />
+                          <NavigationIcon icon={item.icon} isActive={isActive(item.href)} className="h-4 w-4" />
                         </div>
                         <div className="flex-1">
                           <div className="text-sm font-medium leading-none mb-1">{item.label}</div>
@@ -512,7 +513,7 @@ export function Navigation() {
           )}
           onClick={() => setMobileMenuOpen(false)}
         >
-          <LayoutDashboard className="h-5 w-5" />
+          <NavigationIcon icon={LayoutDashboard} isActive={isActive("/dashboard")} className="h-5 w-5" />
           Dashboard
         </Link>
 
@@ -530,7 +531,7 @@ export function Navigation() {
             aria-controls="billing-submenu"
           >
             <span className="flex items-center gap-3">
-              <FileText className="h-5 w-5" />
+              <NavigationIcon icon={FileText} isActive={isGroupActive(navigationConfig.billing.items)} className="h-5 w-5" />
               Billing
             </span>
             <ChevronDown className={cn(
@@ -562,7 +563,7 @@ export function Navigation() {
                 }}
                 onClick={() => setMobileMenuOpen(false)}
               >
-                <item.icon className="h-4 w-4" />
+                <NavigationIcon icon={item.icon} isActive={isActive(item.href)} className="h-4 w-4" />
                 {item.label}
               </Link>
             ))}
@@ -580,7 +581,7 @@ export function Navigation() {
           )}
           onClick={() => setMobileMenuOpen(false)}
         >
-          <Users className="h-5 w-5" />
+          <NavigationIcon icon={Users} isActive={isActive("/clients")} className="h-5 w-5" />
           Clients
         </Link>
 
@@ -598,7 +599,7 @@ export function Navigation() {
             aria-controls="finances-submenu"
           >
             <span className="flex items-center gap-3">
-              <BarChart3 className="h-5 w-5" />
+              <NavigationIcon icon={BarChart3} isActive={isGroupActive(navigationConfig.finances.items)} className="h-5 w-5" />
               Finances
             </span>
             <ChevronDown className={cn(
@@ -630,7 +631,7 @@ export function Navigation() {
                 }}
                 onClick={() => setMobileMenuOpen(false)}
               >
-                <item.icon className="h-4 w-4" />
+                <NavigationIcon icon={item.icon} isActive={isActive(item.href)} className="h-4 w-4" />
                 {item.label}
               </Link>
             ))}
@@ -648,7 +649,7 @@ export function Navigation() {
           )}
           onClick={() => setMobileMenuOpen(false)}
         >
-          <LayoutTemplate className="h-5 w-5" />
+          <NavigationIcon icon={LayoutTemplate} isActive={isActive("/templates")} className="h-5 w-5" />
           Templates
         </Link>
       </div>

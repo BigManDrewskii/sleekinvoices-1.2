@@ -1716,3 +1716,14 @@
 - [x] Update "Add Expense" button icon (BillableExpenseDialog)
 - [x] Update "Import Clients" button icon (CSVImportDialog)
 - [x] Update "Export" button icon (InvoiceExportDialog)
+
+
+## Phosphor Icons Fill Weight for Active States
+- [x] Identify all active/selected state patterns in the codebase
+- [x] Create NavigationIcon component for automatic weight switching
+- [x] Update Navigation component icons to use Fill for active states
+  - [x] Desktop navigation dropdown items
+  - [x] Tablet navigation items and dropdowns
+  - [x] Mobile menu items and submenus
+- [x] Update sidebar/menu icons with Fill for selected items (N/A - no sidebar in current design)
+- [x] Update tab components with Fill for active tabs (N/A - tabs use text styling)
