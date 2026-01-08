@@ -299,6 +299,7 @@
 - [x] Show placeholder variables as clickable chips organized by category
 - [x] Include Preview tab with live sample data
 - [x] Keep Edit tab for template customization
+- [x] Fix HTML template preview to properly render in iframe with sample data
 
 #### 13. Client Avatars
 - [ ] Generate initials-based avatars
@@ -1602,14 +1603,15 @@
 ## Priority Improvements (Based on Competitive Analysis - Jan 2026)
 
 ### Immediate Priority - UX Polish (Email Template Editor Redesign)
-- [ ] Create EmailTemplateEditor component with visual variable insertion
-- [ ] Add clickable variable chips/buttons for easy insertion
-- [ ] Implement live preview panel showing email with sample data
-- [ ] Create pre-built email template library (Invoice Sent, Payment Reminder, Thank You, Overdue Notice)
-- [ ] Add template selector dropdown
-- [ ] Simplify interface - no HTML knowledge required
-- [ ] Update Settings page to use new editor
+- [x] Create EmailTemplateEditor component with visual variable insertion
+- [x] Add clickable variable chips/buttons for easy insertion
+- [x] Implement live preview panel showing email with sample data
+- [x] Create pre-built email template library (Invoice Sent, Payment Reminder, Thank You, Overdue Notice)
+- [x] Add template selector dropdown
+- [x] Simplify interface - no HTML knowledge required
+- [x] Update Settings page to use new editor
 - [ ] Write tests for new email template editor
+- [ ] Fix email template preview to properly render HTML templates with sample data
 
 ### Short-Term - Feature Gaps
 - [ ] Add time tracking feature

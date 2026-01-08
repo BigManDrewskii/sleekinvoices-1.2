@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
@@ -10,8 +10,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
 import { 
   Mail, 
   Eye, 
@@ -167,42 +165,42 @@ export function EmailTemplateEditor({
 }: EmailTemplateEditorProps) {
   const [selectedTemplate, setSelectedTemplate] = useState<string>("custom");
   const [activeTab, setActiveTab] = useState<string>("edit");
-  const [cursorPosition, setCursorPosition] = useState<number>(0);
+  const iframeRef = useRef<HTMLIFrameElement>(null);
 
-  // Parse the template to highlight variables
-  const highlightedContent = useMemo(() => {
-    if (!value) return "";
-    
-    let html = value
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;");
-    
-    // Highlight valid variables
-    const validKeys = EMAIL_VARIABLES.map(v => v.key);
-    html = html.replace(/\{\{(\w+)\}\}/g, (match, key) => {
-      const isValid = validKeys.includes(key);
-      if (isValid) {
-        return `<span class="inline-flex items-center px-1.5 py-0.5 rounded bg-primary/20 text-primary text-sm font-medium">${match}</span>`;
-      }
-      return `<span class="inline-flex items-center px-1.5 py-0.5 rounded bg-destructive/20 text-destructive text-sm font-medium">${match}</span>`;
-    });
-    
-    html = html.replace(/\n/g, "<br>");
-    return html;
+  // Check if the template is HTML
+  const isHtmlTemplate = useMemo(() => {
+    if (!value) return false;
+    return value.includes("<!DOCTYPE") || value.includes("<html") || value.includes("<body");
   }, [value]);
 
-  // Generate preview with sample values
+  // Replace variables with sample values
+  const replaceVariables = (content: string): string => {
+    let result = content;
+    for (const variable of EMAIL_VARIABLES) {
+      const regex = new RegExp(`\\{\\{${variable.key}\\}\\}`, "g");
+      result = result.replace(regex, variable.sampleValue);
+    }
+    return result;
+  };
+
+  // Generate preview content for plain text templates
   const previewContent = useMemo(() => {
     if (!value) return "<p class='text-muted-foreground italic'>No content yet. Select a template or start typing.</p>";
     
+    if (isHtmlTemplate) {
+      // For HTML templates, we'll use an iframe
+      return "";
+    }
+    
     let preview = value;
     
+    // Replace variables with highlighted sample values
     for (const variable of EMAIL_VARIABLES) {
       const regex = new RegExp(`\\{\\{${variable.key}\\}\\}`, "g");
       preview = preview.replace(regex, `<span class="font-semibold text-primary">${variable.sampleValue}</span>`);
     }
     
+    // Escape HTML but preserve our spans
     preview = preview
       .replace(/&/g, "&amp;")
       .replace(/<(?!span|\/span|br)/g, "&lt;")
@@ -210,7 +208,13 @@ export function EmailTemplateEditor({
       .replace(/\n/g, "<br>");
     
     return preview;
-  }, [value]);
+  }, [value, isHtmlTemplate]);
+
+  // Generate HTML content for iframe preview
+  const iframeContent = useMemo(() => {
+    if (!isHtmlTemplate || !value) return "";
+    return replaceVariables(value);
+  }, [value, isHtmlTemplate]);
 
   // Insert variable at cursor position
   const insertVariable = (variableKey: string) => {
@@ -420,10 +424,23 @@ export function EmailTemplateEditor({
               </div>
               
               {/* Email Body Preview */}
-              <div 
-                className="p-6 min-h-[250px] text-sm leading-relaxed"
-                dangerouslySetInnerHTML={{ __html: previewContent }}
-              />
+              {isHtmlTemplate ? (
+                <div className="min-h-[300px] bg-white rounded-b-lg">
+                  <iframe
+                    ref={iframeRef}
+                    title="Email Preview"
+                    className="w-full min-h-[300px] border-0 rounded-b-lg"
+                    srcDoc={iframeContent}
+                    sandbox="allow-same-origin"
+                    style={{ height: "400px" }}
+                  />
+                </div>
+              ) : (
+                <div 
+                  className="p-6 min-h-[250px] text-sm leading-relaxed"
+                  dangerouslySetInnerHTML={{ __html: previewContent }}
+                />
+              )}
             </CardContent>
           </Card>
           <p className="text-xs text-muted-foreground mt-2 text-center">
