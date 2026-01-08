@@ -1625,6 +1625,7 @@ export const appRouter = router({
           return {
             enabled: true,
             intervals: [3, 7, 14],
+            emailSubject: null, // Will use default subject
             emailTemplate: null, // Will use DEFAULT_REMINDER_TEMPLATE
             ccEmail: null,
           };
@@ -1632,6 +1633,7 @@ export const appRouter = router({
         return {
           enabled: settings.enabled === 1,
           intervals: JSON.parse(settings.intervals),
+          emailSubject: settings.emailSubject,
           emailTemplate: settings.emailTemplate,
           ccEmail: settings.ccEmail,
         };
@@ -1641,6 +1643,7 @@ export const appRouter = router({
       .input(z.object({
         enabled: z.boolean(),
         intervals: z.array(z.number()),
+        emailSubject: z.string().optional(),
         emailTemplate: z.string().optional(),
         ccEmail: z.string().email().optional().nullable(),
       }))

@@ -34,6 +34,7 @@ export default function Settings() {
   // Reminder settings state
   const [reminderEnabled, setReminderEnabled] = useState(true);
   const [reminderIntervals, setReminderIntervals] = useState<number[]>([3, 7, 14]);
+  const [reminderSubject, setReminderSubject] = useState("");
   const [reminderTemplate, setReminderTemplate] = useState("");
   const [reminderCcEmail, setReminderCcEmail] = useState("");
   
@@ -66,6 +67,7 @@ export default function Settings() {
     if (reminderSettings) {
       setReminderEnabled(reminderSettings.enabled);
       setReminderIntervals(reminderSettings.intervals);
+      setReminderSubject(reminderSettings.emailSubject || "");
       setReminderTemplate(reminderSettings.emailTemplate || "");
       setReminderCcEmail(reminderSettings.ccEmail || "");
     }
@@ -106,6 +108,7 @@ export default function Settings() {
     updateReminderSettings.mutate({
       enabled: reminderEnabled,
       intervals: reminderIntervals,
+      emailSubject: reminderSubject || undefined,
       emailTemplate: reminderTemplate || undefined,
       ccEmail: reminderCcEmail || null,
     });
@@ -482,6 +485,8 @@ export default function Settings() {
                   label="Email Template"
                   value={reminderTemplate}
                   onChange={setReminderTemplate}
+                  subject={reminderSubject}
+                  onSubjectChange={setReminderSubject}
                   disabled={!reminderEnabled}
                   description="Customize the reminder email sent to clients. Choose a template to get started, then personalize it."
                 />

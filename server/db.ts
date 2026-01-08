@@ -1679,6 +1679,7 @@ export async function getReminderSettings(userId: number) {
 export async function upsertReminderSettings(userId: number, data: {
   enabled?: boolean;
   intervals?: number[];
+  emailSubject?: string;
   emailTemplate?: string;
   ccEmail?: string | null;
 }) {
@@ -1691,6 +1692,7 @@ export async function upsertReminderSettings(userId: number, data: {
     userId,
     enabled: data.enabled !== undefined ? (data.enabled ? 1 : 0) : 1,
     intervals: data.intervals ? JSON.stringify(data.intervals) : JSON.stringify([3, 7, 14]),
+    emailSubject: data.emailSubject || null,
     emailTemplate: data.emailTemplate || DEFAULT_REMINDER_TEMPLATE,
     ccEmail: data.ccEmail || null,
   };

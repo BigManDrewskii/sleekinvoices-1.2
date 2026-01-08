@@ -1621,3 +1621,10 @@
 ### Medium-Term - Differentiation
 - [ ] Enhance AI features (payment prediction, smart follow-ups)
 - [ ] Continue analytics improvements
+
+
+## Email Subject Line Preview Feature
+- [x] Add subject line input field to EmailTemplateEditor component
+- [x] Add subject line preview with variable replacement in preview mode
+- [x] Update Settings page to pass subject line value to editor
+- [x] Test subject line preview with all variable types

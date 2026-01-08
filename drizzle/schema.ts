@@ -489,6 +489,7 @@ export const reminderSettings = mysqlTable("reminderSettings", {
   userId: int("userId").notNull().unique(), // One setting per user
   enabled: int("enabled").default(1).notNull(), // 1 = enabled, 0 = disabled
   intervals: text("intervals").notNull(), // JSON array: [3, 7, 14]
+  emailSubject: varchar("emailSubject", { length: 500 }), // Customizable subject with placeholders
   emailTemplate: text("emailTemplate").notNull(), // Customizable template with placeholders
   ccEmail: varchar("ccEmail", { length: 320 }), // Optional CC address
   createdAt: timestamp("createdAt").defaultNow().notNull(),

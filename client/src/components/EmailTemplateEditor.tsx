@@ -1,6 +1,7 @@
-import { useState, useMemo, useRef, useEffect } from "react";
+import { useState, useMemo, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
@@ -149,6 +150,8 @@ Best regards,
 interface EmailTemplateEditorProps {
   value: string;
   onChange: (value: string) => void;
+  subject?: string;
+  onSubjectChange?: (value: string) => void;
   disabled?: boolean;
   label?: string;
   description?: string;
@@ -158,6 +161,8 @@ interface EmailTemplateEditorProps {
 export function EmailTemplateEditor({
   value,
   onChange,
+  subject = "",
+  onSubjectChange,
   disabled,
   label,
   description,
@@ -165,7 +170,9 @@ export function EmailTemplateEditor({
 }: EmailTemplateEditorProps) {
   const [selectedTemplate, setSelectedTemplate] = useState<string>("custom");
   const [activeTab, setActiveTab] = useState<string>("edit");
+  const [activeField, setActiveField] = useState<"subject" | "body">("body");
   const iframeRef = useRef<HTMLIFrameElement>(null);
+  const subjectInputRef = useRef<HTMLInputElement>(null);
 
   // Check if the template is HTML
   const isHtmlTemplate = useMemo(() => {
@@ -182,6 +189,12 @@ export function EmailTemplateEditor({
     }
     return result;
   };
+
+  // Generate preview subject with sample values
+  const previewSubject = useMemo(() => {
+    if (!subject) return "Payment Reminder";
+    return replaceVariables(subject);
+  }, [subject]);
 
   // Generate preview content for plain text templates
   const previewContent = useMemo(() => {
@@ -220,32 +233,58 @@ export function EmailTemplateEditor({
   const insertVariable = (variableKey: string) => {
     if (disabled) return;
     
-    const textarea = document.getElementById("email-template-textarea") as HTMLTextAreaElement;
-    if (!textarea) {
-      onChange(value + `{{${variableKey}}}`);
-      return;
-    }
-    
-    const start = textarea.selectionStart;
-    const end = textarea.selectionEnd;
     const text = `{{${variableKey}}}`;
     
-    const newValue = value.substring(0, start) + text + value.substring(end);
-    onChange(newValue);
-    
-    // Restore focus and cursor position
-    setTimeout(() => {
-      textarea.focus();
-      textarea.setSelectionRange(start + text.length, start + text.length);
-    }, 0);
+    if (activeField === "subject" && onSubjectChange) {
+      const input = subjectInputRef.current;
+      if (!input) {
+        onSubjectChange(subject + text);
+        return;
+      }
+      
+      const start = input.selectionStart || 0;
+      const end = input.selectionEnd || 0;
+      
+      const newValue = subject.substring(0, start) + text + subject.substring(end);
+      onSubjectChange(newValue);
+      
+      // Restore focus and cursor position
+      setTimeout(() => {
+        input.focus();
+        input.setSelectionRange(start + text.length, start + text.length);
+      }, 0);
+    } else {
+      const textarea = document.getElementById("email-template-textarea") as HTMLTextAreaElement;
+      if (!textarea) {
+        onChange(value + text);
+        return;
+      }
+      
+      const start = textarea.selectionStart;
+      const end = textarea.selectionEnd;
+      
+      const newValue = value.substring(0, start) + text + value.substring(end);
+      onChange(newValue);
+      
+      // Restore focus and cursor position
+      setTimeout(() => {
+        textarea.focus();
+        textarea.setSelectionRange(start + text.length, start + text.length);
+      }, 0);
+    }
   };
 
   // Load a preset template
   const loadTemplate = (templateId: string) => {
     setSelectedTemplate(templateId);
     const template = EMAIL_TEMPLATES[templateId as keyof typeof EMAIL_TEMPLATES];
-    if (template && template.body) {
-      onChange(template.body);
+    if (template) {
+      if (template.body) {
+        onChange(template.body);
+      }
+      if (template.subject && onSubjectChange) {
+        onSubjectChange(template.subject);
+      }
     }
   };
 
@@ -253,6 +292,9 @@ export function EmailTemplateEditor({
   const resetTemplate = () => {
     setSelectedTemplate("custom");
     onChange("");
+    if (onSubjectChange) {
+      onSubjectChange("");
+    }
   };
 
   // Group variables by category
@@ -307,7 +349,7 @@ export function EmailTemplateEditor({
             ))}
           </SelectContent>
         </Select>
-        {value && (
+        {(value || subject) && (
           <Button
             variant="ghost"
             size="sm"
@@ -327,6 +369,11 @@ export function EmailTemplateEditor({
           <div className="flex items-center gap-2 mb-3">
             <Mail className="h-4 w-4 text-muted-foreground" />
             <span className="text-sm font-medium">Click to insert variables:</span>
+            {onSubjectChange && (
+              <span className="text-xs text-muted-foreground ml-auto">
+                Inserting into: <span className="font-medium text-foreground">{activeField === "subject" ? "Subject" : "Body"}</span>
+              </span>
+            )}
           </div>
           <div className="space-y-3">
             {Object.entries(variablesByCategory).map(([category, variables]) => (
@@ -374,12 +421,32 @@ export function EmailTemplateEditor({
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="edit" className="mt-4">
+        <TabsContent value="edit" className="mt-4 space-y-4">
+          {/* Subject Line Input */}
+          {onSubjectChange && (
+            <div className="space-y-2">
+              <Label htmlFor="email-subject" className="text-sm font-medium">Subject Line</Label>
+              <Input
+                ref={subjectInputRef}
+                id="email-subject"
+                value={subject}
+                onChange={(e) => onSubjectChange(e.target.value)}
+                onFocus={() => setActiveField("subject")}
+                disabled={disabled}
+                placeholder="Enter email subject... e.g., Payment Reminder: Invoice {{invoiceNumber}}"
+                className="font-sans"
+              />
+            </div>
+          )}
+          
+          {/* Body Textarea */}
           <div className="relative">
+            <Label htmlFor="email-template-textarea" className="text-sm font-medium mb-2 block">Email Body</Label>
             <textarea
               id="email-template-textarea"
               value={value}
               onChange={(e) => onChange(e.target.value)}
+              onFocus={() => setActiveField("body")}
               disabled={disabled}
               rows={12}
               placeholder="Write your email template here... Use the variable buttons above to insert dynamic content."
@@ -404,7 +471,7 @@ export function EmailTemplateEditor({
             <CardContent className="p-0">
               {/* Email Header Preview */}
               <div className="border-b border-border p-4 bg-muted/30 rounded-t-lg">
-                <div className="flex items-center gap-3 mb-2">
+                <div className="flex items-center gap-3 mb-3">
                   <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center">
                     <Building2 className="h-5 w-5 text-primary" />
                   </div>
@@ -413,14 +480,10 @@ export function EmailTemplateEditor({
                     <p className="text-xs text-muted-foreground">to: john.smith@example.com</p>
                   </div>
                 </div>
-                <p className="text-sm font-medium">
-                  Subject: {selectedTemplate !== "custom" && EMAIL_TEMPLATES[selectedTemplate as keyof typeof EMAIL_TEMPLATES]?.subject 
-                    ? EMAIL_TEMPLATES[selectedTemplate as keyof typeof EMAIL_TEMPLATES].subject.replace(/\{\{(\w+)\}\}/g, (_, key) => {
-                        const variable = EMAIL_VARIABLES.find(v => v.key === key);
-                        return variable?.sampleValue || key;
-                      })
-                    : "Your Invoice"}
-                </p>
+                <div className="bg-background/50 rounded-md p-3 border border-border/50">
+                  <p className="text-xs text-muted-foreground mb-1">Subject:</p>
+                  <p className="text-sm font-medium">{previewSubject}</p>
+                </div>
               </div>
               
               {/* Email Body Preview */}
