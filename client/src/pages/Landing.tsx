@@ -27,26 +27,12 @@ export default function Landing() {
   const { isAuthenticated } = useAuth();
 
   return (
-    <div className="min-h-screen bg-[#0a0a0f]">
+    <div className="min-h-screen bg-background">
       <LandingNavigation />
 
-      {/* AND.CO Migration Banner - Refined, less obtrusive */}
-      <div className="border-b border-amber-500/10">
-        <div className="container max-w-5xl mx-auto px-4 py-2.5">
-          <div className="flex items-center justify-center gap-2 text-xs sm:text-sm">
-            <span className="text-amber-400/80">
-              AND.CO shutting down?{" "}
-              <a href={getLoginUrl()} className="text-amber-300 hover:text-amber-200 underline underline-offset-2">
-                Migrate free →
-              </a>
-            </span>
-          </div>
-        </div>
-      </div>
-
       {/* Hero Section - Clean, focused */}
-      <section className="pt-20 pb-16 md:pt-28 md:pb-24">
-        <div className="container max-w-5xl mx-auto px-4 text-center">
+      <section className="pt-28 pb-16 md:pt-36 md:pb-24">
+        <div className="container max-w-4xl mx-auto px-6 text-center">
           {/* Sleeky Mascot */}
           <div className="mb-6">
             <img
@@ -57,14 +43,14 @@ export default function Landing() {
           </div>
 
           {/* Main headline - Concise */}
-          <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-white leading-[1.1] tracking-tight mb-4">
+          <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-foreground leading-[1.1] tracking-tight mb-5">
             Invoice smarter.
             <br />
             <span className="text-primary">Get paid faster.</span>
           </h1>
 
           {/* Subheadline - One clear value prop */}
-          <p className="text-lg text-zinc-400 max-w-xl mx-auto mb-8">
+          <p className="text-lg text-muted-foreground max-w-xl mx-auto mb-10">
             Professional invoicing with Stripe, crypto payments, and QuickBooks sync. 
             Starting at $0/month.
           </p>
@@ -88,7 +74,7 @@ export default function Landing() {
           </div>
 
           {/* Trust indicators - Minimal */}
-          <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm text-zinc-500">
+          <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm text-muted-foreground">
             <span>No credit card required</span>
             <span className="hidden sm:inline">•</span>
             <span>3 free invoices/month</span>
@@ -99,19 +85,19 @@ export default function Landing() {
       </section>
 
       {/* Social Proof Bar */}
-      <section className="py-8 border-y border-white/5">
-        <div className="container max-w-5xl mx-auto px-4">
-          <div className="flex flex-wrap items-center justify-center gap-8 text-zinc-500 text-sm">
+      <section className="py-10 border-y border-border/50">
+        <div className="container max-w-4xl mx-auto px-6">
+          <div className="flex flex-wrap items-center justify-center gap-12 text-muted-foreground text-sm">
             <div className="flex items-center gap-2">
-              <span className="text-2xl font-bold text-white">1,200+</span>
+              <span className="text-2xl font-bold text-foreground">1,200+</span>
               <span>invoices sent</span>
             </div>
             <div className="flex items-center gap-2">
-              <span className="text-2xl font-bold text-white">$2M+</span>
+              <span className="text-2xl font-bold text-foreground">$2M+</span>
               <span>processed</span>
             </div>
             <div className="flex items-center gap-2">
-              <span className="text-2xl font-bold text-white">4.9★</span>
+              <span className="text-2xl font-bold text-foreground">4.9★</span>
               <span>user rating</span>
             </div>
           </div>
@@ -119,13 +105,13 @@ export default function Landing() {
       </section>
 
       {/* Features Section - Improved aesthetic */}
-      <section id="features" className="py-20 md:py-28">
-        <div className="container max-w-6xl mx-auto px-4">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-white mb-3">
+      <section id="features" className="py-20 md:py-24">
+        <div className="container max-w-4xl mx-auto px-6">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-3">
               Everything you need
             </h2>
-            <p className="text-zinc-400 max-w-lg mx-auto">
+            <p className="text-muted-foreground max-w-lg mx-auto">
               Professional invoicing without the complexity
             </p>
           </div>
@@ -166,41 +152,41 @@ export default function Landing() {
       </section>
 
       {/* Crypto Highlight - Streamlined */}
-      <section className="py-16 border-y border-white/5">
-        <div className="container max-w-5xl mx-auto px-4">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-8">
+      <section className="py-16 border-y border-border/50">
+        <div className="container max-w-4xl mx-auto px-6">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-10">
             <div className="flex-1">
               <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-orange-500/10 text-orange-400 text-sm font-medium mb-4">
                 <Bitcoin className="h-4 w-4" />
                 Exclusive
               </div>
-              <h2 className="text-2xl md:text-3xl font-bold text-white mb-3">
+              <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-3">
                 Accept crypto payments
               </h2>
-              <p className="text-zinc-400 mb-4">
+              <p className="text-muted-foreground mb-5">
                 The only invoicing tool with native crypto support. 
                 No chargebacks, instant settlement.
               </p>
               <div className="flex flex-wrap gap-2">
-                <span className="px-3 py-1 rounded-full bg-white/5 border border-white/10 text-sm text-zinc-300">BTC</span>
-                <span className="px-3 py-1 rounded-full bg-white/5 border border-white/10 text-sm text-zinc-300">ETH</span>
-                <span className="px-3 py-1 rounded-full bg-white/5 border border-white/10 text-sm text-zinc-300">USDT</span>
-                <span className="px-3 py-1 rounded-full bg-white/5 border border-white/10 text-sm text-zinc-300">+300 more</span>
+                <span className="px-3 py-1.5 rounded-full bg-card border border-border text-sm text-foreground/80">BTC</span>
+                <span className="px-3 py-1.5 rounded-full bg-card border border-border text-sm text-foreground/80">ETH</span>
+                <span className="px-3 py-1.5 rounded-full bg-card border border-border text-sm text-foreground/80">USDT</span>
+                <span className="px-3 py-1.5 rounded-full bg-card border border-border text-sm text-foreground/80">+300 more</span>
               </div>
             </div>
             <div className="flex-shrink-0">
-              <div className="grid grid-cols-3 gap-3">
-                <div className="p-4 rounded-xl bg-white/5 border border-white/10 text-center">
-                  <div className="text-xl font-bold text-white">0</div>
-                  <div className="text-xs text-zinc-500">Chargebacks</div>
+              <div className="grid grid-cols-3 gap-4">
+                <div className="p-5 rounded-xl bg-card border border-border text-center">
+                  <div className="text-xl font-bold text-foreground">0</div>
+                  <div className="text-xs text-muted-foreground">Chargebacks</div>
                 </div>
-                <div className="p-4 rounded-xl bg-white/5 border border-white/10 text-center">
-                  <div className="text-xl font-bold text-white">24/7</div>
-                  <div className="text-xs text-zinc-500">Settlement</div>
+                <div className="p-5 rounded-xl bg-card border border-border text-center">
+                  <div className="text-xl font-bold text-foreground">24/7</div>
+                  <div className="text-xs text-muted-foreground">Settlement</div>
                 </div>
-                <div className="p-4 rounded-xl bg-white/5 border border-white/10 text-center">
-                  <div className="text-xl font-bold text-white">1%</div>
-                  <div className="text-xs text-zinc-500">Fee</div>
+                <div className="p-5 rounded-xl bg-card border border-border text-center">
+                  <div className="text-xl font-bold text-foreground">1%</div>
+                  <div className="text-xs text-muted-foreground">Fee</div>
                 </div>
               </div>
             </div>
@@ -209,13 +195,13 @@ export default function Landing() {
       </section>
 
       {/* Competitor Comparison Section */}
-      <section id="compare" className="py-20 md:py-28">
-        <div className="container max-w-5xl mx-auto px-4">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-white mb-3">
+      <section id="compare" className="py-20 md:py-24">
+        <div className="container max-w-4xl mx-auto px-6">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-3">
               See how we compare
             </h2>
-            <p className="text-zinc-400">
+            <p className="text-muted-foreground">
               All the features at a fraction of the price
             </p>
           </div>
@@ -265,23 +251,23 @@ export default function Landing() {
           <div className="hidden md:block overflow-x-auto">
             <table className="w-full border-collapse">
               <thead>
-                <tr className="border-b border-white/10">
-                  <th className="text-left py-4 px-4 font-medium text-zinc-500">Feature</th>
+                <tr className="border-b border-border">
+                  <th className="text-left py-4 px-4 font-medium text-muted-foreground">Feature</th>
                   <th className="text-center py-4 px-4">
                     <div className="font-bold text-primary">SleekInvoices</div>
-                    <div className="text-sm text-zinc-500">$12/mo</div>
+                    <div className="text-sm text-muted-foreground">$12/mo</div>
                   </th>
                   <th className="text-center py-4 px-4">
-                    <div className="font-medium text-zinc-300">FreshBooks</div>
-                    <div className="text-sm text-zinc-500">$21-65/mo</div>
+                    <div className="font-medium text-foreground/80">FreshBooks</div>
+                    <div className="text-sm text-muted-foreground">$21-65/mo</div>
                   </th>
                   <th className="text-center py-4 px-4">
-                    <div className="font-medium text-zinc-300">QuickBooks</div>
-                    <div className="text-sm text-zinc-500">$38-75/mo</div>
+                    <div className="font-medium text-foreground/80">QuickBooks</div>
+                    <div className="text-sm text-muted-foreground">$38-75/mo</div>
                   </th>
                   <th className="text-center py-4 px-4">
-                    <div className="font-medium text-zinc-300">AND.CO</div>
-                    <div className="text-sm text-zinc-500">$18-24/mo</div>
+                    <div className="font-medium text-foreground/80">AND.CO</div>
+                    <div className="text-sm text-muted-foreground">$18-24/mo</div>
                   </th>
                 </tr>
               </thead>
@@ -362,10 +348,10 @@ export default function Landing() {
       </section>
 
       {/* How It Works */}
-      <section className="py-20 md:py-28 border-t border-white/5">
-        <div className="container max-w-5xl mx-auto px-4">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-white mb-3">
+      <section className="py-20 md:py-24 border-t border-border/50">
+        <div className="container max-w-4xl mx-auto px-6">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-3">
               Start in 3 steps
             </h2>
           </div>
@@ -391,13 +377,13 @@ export default function Landing() {
       </section>
 
       {/* Pricing Section */}
-      <section id="pricing" className="py-20 md:py-28 border-t border-white/5">
-        <div className="container max-w-4xl mx-auto px-4">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-white mb-3">
+      <section id="pricing" className="py-20 md:py-24 border-t border-border/50">
+        <div className="container max-w-4xl mx-auto px-6">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-3">
               Simple pricing
             </h2>
-            <p className="text-zinc-400">
+            <p className="text-muted-foreground">
               Start free, upgrade when ready
             </p>
           </div>
@@ -443,10 +429,10 @@ export default function Landing() {
       </section>
 
       {/* FAQ Section */}
-      <section id="faq" className="py-20 md:py-28 border-t border-white/5">
-        <div className="container max-w-4xl mx-auto px-4">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-white mb-3">
+      <section id="faq" className="py-20 md:py-24 border-t border-border/50">
+        <div className="container max-w-4xl mx-auto px-6">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-3">
               Questions?
             </h2>
           </div>
@@ -473,13 +459,13 @@ export default function Landing() {
       </section>
 
       {/* Final CTA */}
-      <section className="py-20 md:py-28 border-t border-white/5">
-        <div className="container max-w-4xl mx-auto px-4">
+      <section className="py-20 md:py-24 border-t border-border/50">
+        <div className="container max-w-4xl mx-auto px-6">
           <div className="bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border border-primary/20 rounded-2xl p-8 md:p-12 text-center">
-            <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
+            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
               Ready to get paid?
             </h2>
-            <p className="text-zinc-400 mb-8 max-w-md mx-auto">
+            <p className="text-muted-foreground mb-8 max-w-md mx-auto">
               Join thousands of freelancers and small businesses using SleekInvoices.
             </p>
             <Button size="lg" asChild className="text-base px-8 h-12 rounded-full">
@@ -495,7 +481,7 @@ export default function Landing() {
       {/* Footer */}
       <footer className="relative mt-8">
         {/* Sleeky Mascot */}
-        <div className="container max-w-5xl mx-auto px-4">
+        <div className="container max-w-4xl mx-auto px-6">
           <img 
             src="/sleeky-relaxed.png" 
             alt="Sleeky relaxing" 
@@ -504,50 +490,50 @@ export default function Landing() {
         </div>
 
         {/* Footer Content */}
-        <div className="border-t border-white/10 bg-white/[0.02]">
-          <div className="container max-w-5xl mx-auto px-4 py-10">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-8 lg:gap-16 mb-8">
+        <div className="border-t border-border bg-card/30">
+          <div className="container max-w-4xl mx-auto px-6 py-10">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-8 lg:gap-12 mb-8">
               <div className="col-span-2 md:col-span-1">
                 <div className="flex items-center gap-2.5 mb-4">
                   <img src="/monogram-white.svg" alt="SleekInvoices" className="h-7 w-7" />
-                  <span className="font-semibold text-white">SleekInvoices</span>
+                  <span className="font-semibold text-foreground">SleekInvoices</span>
                 </div>
-                <p className="text-sm text-zinc-500 leading-relaxed">
+                <p className="text-sm text-muted-foreground leading-relaxed">
                   Professional invoicing for freelancers and small businesses.
                 </p>
               </div>
               <div>
-                <h4 className="font-medium text-white mb-4">Product</h4>
-                <ul className="space-y-2 text-sm text-zinc-500">
-                  <li><a href="#features" className="hover:text-white transition-colors">Features</a></li>
-                  <li><a href="#pricing" className="hover:text-white transition-colors">Pricing</a></li>
-                  <li><a href="#compare" className="hover:text-white transition-colors">Compare</a></li>
-                  <li><a href="#faq" className="hover:text-white transition-colors">FAQ</a></li>
+                <h4 className="font-medium text-foreground mb-4">Product</h4>
+                <ul className="space-y-2 text-sm text-muted-foreground">
+                  <li><a href="#features" className="hover:text-foreground transition-colors">Features</a></li>
+                  <li><a href="#pricing" className="hover:text-foreground transition-colors">Pricing</a></li>
+                  <li><a href="#compare" className="hover:text-foreground transition-colors">Compare</a></li>
+                  <li><a href="#faq" className="hover:text-foreground transition-colors">FAQ</a></li>
                 </ul>
               </div>
               <div>
-                <h4 className="font-medium text-white mb-4">Company</h4>
-                <ul className="space-y-2 text-sm text-zinc-500">
-                  <li><a href="mailto:support@sleekinvoices.com" className="hover:text-white transition-colors">Contact</a></li>
-                  <li><a href="/privacy" className="hover:text-white transition-colors">Privacy</a></li>
-                  <li><a href="/terms" className="hover:text-white transition-colors">Terms</a></li>
+                <h4 className="font-medium text-foreground mb-4">Company</h4>
+                <ul className="space-y-2 text-sm text-muted-foreground">
+                  <li><a href="mailto:support@sleekinvoices.com" className="hover:text-foreground transition-colors">Contact</a></li>
+                  <li><a href="/privacy" className="hover:text-foreground transition-colors">Privacy</a></li>
+                  <li><a href="/terms" className="hover:text-foreground transition-colors">Terms</a></li>
                 </ul>
               </div>
               <div>
-                <h4 className="font-medium text-white mb-4">Compare</h4>
-                <ul className="space-y-2 text-sm text-zinc-500">
-                  <li><span className="text-zinc-600">vs FreshBooks</span></li>
-                  <li><span className="text-zinc-600">vs QuickBooks</span></li>
-                  <li><span className="text-zinc-600">vs AND.CO</span></li>
-                  <li><span className="text-zinc-600">vs Wave</span></li>
+                <h4 className="font-medium text-foreground mb-4">Compare</h4>
+                <ul className="space-y-2 text-sm text-muted-foreground/60">
+                  <li><span>vs FreshBooks</span></li>
+                  <li><span>vs QuickBooks</span></li>
+                  <li><span>vs AND.CO</span></li>
+                  <li><span>vs Wave</span></li>
                 </ul>
               </div>
             </div>
-            <div className="pt-8 border-t border-white/10 flex flex-col md:flex-row items-center justify-between gap-4">
-              <p className="text-sm text-zinc-600">
+            <div className="pt-8 border-t border-border flex flex-col md:flex-row items-center justify-between gap-4">
+              <p className="text-sm text-muted-foreground/60">
                 © {new Date().getFullYear()} SleekInvoices. All rights reserved.
               </p>
-              <div className="flex items-center gap-4 text-sm text-zinc-600">
+              <div className="flex items-center gap-4 text-sm text-muted-foreground/60">
                 <span>Made with ❤️ for freelancers</span>
               </div>
             </div>
@@ -569,14 +555,14 @@ function FeatureCard({
   description: string;
 }) {
   return (
-    <div className="p-5 rounded-xl bg-white/[0.02] border border-white/5 hover:border-white/10 transition-colors">
+    <div className="p-5 rounded-xl bg-card border border-border hover:border-border/80 transition-colors">
       <div className="flex items-start gap-4">
         <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
           {icon}
         </div>
         <div>
-          <h3 className="font-semibold text-white mb-1">{title}</h3>
-          <p className="text-sm text-zinc-500">{description}</p>
+          <h3 className="font-semibold text-foreground mb-1">{title}</h3>
+          <p className="text-sm text-muted-foreground">{description}</p>
         </div>
       </div>
     </div>
@@ -596,8 +582,8 @@ function StepCard({
   return (
     <div className="text-center">
       <div className="text-4xl font-bold text-primary/30 mb-3">{number}</div>
-      <h3 className="text-lg font-semibold text-white mb-2">{title}</h3>
-      <p className="text-sm text-zinc-500">{description}</p>
+      <h3 className="text-lg font-semibold text-foreground mb-2">{title}</h3>
+      <p className="text-sm text-muted-foreground">{description}</p>
     </div>
   );
 }
@@ -629,7 +615,7 @@ function PricingCard({
       className={`relative rounded-2xl p-6 ${
         highlighted
           ? "bg-primary/5 border-2 border-primary/30"
-          : "bg-white/[0.02] border border-white/10"
+          : "bg-card border border-border"
       }`}
     >
       {badge && (
@@ -640,16 +626,16 @@ function PricingCard({
         </div>
       )}
       <div className="text-center mb-6">
-        <h3 className="text-lg font-semibold text-white mb-2">{name}</h3>
+        <h3 className="text-lg font-semibold text-foreground mb-2">{name}</h3>
         <div className="flex items-baseline justify-center gap-1">
-          <span className="text-4xl font-bold text-white">{price}</span>
-          <span className="text-zinc-500">/{period}</span>
+          <span className="text-4xl font-bold text-foreground">{price}</span>
+          <span className="text-muted-foreground">/{period}</span>
         </div>
-        <p className="text-sm text-zinc-500 mt-2">{description}</p>
+        <p className="text-sm text-muted-foreground mt-2">{description}</p>
       </div>
       <ul className="space-y-3 mb-6">
         {features.map((feature, i) => (
-          <li key={i} className="flex items-center gap-2 text-sm text-zinc-400">
+          <li key={i} className="flex items-center gap-2 text-sm text-muted-foreground">
             <Check className="h-4 w-4 text-primary flex-shrink-0" />
             {feature}
           </li>
@@ -677,9 +663,9 @@ function FAQItem({
   answer: string;
 }) {
   return (
-    <div className="p-5 rounded-xl bg-white/[0.02] border border-white/5">
-      <h3 className="font-medium text-white mb-2">{question}</h3>
-      <p className="text-sm text-zinc-500">{answer}</p>
+    <div className="p-5 rounded-xl bg-card border border-border">
+      <h3 className="font-medium text-foreground mb-2">{question}</h3>
+      <p className="text-sm text-muted-foreground">{answer}</p>
     </div>
   );
 }
@@ -702,13 +688,13 @@ function ComparisonRow({
 }) {
   const renderValue = (value: boolean | string) => {
     if (value === true) return <Check className="h-5 w-5 text-green-500 mx-auto" />;
-    if (value === false) return <X className="h-5 w-5 text-zinc-600 mx-auto" />;
-    return <span className="text-sm text-zinc-500">{value}</span>;
+    if (value === false) return <X className="h-5 w-5 text-muted-foreground/50 mx-auto" />;
+    return <span className="text-sm text-muted-foreground">{value}</span>;
   };
 
   return (
-    <tr className={`border-b border-white/5 ${highlight ? "bg-primary/5" : ""}`}>
-      <td className="py-4 px-4 text-sm text-zinc-300">{feature}</td>
+    <tr className={`border-b border-border ${highlight ? "bg-primary/5" : ""}`}>
+      <td className="py-4 px-4 text-sm text-foreground/80">{feature}</td>
       <td className="py-4 px-4 text-center">{renderValue(sleek)}</td>
       <td className="py-4 px-4 text-center">{renderValue(freshbooks)}</td>
       <td className="py-4 px-4 text-center">{renderValue(quickbooks)}</td>
@@ -735,28 +721,28 @@ function MobileComparisonCard({
 }) {
   const renderValue = (value: boolean | string, label: string) => {
     if (value === true) return <Check className="h-4 w-4 text-green-500" />;
-    if (value === false) return <X className="h-4 w-4 text-zinc-600" />;
-    return <span className="text-xs text-zinc-500">{value}</span>;
+    if (value === false) return <X className="h-4 w-4 text-muted-foreground/50" />;
+    return <span className="text-xs text-muted-foreground">{value}</span>;
   };
 
   return (
-    <div className={`p-4 rounded-xl border ${highlight ? "bg-primary/5 border-primary/20" : "bg-white/[0.02] border-white/5"}`}>
-      <h4 className="font-medium text-white mb-3">{feature}</h4>
+    <div className={`p-4 rounded-xl border ${highlight ? "bg-primary/5 border-primary/20" : "bg-card border-border"}`}>
+      <h4 className="font-medium text-foreground mb-3">{feature}</h4>
       <div className="grid grid-cols-4 gap-2 text-center">
         <div>
           <div className="text-xs text-primary font-medium mb-1">Sleek</div>
           {renderValue(sleek, "SleekInvoices")}
         </div>
         <div>
-          <div className="text-xs text-zinc-500 mb-1">Fresh</div>
+          <div className="text-xs text-muted-foreground mb-1">Fresh</div>
           {renderValue(freshbooks, "FreshBooks")}
         </div>
         <div>
-          <div className="text-xs text-zinc-500 mb-1">QB</div>
+          <div className="text-xs text-muted-foreground mb-1">QB</div>
           {renderValue(quickbooks, "QuickBooks")}
         </div>
         <div>
-          <div className="text-xs text-zinc-500 mb-1">AND.CO</div>
+          <div className="text-xs text-muted-foreground mb-1">AND.CO</div>
           {renderValue(wave, "AND.CO")}
         </div>
       </div>
