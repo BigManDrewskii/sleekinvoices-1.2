@@ -15,7 +15,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 import { Navigation } from "@/components/Navigation";
 import { QuickBooksSettings } from "@/components/QuickBooksSettings";
-import { PlaceholderTextarea } from "@/components/PlaceholderTextarea";
+import { EmailTemplateEditor } from "@/components/EmailTemplateEditor";
 
 export default function Settings() {
   const { user, loading, isAuthenticated, logout } = useAuth();
@@ -477,82 +477,13 @@ export default function Settings() {
                   </p>
                 </div>
                 
-                {/* Email Template */}
-                <PlaceholderTextarea
-                  label="Email Template (Optional)"
+                {/* Email Template - New Visual Editor */}
+                <EmailTemplateEditor
+                  label="Email Template"
                   value={reminderTemplate}
                   onChange={setReminderTemplate}
-                  placeholder="Leave blank to use the default template. Click 'Use Template' to start with a preset, or 'Insert Placeholder' to add dynamic content."
                   disabled={!reminderEnabled}
-                  rows={10}
-                  description="Customize the reminder email sent to clients. Select a template preset to get started, then customize as needed."
-                  placeholders={[
-                    { key: "clientName", label: "Client's full name", sampleValue: "John Smith" },
-                    { key: "invoiceNumber", label: "Invoice number", sampleValue: "INV-2026-001" },
-                    { key: "invoiceAmount", label: "Total invoice amount", sampleValue: "$1,250.00" },
-                    { key: "dueDate", label: "Invoice due date", sampleValue: "January 15, 2026" },
-                    { key: "daysOverdue", label: "Days past due", sampleValue: "7" },
-                    { key: "invoiceUrl", label: "Link to view invoice", sampleValue: "https://sleekinvoices.com/view/abc123" },
-                    { key: "companyName", label: "Your company name", sampleValue: "Acme Inc." },
-                  ]}
-                  presets={[
-                    {
-                      id: "friendly",
-                      name: "Friendly Reminder",
-                      description: "Warm and casual tone for good client relationships",
-                      content: `Hi {{clientName}},
-
-Hope you're doing well! Just a quick reminder that invoice {{invoiceNumber}} for {{invoiceAmount}} was due on {{dueDate}} and is now {{daysOverdue}} days overdue.
-
-I know things can get busy, so no worries if it slipped through the cracks. You can view and pay the invoice here:
-{{invoiceUrl}}
-
-Let me know if you have any questions or if there's anything I can help with!
-
-Best,
-{{companyName}}`
-                    },
-                    {
-                      id: "formal",
-                      name: "Professional Notice",
-                      description: "Formal business tone for corporate clients",
-                      content: `Dear {{clientName}},
-
-This is a reminder regarding invoice {{invoiceNumber}} in the amount of {{invoiceAmount}}, which was due on {{dueDate}}.
-
-As of today, this invoice is {{daysOverdue}} days past due. We kindly request that you process this payment at your earliest convenience.
-
-You may view the invoice and submit payment using the following link:
-{{invoiceUrl}}
-
-If you have already sent payment, please disregard this notice. Should you have any questions regarding this invoice, please do not hesitate to contact us.
-
-Thank you for your prompt attention to this matter.
-
-Sincerely,
-{{companyName}}`
-                    },
-                    {
-                      id: "urgent",
-                      name: "Urgent Final Notice",
-                      description: "Firm tone for significantly overdue payments",
-                      content: `Dear {{clientName}},
-
-URGENT: Final Payment Notice
-
-Despite previous reminders, invoice {{invoiceNumber}} for {{invoiceAmount}} remains unpaid. This invoice was due on {{dueDate}} and is now {{daysOverdue}} days overdue.
-
-Immediate payment is required to avoid any disruption to services and potential collection proceedings.
-
-Please submit payment immediately using this link:
-{{invoiceUrl}}
-
-If there are circumstances preventing payment, please contact us within 48 hours to discuss payment arrangements.
-
-Regards,
-{{companyName}}`
-                    }
-                  ]}
+                  description="Customize the reminder email sent to clients. Choose a template to get started, then personalize it."
                 />
                 
                 {/* Save Button */}
