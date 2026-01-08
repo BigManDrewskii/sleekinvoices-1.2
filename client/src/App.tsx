@@ -8,6 +8,7 @@ import { KeyboardShortcutsHelp } from "./components/KeyboardShortcutsHelp";
 import { GlobalShortcuts } from "./components/GlobalShortcuts";
 import { CommandPalette } from "./components/CommandPalette";
 import { ConfettiTrigger } from "./components/Confetti";
+import { OnboardingTour } from "./components/OnboardingTour";
 import { AIAssistantProvider } from "./contexts/AIAssistantContext";
 
 // Eager load: Public pages (landing, home, client portal)
@@ -116,6 +117,7 @@ function App() {
           <CommandPalette />
           <ConfettiTrigger />
           <AIAssistantProvider>
+            <OnboardingTour />
             <Router />
           </AIAssistantProvider>
         </TooltipProvider>

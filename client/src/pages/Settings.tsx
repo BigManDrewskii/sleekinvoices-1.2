@@ -15,6 +15,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 import { Navigation } from "@/components/Navigation";
 import { QuickBooksSettings } from "@/components/QuickBooksSettings";
+import { OnboardingRestartButton } from "@/components/OnboardingRestartButton";
 import { EmailTemplateEditor } from "@/components/EmailTemplateEditor";
 
 export default function Settings() {
@@ -268,7 +269,8 @@ export default function Settings() {
                 <CardTitle>Account Actions</CardTitle>
                 <CardDescription>Manage your account</CardDescription>
               </CardHeader>
-              <CardContent>
+              <CardContent className="flex flex-wrap gap-3">
+                <OnboardingRestartButton />
                 <Button variant="outline" onClick={handleLogout}>
                   <LogOut className="h-4 w-4 mr-2" />
                   Log Out

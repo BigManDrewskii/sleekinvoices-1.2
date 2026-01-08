@@ -314,7 +314,7 @@ export function Navigation() {
 
   // Desktop Navigation with enhanced hover effects
   const DesktopNav = () => (
-    <NavigationMenu className="hidden lg:flex">
+    <NavigationMenu className="hidden lg:flex" data-onboarding="main-nav">
       <NavigationMenuList className="gap-1">
         {/* Dashboard - Direct Link */}
         <NavigationMenuItem>
@@ -696,7 +696,7 @@ export function Navigation() {
           <DesktopNav />
 
           {/* Global Search - Only at xl (1280px+) */}
-          <div className="hidden xl:block flex-1 max-w-xs ml-4">
+          <div className="hidden xl:block flex-1 max-w-xs ml-4" data-onboarding="search-bar">
             <GlobalSearch />
           </div>
 

@@ -1754,3 +1754,16 @@
 - [x] Implement conversation to text file conversion
 - [x] Add download functionality
 - [x] Test export feature
+
+
+## Onboarding & Tooltips System (Jan 8, 2026)
+- [x] Design onboarding flow architecture
+- [x] Create reusable tooltip component with animations
+- [x] Build onboarding tour system with step navigation
+- [x] Implement welcome modal for first-time users
+- [x] Add onboarding steps for Dashboard features
+- [x] Add onboarding steps for Invoice creation
+- [x] Add onboarding steps for AI Assistant
+- [x] Add contextual tooltips to key UI elements
+- [x] Persist onboarding completion state
+- [x] Test complete onboarding flow
