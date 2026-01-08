@@ -382,6 +382,27 @@ export const appRouter = router({
         // ============================================================================
         await db.incrementInvoiceCount(ctx.user.id);
         
+        // ============================================================================
+        // AUTOMATIC QUICKBOOKS SYNC
+        // Sync invoice to QuickBooks if connected and invoice is being sent
+        // Only sync non-draft invoices to avoid syncing incomplete work
+        // ============================================================================
+        if (input.status === 'sent') {
+          try {
+            const { getConnectionStatus, syncInvoiceToQB } = await import('./quickbooks');
+            const qbStatus = await getConnectionStatus(ctx.user.id);
+            if (qbStatus.connected) {
+              // Fire and forget - don't block invoice creation on QB sync
+              syncInvoiceToQB(ctx.user.id, invoice.id).catch((err) => {
+                console.error('[QuickBooks] Auto-sync failed for invoice', invoice.id, err);
+              });
+            }
+          } catch (err) {
+            // QuickBooks sync failure should not block invoice creation
+            console.error('[QuickBooks] Auto-sync error:', err);
+          }
+        }
+        
         return invoice;
       }),
     
@@ -573,6 +594,23 @@ export const appRouter = router({
             status: 'sent',
             sentAt: new Date(),
           });
+          
+          // ============================================================================
+          // AUTOMATIC QUICKBOOKS SYNC ON SEND
+          // Sync invoice to QuickBooks when first sent (status changes from draft)
+          // ============================================================================
+          try {
+            const { getConnectionStatus, syncInvoiceToQB } = await import('./quickbooks');
+            const qbStatus = await getConnectionStatus(ctx.user.id);
+            if (qbStatus.connected) {
+              // Fire and forget - don't block email sending on QB sync
+              syncInvoiceToQB(ctx.user.id, input.id).catch((err) => {
+                console.error('[QuickBooks] Auto-sync on send failed for invoice', input.id, err);
+              });
+            }
+          } catch (err) {
+            console.error('[QuickBooks] Auto-sync on send error:', err);
+          }
         }
         
         // Log email result
@@ -1387,6 +1425,23 @@ export const appRouter = router({
             amountPaid: paymentStatus.totalPaid.toString(),
           });
           console.log(`[Payment] Invoice ${input.invoiceId} marked as paid`);
+          
+          // ============================================================================
+          // AUTOMATIC QUICKBOOKS SYNC ON PAYMENT
+          // Sync invoice to QuickBooks when marked as paid to update payment status
+          // ============================================================================
+          try {
+            const { getConnectionStatus, syncInvoiceToQB } = await import('./quickbooks');
+            const qbStatus = await getConnectionStatus(ctx.user.id);
+            if (qbStatus.connected) {
+              // Fire and forget - don't block payment recording on QB sync
+              syncInvoiceToQB(ctx.user.id, input.invoiceId).catch((err) => {
+                console.error('[QuickBooks] Auto-sync on payment failed for invoice', input.invoiceId, err);
+              });
+            }
+          } catch (err) {
+            console.error('[QuickBooks] Auto-sync on payment error:', err);
+          }
         } else if (paymentStatus.status === 'partial') {
           // Update amount paid but keep status as sent
           await db.updateInvoice(input.invoiceId, ctx.user.id, {

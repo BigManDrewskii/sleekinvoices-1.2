@@ -1316,3 +1316,37 @@
 - [x] Replace with new GearLoader cog animation component
 - [x] Lower opacity to 70% on all full-page loading screens
 - [x] Small inline button spinners kept as-is (appropriate for button states)
+
+
+## QuickBooks Sync Enhancements
+
+### Per-Invoice Sync Button
+- [x] Add "Sync to QuickBooks" action to invoice Actions dropdown
+- [x] Check if QuickBooks is connected before showing option
+- [x] Show sync status indicator on invoice row (syncing spinner)
+- [x] Handle sync errors gracefully with toast notifications
+
+### Automatic Sync on Invoice Creation
+- [x] Trigger QuickBooks sync when new invoice is created (status='sent')
+- [x] Sync associated client first if not already synced (handled by syncInvoiceToQB)
+- [x] Log sync activity to sync history (via quickbooksSyncLog table)
+- [x] Handle errors without blocking invoice creation (fire-and-forget pattern)
+
+### Automatic Sync on Invoice Send
+- [x] Trigger QuickBooks sync when invoice is sent via email (draft→sent)
+- [x] Log sync activity to sync history
+- [x] Handle errors without blocking email sending
+
+### Automatic Sync on Payment
+- [x] Trigger QuickBooks sync when invoice is marked as paid
+- [x] Update payment status in QuickBooks
+- [x] Log sync activity to sync history
+- [x] Handle errors gracefully (fire-and-forget pattern)
+
+### Testing
+- [x] Test per-invoice sync button functionality (12 tests)
+- [x] Test automatic sync on invoice creation (3 tests)
+- [x] Test automatic sync on payment (2 tests)
+- [x] Test error handling (2 tests)
+- [x] Test InvoiceActionsMenu integration (3 tests)
+- [x] All 12 tests passing

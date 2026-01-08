@@ -14,6 +14,8 @@ import {
   Link as LinkIcon,
   Trash2,
   MoreVertical,
+  RefreshCw,
+  Check,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -27,11 +29,15 @@ interface InvoiceActionsMenuProps {
   onSendEmail: () => void;
   onCreatePaymentLink: () => void;
   onDelete: () => void;
+  onSyncToQuickBooks?: () => void;
+  quickBooksConnected?: boolean;
+  quickBooksSynced?: boolean;
   isLoading?: {
     pdf?: boolean;
     email?: boolean;
     paymentLink?: boolean;
     delete?: boolean;
+    quickBooksSync?: boolean;
   };
 }
 
@@ -45,6 +51,9 @@ export function InvoiceActionsMenu({
   onSendEmail,
   onCreatePaymentLink,
   onDelete,
+  onSyncToQuickBooks,
+  quickBooksConnected = false,
+  quickBooksSynced = false,
   isLoading = {},
 }: InvoiceActionsMenuProps) {
   const handleCopyInvoiceNumber = () => {
@@ -104,6 +113,22 @@ export function InvoiceActionsMenu({
           >
             <LinkIcon className="mr-2 h-4 w-4" />
             <span>Create Payment Link</span>
+          </DropdownMenuItem>
+        )}
+        {quickBooksConnected && onSyncToQuickBooks && (
+          <DropdownMenuItem
+            onClick={onSyncToQuickBooks}
+            disabled={isLoading.quickBooksSync}
+            className="cursor-pointer"
+          >
+            {isLoading.quickBooksSync ? (
+              <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
+            ) : quickBooksSynced ? (
+              <Check className="mr-2 h-4 w-4 text-green-500" />
+            ) : (
+              <RefreshCw className="mr-2 h-4 w-4" />
+            )}
+            <span>{quickBooksSynced ? 'Re-sync to QuickBooks' : 'Sync to QuickBooks'}</span>
           </DropdownMenuItem>
         )}
 

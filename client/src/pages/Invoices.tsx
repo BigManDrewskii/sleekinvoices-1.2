@@ -282,6 +282,29 @@ export default function Invoices() {
     },
   });
 
+  // QuickBooks integration
+  const { data: qbStatus } = trpc.quickbooks.getStatus.useQuery(undefined, {
+    enabled: isAuthenticated,
+  });
+  
+  const [syncingInvoiceId, setSyncingInvoiceId] = useState<number | null>(null);
+  
+  const syncToQuickBooks = trpc.quickbooks.syncInvoice.useMutation({
+    onSuccess: (_, variables) => {
+      toast.success("Invoice synced to QuickBooks");
+      setSyncingInvoiceId(null);
+    },
+    onError: (error) => {
+      toast.error(error.message || "Failed to sync to QuickBooks");
+      setSyncingInvoiceId(null);
+    },
+  });
+
+  const handleSyncToQuickBooks = (invoiceId: number) => {
+    setSyncingInvoiceId(invoiceId);
+    syncToQuickBooks.mutate({ invoiceId });
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
@@ -698,10 +721,13 @@ export default function Invoices() {
                               onSendEmail={() => handleSendEmail(invoice.id)}
                               onCreatePaymentLink={() => handleCreatePaymentLink(invoice.id)}
                               onDelete={() => handleDelete(invoice)}
+                              onSyncToQuickBooks={() => handleSyncToQuickBooks(invoice.id)}
+                              quickBooksConnected={qbStatus?.connected || false}
                               isLoading={{
                                 pdf: generatePDF.isPending,
                                 email: sendEmail.isPending,
                                 paymentLink: createPaymentLink.isPending,
+                                quickBooksSync: syncingInvoiceId === invoice.id,
                               }}
                             />
                           </TableCell>
@@ -741,10 +767,13 @@ export default function Invoices() {
                           onSendEmail={() => handleSendEmail(invoice.id)}
                           onCreatePaymentLink={() => handleCreatePaymentLink(invoice.id)}
                           onDelete={() => handleDelete(invoice)}
+                          onSyncToQuickBooks={() => handleSyncToQuickBooks(invoice.id)}
+                          quickBooksConnected={qbStatus?.connected || false}
                           isLoading={{
                             pdf: generatePDF.isPending,
                             email: sendEmail.isPending,
                             paymentLink: createPaymentLink.isPending,
+                            quickBooksSync: syncingInvoiceId === invoice.id,
                           }}
                         />
                       </div>
