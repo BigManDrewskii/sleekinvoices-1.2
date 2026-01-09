@@ -3221,15 +3221,20 @@ export async function updateExpiredEstimates(userId: number) {
   
   const now = new Date();
   
-  await db.update(estimates)
-    .set({ status: 'expired' })
-    .where(
-      and(
-        eq(estimates.userId, userId),
-        sql`${estimates.status} IN ('draft', 'sent', 'viewed')`,
-        lt(estimates.validUntil, now)
-      )
-    );
+  try {
+    await db.update(estimates)
+      .set({ status: 'expired' })
+      .where(
+        and(
+          eq(estimates.userId, userId),
+          inArray(estimates.status, ['draft', 'sent', 'viewed']),
+          lt(estimates.validUntil, now)
+        )
+      );
+  } catch (error) {
+    // Log error but don't throw - this is a background operation
+    console.error('Error updating expired estimates:', error);
+  }
 }
 
 

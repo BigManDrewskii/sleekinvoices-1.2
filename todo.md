@@ -1778,3 +1778,10 @@
 - [x] Add responsive breakpoints for mobile/tablet/desktop
 - [x] Ensure excellent readability at all sizes
 - [x] Test across different screen sizes
+
+
+## Estimates API Error Fix (Jan 9, 2026)
+- [x] Investigate failed query for updating expired estimates
+- [x] Fix the database query in estimates router
+- [x] Create missing estimates and estimateLineItems tables
+- [x] Test estimates page functionality
