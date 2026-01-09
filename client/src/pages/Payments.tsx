@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -29,10 +29,26 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { Plus, DollarSign, CreditCard, Banknote, FileCheck, Bitcoin } from "lucide-react";
+import { 
+  Plus, 
+  DollarSign, 
+  CreditCard, 
+  Banknote, 
+  FileCheck, 
+  Bitcoin, 
+  Search, 
+  ChevronLeft, 
+  ChevronRight,
+  Filter,
+  X,
+  ArrowUpDown,
+  Calendar
+} from "lucide-react";
 import { toast } from "sonner";
 import { PageLayout } from "@/components/layout/PageLayout";
 import { PaymentsPageSkeleton } from "@/components/skeletons";
+
+const ITEMS_PER_PAGE = 10;
 
 export default function Payments() {
   const [recordPaymentOpen, setRecordPaymentOpen] = useState(false);
@@ -50,6 +66,14 @@ export default function Payments() {
     cryptoTxHash: "",
     cryptoWalletAddress: "",
   });
+
+  // Pagination and filtering state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [methodFilter, setMethodFilter] = useState<string>("all");
+  const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [sortField, setSortField] = useState<"date" | "amount">("date");
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
 
   const { data: payments, isLoading, refetch } = trpc.payments.list.useQuery({});
   const { data: stats } = trpc.payments.getStats.useQuery();
@@ -76,6 +100,60 @@ export default function Payments() {
       toast.error(`Failed to record payment: ${error.message}`);
     },
   });
+
+  // Filter and sort payments
+  const filteredAndSortedPayments = useMemo(() => {
+    if (!payments) return [];
+    
+    let result = [...payments];
+    
+    // Apply search filter
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase();
+      result = result.filter((payment) => 
+        payment.invoiceId.toString().includes(query) ||
+        payment.notes?.toLowerCase().includes(query) ||
+        payment.paymentMethod.toLowerCase().includes(query)
+      );
+    }
+    
+    // Apply method filter
+    if (methodFilter !== "all") {
+      result = result.filter((payment) => payment.paymentMethod === methodFilter);
+    }
+    
+    // Apply status filter
+    if (statusFilter !== "all") {
+      result = result.filter((payment) => payment.status === statusFilter);
+    }
+    
+    // Apply sorting
+    result.sort((a, b) => {
+      if (sortField === "date") {
+        const dateA = new Date(a.paymentDate).getTime();
+        const dateB = new Date(b.paymentDate).getTime();
+        return sortOrder === "asc" ? dateA - dateB : dateB - dateA;
+      } else {
+        const amountA = parseFloat(a.amount);
+        const amountB = parseFloat(b.amount);
+        return sortOrder === "asc" ? amountA - amountB : amountB - amountA;
+      }
+    });
+    
+    return result;
+  }, [payments, searchQuery, methodFilter, statusFilter, sortField, sortOrder]);
+
+  // Pagination calculations
+  const totalPages = Math.ceil(filteredAndSortedPayments.length / ITEMS_PER_PAGE);
+  const paginatedPayments = useMemo(() => {
+    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+    return filteredAndSortedPayments.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+  }, [filteredAndSortedPayments, currentPage]);
+
+  // Reset to page 1 when filters change
+  const handleFilterChange = () => {
+    setCurrentPage(1);
+  };
 
   const handleRecordPayment = () => {
     if (!formData.invoiceId || !formData.amount) {
@@ -146,6 +224,24 @@ export default function Payments() {
     });
   };
 
+  const toggleSort = (field: "date" | "amount") => {
+    if (sortField === field) {
+      setSortOrder(sortOrder === "asc" ? "desc" : "asc");
+    } else {
+      setSortField(field);
+      setSortOrder("desc");
+    }
+  };
+
+  const clearFilters = () => {
+    setSearchQuery("");
+    setMethodFilter("all");
+    setStatusFilter("all");
+    setCurrentPage(1);
+  };
+
+  const hasActiveFilters = searchQuery || methodFilter !== "all" || statusFilter !== "all";
+
   return (
     <PageLayout
       title="Payments"
@@ -200,52 +296,238 @@ export default function Payments() {
       {/* Payments Table */}
       <Card>
         <CardHeader>
-          <CardTitle>Payment History</CardTitle>
-          <CardDescription>All recorded payments for your invoices</CardDescription>
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div>
+              <CardTitle>Payment History</CardTitle>
+              <CardDescription>
+                {filteredAndSortedPayments.length} payment{filteredAndSortedPayments.length !== 1 ? 's' : ''} found
+              </CardDescription>
+            </div>
+          </div>
+          
+          {/* Search and Filters */}
+          <div className="flex flex-col sm:flex-row gap-3 mt-4">
+            {/* Search Input */}
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Search by invoice ID, notes..."
+                value={searchQuery}
+                onChange={(e) => {
+                  setSearchQuery(e.target.value);
+                  handleFilterChange();
+                }}
+                className="pl-9"
+              />
+            </div>
+            
+            {/* Method Filter */}
+            <Select 
+              value={methodFilter} 
+              onValueChange={(value) => {
+                setMethodFilter(value);
+                handleFilterChange();
+              }}
+            >
+              <SelectTrigger className="w-full sm:w-[160px]">
+                <Filter className="h-4 w-4 mr-2" />
+                <SelectValue placeholder="Method" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Methods</SelectItem>
+                <SelectItem value="manual">Manual</SelectItem>
+                <SelectItem value="stripe">Stripe</SelectItem>
+                <SelectItem value="bank_transfer">Bank Transfer</SelectItem>
+                <SelectItem value="check">Check</SelectItem>
+                <SelectItem value="cash">Cash</SelectItem>
+                <SelectItem value="crypto">Crypto</SelectItem>
+              </SelectContent>
+            </Select>
+            
+            {/* Status Filter */}
+            <Select 
+              value={statusFilter} 
+              onValueChange={(value) => {
+                setStatusFilter(value);
+                handleFilterChange();
+              }}
+            >
+              <SelectTrigger className="w-full sm:w-[140px]">
+                <SelectValue placeholder="Status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Status</SelectItem>
+                <SelectItem value="completed">Completed</SelectItem>
+                <SelectItem value="pending">Pending</SelectItem>
+                <SelectItem value="failed">Failed</SelectItem>
+                <SelectItem value="refunded">Refunded</SelectItem>
+              </SelectContent>
+            </Select>
+            
+            {/* Clear Filters */}
+            {hasActiveFilters && (
+              <Button variant="ghost" size="icon" onClick={clearFilters} className="shrink-0">
+                <X className="h-4 w-4" />
+              </Button>
+            )}
+          </div>
         </CardHeader>
+        
         <CardContent>
           {isLoading ? (
             <PaymentsPageSkeleton />
           ) : !payments || payments.length === 0 ? (
-            <div className="text-center py-8 text-muted-foreground">
-              No payments recorded yet
+            <div className="text-center py-12">
+              <div className="p-4 rounded-full bg-muted/50 w-fit mx-auto mb-4">
+                <DollarSign className="h-8 w-8 text-muted-foreground" />
+              </div>
+              <p className="text-lg font-medium">No payments recorded yet</p>
+              <p className="text-sm text-muted-foreground mt-1">
+                Record your first payment to start tracking
+              </p>
+              <Button onClick={() => setRecordPaymentOpen(true)} className="mt-4">
+                <Plus className="h-4 w-4 mr-2" />
+                Record Payment
+              </Button>
+            </div>
+          ) : filteredAndSortedPayments.length === 0 ? (
+            <div className="text-center py-12">
+              <div className="p-4 rounded-full bg-muted/50 w-fit mx-auto mb-4">
+                <Search className="h-8 w-8 text-muted-foreground" />
+              </div>
+              <p className="text-lg font-medium">No matching payments</p>
+              <p className="text-sm text-muted-foreground mt-1">
+                Try adjusting your search or filters
+              </p>
+              <Button variant="outline" onClick={clearFilters} className="mt-4">
+                Clear Filters
+              </Button>
             </div>
           ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Date</TableHead>
-                  <TableHead>Invoice ID</TableHead>
-                  <TableHead>Amount</TableHead>
-                  <TableHead>Method</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Notes</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {payments.map((payment) => (
-                  <TableRow key={payment.id}>
-                    <TableCell>{formatDate(payment.paymentDate)}</TableCell>
-                    <TableCell className="font-mono">{payment.invoiceId}</TableCell>
-                    <TableCell className="font-semibold">
-                      {formatCurrency(payment.amount, payment.currency)}
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        {getPaymentMethodIcon(payment.paymentMethod)}
-                        <span className="capitalize">
-                          {payment.paymentMethod.replace("_", " ")}
-                        </span>
-                      </div>
-                    </TableCell>
-                    <TableCell>{getStatusBadge(payment.status)}</TableCell>
-                    <TableCell className="text-sm text-muted-foreground">
-                      {payment.notes || "-"}
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+            <>
+              <div className="rounded-lg border overflow-hidden">
+                <Table>
+                  <TableHeader>
+                    <TableRow className="bg-muted/30">
+                      <TableHead>
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          className="h-8 -ml-3 font-medium"
+                          onClick={() => toggleSort("date")}
+                        >
+                          <Calendar className="h-4 w-4 mr-2" />
+                          Date
+                          <ArrowUpDown className="h-3 w-3 ml-1 opacity-50" />
+                        </Button>
+                      </TableHead>
+                      <TableHead>Invoice</TableHead>
+                      <TableHead>
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          className="h-8 -ml-3 font-medium"
+                          onClick={() => toggleSort("amount")}
+                        >
+                          Amount
+                          <ArrowUpDown className="h-3 w-3 ml-1 opacity-50" />
+                        </Button>
+                      </TableHead>
+                      <TableHead>Method</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead className="hidden md:table-cell">Notes</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {paginatedPayments.map((payment) => (
+                      <TableRow key={payment.id} className="hover:bg-muted/30 transition-colors">
+                        <TableCell className="font-medium">
+                          {formatDate(payment.paymentDate)}
+                        </TableCell>
+                        <TableCell>
+                          <span className="font-mono text-sm bg-muted/50 px-2 py-1 rounded">
+                            #{payment.invoiceId}
+                          </span>
+                        </TableCell>
+                        <TableCell className="font-semibold text-primary">
+                          {formatCurrency(payment.amount, payment.currency)}
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-2">
+                            <div className="p-1.5 rounded-md bg-muted/50">
+                              {getPaymentMethodIcon(payment.paymentMethod)}
+                            </div>
+                            <span className="capitalize text-sm">
+                              {payment.paymentMethod.replace("_", " ")}
+                            </span>
+                          </div>
+                        </TableCell>
+                        <TableCell>{getStatusBadge(payment.status)}</TableCell>
+                        <TableCell className="hidden md:table-cell text-sm text-muted-foreground max-w-[200px] truncate">
+                          {payment.notes || "-"}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+              
+              {/* Pagination */}
+              {totalPages > 1 && (
+                <div className="flex items-center justify-between mt-4 pt-4 border-t">
+                  <p className="text-sm text-muted-foreground">
+                    Showing {((currentPage - 1) * ITEMS_PER_PAGE) + 1} to {Math.min(currentPage * ITEMS_PER_PAGE, filteredAndSortedPayments.length)} of {filteredAndSortedPayments.length} payments
+                  </p>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                      disabled={currentPage === 1}
+                    >
+                      <ChevronLeft className="h-4 w-4" />
+                      Previous
+                    </Button>
+                    
+                    <div className="flex items-center gap-1">
+                      {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                        let pageNum;
+                        if (totalPages <= 5) {
+                          pageNum = i + 1;
+                        } else if (currentPage <= 3) {
+                          pageNum = i + 1;
+                        } else if (currentPage >= totalPages - 2) {
+                          pageNum = totalPages - 4 + i;
+                        } else {
+                          pageNum = currentPage - 2 + i;
+                        }
+                        return (
+                          <Button
+                            key={pageNum}
+                            variant={currentPage === pageNum ? "default" : "outline"}
+                            size="sm"
+                            className="w-8 h-8 p-0"
+                            onClick={() => setCurrentPage(pageNum)}
+                          >
+                            {pageNum}
+                          </Button>
+                        );
+                      })}
+                    </div>
+                    
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                      disabled={currentPage === totalPages}
+                    >
+                      Next
+                      <ChevronRight className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </>
           )}
         </CardContent>
       </Card>
@@ -254,7 +536,12 @@ export default function Payments() {
       <Dialog open={recordPaymentOpen} onOpenChange={setRecordPaymentOpen}>
         <DialogContent className="sm:max-w-[500px]">
           <DialogHeader>
-            <DialogTitle>Record Payment</DialogTitle>
+            <DialogTitle className="flex items-center gap-2">
+              <div className="p-2 rounded-lg bg-primary/10">
+                <DollarSign className="h-5 w-5 text-primary" />
+              </div>
+              Record Payment
+            </DialogTitle>
             <DialogDescription>
               Manually record a payment received for an invoice
             </DialogDescription>
