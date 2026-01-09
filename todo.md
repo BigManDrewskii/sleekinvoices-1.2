@@ -1785,3 +1785,11 @@
 - [x] Fix the database query in estimates router
 - [x] Create missing estimates and estimateLineItems tables
 - [x] Test estimates page functionality
+
+
+## Manage Categories UI Improvement (Jan 9, 2026)
+- [x] Analyze current Manage Categories UI on Expenses page
+- [x] Improve visual design and layout
+- [x] Enhance category list styling
+- [x] Improve add/edit category form
+- [x] Test the improvements
