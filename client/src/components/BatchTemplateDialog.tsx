@@ -3,10 +3,10 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { DialogBody, DialogActions } from "@/components/shared/DialogPatterns";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -72,9 +72,8 @@ export function SaveBatchTemplateDialog({
             Save this batch configuration as a reusable template for future invoicing.
           </DialogDescription>
         </DialogHeader>
-        
-        {/* Dialog Body - consistent padding */}
-        <div className="px-6 py-4 space-y-4">
+
+        <DialogBody>
           <div className="space-y-2">
             <Label htmlFor="template-name">Template Name *</Label>
             <Input
@@ -120,23 +119,16 @@ export function SaveBatchTemplateDialog({
               {notes && <li>• Notes: "{notes.substring(0, 50)}{notes.length > 50 ? '...' : ''}"</li>}
             </ul>
           </div>
-        </div>
-        
-        <DialogFooter className="gap-3">
-          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={isLoading}>
-            Cancel
-          </Button>
-          <Button onClick={handleSave} disabled={!name.trim() || isLoading}>
-            {isLoading ? (
-              <>
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                Saving...
-              </>
-            ) : (
-              'Save Template'
-            )}
-          </Button>
-        </DialogFooter>
+        </DialogBody>
+
+        <DialogActions
+          onClose={() => onOpenChange(false)}
+          onSubmit={handleSave}
+          submitText="Save Template"
+          cancelText="Cancel"
+          isLoading={isLoading}
+          disabled={!name.trim()}
+        />
       </DialogContent>
     </Dialog>
   );
@@ -188,9 +180,8 @@ export function LoadBatchTemplateDialog({
             Select a saved template to populate the batch invoice form.
           </DialogDescription>
         </DialogHeader>
-        
-        {/* Dialog Body - consistent padding */}
-        <div className="px-6 py-4">
+
+        <DialogBody>
           {isLoading ? (
             <div className="flex items-center justify-center py-8">
               <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
@@ -249,13 +240,12 @@ export function LoadBatchTemplateDialog({
               ))}
             </div>
           )}
-        </div>
-        
-        <DialogFooter className="gap-3">
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Cancel
-          </Button>
-        </DialogFooter>
+        </DialogBody>
+
+        <DialogActions
+          onClose={() => onOpenChange(false)}
+          cancelText="Cancel"
+        />
       </DialogContent>
     </Dialog>
   );

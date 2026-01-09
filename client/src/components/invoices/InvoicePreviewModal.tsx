@@ -5,8 +5,10 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { DialogBody } from "@/components/shared/DialogPatterns";
 import { Button } from "@/components/ui/button";
 import { formatCurrency, formatDate } from "@/lib/utils";
+import { Currency, DateDisplay } from "@/components/ui/typography";
 import { Eye, X } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 import { TemplateSelector } from "./TemplateSelector";
@@ -102,8 +104,7 @@ export function InvoicePreviewModal({
           </DialogDescription>
         </DialogHeader>
 
-        {/* Dialog Body - consistent padding */}
-        <div className="px-6 py-4">
+        <DialogBody>
         {/* Template Selector */}
         <div className="mb-4">
           <TemplateSelector
@@ -173,11 +174,11 @@ export function InvoicePreviewModal({
             <div className="text-right">
               <div className="mb-3">
                 <span className="text-sm font-semibold text-gray-500">Issue Date: </span>
-                <span className="text-gray-900 font-medium">{formatDate(issueDate)}</span>
+                <span className="text-gray-900 font-medium"><DateDisplay date={issueDate} format="long" /></span>
               </div>
               <div>
                 <span className="text-sm font-semibold text-gray-500">Due Date: </span>
-                <span className="text-gray-900 font-medium">{formatDate(dueDate)}</span>
+                <span className="text-gray-900 font-medium"><DateDisplay date={dueDate} format="long" /></span>
               </div>
             </div>
           </div>
@@ -217,8 +218,8 @@ export function InvoicePreviewModal({
                 <tr key={index} className="border-b border-gray-200">
                   <td className="py-3 px-4 text-gray-900">{item.description}</td>
                   <td className="py-3 px-4 text-right text-gray-900">{item.quantity}</td>
-                  <td className="py-3 px-4 text-right text-gray-900">{formatCurrency(item.rate)}</td>
-                  <td className="py-3 px-4 text-right text-gray-900 font-medium">{formatCurrency(item.quantity * item.rate)}</td>
+                  <td className="py-3 px-4 text-right text-gray-900"><Currency amount={item.rate} /></td>
+                  <td className="py-3 px-4 text-right text-gray-900 font-medium"><Currency amount={item.quantity * item.rate} /></td>
                 </tr>
               ))}
             </tbody>
@@ -229,18 +230,18 @@ export function InvoicePreviewModal({
             <div className="w-72 space-y-2">
               <div className="flex justify-between text-gray-700 py-2">
                 <span className="font-medium">Subtotal:</span>
-                <span className="font-semibold">{formatCurrency(subtotal)}</span>
+                <span className="font-semibold"><Currency amount={subtotal} /></span>
               </div>
               {discountAmount > 0 && (
                 <div className="flex justify-between text-gray-700 py-2">
                   <span className="font-medium">Discount:</span>
-                  <span className="font-semibold text-green-600">-{formatCurrency(discountAmount)}</span>
+                  <span className="font-semibold text-green-600">-<Currency amount={discountAmount} /></span>
                 </div>
               )}
               {taxAmount > 0 && (
                 <div className="flex justify-between text-gray-700 py-2">
                   <span className="font-medium">Tax:</span>
-                  <span className="font-semibold">{formatCurrency(taxAmount)}</span>
+                  <span className="font-semibold"><Currency amount={taxAmount} /></span>
                 </div>
               )}
               <div 
@@ -251,7 +252,7 @@ export function InvoicePreviewModal({
                 }}
               >
                 <span>Total:</span>
-                <span>{formatCurrency(total)}</span>
+                <span><Currency amount={total} /></span>
               </div>
             </div>
           </div>
@@ -299,7 +300,7 @@ export function InvoicePreviewModal({
             Close
           </Button>
         </div>
-        </div>
+        </DialogBody>
       </DialogContent>
     </Dialog>
   );

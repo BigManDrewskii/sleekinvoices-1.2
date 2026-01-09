@@ -5,8 +5,8 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogFooter,
 } from "@/components/ui/dialog";
+import { DialogBody, DialogActions } from "@/components/shared/DialogPatterns";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -133,8 +133,7 @@ export function CryptoPaymentDialog({
           </DialogDescription>
         </DialogHeader>
 
-        {/* Dialog Body - consistent padding */}
-        <div className="px-6 py-4 space-y-5">
+        <DialogBody spacing="relaxed">
           {!paymentUrl ? (
             <>
               {/* Currency Selection */}
@@ -251,13 +250,12 @@ export function CryptoPaymentDialog({
               </div>
             </>
           )}
-        </div>
-        
-        <DialogFooter className="gap-3">
-          <Button variant="ghost" onClick={() => onOpenChange(false)}>
-            {paymentUrl ? "Close" : "Cancel"}
-          </Button>
-        </DialogFooter>
+        </DialogBody>
+
+        <DialogActions
+          onClose={() => onOpenChange(false)}
+          cancelText={paymentUrl ? "Close" : "Cancel"}
+        />
       </DialogContent>
     </Dialog>
   );

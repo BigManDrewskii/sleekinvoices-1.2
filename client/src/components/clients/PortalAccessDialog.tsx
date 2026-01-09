@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { DialogBody, DialogActions } from "@/components/shared/DialogPatterns";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -100,9 +101,8 @@ export function PortalAccessDialog({ open, onOpenChange, client }: PortalAccessD
             Manage secure portal access for {client.name}
           </DialogDescription>
         </DialogHeader>
-        
-        {/* Dialog Body - consistent padding */}
-        <div className="px-6 py-4 space-y-5">
+
+        <DialogBody spacing="relaxed">
           {isLoading ? (
             <div className="flex items-center justify-center py-8">
               <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -259,13 +259,12 @@ export function PortalAccessDialog({ open, onOpenChange, client }: PortalAccessD
               </div>
             </>
           )}
-        </div>
-        
-        <DialogFooter className="gap-3">
-          <Button variant="ghost" onClick={() => onOpenChange(false)}>
-            Close
-          </Button>
-        </DialogFooter>
+        </DialogBody>
+
+        <DialogActions
+          onClose={() => onOpenChange(false)}
+          cancelText="Close"
+        />
       </DialogContent>
     </Dialog>
   );

@@ -1,4 +1,5 @@
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { DialogBody, DialogActions } from "@/components/shared/DialogPatterns";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { trpc } from "@/lib/trpc";
@@ -97,8 +98,7 @@ export function BillableExpenseDialog({
           </DialogDescription>
         </DialogHeader>
 
-        {/* Dialog Body - consistent padding */}
-        <div className="px-6 py-4 space-y-4">
+        <DialogBody>
           {isLoading && (
             <div className="flex items-center justify-center py-8">
               <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -180,29 +180,15 @@ export function BillableExpenseDialog({
               </div>
             </>
           )}
-        </div>
+        </DialogBody>
 
-        <DialogFooter className="gap-3">
-          <Button variant="ghost" onClick={handleCancel}>
-            Cancel
-          </Button>
-          <Button 
-            onClick={handleAdd}
-            disabled={selectedExpenseIds.size === 0}
-          >
-            {selectedExpenseIds.size > 0 ? (
-              <>
-                <Plus weight="bold" className="size-4" />
-                Add {selectedExpenseIds.size} Expense(s)
-              </>
-            ) : (
-              <>
-                <Plus weight="bold" className="size-4" />
-                Add Expense(s)
-              </>
-            )}
-          </Button>
-        </DialogFooter>
+        <DialogActions
+          onClose={handleCancel}
+          onSubmit={handleAdd}
+          submitText={selectedExpenseIds.size > 0 ? `Add ${selectedExpenseIds.size} Expense(s)` : "Add Expense(s)"}
+          cancelText="Cancel"
+          disabled={selectedExpenseIds.size === 0}
+        />
       </DialogContent>
     </Dialog>
   );

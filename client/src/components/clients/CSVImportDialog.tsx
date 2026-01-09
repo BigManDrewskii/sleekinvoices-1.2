@@ -1,5 +1,6 @@
 import { useState, useCallback } from "react";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { DialogBody, DialogActions } from "@/components/shared/DialogPatterns";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
@@ -339,41 +340,35 @@ export function CSVImportDialog({ open, onOpenChange, onSuccess }: CSVImportDial
           </DialogDescription>
         </DialogHeader>
 
-        {/* Dialog Body - consistent padding */}
-        <div className="px-6 py-4">
+        <DialogBody>
           {step === "upload" && renderUploadStep()}
           {step === "preview" && renderPreviewStep()}
           {step === "importing" && renderImportingStep()}
           {step === "complete" && renderCompleteStep()}
-        </div>
+        </DialogBody>
 
-        <DialogFooter className="gap-3">
-          {step === "upload" && (
-            <Button variant="ghost" onClick={handleClose}>
-              Cancel
-            </Button>
-          )}
-          {step === "preview" && (
-            <>
-              <Button variant="ghost" onClick={() => setStep("upload")}>
-                Back
-              </Button>
-              <Button
-                onClick={handleImport}
-                disabled={!parseResult || parseResult.clients.length === 0}
-              >
-                <Upload weight="bold" className="size-4" />
-                Import {parseResult?.clients.length || 0} Clients
-              </Button>
-            </>
-          )}
-          {step === "complete" && (
-            <Button variant="success" onClick={handleClose}>
-              <CheckCircle2 className="size-4" />
-              Done
-            </Button>
-          )}
-        </DialogFooter>
+        {step === "upload" && (
+          <DialogActions
+            onClose={handleClose}
+            cancelText="Cancel"
+          />
+        )}
+        {step === "preview" && (
+          <DialogActions
+            onClose={() => setStep("upload")}
+            onSubmit={handleImport}
+            submitText={`Import ${parseResult?.clients.length || 0} Clients`}
+            cancelText="Back"
+            disabled={!parseResult || parseResult.clients.length === 0}
+          />
+        )}
+        {step === "complete" && (
+          <DialogActions
+            onClose={handleClose}
+            submitText="Done"
+            cancelText=""
+          />
+        )}
       </DialogContent>
     </Dialog>
   );
