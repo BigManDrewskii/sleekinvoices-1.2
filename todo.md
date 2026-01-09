@@ -1812,3 +1812,24 @@
 - [x] Add copy-to-clipboard for transaction hashes and wallet addresses
 - [x] Add block explorer links for crypto transactions
 - [x] Test the modal functionality
+
+
+## Payment Receipt PDF Generation (Jan 9, 2026)
+- [x] Create PDF receipt template in pdf.ts
+- [x] Add generateReceipt endpoint to payments router
+- [x] Implement download button in payment details modal
+- [x] Test receipt generation
+
+## Refund Functionality (Jan 9, 2026)
+- [x] Add refund endpoint to payments router
+- [x] Create refundPayment function in db.ts
+- [x] Add refund button and dialog in payment details modal
+- [x] Track refund reason in payment notes
+- [x] Test refund functionality
+
+## Payment Reminders (Jan 9, 2026)
+- [x] Create sendPaymentReminder endpoint in reminders router
+- [x] Create enhanced payment reminder email template
+- [x] Add ability to send custom message with reminder
+- [x] Log reminder history
+- [x] Test reminder functionality
