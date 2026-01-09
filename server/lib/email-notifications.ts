@@ -8,8 +8,18 @@
 import { Resend } from 'resend';
 import { formatEndDate } from './subscription-utils';
 
-// Initialize Resend client
-const resend = new Resend(process.env.RESEND_API_KEY);
+// Lazy-initialized Resend client to prevent startup crashes if API key is missing
+let _resend: Resend | null = null;
+
+function getResend(): Resend | null {
+  if (!process.env.RESEND_API_KEY) {
+    return null;
+  }
+  if (!_resend) {
+    _resend = new Resend(process.env.RESEND_API_KEY);
+  }
+  return _resend;
+}
 
 // Email sender configuration
 const FROM_EMAIL = 'SleekInvoices <noreply@sleekinvoices.com>';
@@ -216,6 +226,11 @@ https://sleekinvoices.com
   `.trim();
 
   try {
+    const resend = getResend();
+    if (!resend) {
+      console.log('[Email] Resend client not available');
+      return false;
+    }
     const { data, error } = await resend.emails.send({
       from: FROM_EMAIL,
       to: userEmail,
@@ -347,6 +362,11 @@ https://sleekinvoices.com
   `.trim();
 
   try {
+    const resend = getResend();
+    if (!resend) {
+      console.log('[Email] Resend client not available');
+      return false;
+    }
     const { data, error } = await resend.emails.send({
       from: FROM_EMAIL,
       to: userEmail,
