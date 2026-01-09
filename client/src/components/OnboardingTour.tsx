@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { useOnboarding } from '@/contexts/OnboardingContext';
 import { Button } from '@/components/ui/button';
@@ -17,6 +17,12 @@ interface TooltipPosition {
   left: number;
   placement: 'top' | 'bottom' | 'left' | 'right';
 }
+
+// Best practices constants based on Material Design and Popper.js guidelines
+const VIEWPORT_PADDING = 16; // Minimum distance from viewport edges
+const GAP = 12; // Gap between tooltip and target element
+const TOOLTIP_WIDTH = 320;
+const TOOLTIP_HEIGHT = 200; // Estimated max height
 
 export function OnboardingTour() {
   const {
@@ -44,79 +50,85 @@ export function OnboardingTour() {
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  // Smart positioning that ensures tooltip is always visible
+  // Calculate tooltip position using FIXED positioning (viewport-relative)
   const calculateTooltipPosition = useCallback((
     targetRect: DOMRect,
     preferredPlacement: 'top' | 'bottom' | 'left' | 'right'
   ): TooltipPosition => {
     const viewportWidth = window.innerWidth;
     const viewportHeight = window.innerHeight;
-    const scrollY = window.scrollY;
     
-    // Responsive tooltip dimensions
-    const tooltipWidth = isMobile ? Math.min(viewportWidth - 32, 300) : 320;
-    const tooltipHeight = isMobile ? 140 : 160;
-    const gap = isMobile ? 12 : 16;
-    const margin = 16;
+    const tooltipWidth = Math.min(TOOLTIP_WIDTH, viewportWidth - VIEWPORT_PADDING * 2);
+    const tooltipHeight = TOOLTIP_HEIGHT;
 
-    // Calculate available space in each direction
-    const spaceTop = targetRect.top - margin;
-    const spaceBottom = viewportHeight - targetRect.bottom - margin;
-    const spaceLeft = targetRect.left - margin;
-    const spaceRight = viewportWidth - targetRect.right - margin;
+    // Calculate available space in each direction (all relative to viewport)
+    const spaceAbove = targetRect.top - VIEWPORT_PADDING;
+    const spaceBelow = viewportHeight - targetRect.bottom - VIEWPORT_PADDING;
+    const spaceLeft = targetRect.left - VIEWPORT_PADDING;
+    const spaceRight = viewportWidth - targetRect.right - VIEWPORT_PADDING;
 
-    // Determine best placement based on available space
+    // Required space for tooltip + gap
+    const requiredVertical = tooltipHeight + GAP;
+    const requiredHorizontal = tooltipWidth + GAP;
+
+    // Determine best placement using flip logic
     let placement = preferredPlacement;
-    const requiredHeight = tooltipHeight + gap;
-    const requiredWidth = tooltipWidth + gap;
+    
+    // Check if preferred placement fits
+    const canFit = {
+      top: spaceAbove >= requiredVertical,
+      bottom: spaceBelow >= requiredVertical,
+      left: spaceLeft >= requiredHorizontal,
+      right: spaceRight >= requiredHorizontal,
+    };
 
-    // Check if preferred placement works, otherwise find best alternative
-    if (placement === 'bottom' && spaceBottom < requiredHeight) {
-      placement = spaceTop >= requiredHeight ? 'top' : 
-                  spaceRight >= requiredWidth ? 'right' :
-                  spaceLeft >= requiredWidth ? 'left' : 'bottom';
-    } else if (placement === 'top' && spaceTop < requiredHeight) {
-      placement = spaceBottom >= requiredHeight ? 'bottom' :
-                  spaceRight >= requiredWidth ? 'right' :
-                  spaceLeft >= requiredWidth ? 'left' : 'top';
-    } else if (placement === 'right' && spaceRight < requiredWidth) {
-      placement = spaceLeft >= requiredWidth ? 'left' :
-                  spaceBottom >= requiredHeight ? 'bottom' :
-                  spaceTop >= requiredHeight ? 'top' : 'right';
-    } else if (placement === 'left' && spaceLeft < requiredWidth) {
-      placement = spaceRight >= requiredWidth ? 'right' :
-                  spaceBottom >= requiredHeight ? 'bottom' :
-                  spaceTop >= requiredHeight ? 'top' : 'left';
+    // If preferred doesn't fit, flip to opposite or find best alternative
+    if (!canFit[placement]) {
+      const opposites: Record<string, 'top' | 'bottom' | 'left' | 'right'> = {
+        top: 'bottom',
+        bottom: 'top',
+        left: 'right',
+        right: 'left',
+      };
+      
+      if (canFit[opposites[placement]]) {
+        placement = opposites[placement];
+      } else {
+        // Find placement with most space
+        const spaces = { top: spaceAbove, bottom: spaceBelow, left: spaceLeft, right: spaceRight };
+        placement = (Object.entries(spaces).sort((a, b) => b[1] - a[1])[0][0]) as typeof placement;
+      }
     }
 
+    // Calculate position based on final placement (viewport-relative for position:fixed)
     let tooltipTop = 0;
     let tooltipLeft = 0;
 
     switch (placement) {
       case 'top':
-        tooltipTop = targetRect.top - tooltipHeight - gap + scrollY;
+        tooltipTop = targetRect.top - tooltipHeight - GAP;
         tooltipLeft = targetRect.left + targetRect.width / 2 - tooltipWidth / 2;
         break;
       case 'bottom':
-        tooltipTop = targetRect.bottom + gap + scrollY;
+        tooltipTop = targetRect.bottom + GAP;
         tooltipLeft = targetRect.left + targetRect.width / 2 - tooltipWidth / 2;
         break;
       case 'left':
-        tooltipTop = targetRect.top + targetRect.height / 2 - tooltipHeight / 2 + scrollY;
-        tooltipLeft = targetRect.left - tooltipWidth - gap;
+        tooltipTop = targetRect.top + targetRect.height / 2 - tooltipHeight / 2;
+        tooltipLeft = targetRect.left - tooltipWidth - GAP;
         break;
       case 'right':
-        tooltipTop = targetRect.top + targetRect.height / 2 - tooltipHeight / 2 + scrollY;
-        tooltipLeft = targetRect.right + gap;
+        tooltipTop = targetRect.top + targetRect.height / 2 - tooltipHeight / 2;
+        tooltipLeft = targetRect.right + GAP;
         break;
     }
 
-    // Ensure tooltip stays within viewport bounds
-    tooltipLeft = Math.max(margin, Math.min(tooltipLeft, viewportWidth - tooltipWidth - margin));
-    tooltipTop = Math.max(margin + scrollY, Math.min(tooltipTop, scrollY + viewportHeight - tooltipHeight - margin));
+    // Clamp to viewport bounds
+    tooltipLeft = Math.max(VIEWPORT_PADDING, Math.min(tooltipLeft, viewportWidth - tooltipWidth - VIEWPORT_PADDING));
+    tooltipTop = Math.max(VIEWPORT_PADDING, Math.min(tooltipTop, viewportHeight - tooltipHeight - VIEWPORT_PADDING));
 
     return { top: tooltipTop, left: tooltipLeft, placement };
-  }, [isMobile]);
+  }, []);
 
   // Find and position the spotlight on the target element
   useEffect(() => {
@@ -131,29 +143,43 @@ export function OnboardingTour() {
       if (targetElement) {
         const rect = targetElement.getBoundingClientRect();
         const padding = isMobile ? 4 : (currentStepData.spotlightPadding || 8);
+        const viewportHeight = window.innerHeight;
         
-        setSpotlightPosition({
-          top: rect.top - padding + window.scrollY,
-          left: rect.left - padding,
-          width: rect.width + padding * 2,
-          height: rect.height + padding * 2,
-        });
-
-        const position = calculateTooltipPosition(rect, currentStepData.placement);
-        setTooltipPosition(position);
-        setIsVisible(true);
-
-        // Scroll target into view if needed
-        const tooltipHeight = isMobile ? 140 : 160;
-        const elementTop = rect.top;
-        const elementBottom = rect.bottom;
+        // Check if we need to scroll to make room for tooltip
+        const tooltipHeight = TOOLTIP_HEIGHT;
+        const spaceBelow = viewportHeight - rect.bottom - VIEWPORT_PADDING;
+        const spaceAbove = rect.top - VIEWPORT_PADDING;
+        const needsSpace = tooltipHeight + GAP;
         
-        if (elementTop < 100 || elementBottom > window.innerHeight - tooltipHeight - 50) {
+        // If neither direction has enough space, scroll to center
+        if (spaceBelow < needsSpace && spaceAbove < needsSpace) {
           targetElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          setTimeout(() => {
+            const newRect = targetElement.getBoundingClientRect();
+            updatePositions(newRect, padding);
+          }, 350);
+          return;
         }
+        
+        updatePositions(rect, padding);
       } else {
         setTimeout(findAndPositionTarget, 100);
       }
+    };
+
+    const updatePositions = (rect: DOMRect, padding: number) => {
+      // Spotlight uses absolute positioning (document coordinates)
+      setSpotlightPosition({
+        top: rect.top + window.scrollY - padding,
+        left: rect.left - padding,
+        width: rect.width + padding * 2,
+        height: rect.height + padding * 2,
+      });
+
+      // Tooltip uses fixed positioning (viewport coordinates)
+      const position = calculateTooltipPosition(rect, currentStepData!.placement);
+      setTooltipPosition(position);
+      setIsVisible(true);
     };
 
     const timer = setTimeout(findAndPositionTarget, 100);
@@ -202,63 +228,65 @@ export function OnboardingTour() {
 
   const isLastStep = currentStep === totalSteps - 1;
   const isFirstStep = currentStep === 0;
-  const tooltipWidth = isMobile ? Math.min(window.innerWidth - 32, 300) : 320;
+  const tooltipWidth = Math.min(TOOLTIP_WIDTH, window.innerWidth - VIEWPORT_PADDING * 2);
 
   return createPortal(
-    <div className="fixed inset-0 z-[9999] pointer-events-none">
-      {/* Overlay with spotlight cutout */}
-      <svg
-        className="absolute inset-0 w-full h-full pointer-events-auto"
-        style={{ minHeight: document.documentElement.scrollHeight }}
-      >
-        <defs>
-          <mask id="spotlight-mask">
-            <rect x="0" y="0" width="100%" height="100%" fill="white" />
-            {spotlightPosition && (
-              <rect
-                x={spotlightPosition.left}
-                y={spotlightPosition.top}
-                width={spotlightPosition.width}
-                height={spotlightPosition.height}
-                rx={isMobile ? 8 : 12}
-                fill="black"
-              />
+    <>
+      {/* Overlay layer - absolute positioning for full document coverage */}
+      <div className="fixed inset-0 z-[9998] pointer-events-none">
+        <svg
+          className="absolute inset-0 w-full h-full pointer-events-auto"
+          style={{ minHeight: document.documentElement.scrollHeight }}
+        >
+          <defs>
+            <mask id="spotlight-mask">
+              <rect x="0" y="0" width="100%" height="100%" fill="white" />
+              {spotlightPosition && (
+                <rect
+                  x={spotlightPosition.left}
+                  y={spotlightPosition.top}
+                  width={spotlightPosition.width}
+                  height={spotlightPosition.height}
+                  rx={isMobile ? 8 : 12}
+                  fill="black"
+                />
+              )}
+            </mask>
+          </defs>
+          <rect
+            x="0"
+            y="0"
+            width="100%"
+            height="100%"
+            fill="rgba(0, 0, 0, 0.7)"
+            mask="url(#spotlight-mask)"
+            className="transition-all duration-200"
+          />
+        </svg>
+
+        {/* Spotlight border */}
+        {spotlightPosition && (
+          <div
+            className={cn(
+              "absolute pointer-events-none transition-all duration-200",
+              isMobile ? "rounded-lg ring-1 ring-primary/40" : "rounded-xl ring-2 ring-primary/30"
             )}
-          </mask>
-        </defs>
-        <rect
-          x="0"
-          y="0"
-          width="100%"
-          height="100%"
-          fill="rgba(0, 0, 0, 0.7)"
-          mask="url(#spotlight-mask)"
-          className="transition-all duration-200"
-        />
-      </svg>
+            style={{
+              top: spotlightPosition.top,
+              left: spotlightPosition.left,
+              width: spotlightPosition.width,
+              height: spotlightPosition.height,
+              boxShadow: '0 0 0 2px rgba(var(--primary), 0.1)',
+            }}
+          />
+        )}
+      </div>
 
-      {/* Spotlight border - subtle glow */}
-      {spotlightPosition && (
-        <div
-          className={cn(
-            "absolute pointer-events-none transition-all duration-200",
-            isMobile ? "rounded-lg ring-1 ring-primary/40" : "rounded-xl ring-2 ring-primary/30"
-          )}
-          style={{
-            top: spotlightPosition.top,
-            left: spotlightPosition.left,
-            width: spotlightPosition.width,
-            height: spotlightPosition.height,
-            boxShadow: '0 0 0 2px rgba(var(--primary), 0.1)',
-          }}
-        />
-      )}
-
-      {/* Compact Tooltip */}
+      {/* Tooltip - FIXED positioning for viewport-relative placement */}
       <div
         ref={tooltipRef}
         className={cn(
-          "absolute pointer-events-auto",
+          "fixed z-[9999] pointer-events-auto",
           "bg-popover/95 backdrop-blur-sm border border-border/60 shadow-xl",
           isMobile ? "rounded-xl" : "rounded-2xl",
           "animate-in fade-in-0 zoom-in-95 duration-200"
@@ -268,15 +296,19 @@ export function OnboardingTour() {
           left: tooltipPosition.left,
           width: tooltipWidth,
         }}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="onboarding-title"
+        aria-describedby="onboarding-description"
       >
-        {/* Compact Header */}
+        {/* Header */}
         <div className={cn(
           "flex items-center justify-between",
           isMobile ? "px-3 pt-3 pb-1" : "px-4 pt-3 pb-1"
         )}>
           <div className="flex items-center gap-2">
             <div className={cn(
-              "rounded-md bg-primary/10 flex items-center justify-center",
+              "rounded-md bg-primary/10 flex items-center justify-center flex-shrink-0",
               isMobile ? "h-6 w-6" : "h-7 w-7"
             )}>
               <Sparkles className={cn(
@@ -295,7 +327,7 @@ export function OnboardingTour() {
             variant="ghost"
             size="icon"
             className={cn(
-              "rounded-md hover:bg-muted/60 text-muted-foreground hover:text-foreground",
+              "rounded-md hover:bg-muted/60 text-muted-foreground hover:text-foreground flex-shrink-0",
               isMobile ? "h-6 w-6" : "h-7 w-7"
             )}
             onClick={skipOnboarding}
@@ -305,25 +337,31 @@ export function OnboardingTour() {
           </Button>
         </div>
 
-        {/* Compact Content */}
+        {/* Content */}
         <div className={cn(
           isMobile ? "px-3 py-2" : "px-4 py-2"
         )}>
-          <h3 className={cn(
-            "font-semibold text-foreground leading-tight",
-            isMobile ? "text-sm mb-1" : "text-base mb-1.5"
-          )}>
+          <h3 
+            id="onboarding-title"
+            className={cn(
+              "font-semibold text-foreground leading-tight",
+              isMobile ? "text-sm mb-1" : "text-base mb-1.5"
+            )}
+          >
             {currentStepData.title}
           </h3>
-          <p className={cn(
-            "text-muted-foreground leading-snug",
-            isMobile ? "text-xs" : "text-sm"
-          )}>
+          <p 
+            id="onboarding-description"
+            className={cn(
+              "text-muted-foreground leading-snug",
+              isMobile ? "text-xs" : "text-sm"
+            )}
+          >
             {currentStepData.description}
           </p>
         </div>
 
-        {/* Compact Progress Dots */}
+        {/* Progress Dots */}
         <div className={cn(
           "flex items-center justify-center gap-1",
           isMobile ? "py-1.5" : "py-2"
@@ -344,7 +382,7 @@ export function OnboardingTour() {
           ))}
         </div>
 
-        {/* Compact Footer */}
+        {/* Footer */}
         <div className={cn(
           "flex items-center justify-between border-t border-border/40",
           isMobile ? "px-3 py-2" : "px-4 py-2.5"
@@ -400,7 +438,7 @@ export function OnboardingTour() {
           </div>
         </div>
       </div>
-    </div>,
+    </>,
     document.body
   );
 }

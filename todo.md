@@ -1833,3 +1833,11 @@
 - [x] Add ability to send custom message with reminder
 - [x] Log reminder history
 - [x] Test reminder functionality
+
+
+## Onboarding Modal Improvements (Jan 9, 2026)
+- [x] Research onboarding modal best practices
+- [x] Fix tooltip cutoff issues on all screen sizes
+- [x] Implement viewport-aware positioning
+- [x] Add scroll-into-view for target elements
+- [x] Test on mobile, tablet, and desktop viewports
