@@ -47,11 +47,12 @@ export default defineConfig({
             return 'vendor-forms';
           }
           
-          // Charts - only loaded on Analytics page
-          if (id.includes('node_modules/recharts/') || 
-              id.includes('node_modules/d3-')) {
-            return 'vendor-charts';
-          }
+          // Charts - recharts and all d3 dependencies must stay together
+          // to avoid circular reference initialization errors
+          // Don't split these - let them bundle naturally with their consumers
+          // if (id.includes('node_modules/recharts/') || id.includes('node_modules/d3-')) {
+          //   return 'vendor-charts';
+          // }
           
           // Streamdown and its heavy dependencies (mermaid, shiki, cytoscape)
           // These will be lazy loaded with AIAssistant
