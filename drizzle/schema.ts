@@ -169,6 +169,16 @@ export const emailLog = mysqlTable("emailLog", {
   sentAt: timestamp("sentAt").defaultNow().notNull(),
   success: boolean("success").default(true).notNull(),
   errorMessage: text("errorMessage"),
+  // Email delivery tracking (Resend webhooks)
+  messageId: varchar("messageId", { length: 100 }), // Resend message ID
+  deliveryStatus: mysqlEnum("deliveryStatus", ["sent", "delivered", "opened", "clicked", "bounced", "complained", "failed"]).default("sent"),
+  deliveredAt: timestamp("deliveredAt"),
+  openedAt: timestamp("openedAt"),
+  openCount: int("openCount").default(0),
+  clickedAt: timestamp("clickedAt"),
+  clickCount: int("clickCount").default(0),
+  bouncedAt: timestamp("bouncedAt"),
+  bounceType: varchar("bounceType", { length: 50 }), // hard, soft, etc.
 });
 
 export type EmailLog = typeof emailLog.$inferSelect;
@@ -985,3 +995,22 @@ export const batchInvoiceTemplateLineItems = mysqlTable("batchInvoiceTemplateLin
 
 export type BatchInvoiceTemplateLineItem = typeof batchInvoiceTemplateLineItems.$inferSelect;
 export type InsertBatchInvoiceTemplateLineItem = typeof batchInvoiceTemplateLineItems.$inferInsert;
+
+
+/**
+ * Audit Log - Track all user actions for compliance and debugging
+ */
+export const auditLog = mysqlTable("auditLog", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  action: varchar("action", { length: 50 }).notNull(), // create, update, delete, view, send, etc.
+  entityType: varchar("entityType", { length: 50 }).notNull(), // invoice, client, payment, etc.
+  entityId: int("entityId"),
+  entityName: varchar("entityName", { length: 255 }), // Human-readable name for display
+  details: text("details"), // JSON string with additional context (old values, new values, etc.)
+  ipAddress: varchar("ipAddress", { length: 45 }), // IPv4 or IPv6
+  userAgent: varchar("userAgent", { length: 500 }),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+export type AuditLog = typeof auditLog.$inferSelect;
+export type InsertAuditLog = typeof auditLog.$inferInsert;

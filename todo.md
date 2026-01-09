@@ -1851,3 +1851,22 @@
 - [x] Apply consistent header/content/footer padding
 - [x] Ensure visual harmony across all modals
 - [x] Test modal consistency across the application
+
+
+## Production Hardening & UX Improvements (Jan 9, 2026)
+
+### Priority 1: Production Hardening
+- [x] Set up error monitoring (console-based error tracking)
+- [x] Implement rate limiting on public endpoints
+- [x] Add health check endpoint for monitoring
+- [ ] Database query optimization (add indexes)
+
+### Priority 2: UX Improvements
+- [x] Implement invoice duplication feature
+- [x] Add bulk invoice actions (send/download multiple)
+- [x] Add email delivery tracking via Resend webhooks
+
+### Priority 3: Compliance & Operations
+- [ ] Implement data export for GDPR compliance
+- [x] Add audit logging system for tracking changes
+- [ ] Add account deletion flow (GDPR right to be forgotten)

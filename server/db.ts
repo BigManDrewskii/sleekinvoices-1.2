@@ -48,6 +48,9 @@ import {
   batchInvoiceTemplateLineItems,
   BatchInvoiceTemplateLineItem,
   InsertBatchInvoiceTemplateLineItem,
+  auditLog,
+  AuditLog,
+  InsertAuditLog,
 } from "../drizzle/schema";
 import { ENV } from './_core/env';
 import { DEFAULT_REMINDER_TEMPLATE } from './email';
@@ -702,6 +705,46 @@ export async function getEmailLogByInvoiceId(invoiceId: number) {
     .orderBy(desc(emailLog.sentAt));
 }
 
+export async function getEmailLogByMessageId(messageId: string) {
+  const db = await getDb();
+  if (!db) return null;
+  
+  const results = await db.select().from(emailLog)
+    .where(eq(emailLog.messageId, messageId))
+    .limit(1);
+  
+  return results[0] || null;
+}
+
+export async function updateEmailLogDelivery(
+  id: number,
+  data: {
+    deliveryStatus?: 'sent' | 'delivered' | 'opened' | 'clicked' | 'bounced' | 'complained' | 'failed';
+    deliveredAt?: Date;
+    openedAt?: Date;
+    openCount?: number;
+    clickedAt?: Date;
+    clickCount?: number;
+    bouncedAt?: Date;
+    bounceType?: string;
+  }
+) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  await db.update(emailLog)
+    .set(data)
+    .where(eq(emailLog.id, id));
+}
+
+export async function updateEmailLogMessageId(id: number, messageId: string) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  await db.update(emailLog)
+    .set({ messageId })
+    .where(eq(emailLog.id, id));
+}
 
 // ============================================================================
 // RECURRING INVOICE OPERATIONS
@@ -3787,4 +3830,170 @@ export async function getClientsByTagId(tagId: number, userId: number): Promise<
       inArray(clients.id, clientIds)
     ))
     .orderBy(clients.name);
+}
+
+
+// ============================================================================
+// GDPR DATA EXPORT OPERATIONS
+// ============================================================================
+
+/**
+ * Get all payments for a user (for GDPR export)
+ */
+export async function getPaymentsByUserId(userId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  
+  // Get all invoices for this user first
+  const userInvoices = await db
+    .select({ id: invoices.id })
+    .from(invoices)
+    .where(eq(invoices.userId, userId));
+  
+  if (userInvoices.length === 0) return [];
+  
+  const invoiceIds = userInvoices.map(i => i.id);
+  
+  return await db
+    .select()
+    .from(payments)
+    .where(inArray(payments.invoiceId, invoiceIds))
+    .orderBy(desc(payments.paymentDate));
+}
+
+/**
+ * Get all email logs for a user (for GDPR export)
+ */
+export async function getEmailLogsByUserId(userId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  
+  return await db
+    .select()
+    .from(emailLog)
+    .where(eq(emailLog.userId, userId))
+    .orderBy(desc(emailLog.sentAt));
+}
+
+
+// ============================================================================
+// AUDIT LOG OPERATIONS
+// ============================================================================
+
+/**
+ * Log an audit event
+ */
+export async function logAuditEvent(data: {
+  userId: number;
+  action: string;
+  entityType: string;
+  entityId?: number;
+  entityName?: string;
+  details?: Record<string, any>;
+  ipAddress?: string;
+  userAgent?: string;
+}) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  await db.insert(auditLog).values({
+    userId: data.userId,
+    action: data.action,
+    entityType: data.entityType,
+    entityId: data.entityId || null,
+    entityName: data.entityName || null,
+    details: data.details ? JSON.stringify(data.details) : null,
+    ipAddress: data.ipAddress || null,
+    userAgent: data.userAgent || null,
+  });
+}
+
+/**
+ * Get audit logs for a user with pagination
+ */
+export async function getAuditLogs(
+  userId: number,
+  options: {
+    limit?: number;
+    offset?: number;
+    entityType?: string;
+    action?: string;
+    startDate?: Date;
+    endDate?: Date;
+  } = {}
+) {
+  const db = await getDb();
+  if (!db) return { logs: [], total: 0 };
+  
+  const { limit = 50, offset = 0, entityType, action, startDate, endDate } = options;
+  
+  // Build conditions
+  const conditions = [eq(auditLog.userId, userId)];
+  
+  if (entityType) {
+    conditions.push(eq(auditLog.entityType, entityType));
+  }
+  if (action) {
+    conditions.push(eq(auditLog.action, action));
+  }
+  if (startDate) {
+    conditions.push(gte(auditLog.createdAt, startDate));
+  }
+  if (endDate) {
+    conditions.push(lte(auditLog.createdAt, endDate));
+  }
+  
+  // Get total count
+  const countResult = await db
+    .select({ count: sql<number>`COUNT(*)` })
+    .from(auditLog)
+    .where(and(...conditions));
+  
+  const total = countResult[0]?.count || 0;
+  
+  // Get logs
+  const logs = await db
+    .select()
+    .from(auditLog)
+    .where(and(...conditions))
+    .orderBy(desc(auditLog.createdAt))
+    .limit(limit)
+    .offset(offset);
+  
+  // Parse details JSON
+  const parsedLogs = logs.map(log => ({
+    ...log,
+    details: log.details ? JSON.parse(log.details as string) : null,
+  }));
+  
+  return { logs: parsedLogs, total };
+}
+
+/**
+ * Get recent activity for a specific entity
+ */
+export async function getEntityAuditLogs(
+  userId: number,
+  entityType: string,
+  entityId: number,
+  limit: number = 20
+) {
+  const db = await getDb();
+  if (!db) return [];
+  
+  const logs = await db
+    .select()
+    .from(auditLog)
+    .where(and(
+      eq(auditLog.userId, userId),
+      eq(auditLog.entityType, entityType),
+      eq(auditLog.entityId, entityId)
+    ))
+    .orderBy(desc(auditLog.createdAt))
+    .limit(limit);
+  
+  return logs.map(log => ({
+    ...log,
+    details: log.details ? JSON.parse(log.details as string) : null,
+  }));
 }

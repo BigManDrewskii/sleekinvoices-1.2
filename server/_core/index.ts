@@ -11,6 +11,17 @@ import { initializeScheduler } from "../jobs/scheduler";
 import { initializeDefaultCurrencies } from "../currency";
 import { standardRateLimit, strictRateLimit } from "./rateLimit";
 
+// Global error handler for uncaught exceptions
+process.on('uncaughtException', (error) => {
+  console.error('[CRITICAL] Uncaught Exception:', error);
+  // In production, you would send this to an error monitoring service
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('[CRITICAL] Unhandled Rejection at:', promise, 'reason:', reason);
+  // In production, you would send this to an error monitoring service
+});
+
 function isPortAvailable(port: number): Promise<boolean> {
   return new Promise(resolve => {
     const server = net.createServer();
@@ -54,9 +65,66 @@ async function startServer() {
     }
   );
   
+  // Resend webhook endpoint for email delivery tracking
+  app.post(
+    "/api/webhooks/resend",
+    express.json(),
+    async (req, res) => {
+      const resendRouter = (await import("../webhooks/resend")).default;
+      resendRouter(req, res, () => {});
+    }
+  );
+  
   // Configure body parser with larger size limit for file uploads
   app.use(express.json({ limit: "50mb" }));
   app.use(express.urlencoded({ limit: "50mb", extended: true }));
+  
+  // Health check endpoint for load balancers and monitoring
+  app.get("/api/health", (req, res) => {
+    res.json({
+      status: "healthy",
+      timestamp: new Date().toISOString(),
+      uptime: process.uptime(),
+      version: process.env.npm_package_version || "1.0.0",
+      environment: process.env.NODE_ENV || "development",
+    });
+  });
+  
+  // Detailed health check with database connectivity
+  app.get("/api/health/detailed", async (req, res) => {
+    try {
+      const { getDb } = await import("../db");
+      const db = await getDb();
+      if (!db) {
+        throw new Error("Database connection not available");
+      }
+      // Simple query to check database connectivity
+      const startTime = Date.now();
+      await db.execute("SELECT 1");
+      const dbLatency = Date.now() - startTime;
+      
+      res.json({
+        status: "healthy",
+        timestamp: new Date().toISOString(),
+        uptime: process.uptime(),
+        version: process.env.npm_package_version || "1.0.0",
+        environment: process.env.NODE_ENV || "development",
+        checks: {
+          database: { status: "healthy", latencyMs: dbLatency },
+          memory: {
+            heapUsed: Math.round(process.memoryUsage().heapUsed / 1024 / 1024) + "MB",
+            heapTotal: Math.round(process.memoryUsage().heapTotal / 1024 / 1024) + "MB",
+          },
+        },
+      });
+    } catch (error: any) {
+      res.status(503).json({
+        status: "unhealthy",
+        timestamp: new Date().toISOString(),
+        error: error.message,
+      });
+    }
+  });
   
   // Rate limiting for API endpoints
   app.use("/api/trpc", standardRateLimit);

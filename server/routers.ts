@@ -44,6 +44,63 @@ export const appRouter = router({
         return { success: true };
       }),
     
+    // GDPR Data Export - Download all user data
+    exportAllData: protectedProcedure.mutation(async ({ ctx }) => {
+      const userId = ctx.user.id;
+      
+      // Gather all user data
+      const [clients, invoices, products, expenses, templates, recurringInvoices, estimates, payments, emailLogs] = await Promise.all([
+        db.getClientsByUserId(userId),
+        db.getInvoicesByUserId(userId),
+        db.getProductsByUserId(userId),
+        db.getExpensesByUserId(userId),
+        db.getInvoiceTemplatesByUserId(userId),
+        db.getRecurringInvoicesByUserId(userId),
+        db.getEstimatesByUserId(userId),
+        db.getPaymentsByUserId(userId),
+        db.getEmailLogsByUserId(userId),
+      ]);
+      
+      // Get line items for each invoice
+      const invoicesWithLineItems = await Promise.all(
+        invoices.map(async (invoice) => {
+          const lineItems = await db.getLineItemsByInvoiceId(invoice.id);
+          return { ...invoice, lineItems };
+        })
+      );
+      
+      // Compile all data
+      const exportData = {
+        exportedAt: new Date().toISOString(),
+        user: {
+          id: ctx.user.id,
+          email: ctx.user.email,
+          name: ctx.user.name,
+          companyName: ctx.user.companyName,
+          companyAddress: ctx.user.companyAddress,
+          companyPhone: ctx.user.companyPhone,
+          taxId: ctx.user.taxId,
+          createdAt: ctx.user.createdAt,
+        },
+        clients,
+        invoices: invoicesWithLineItems,
+        products,
+        expenses,
+        templates,
+        recurringInvoices,
+        estimates,
+        payments,
+        emailLogs,
+      };
+      
+      // Convert to JSON and upload to S3
+      const jsonData = JSON.stringify(exportData, null, 2);
+      const fileKey = `exports/${userId}/sleek-invoices-data-export-${new Date().toISOString().split('T')[0]}-${nanoid(6)}.json`;
+      const { url } = await storagePut(fileKey, Buffer.from(jsonData), 'application/json');
+      
+      return { url, exportedAt: exportData.exportedAt };
+    }),
+    
     uploadLogo: protectedProcedure
       .input(z.object({
         base64Data: z.string(),
@@ -615,6 +672,164 @@ export const appRouter = router({
         return { success: true, deletedCount };
       }),
     
+    // Bulk update status for multiple invoices
+    bulkUpdateStatus: protectedProcedure
+      .input(z.object({
+        ids: z.array(z.number()),
+        status: z.enum(['draft', 'sent', 'paid', 'overdue', 'canceled']),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        let updatedCount = 0;
+        const errors: string[] = [];
+        
+        for (const id of input.ids) {
+          try {
+            await db.updateInvoice(id, ctx.user.id, { status: input.status });
+            updatedCount++;
+          } catch (error: any) {
+            console.error(`Failed to update invoice ${id}:`, error);
+            errors.push(`Invoice ${id}: ${error.message}`);
+          }
+        }
+        
+        return { success: true, updatedCount, errors };
+      }),
+    
+    // Bulk send emails for multiple invoices
+    bulkSendEmail: protectedProcedure
+      .input(z.object({ ids: z.array(z.number()) }))
+      .mutation(async ({ ctx, input }) => {
+        let sentCount = 0;
+        const errors: string[] = [];
+        
+        for (const id of input.ids) {
+          try {
+            const invoice = await db.getInvoiceById(id, ctx.user.id);
+            if (!invoice) {
+              errors.push(`Invoice ${id}: Not found`);
+              continue;
+            }
+            
+            const lineItems = await db.getLineItemsByInvoiceId(id);
+            const client = await db.getClientById(invoice.clientId, ctx.user.id);
+            if (!client) {
+              errors.push(`Invoice ${id}: Client not found`);
+              continue;
+            }
+            
+            if (!client.email) {
+              errors.push(`Invoice ${invoice.invoiceNumber}: Client has no email`);
+              continue;
+            }
+            
+            // Get user's default template
+            const template = await db.getDefaultTemplate(ctx.user.id);
+            
+            // Generate PDF
+            const pdfBuffer = await generateInvoicePDF({
+              invoice,
+              client,
+              lineItems,
+              user: ctx.user,
+              template,
+            });
+            
+            // Send email
+            const result = await sendInvoiceEmail({
+              invoice,
+              client,
+              user: ctx.user,
+              pdfBuffer,
+              paymentLinkUrl: invoice.stripePaymentLinkUrl || undefined,
+            });
+            
+            if (result.success) {
+              // Update invoice status to 'sent' if it was draft
+              if (invoice.status === 'draft') {
+                await db.updateInvoice(id, ctx.user.id, {
+                  status: 'sent',
+                  sentAt: new Date(),
+                });
+              }
+              
+              // Log email
+              await db.logEmail({
+                userId: ctx.user.id,
+                invoiceId: invoice.id,
+                recipientEmail: client.email,
+                subject: `Invoice ${invoice.invoiceNumber}`,
+                emailType: 'invoice',
+                success: true,
+              });
+              
+              sentCount++;
+            } else {
+              errors.push(`Invoice ${invoice.invoiceNumber}: ${result.error}`);
+            }
+          } catch (error: any) {
+            console.error(`Failed to send invoice ${id}:`, error);
+            errors.push(`Invoice ${id}: ${error.message}`);
+          }
+        }
+        
+        return { success: true, sentCount, errors };
+      }),
+    
+    // Bulk create payment links for multiple invoices
+    bulkCreatePaymentLinks: protectedProcedure
+      .input(z.object({ ids: z.array(z.number()) }))
+      .mutation(async ({ ctx, input }) => {
+        let createdCount = 0;
+        const errors: string[] = [];
+        const links: { invoiceId: number; invoiceNumber: string; url: string }[] = [];
+        
+        for (const id of input.ids) {
+          try {
+            const invoice = await db.getInvoiceById(id, ctx.user.id);
+            if (!invoice) {
+              errors.push(`Invoice ${id}: Not found`);
+              continue;
+            }
+            
+            // Skip if already has payment link
+            if (invoice.stripePaymentLinkUrl) {
+              links.push({
+                invoiceId: id,
+                invoiceNumber: invoice.invoiceNumber,
+                url: invoice.stripePaymentLinkUrl,
+              });
+              continue;
+            }
+            
+            const { paymentLinkId, url } = await createPaymentLink({
+              amount: Number(invoice.total),
+              description: `Invoice ${invoice.invoiceNumber}`,
+              metadata: {
+                invoiceId: invoice.id.toString(),
+                userId: ctx.user.id.toString(),
+              },
+            });
+            
+            await db.updateInvoice(id, ctx.user.id, {
+              stripePaymentLinkId: paymentLinkId,
+              stripePaymentLinkUrl: url,
+            });
+            
+            links.push({
+              invoiceId: id,
+              invoiceNumber: invoice.invoiceNumber,
+              url,
+            });
+            createdCount++;
+          } catch (error: any) {
+            console.error(`Failed to create payment link for invoice ${id}:`, error);
+            errors.push(`Invoice ${id}: ${error.message}`);
+          }
+        }
+        
+        return { success: true, createdCount, links, errors };
+      }),
+    
     generatePDF: protectedProcedure
       .input(z.object({ id: z.number() }))
       .mutation(async ({ ctx, input }) => {
@@ -785,6 +1000,83 @@ export const appRouter = router({
         });
         
         return result;
+      }),
+    
+    // Duplicate an existing invoice
+    duplicate: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ ctx, input }) => {
+        // Get the original invoice
+        const originalInvoice = await db.getInvoiceById(input.id, ctx.user.id);
+        if (!originalInvoice) throw new Error('Invoice not found');
+        
+        // Check if user can create invoice (limit enforcement)
+        const canCreate = await db.canUserCreateInvoice(
+          ctx.user.id,
+          ctx.user.subscriptionStatus
+        );
+        
+        if (!canCreate) {
+          throw new Error(
+            'Monthly invoice limit reached. You have created 3 invoices this month. ' +
+            'Upgrade to Pro for unlimited invoices at $12/month.'
+          );
+        }
+        
+        // Get line items from original invoice
+        const originalLineItems = await db.getLineItemsByInvoiceId(input.id);
+        
+        // Generate new invoice number
+        const newInvoiceNumber = await db.getNextInvoiceNumber(ctx.user.id);
+        
+        // Calculate new dates (issue date = today, due date = today + original difference)
+        const originalIssueDateMs = new Date(originalInvoice.issueDate).getTime();
+        const originalDueDateMs = new Date(originalInvoice.dueDate).getTime();
+        const daysDifference = Math.ceil((originalDueDateMs - originalIssueDateMs) / (1000 * 60 * 60 * 24));
+        
+        const newIssueDate = new Date();
+        const newDueDate = new Date();
+        newDueDate.setDate(newDueDate.getDate() + daysDifference);
+        
+        // Create the duplicated invoice
+        const newInvoice = await db.createInvoice({
+          userId: ctx.user.id,
+          clientId: originalInvoice.clientId,
+          invoiceNumber: newInvoiceNumber,
+          status: 'draft', // Always start as draft
+          subtotal: originalInvoice.subtotal,
+          taxRate: originalInvoice.taxRate,
+          taxAmount: originalInvoice.taxAmount,
+          discountType: originalInvoice.discountType,
+          discountValue: originalInvoice.discountValue,
+          discountAmount: originalInvoice.discountAmount,
+          total: originalInvoice.total,
+          amountPaid: "0",
+          issueDate: newIssueDate,
+          dueDate: newDueDate,
+          notes: originalInvoice.notes,
+          paymentTerms: originalInvoice.paymentTerms,
+          templateId: originalInvoice.templateId,
+          currency: originalInvoice.currency,
+        });
+        
+        // Duplicate line items
+        for (let i = 0; i < originalLineItems.length; i++) {
+          const item = originalLineItems[i]!;
+          await db.createLineItem({
+            invoiceId: newInvoice.id,
+            description: item.description,
+            quantity: item.quantity,
+            rate: item.rate,
+            amount: item.amount,
+            sortOrder: item.sortOrder,
+          });
+        }
+        
+        // Increment usage counter
+        await db.incrementInvoiceCount(ctx.user.id);
+        
+        return newInvoice;
       }),
     
     getAnalytics: protectedProcedure

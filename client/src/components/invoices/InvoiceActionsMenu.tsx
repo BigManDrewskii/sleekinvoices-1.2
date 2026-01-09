@@ -16,6 +16,7 @@ import {
   MoreVertical,
   RefreshCw,
   Check,
+  Copy,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -29,6 +30,7 @@ interface InvoiceActionsMenuProps {
   onSendEmail: () => void;
   onCreatePaymentLink: () => void;
   onDelete: () => void;
+  onDuplicate: () => void;
   onSyncToQuickBooks?: () => void;
   quickBooksConnected?: boolean;
   quickBooksSynced?: boolean;
@@ -37,6 +39,7 @@ interface InvoiceActionsMenuProps {
     email?: boolean;
     paymentLink?: boolean;
     delete?: boolean;
+    duplicate?: boolean;
     quickBooksSync?: boolean;
   };
 }
@@ -51,6 +54,7 @@ export function InvoiceActionsMenu({
   onSendEmail,
   onCreatePaymentLink,
   onDelete,
+  onDuplicate,
   onSyncToQuickBooks,
   quickBooksConnected = false,
   quickBooksSynced = false,
@@ -85,6 +89,14 @@ export function InvoiceActionsMenu({
         <DropdownMenuItem onClick={handleCopyInvoiceNumber} className="cursor-pointer">
           <LinkIcon className="mr-2 h-4 w-4" />
           <span>Copy Invoice #</span>
+        </DropdownMenuItem>
+        <DropdownMenuItem
+          onClick={onDuplicate}
+          disabled={isLoading.duplicate}
+          className="cursor-pointer"
+        >
+          <Copy className="mr-2 h-4 w-4" />
+          <span>Duplicate Invoice</span>
         </DropdownMenuItem>
 
         <DropdownMenuSeparator />

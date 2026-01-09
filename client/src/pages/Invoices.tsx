@@ -56,6 +56,7 @@ import {
   X,
   Calendar,
   DollarSign,
+  Check,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { useState, useMemo, useRef } from "react";
@@ -329,6 +330,80 @@ export default function Invoices() {
   const handleSyncToQuickBooks = (invoiceId: number) => {
     setSyncingInvoiceId(invoiceId);
     syncToQuickBooks.mutate({ invoiceId });
+  };
+
+  // Duplicate invoice mutation
+  const duplicateInvoice = trpc.invoices.duplicate.useMutation({
+    onSuccess: (newInvoice) => {
+      toast.success(`Invoice duplicated as ${newInvoice.invoiceNumber}`);
+      utils.invoices.list.invalidate();
+      // Navigate to edit the new invoice
+      setLocation(`/invoices/${newInvoice.id}/edit`);
+    },
+    onError: (error) => {
+      toast.error(error.message || "Failed to duplicate invoice");
+    },
+  });
+
+  const handleDuplicate = (invoiceId: number) => {
+    duplicateInvoice.mutate({ id: invoiceId });
+  };
+
+  // Bulk update status mutation
+  const bulkUpdateStatus = trpc.invoices.bulkUpdateStatus.useMutation({
+    onSuccess: (data) => {
+      toast.success(`${data.updatedCount} invoice(s) updated successfully`);
+      if (data.errors.length > 0) {
+        toast.warning(`${data.errors.length} invoice(s) failed to update`);
+      }
+      utils.invoices.list.invalidate();
+      setSelectedIds(new Set());
+    },
+    onError: (error) => {
+      toast.error(error.message || "Failed to update invoices");
+    },
+  });
+
+  const handleBulkUpdateStatus = (status: 'draft' | 'sent' | 'paid' | 'overdue' | 'canceled') => {
+    bulkUpdateStatus.mutate({ ids: Array.from(selectedIds), status });
+  };
+
+  // Bulk send email mutation
+  const bulkSendEmail = trpc.invoices.bulkSendEmail.useMutation({
+    onSuccess: (data) => {
+      toast.success(`${data.sentCount} invoice(s) sent successfully`);
+      if (data.errors.length > 0) {
+        toast.warning(`${data.errors.length} invoice(s) failed to send`);
+      }
+      utils.invoices.list.invalidate();
+      setSelectedIds(new Set());
+    },
+    onError: (error) => {
+      toast.error(error.message || "Failed to send invoices");
+    },
+  });
+
+  const handleBulkSendEmail = () => {
+    bulkSendEmail.mutate({ ids: Array.from(selectedIds) });
+  };
+
+  // Bulk create payment links mutation
+  const bulkCreatePaymentLinks = trpc.invoices.bulkCreatePaymentLinks.useMutation({
+    onSuccess: (data) => {
+      toast.success(`${data.createdCount} payment link(s) created`);
+      if (data.errors.length > 0) {
+        toast.warning(`${data.errors.length} invoice(s) failed`);
+      }
+      utils.invoices.list.invalidate();
+      setSelectedIds(new Set());
+    },
+    onError: (error) => {
+      toast.error(error.message || "Failed to create payment links");
+    },
+  });
+
+  const handleBulkCreatePaymentLinks = () => {
+    bulkCreatePaymentLinks.mutate({ ids: Array.from(selectedIds) });
   };
 
   if (loading) {
@@ -618,7 +693,44 @@ export default function Invoices() {
                     <ChevronDown className="h-4 w-4 ml-1" />
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
+                <DropdownMenuContent align="end" className="w-56">
+                  <DropdownMenuItem
+                    onClick={() => handleBulkSendEmail()}
+                    disabled={bulkSendEmail.isPending}
+                  >
+                    <Mail className="h-4 w-4 mr-2" />
+                    Send Emails
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() => handleBulkCreatePaymentLinks()}
+                    disabled={bulkCreatePaymentLinks.isPending}
+                  >
+                    <LinkIcon className="h-4 w-4 mr-2" />
+                    Create Payment Links
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem
+                    onClick={() => handleBulkUpdateStatus('sent')}
+                    disabled={bulkUpdateStatus.isPending}
+                  >
+                    <Mail className="h-4 w-4 mr-2" />
+                    Mark as Sent
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() => handleBulkUpdateStatus('paid')}
+                    disabled={bulkUpdateStatus.isPending}
+                  >
+                    <Check className="h-4 w-4 mr-2" />
+                    Mark as Paid
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() => handleBulkUpdateStatus('draft')}
+                    disabled={bulkUpdateStatus.isPending}
+                  >
+                    <FileText className="h-4 w-4 mr-2" />
+                    Mark as Draft
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
                   <DropdownMenuItem
                     onClick={() => setBulkDeleteDialogOpen(true)}
                     className="text-destructive focus:text-destructive"
@@ -967,12 +1079,14 @@ export default function Invoices() {
                               onSendEmail={() => handleSendEmail(invoice.id)}
                               onCreatePaymentLink={() => handleCreatePaymentLink(invoice.id)}
                               onDelete={() => handleDelete(invoice)}
+                              onDuplicate={() => handleDuplicate(invoice.id)}
                               onSyncToQuickBooks={() => handleSyncToQuickBooks(invoice.id)}
                               quickBooksConnected={qbStatus?.connected || false}
                               isLoading={{
                                 pdf: generatePDF.isPending,
                                 email: sendEmail.isPending,
                                 paymentLink: createPaymentLink.isPending,
+                                duplicate: duplicateInvoice.isPending,
                                 quickBooksSync: syncingInvoiceId === invoice.id,
                               }}
                             />
@@ -1013,12 +1127,14 @@ export default function Invoices() {
                           onSendEmail={() => handleSendEmail(invoice.id)}
                           onCreatePaymentLink={() => handleCreatePaymentLink(invoice.id)}
                           onDelete={() => handleDelete(invoice)}
+                          onDuplicate={() => handleDuplicate(invoice.id)}
                           onSyncToQuickBooks={() => handleSyncToQuickBooks(invoice.id)}
                           quickBooksConnected={qbStatus?.connected || false}
                           isLoading={{
                             pdf: generatePDF.isPending,
                             email: sendEmail.isPending,
                             paymentLink: createPaymentLink.isPending,
+                            duplicate: duplicateInvoice.isPending,
                             quickBooksSync: syncingInvoiceId === invoice.id,
                           }}
                         />
