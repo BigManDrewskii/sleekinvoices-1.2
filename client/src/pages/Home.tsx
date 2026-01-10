@@ -1,5 +1,6 @@
 import { GearLoader } from "@/components/ui/gear-loader";
 import { useAuth } from "@/_core/hooks/useAuth";
+import { isLocalDevMode } from "@/const";
 import { useEffect } from "react";
 import { useLocation } from "wouter";
 
@@ -10,8 +11,8 @@ export default function Home() {
   useEffect(() => {
     if (loading) return;
 
-    // In development with SKIP_AUTH, always go to dashboard
-    if (import.meta.env.DEV) {
+    // In local dev mode with SKIP_AUTH, always go to dashboard
+    if (isLocalDevMode()) {
       setLocation("/dashboard");
       return;
     }
