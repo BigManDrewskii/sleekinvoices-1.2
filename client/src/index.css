@@ -388,6 +388,14 @@ label {
   letter-spacing: 0.01em;
 }
 
+/* Bold numeric values - for prominent amounts like totals and prices */
+.font-numeric-bold {
+  font-family: var(--font-mono); /* Atkinson Hyperlegible Mono - ONLY for numbers */
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.01em;
+  font-weight: 700;
+}
+
 /* Utility classes for explicit font control */
 .font-heading {
   font-family: var(--font-sans); /* Google Sans Flex - Primary font */

@@ -242,8 +242,8 @@ export default function Subscription() {
                       className="bg-background/50 rounded-lg p-3 text-center border border-border/50"
                     >
                       <div className="text-sm font-medium">{tier.label}</div>
-                      <div className="text-lg font-bold">${tier.totalPrice}</div>
-                      <div className="text-xs text-green-500">Save {tier.savingsPercent}%</div>
+                      <div className="text-lg font-numeric-bold">${tier.totalPrice}</div>
+                      <div className="text-xs text-green-500">Save <span className="font-numeric">{tier.savingsPercent}</span>%</div>
                     </div>
                   ))}
                 </div>
@@ -269,7 +269,7 @@ export default function Subscription() {
                 <CardTitle>Free</CardTitle>
                 <CardDescription>Get started with basic features</CardDescription>
                 <div className="mt-4">
-                  <span className="text-4xl font-bold text-foreground">${SUBSCRIPTION_PLANS.FREE.price}</span>
+                  <span className="text-4xl font-numeric-bold text-foreground">${SUBSCRIPTION_PLANS.FREE.price}</span>
                   <span className="text-muted-foreground">/month</span>
                 </div>
               </CardHeader>
@@ -277,7 +277,7 @@ export default function Subscription() {
                 <ul className="space-y-3 mb-6">
                   <li className="flex items-center gap-2">
                     <Check className="h-4 w-4 text-green-500" />
-                    <span className="text-sm">{SUBSCRIPTION_PLANS.FREE.invoiceLimit} invoices per month</span>
+                    <span className="text-sm"><span className="font-numeric">{SUBSCRIPTION_PLANS.FREE.invoiceLimit}</span> invoices per month</span>
                   </li>
                   <li className="flex items-center gap-2">
                     <Check className="h-4 w-4 text-green-500" />
@@ -321,11 +321,11 @@ export default function Subscription() {
                 </div>
                 <CardDescription>Everything you need to grow</CardDescription>
                 <div className="mt-4">
-                  <span className="text-4xl font-bold text-foreground">${SUBSCRIPTION_PLANS.PRO.price}</span>
+                  <span className="text-4xl font-numeric-bold text-foreground">${SUBSCRIPTION_PLANS.PRO.price}</span>
                   <span className="text-muted-foreground">/month with card</span>
                   {!isActive && (
                     <div className="text-sm text-green-500 mt-1">
-                      or from ${lowestCryptoPrice}/month with crypto
+                      or from $<span className="font-numeric">{lowestCryptoPrice}</span>/month with crypto
                     </div>
                   )}
                 </div>
@@ -438,13 +438,13 @@ export default function Subscription() {
                                 </span>
                               )}
                             </td>
-                            <td className="text-right py-3 px-2 text-muted-foreground line-through">
+                            <td className="text-right py-3 px-2 text-muted-foreground line-through font-numeric">
                               ${cardPrice.toFixed(2)}
                             </td>
-                            <td className="text-right py-3 px-2 font-semibold">
+                            <td className="text-right py-3 px-2 font-numeric-bold">
                               ${tier.totalPrice.toFixed(2)}
                             </td>
-                            <td className="text-right py-3 px-2 text-green-500 font-medium">
+                            <td className="text-right py-3 px-2 text-green-500 font-numeric">
                               ${savings.toFixed(2)} ({tier.savingsPercent}%)
                             </td>
                           </tr>

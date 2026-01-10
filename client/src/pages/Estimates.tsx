@@ -319,7 +319,7 @@ export default function Estimates() {
           <CardHeader>
             <CardTitle>All Estimates</CardTitle>
             <CardDescription>
-              {filteredEstimates?.length || 0} estimate{filteredEstimates?.length !== 1 ? "s" : ""} found
+              <span className="font-numeric">{filteredEstimates?.length || 0}</span> estimate{filteredEstimates?.length !== 1 ? "s" : ""} found
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -373,7 +373,7 @@ export default function Estimates() {
                           <TableCell>{estimate.title || "—"}</TableCell>
                           <TableCell>{getStatusBadge(estimate.status)}</TableCell>
                           <TableCell>{formatDate(estimate.validUntil)}</TableCell>
-                          <TableCell className="text-right font-medium">
+                          <TableCell className="text-right font-numeric">
                             {formatCurrency(Number(estimate.total), estimate.currency)}
                           </TableCell>
                           <TableCell>
@@ -470,7 +470,7 @@ export default function Estimates() {
                         <span className="text-muted-foreground">
                           Valid until {formatDate(estimate.validUntil)}
                         </span>
-                        <span className="font-medium">
+                        <span className="font-numeric">
                           {formatCurrency(Number(estimate.total), estimate.currency)}
                         </span>
                       </div>

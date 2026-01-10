@@ -333,7 +333,7 @@ export default function Payments() {
             </CardHeader>
             <CardContent>
               <p className="text-sm text-muted-foreground">
-                {stats.totalCount} payments
+                <span className="font-numeric">{stats.totalCount}</span> payments
               </p>
             </CardContent>
           </Card>
@@ -351,7 +351,7 @@ export default function Payments() {
               </CardHeader>
               <CardContent>
                 <p className="text-sm text-muted-foreground">
-                  {methodStat.count} payments
+                  <span className="font-numeric">{methodStat.count}</span> payments
                 </p>
               </CardContent>
             </Card>
@@ -515,7 +515,7 @@ export default function Payments() {
                           <DateDisplay date={payment.paymentDate} format="long" />
                         </TableCell>
                         <TableCell>
-                          <span className="font-mono text-sm bg-muted/50 px-2 py-1 rounded">
+                          <span className="font-numeric text-sm bg-muted/50 px-2 py-1 rounded">
                             #{payment.invoiceId}
                           </span>
                         </TableCell>
@@ -642,7 +642,7 @@ export default function Payments() {
                     <Hash className="h-3.5 w-3.5" />
                     Invoice ID
                   </div>
-                  <p className="font-mono font-medium">#{selectedPayment.invoiceId}</p>
+                  <p className="font-numeric">#{selectedPayment.invoiceId}</p>
                 </div>
                 <div className="space-y-1">
                   <div className="flex items-center gap-2 text-sm text-muted-foreground">
@@ -705,7 +705,7 @@ export default function Payments() {
                     {selectedPayment.cryptoAmount && (
                       <div className="space-y-1">
                         <p className="text-sm text-muted-foreground">Crypto Amount</p>
-                        <p className="font-mono font-medium">
+                        <p className="font-numeric">
                           {parseFloat(selectedPayment.cryptoAmount).toFixed(8)} {selectedPayment.cryptoCurrency?.toUpperCase()}
                         </p>
                       </div>

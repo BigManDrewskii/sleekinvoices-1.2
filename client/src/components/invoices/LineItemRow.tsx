@@ -67,7 +67,7 @@ export function LineItemRow({ item, onChange, onDelete, canDelete }: LineItemRow
 
       {/* Amount (calculated, read-only) */}
       <div className="col-span-3 md:col-span-2">
-        <div className="h-10 px-3 flex items-center justify-end text-sm font-medium bg-muted rounded-md">
+        <div className="h-10 px-3 flex items-center justify-end text-sm font-numeric bg-muted rounded-md">
           {formatCurrency(amount)}
         </div>
       </div>

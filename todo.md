@@ -1894,3 +1894,17 @@
 - [x] Audit Invoices page for numerical displays
 - [x] Audit Analytics page for numerical displays
 - [x] Apply font-numeric fixes to all identified elements
+
+
+## Numerical Typography Audit
+- [x] Audit Estimates page for numerical displays
+- [x] Audit Payments page for numerical displays
+- [x] Audit RecurringInvoices page for numerical displays
+- [x] Audit Subscription page for numerical displays
+- [x] Audit CreateInvoice/EditInvoice pages for numerical displays
+- [x] Apply font-numeric class to estimate counts and amounts
+- [x] Apply font-numeric class to payment counts and amounts
+- [x] Apply font-numeric class to subscription pricing
+- [x] Apply font-numeric class to line item amounts
+- [x] Create font-numeric-bold class for prominent amounts
+- [x] Test typography changes
