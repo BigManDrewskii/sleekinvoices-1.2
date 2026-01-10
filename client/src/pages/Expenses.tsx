@@ -685,7 +685,7 @@ export default function Expenses() {
             <DollarSign className="w-8 h-8 text-muted-foreground" />
             <div>
               <p className="text-sm text-muted-foreground">Total Expenses</p>
-              <p className="text-2xl font-bold"><Currency amount={stats.totalWithTax} /></p>
+              <p className="text-2xl"><Currency amount={stats.totalWithTax} bold /></p>
               {stats.totalTax > 0 && (
                 <p className="text-xs text-muted-foreground">
                   (incl. <Currency amount={stats.totalTax} /> tax)
@@ -700,10 +700,10 @@ export default function Expenses() {
             <FileText className="w-8 h-8 text-muted-foreground" />
             <div>
               <p className="text-sm text-muted-foreground">Expense Count</p>
-              <p className="text-2xl font-bold">{stats.count}</p>
+              <p className="text-2xl font-numeric-bold">{stats.count}</p>
               {hasActiveFilters && expenses && (
                 <p className="text-xs text-muted-foreground">
-                  of {expenses.length} total
+                  of <span className="font-numeric">{expenses.length}</span> total
                 </p>
               )}
             </div>
@@ -715,9 +715,9 @@ export default function Expenses() {
             <Receipt className="w-8 h-8 text-green-600" />
             <div>
               <p className="text-sm text-muted-foreground">Billable</p>
-              <p className="text-2xl font-bold"><Currency amount={stats.billableAmount} /></p>
+              <p className="text-2xl"><Currency amount={stats.billableAmount} bold /></p>
               <p className="text-xs text-muted-foreground">
-                {stats.billableCount} expense{stats.billableCount !== 1 ? 's' : ''}
+                <span className="font-numeric">{stats.billableCount}</span> expense{stats.billableCount !== 1 ? 's' : ''}
               </p>
             </div>
           </div>
@@ -728,9 +728,9 @@ export default function Expenses() {
             <Tag className="w-8 h-8 text-muted-foreground" />
             <div>
               <p className="text-sm text-muted-foreground">Non-Billable</p>
-              <p className="text-2xl font-bold"><Currency amount={stats.totalWithTax - stats.billableAmount} /></p>
+              <p className="text-2xl"><Currency amount={stats.totalWithTax - stats.billableAmount} bold /></p>
               <p className="text-xs text-muted-foreground">
-                {stats.nonBillableCount} expense{stats.nonBillableCount !== 1 ? 's' : ''}
+                <span className="font-numeric">{stats.nonBillableCount}</span> expense{stats.nonBillableCount !== 1 ? 's' : ''}
               </p>
             </div>
           </div>
