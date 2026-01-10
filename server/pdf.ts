@@ -19,23 +19,13 @@ function formatCurrency(amount: number | string): string {
   }).format(num);
 }
 
-function formatDate(date: Date | null, dateFormat: string = 'MM/DD/YYYY'): string {
+function formatDate(date: Date | null): string {
   if (!date) return '';
   const d = new Date(date);
   const month = String(d.getMonth() + 1).padStart(2, '0');
   const day = String(d.getDate()).padStart(2, '0');
   const year = d.getFullYear();
-  
-  switch (dateFormat) {
-    case "DD/MM/YYYY":
-      return `${day}/${month}/${year}`;
-    case "YYYY-MM-DD":
-      return `${year}-${month}-${day}`;
-    case "MMM DD, YYYY":
-      return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-    default: // MM/DD/YYYY
-      return `${month}/${day}/${year}`;
-  }
+  return `${month}/${day}/${year}`;
 }
 
 function formatLongDate(date: Date | null): string {
@@ -52,6 +42,17 @@ function getStatusColor(status: string): string {
     case 'sent': return '#f59e0b';
     case 'draft': return '#71717a';
     default: return '#71717a';
+  }
+}
+
+function getStatusBgColor(status: string): string {
+  switch (status.toLowerCase()) {
+    case 'paid': return '#ecfdf5';
+    case 'overdue': return '#fef2f2';
+    case 'pending': 
+    case 'sent': return '#fffbeb';
+    case 'draft': return '#f4f4f5';
+    default: return '#f4f4f5';
   }
 }
 
@@ -95,12 +96,7 @@ function generateReceiptStyleHTML(data: InvoicePDFData): string {
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-    
+    * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
       font-family: 'IBM Plex Mono', monospace;
       color: #18181b;
@@ -108,22 +104,18 @@ function generateReceiptStyleHTML(data: InvoicePDFData): string {
       line-height: 1.6;
       background: white;
       -webkit-font-smoothing: antialiased;
-      -moz-osx-font-smoothing: grayscale;
     }
-    
     .receipt-container {
       max-width: 800px;
       margin: 0 auto;
       padding: 48px 64px;
       background: white;
     }
-    
     .divider {
       margin: 24px 0;
       border-top: 1px dashed #e4e4e7;
       width: 100%;
     }
-    
     .label {
       font-size: 10px;
       text-transform: uppercase;
@@ -132,10 +124,6 @@ function generateReceiptStyleHTML(data: InvoicePDFData): string {
       font-weight: 500;
       line-height: 1;
       margin-bottom: 4px;
-    }
-    
-    .tabular-nums {
-      font-variant-numeric: tabular-nums;
     }
   </style>
 </head>
@@ -195,7 +183,7 @@ function generateReceiptStyleHTML(data: InvoicePDFData): string {
         ${companyAddress ? `<div style="white-space: pre-line;">${companyAddress}</div>` : ''}
         ${companyEmail ? `<div style="color: #71717a;">${companyEmail}</div>` : ''}
         ${companyPhone ? `<div style="color: #71717a;">${companyPhone}</div>` : ''}
-        ${taxId ? `<div style="font-size: 12px; color: #a1a1aa; margin-top: 4px; text-transform: uppercase; letter-spacing: 0.05em; font-variant-numeric: tabular-nums;">Tax ID: ${taxId}</div>` : ''}
+        ${taxId ? `<div style="font-size: 12px; color: #a1a1aa; margin-top: 4px; text-transform: uppercase; letter-spacing: 0.05em;">Tax ID: ${taxId}</div>` : ''}
       </div>
     </div>
 
@@ -209,7 +197,7 @@ function generateReceiptStyleHTML(data: InvoicePDFData): string {
         ${client.companyName ? `<div>${client.companyName}</div>` : ''}
         ${client.address ? `<div style="white-space: pre-line;">${client.address}</div>` : ''}
         ${client.email ? `<div style="color: #71717a;">${client.email}</div>` : ''}
-        ${client.vatNumber ? `<div style="font-size: 12px; color: #a1a1aa; margin-top: 4px; text-transform: uppercase; letter-spacing: 0.05em; font-variant-numeric: tabular-nums;">VAT: ${client.vatNumber}</div>` : ''}
+        ${client.vatNumber ? `<div style="font-size: 12px; color: #a1a1aa; margin-top: 4px; text-transform: uppercase; letter-spacing: 0.05em;">VAT: ${client.vatNumber}</div>` : ''}
       </div>
     </div>
 
@@ -219,13 +207,11 @@ function generateReceiptStyleHTML(data: InvoicePDFData): string {
     <div style="margin-bottom: 24px;">
       <div class="label">Items</div>
       <div style="margin-top: 16px;">
-        <!-- Header -->
         <div style="display: grid; grid-template-columns: repeat(12, 1fr); font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: #a1a1aa; font-weight: 500; margin-bottom: 8px; padding-bottom: 8px;">
           <div style="grid-column: span 6;">Description</div>
           <div style="grid-column: span 2; text-align: right;">Qty</div>
           <div style="grid-column: span 4; text-align: right;">Price</div>
         </div>
-        <!-- Line Items -->
         ${lineItemsHTML}
       </div>
     </div>
@@ -270,7 +256,7 @@ function generateReceiptStyleHTML(data: InvoicePDFData): string {
       ${invoice.paymentTerms ? `
       <div>
         <div class="label">Payment Terms</div>
-        <div style="font-size: 12px; color: #71717a; white-space: pre-wrap; line-height: 1.7; font-variant-numeric: tabular-nums;">
+        <div style="font-size: 12px; color: #71717a; white-space: pre-wrap; line-height: 1.7;">
           ${invoice.paymentTerms}
         </div>
       </div>
@@ -303,48 +289,31 @@ function generateReceiptStyleHTML(data: InvoicePDFData): string {
 }
 
 /**
- * Generate Classic Style Invoice HTML (original design)
+ * Generate Modern Classic Style Invoice HTML
+ * Clean, contemporary design with refined typography and subtle styling
  */
 function generateClassicStyleHTML(data: InvoicePDFData): string {
   const { invoice, client, lineItems, user, template } = data;
   
-  // Default template values
-  const primaryColor = template?.primaryColor || '#5f6fff';
-  const secondaryColor = template?.secondaryColor || '#252f33';
-  const accentColor = template?.accentColor || '#10b981';
-  const headingFont = template?.headingFont || 'Inter, sans-serif';
-  const bodyFont = template?.bodyFont || 'Inter, sans-serif';
-  const fontSize = template?.fontSize || 14;
-  const logoUrl = template?.logoUrl;
-  const logoPosition = template?.logoPosition || 'left';
-  const logoWidth = template?.logoWidth || 150;
-  const headerLayout = template?.headerLayout || 'standard';
-  const footerLayout = template?.footerLayout || 'simple';
-  const showCompanyAddress = template?.showCompanyAddress !== false;
-  const showPaymentTerms = template?.showPaymentTerms !== false;
-  const showTaxField = template?.showTaxField !== false;
-  const showDiscountField = template?.showDiscountField !== false;
-  const showNotesField = template?.showNotesField !== false;
-  const footerText = template?.footerText || 'Thank you for your business!';
-  const dateFormat = template?.dateFormat || 'MM/DD/YYYY';
+  // Template values with modern defaults
+  const accentColor = template?.accentColor || '#5f6fff';
+  const logoUrl = template?.logoUrl || user.logoUrl;
+  
+  const companyName = user.companyName || user.name || 'Your Company';
+  const companyAddress = user.companyAddress || '';
+  const companyEmail = user.email || '';
+  const companyPhone = user.companyPhone || '';
+  const taxId = user.taxId || '';
   
   const lineItemsHTML = lineItems.map(item => `
-    <tr>
-      <td style="padding: 12px; border-bottom: 1px solid #e5e7eb;">${item.description}</td>
-      <td style="padding: 12px; border-bottom: 1px solid #e5e7eb; text-align: center;">${item.quantity}</td>
-      <td style="padding: 12px; border-bottom: 1px solid #e5e7eb; text-align: right;">${formatCurrency(item.rate)}</td>
-      <td style="padding: 12px; border-bottom: 1px solid #e5e7eb; text-align: right; font-weight: 600;">${formatCurrency(item.amount)}</td>
-    </tr>
+    <div style="display: grid; grid-template-columns: 6fr 2fr 2fr 2fr; gap: 16px; padding: 16px 20px; border-bottom: 1px solid #f4f4f5;">
+      <div style="font-size: 14px; color: #18181b;">${item.description}</div>
+      <div style="font-size: 14px; color: #71717a; text-align: right; font-variant-numeric: tabular-nums;">${item.quantity}</div>
+      <div style="font-size: 14px; color: #71717a; text-align: right; font-variant-numeric: tabular-nums;">${formatCurrency(item.rate)}</div>
+      <div style="font-size: 14px; color: #18181b; text-align: right; font-weight: 500; font-variant-numeric: tabular-nums;">${formatCurrency(item.amount)}</div>
+    </div>
   `).join('');
 
-  // Header layout styles
-  const headerFlexStyle = headerLayout === 'split' ? 'display: flex; justify-content: space-between; align-items: flex-start;' : '';
-  const logoAlignStyle = 
-    logoPosition === 'center' ? 'margin: 0 auto; text-align: center;' :
-    logoPosition === 'right' ? 'margin-left: auto; text-align: right;' :
-    '';
-  const invoiceTitleAlign = headerLayout === 'centered' ? 'text-align: center;' : headerLayout === 'split' ? 'text-align: right;' : '';
-  
   return `
 <!DOCTYPE html>
 <html lang="en">
@@ -354,421 +323,176 @@ function generateClassicStyleHTML(data: InvoicePDFData): string {
   <title>Invoice ${invoice.invoiceNumber}</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Roboto:wght@400;500;700&family=Montserrat:wght@400;600;700&family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-    
+    * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
-      font-family: ${bodyFont};
-      color: ${secondaryColor};
-      font-size: ${fontSize}px;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      color: #18181b;
+      font-size: 14px;
       line-height: 1.6;
-      padding: 40px;
       background: white;
+      -webkit-font-smoothing: antialiased;
     }
-    
     .invoice-container {
       max-width: 800px;
       margin: 0 auto;
       background: white;
     }
-    
-    .header {
-      ${headerFlexStyle}
-      margin-bottom: 48px;
-      padding-bottom: 24px;
-      border-bottom: 2px solid ${primaryColor}40;
-    }
-    
-    .company-info {
-      ${headerLayout === 'split' ? 'flex: 1;' : ''}
-      ${logoAlignStyle}
-    }
-    
-    .company-logo {
-      max-width: ${logoWidth}px;
-      margin-bottom: 16px;
-    }
-    
-    .company-name {
-      font-size: 24px;
-      font-weight: 700;
-      font-family: ${headingFont};
-      color: ${primaryColor};
-      margin-bottom: 8px;
-    }
-    
-    .company-details {
-      font-size: ${fontSize - 1}px;
-      color: ${secondaryColor}cc;
-      line-height: 1.8;
-    }
-    
-    .invoice-title {
-      ${invoiceTitleAlign}
-      ${headerLayout === 'split' ? 'flex: 1;' : ''}
-    }
-    
-    .invoice-title h1 {
-      font-size: 36px;
-      font-weight: 700;
-      font-family: ${headingFont};
-      color: ${primaryColor};
-      margin-bottom: 8px;
-    }
-    
-    .invoice-number {
-      font-size: ${fontSize}px;
-      color: ${secondaryColor}cc;
-    }
-    
-    .invoice-details {
-      display: flex;
-      justify-content: space-between;
-      margin-bottom: 48px;
-      padding-bottom: 24px;
-      border-bottom: 1px solid ${primaryColor}20;
-    }
-    
-    .bill-to, .invoice-info {
-      flex: 1;
-    }
-    
-    .section-title {
-      font-size: ${fontSize - 2}px;
-      font-weight: 600;
-      font-family: ${headingFont};
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      color: ${primaryColor};
-      margin-bottom: 12px;
-    }
-    
-    .client-name {
-      font-size: ${fontSize + 2}px;
-      font-weight: 600;
-      color: ${secondaryColor};
-      margin-bottom: 4px;
-    }
-    
-    .client-details {
-      font-size: ${fontSize}px;
-      color: ${secondaryColor}cc;
-      line-height: 1.8;
-    }
-    
-    .invoice-info {
-      text-align: right;
-    }
-    
-    .info-row {
-      display: flex;
-      justify-content: flex-end;
-      margin-bottom: 8px;
-      font-size: ${fontSize}px;
-    }
-    
-    .info-label {
-      color: ${secondaryColor}cc;
-      margin-right: 12px;
-    }
-    
-    .info-value {
-      color: ${secondaryColor};
-      font-weight: 600;
-    }
-    
-    .status-badge {
-      display: inline-block;
-      padding: 4px 12px;
-      border-radius: 9999px;
-      font-size: ${fontSize - 2}px;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-    
-    .status-draft {
-      background: #f3f4f6;
-      color: #6b7280;
-    }
-    
-    .status-sent {
-      background: ${primaryColor}20;
-      color: ${primaryColor};
-    }
-    
-    .status-paid {
-      background: ${accentColor}20;
-      color: ${accentColor};
-    }
-    
-    .status-overdue {
-      background: #fee2e2;
-      color: #991b1b;
-    }
-    
-    .line-items-table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-bottom: 24px;
-    }
-    
-    .line-items-table thead {
-      background: ${primaryColor}10;
-    }
-    
-    .line-items-table th {
-      padding: 12px;
-      text-align: left;
-      font-size: ${fontSize - 2}px;
-      font-weight: 600;
-      font-family: ${headingFont};
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      color: ${primaryColor};
-      border-bottom: 2px solid ${primaryColor};
-    }
-    
-    .line-items-table th:nth-child(2),
-    .line-items-table th:nth-child(3),
-    .line-items-table th:nth-child(4) {
-      text-align: right;
-    }
-    
-    .line-items-table td {
-      font-size: ${fontSize}px;
-      color: ${secondaryColor};
-    }
-    
-    .totals {
-      margin-left: auto;
-      width: 300px;
-      margin-top: 24px;
-    }
-    
-    .total-row {
-      display: flex;
-      justify-content: space-between;
-      padding: 12px 0;
-      font-size: ${fontSize}px;
-    }
-    
-    .total-label {
-      color: ${secondaryColor}cc;
-    }
-    
-    .total-value {
-      color: ${secondaryColor};
-      font-weight: 600;
-    }
-    
-    .grand-total {
-      border-top: 2px solid ${primaryColor};
-      padding-top: 16px !important;
-      margin-top: 8px;
-    }
-    
-    .grand-total .total-label {
-      font-size: ${fontSize + 2}px;
-      font-weight: 600;
-      font-family: ${headingFont};
-      color: ${primaryColor};
-    }
-    
-    .grand-total .total-value {
-      font-size: ${fontSize + 6}px;
-      font-weight: 700;
-      font-family: ${headingFont};
-      color: ${primaryColor};
-    }
-    
-    .notes-section {
-      margin-top: 48px;
-      padding-top: 24px;
-      border-top: 1px solid ${primaryColor}20;
-    }
-    
-    .notes-title {
-      font-size: ${fontSize}px;
-      font-weight: 600;
-      font-family: ${headingFont};
-      color: ${primaryColor};
-      margin-bottom: 8px;
-    }
-    
-    .notes-content {
-      font-size: ${fontSize}px;
-      color: ${secondaryColor}cc;
-      line-height: 1.8;
-    }
-    
-    .footer {
-      margin-top: 64px;
-      padding-top: 24px;
-      border-top: 1px solid ${primaryColor}20;
-      text-align: ${footerLayout === 'detailed' ? 'center' : footerLayout === 'minimal' ? 'center' : 'center'};
-      font-size: ${footerLayout === 'minimal' ? fontSize - 2 : fontSize}px;
-      color: ${secondaryColor}99;
-    }
-    
-    .footer-detailed {
-      margin-bottom: 8px;
-      font-weight: 600;
-    }
-    
-    .footer-contact {
-      font-size: ${fontSize - 2}px;
-      margin-top: 8px;
-    }
   </style>
 </head>
 <body>
   <div class="invoice-container">
-    <div class="header">
-      <div class="company-info">
-        ${logoUrl ? `<img src="${logoUrl}" alt="Logo" class="company-logo">` : ''}
-        <div class="company-name">${user.companyName || user.name || 'Your Company'}</div>
-        ${showCompanyAddress ? `
-        <div class="company-details">
-          ${user.companyAddress ? `${user.companyAddress}<br>` : ''}
-          ${user.email ? `${user.email}<br>` : ''}
-          ${user.companyPhone ? `${user.companyPhone}<br>` : ''}
-          ${user.taxId ? `<span style="font-weight: 600;">VAT:</span> ${user.taxId}` : ''}
+    <!-- Header Section -->
+    <div style="padding: 40px 40px 32px;">
+      <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+        <!-- Company Info -->
+        <div style="flex: 1;">
+          ${logoUrl ? `
+            <img src="${logoUrl}" alt="Logo" style="height: 40px; width: auto; object-fit: contain; margin-bottom: 16px;">
+          ` : `
+            <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
+              <div style="width: 40px; height: 40px; background: ${accentColor}; border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                </svg>
+              </div>
+              <span style="font-size: 20px; font-weight: 600; color: #18181b; letter-spacing: -0.02em;">${companyName}</span>
+            </div>
+          `}
+          ${logoUrl ? `<p style="font-size: 16px; font-weight: 600; color: #18181b; margin-bottom: 4px;">${companyName}</p>` : ''}
+          ${companyAddress ? `<p style="font-size: 13px; color: #71717a; white-space: pre-line; line-height: 1.6;">${companyAddress}</p>` : ''}
+          ${companyEmail ? `<p style="font-size: 13px; color: #71717a; margin-top: 4px;">${companyEmail}</p>` : ''}
+          ${companyPhone ? `<p style="font-size: 13px; color: #71717a;">${companyPhone}</p>` : ''}
+          ${taxId ? `<p style="font-size: 11px; color: #a1a1aa; margin-top: 8px; font-weight: 500; letter-spacing: 0.05em;">TAX ID: ${taxId}</p>` : ''}
         </div>
-        ` : ''}
-      </div>
-      ${headerLayout !== 'centered' ? `
-      <div class="invoice-title">
-        <h1>INVOICE</h1>
-        <div class="invoice-number">${invoice.invoiceNumber}</div>
-      </div>
-      ` : ''}
-    </div>
-    
-    ${headerLayout === 'centered' ? `
-    <div style="text-align: center; margin-bottom: 48px;">
-      <h1 style="font-size: 36px; font-weight: 700; font-family: ${headingFont}; color: ${primaryColor}; margin-bottom: 8px;">INVOICE</h1>
-      <div style="font-size: ${fontSize}px; color: ${secondaryColor}cc;">${invoice.invoiceNumber}</div>
-    </div>
-    ` : ''}
-    
-    <div class="invoice-details">
-      <div class="bill-to">
-        <div class="section-title">Bill To</div>
-        <div class="client-name">${client.name}</div>
-        <div class="client-details">
-          ${client.companyName ? `${client.companyName}<br>` : ''}
-          ${client.address ? `${client.address}<br>` : ''}
-          ${client.email ? `${client.email}<br>` : ''}
-          ${client.phone ? `${client.phone}<br>` : ''}
-          ${client.vatNumber ? `<span style="font-weight: 600;">VAT:</span> ${client.vatNumber}` : ''}
+
+        <!-- Invoice Title & Number -->
+        <div style="text-align: right;">
+          <h1 style="font-size: 28px; font-weight: 700; color: #18181b; letter-spacing: -0.02em; margin-bottom: 4px;">Invoice</h1>
+          <p style="font-size: 16px; font-weight: 500; color: #71717a; font-variant-numeric: tabular-nums;">${invoice.invoiceNumber}</p>
+          <div style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; border-radius: 9999px; margin-top: 12px; background: ${getStatusBgColor(invoice.status)}; color: ${getStatusColor(invoice.status)};">
+            <span style="width: 6px; height: 6px; border-radius: 50%; background: currentColor;"></span>
+            <span style="font-size: 12px; font-weight: 500;">${getStatusLabel(invoice.status)}</span>
+          </div>
         </div>
-      </div>
-      <div class="invoice-info">
-        <div class="section-title">Invoice Details</div>
-        <div class="info-row">
-          <span class="info-label">Status:</span>
-          <span class="status-badge status-${invoice.status}">${invoice.status.toUpperCase()}</span>
-        </div>
-        <div class="info-row">
-          <span class="info-label">Issue Date:</span>
-          <span class="info-value">${formatDate(invoice.issueDate, dateFormat)}</span>
-        </div>
-        <div class="info-row">
-          <span class="info-label">Due Date:</span>
-          <span class="info-value">${formatDate(invoice.dueDate, dateFormat)}</span>
-        </div>
-        ${invoice.paidAt ? `
-        <div class="info-row">
-          <span class="info-label">Paid On:</span>
-          <span class="info-value">${formatDate(invoice.paidAt, dateFormat)}</span>
-        </div>
-        ` : ''}
       </div>
     </div>
-    
-    <table class="line-items-table">
-      <thead>
-        <tr>
-          <th>Description</th>
-          <th style="text-align: center;">Quantity</th>
-          <th style="text-align: right;">Rate</th>
-          <th style="text-align: right;">Amount</th>
-        </tr>
-      </thead>
-      <tbody>
+
+    <!-- Divider -->
+    <div style="margin: 0 40px; height: 1px; background: linear-gradient(to right, #e4e4e7, #d4d4d8, #e4e4e7);"></div>
+
+    <!-- Bill To & Dates Section -->
+    <div style="padding: 32px 40px;">
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 32px;">
+        <!-- Bill To -->
+        <div>
+          <p style="font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.15em; color: #a1a1aa; margin-bottom: 8px;">Bill To</p>
+          <p style="font-size: 16px; font-weight: 600; color: #18181b;">${client.name}</p>
+          ${client.companyName ? `<p style="font-size: 13px; color: #71717a; margin-top: 2px;">${client.companyName}</p>` : ''}
+          ${client.address ? `<p style="font-size: 13px; color: #71717a; white-space: pre-line; line-height: 1.6; margin-top: 4px;">${client.address}</p>` : ''}
+          ${client.email ? `<p style="font-size: 13px; color: #71717a; margin-top: 4px;">${client.email}</p>` : ''}
+          ${client.vatNumber ? `<p style="font-size: 11px; color: #a1a1aa; margin-top: 8px; font-weight: 500; letter-spacing: 0.05em;">VAT: ${client.vatNumber}</p>` : ''}
+        </div>
+
+        <!-- Dates -->
+        <div style="text-align: right;">
+          <div style="display: inline-grid; grid-template-columns: auto auto; gap: 8px 24px; text-align: left;">
+            <span style="font-size: 13px; color: #a1a1aa; font-weight: 500;">Issue Date</span>
+            <span style="font-size: 13px; color: #18181b; font-weight: 500; font-variant-numeric: tabular-nums;">${formatDate(invoice.issueDate)}</span>
+            <span style="font-size: 13px; color: #a1a1aa; font-weight: 500;">Due Date</span>
+            <span style="font-size: 13px; color: #18181b; font-weight: 500; font-variant-numeric: tabular-nums;">${formatDate(invoice.dueDate)}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Line Items Table -->
+    <div style="padding: 0 40px 24px;">
+      <div style="border: 1px solid #e4e4e7; border-radius: 12px; overflow: hidden;">
+        <!-- Table Header -->
+        <div style="background: #fafafa; border-bottom: 1px solid #e4e4e7;">
+          <div style="display: grid; grid-template-columns: 6fr 2fr 2fr 2fr; gap: 16px; padding: 12px 20px;">
+            <div style="font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.15em; color: #71717a;">Description</div>
+            <div style="font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.15em; color: #71717a; text-align: right;">Qty</div>
+            <div style="font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.15em; color: #71717a; text-align: right;">Rate</div>
+            <div style="font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.15em; color: #71717a; text-align: right;">Amount</div>
+          </div>
+        </div>
+        <!-- Table Body -->
         ${lineItemsHTML}
-      </tbody>
-    </table>
-    
-    <div class="totals">
-      <div class="total-row">
-        <span class="total-label">Subtotal</span>
-        <span class="total-value">${formatCurrency(invoice.subtotal)}</span>
-      </div>
-      ${showDiscountField && Number(invoice.discountAmount) > 0 ? `
-      <div class="total-row">
-        <span class="total-label" style="color: ${accentColor};">Discount ${invoice.discountType === 'percentage' ? `(${invoice.discountValue}%)` : ''}</span>
-        <span class="total-value" style="color: ${accentColor};">-${formatCurrency(invoice.discountAmount)}</span>
-      </div>
-      ` : ''}
-      ${showTaxField && Number(invoice.taxAmount) > 0 && !client.taxExempt ? `
-      <div class="total-row">
-        <span class="total-label">Tax (${invoice.taxRate}%)</span>
-        <span class="total-value">${formatCurrency(invoice.taxAmount)}</span>
-      </div>
-      ` : ''}
-      ${client.taxExempt && client.vatNumber ? `
-      <div class="total-row">
-        <span class="total-label" style="font-size: ${fontSize - 2}px; color: ${primaryColor};">Reverse Charge - VAT 0%</span>
-        <span class="total-value">${formatCurrency(0)}</span>
-      </div>
-      ` : ''}
-      <div class="total-row grand-total">
-        <span class="total-label">Total</span>
-        <span class="total-value">${formatCurrency(invoice.total)}</span>
       </div>
     </div>
-    
-    ${(showNotesField && invoice.notes) || (showPaymentTerms && invoice.paymentTerms) ? `
-    <div class="notes-section">
-      ${showNotesField && invoice.notes ? `
-      <div style="margin-bottom: 24px;">
-        <div class="notes-title">Notes</div>
-        <div class="notes-content">${invoice.notes}</div>
+
+    <!-- Totals Section -->
+    <div style="padding: 0 40px 32px;">
+      <div style="display: flex; justify-content: flex-end;">
+        <div style="width: 280px;">
+          <div style="display: flex; justify-content: space-between; padding: 8px 0; font-size: 14px;">
+            <span style="color: #71717a;">Subtotal</span>
+            <span style="color: #18181b; font-weight: 500; font-variant-numeric: tabular-nums;">${formatCurrency(invoice.subtotal)}</span>
+          </div>
+          ${Number(invoice.discountAmount) > 0 ? `
+          <div style="display: flex; justify-content: space-between; padding: 8px 0; font-size: 14px;">
+            <span style="color: #10b981;">Discount</span>
+            <span style="color: #10b981; font-weight: 500; font-variant-numeric: tabular-nums;">-${formatCurrency(invoice.discountAmount)}</span>
+          </div>
+          ` : ''}
+          ${Number(invoice.taxAmount) > 0 && !client.taxExempt ? `
+          <div style="display: flex; justify-content: space-between; padding: 8px 0; font-size: 14px;">
+            <span style="color: #71717a;">Tax (${invoice.taxRate}%)</span>
+            <span style="color: #18181b; font-weight: 500; font-variant-numeric: tabular-nums;">${formatCurrency(invoice.taxAmount)}</span>
+          </div>
+          ` : ''}
+          ${client.taxExempt && client.vatNumber ? `
+          <div style="display: flex; justify-content: space-between; padding: 8px 0; font-size: 12px;">
+            <span style="color: #71717a;">Reverse Charge - VAT 0%</span>
+            <span style="color: #18181b; font-weight: 500; font-variant-numeric: tabular-nums;">${formatCurrency(0)}</span>
+          </div>
+          ` : ''}
+          <div style="border-top: 1px solid #e4e4e7; margin-top: 8px; padding-top: 12px;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <span style="font-size: 16px; font-weight: 600; color: #18181b;">Total</span>
+              <span style="font-size: 24px; font-weight: 700; color: ${accentColor}; font-variant-numeric: tabular-nums;">${formatCurrency(invoice.total)}</span>
+            </div>
+          </div>
+        </div>
       </div>
-      ` : ''}
-      ${showPaymentTerms && invoice.paymentTerms ? `
+    </div>
+
+    <!-- Notes & Payment Terms -->
+    ${(invoice.notes || invoice.paymentTerms) ? `
+    <div style="margin: 0 40px; border-top: 1px solid #e4e4e7;"></div>
+    <div style="padding: 32px 40px; display: grid; grid-template-columns: 1fr 1fr; gap: 32px;">
+      ${invoice.notes ? `
       <div>
-        <div class="notes-title">Payment Terms</div>
-        <div class="notes-content">${invoice.paymentTerms}</div>
+        <p style="font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.15em; color: #a1a1aa; margin-bottom: 8px;">Notes</p>
+        <p style="font-size: 13px; color: #71717a; line-height: 1.7; white-space: pre-line;">${invoice.notes}</p>
+      </div>
+      ` : ''}
+      ${invoice.paymentTerms ? `
+      <div>
+        <p style="font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.15em; color: #a1a1aa; margin-bottom: 8px;">Payment Terms</p>
+        <p style="font-size: 13px; color: #71717a; line-height: 1.7;">${invoice.paymentTerms}</p>
       </div>
       ` : ''}
     </div>
     ` : ''}
-    
+
     ${client.taxExempt && client.vatNumber ? `
-    <div style="margin-top: 32px; padding: 16px; background: ${primaryColor}10; border-left: 4px solid ${primaryColor}; font-size: ${fontSize - 1}px;">
-      <strong style="color: ${primaryColor};">Reverse Charge Notice:</strong><br>
-      VAT reverse charge applies. The customer is liable for VAT in their country of establishment under Article 196 of Council Directive 2006/112/EC.
+    <div style="margin: 0 40px 24px; padding: 16px; background: #fafafa; border-left: 4px solid #18181b; border-radius: 0 8px 8px 0;">
+      <p style="font-size: 12px; color: #18181b; font-weight: 600; margin-bottom: 4px;">Reverse Charge Notice</p>
+      <p style="font-size: 12px; color: #71717a; line-height: 1.6;">VAT reverse charge applies. The customer is liable for VAT in their country of establishment under Article 196 of Council Directive 2006/112/EC.</p>
     </div>
     ` : ''}
-    
-    ${footerText ? `
-    <div class="footer">
-      ${footerLayout === 'detailed' ? `
-        <div class="footer-detailed">${footerText}</div>
-        <div class="footer-contact">For questions, contact us at ${user.email || 'support@example.com'}</div>
-      ` : `
-        ${footerText}
-      `}
+
+    <!-- Footer -->
+    <div style="padding: 24px 40px; background: #fafafa; border-top: 1px solid #e4e4e7;">
+      <div style="display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: #a1a1aa;">
+        <span>Thank you for your business</span>
+        <span style="font-variant-numeric: tabular-nums;">Generated by SleekInvoices</span>
+      </div>
     </div>
-    ` : ''}
   </div>
 </body>
 </html>

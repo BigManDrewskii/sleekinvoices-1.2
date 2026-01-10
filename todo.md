@@ -1933,3 +1933,16 @@
 - [x] Test all invoice functionality (34 tests passing)
 - [x] Ensure no feature regressions
 - [x] Save checkpoint
+
+
+## Classic Invoice Style Redesign
+- [x] Analyze current Classic style issues (archaic look, poor responsiveness)
+- [x] Design modern Classic style with contemporary typography (Inter font)
+- [x] Implement clean, minimal header with better logo placement
+- [x] Create refined line items table with better spacing (rounded corners, grid layout)
+- [x] Improve totals section with modern styling (accent color total)
+- [x] Add subtle shadows and rounded corners for depth
+- [x] Ensure responsive layout for mobile/tablet (CSS Grid)
+- [x] Update PDF generation for modern Classic style
+- [x] Test all functionality (34 tests passing)
+- [x] Save checkpoint
