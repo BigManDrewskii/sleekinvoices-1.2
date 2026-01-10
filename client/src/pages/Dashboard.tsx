@@ -23,6 +23,7 @@ import { MonthlyUsageCard } from "@/components/dashboard/MonthlyUsageCard";
 import { StatsGridSkeleton, RecentInvoicesSkeleton } from "@/components/dashboard/DashboardSkeleton";
 import { formatCurrency } from "@/lib/utils";
 import { Currency, DateDisplay, Numeric, InvoiceNumber } from "@/components/ui/typography";
+import { AnimatedCurrency, AnimatedInteger, AnimatedPercentage } from "@/components/ui/animated-number";
 
 export default function Dashboard() {
   const { user, loading, isAuthenticated } = useAuth();
@@ -187,11 +188,11 @@ export default function Dashboard() {
                 <p className="text-sm font-medium text-muted-foreground">Total Revenue</p>
                 <span className="inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-500 font-medium">
                   <ArrowUpRight className="h-3 w-3" />
-                  +{stats?.revenueChangePercent?.toFixed(1) || 12.5}%
+                  <AnimatedPercentage value={stats?.revenueChangePercent || 12.5} showSign duration={600} delay={400} />
                 </span>
               </div>
               <p className="text-2xl tracking-tight text-foreground">
-                <Currency amount={stats?.totalRevenue || 0} bold />
+                <AnimatedCurrency amount={stats?.totalRevenue || 0} bold duration={900} />
               </p>
               <p className="text-xs text-muted-foreground mt-2 flex items-center gap-1.5">
                 <TrendingUp className="h-3 w-3 text-emerald-500" />
@@ -211,7 +212,7 @@ export default function Dashboard() {
                 )}
               </div>
               <p className="text-2xl tracking-tight text-foreground">
-                <Currency amount={stats?.outstandingBalance || 0} bold />
+                <AnimatedCurrency amount={stats?.outstandingBalance || 0} bold duration={900} delay={100} />
               </p>
               <p className="text-xs text-muted-foreground mt-2">
                 Awaiting payment
@@ -224,7 +225,7 @@ export default function Dashboard() {
                 <p className="text-sm font-medium text-muted-foreground">Total Invoices</p>
               </div>
               <p className="text-2xl tracking-tight text-foreground">
-                <Numeric value={stats?.totalInvoices || 0} bold />
+                <AnimatedInteger value={stats?.totalInvoices || 0} bold duration={700} delay={200} />
               </p>
               <p className="text-xs text-muted-foreground mt-2">
                 All time invoices created
@@ -241,7 +242,7 @@ export default function Dashboard() {
                 </span>
               </div>
               <p className="text-2xl tracking-tight text-foreground">
-                <Numeric value={stats?.paidInvoices || 0} bold />
+                <AnimatedInteger value={stats?.paidInvoices || 0} bold duration={700} delay={300} />
               </p>
               <p className="text-xs text-muted-foreground mt-2">
                 Successfully collected

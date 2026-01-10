@@ -5,6 +5,7 @@ import { getLoginUrl } from "@/const";
 import { trpc } from "@/lib/trpc";
 import { formatCurrency } from "@/lib/utils";
 import { Currency, Numeric } from "@/components/ui/typography";
+import { AnimatedCurrency, AnimatedInteger, AnimatedPercentage } from "@/components/ui/animated-number";
 import { 
   TrendingUp, 
   TrendingDown, 
@@ -214,7 +215,7 @@ export default function Analytics() {
                 <span className="text-sm font-medium text-muted-foreground">Total Revenue</span>
               </div>
               <div className="text-3xl font-bold text-foreground mb-2">
-                <Currency amount={revenueNum} />
+                <AnimatedCurrency amount={revenueNum} bold duration={900} />
               </div>
               <div className="flex items-center gap-1.5">
                 {revenueChangePercent >= 0 ? (
@@ -223,7 +224,7 @@ export default function Analytics() {
                   <TrendingDown className="h-4 w-4 text-red-500" />
                 )}
                 <span className={`text-sm font-medium ${revenueChangePercent >= 0 ? "text-green-500" : "text-red-500"}`}>
-                  <span className="font-numeric">{revenueChangePercent >= 0 ? "+" : ""}{revenueChangePercent.toFixed(0)}%</span>
+                  <AnimatedPercentage value={revenueChangePercent} showSign duration={600} delay={200} />
                 </span>
                 <span className="text-xs text-muted-foreground">vs previous period</span>
               </div>
@@ -240,10 +241,10 @@ export default function Analytics() {
                 <span className="text-sm font-medium text-muted-foreground">Outstanding</span>
               </div>
               <div className="text-3xl font-bold text-foreground mb-2">
-                <Currency amount={outstandingNum} />
+                <AnimatedCurrency amount={outstandingNum} bold duration={900} delay={100} />
               </div>
               <div className="text-sm text-muted-foreground">
-                <span className="font-numeric">{totalInvoices - paidInvoices}</span> unpaid invoices
+                <AnimatedInteger value={totalInvoices - paidInvoices} duration={600} delay={200} /> unpaid invoices
               </div>
             </CardContent>
           </Card>
@@ -258,10 +259,10 @@ export default function Analytics() {
                 <span className="text-sm font-medium text-muted-foreground">Overdue</span>
               </div>
               <div className="text-3xl font-bold text-foreground mb-2">
-                <Currency amount={overdueAmount} />
+                <AnimatedCurrency amount={overdueAmount} bold duration={900} delay={200} />
               </div>
               <div className="text-sm text-muted-foreground">
-                {overdueCount > 0 ? <><span className="font-numeric">{overdueCount}</span> invoices need attention</> : "All invoices on track"}
+                {overdueCount > 0 ? <><AnimatedInteger value={overdueCount} duration={600} delay={300} /> invoices need attention</> : "All invoices on track"}
               </div>
             </CardContent>
           </Card>

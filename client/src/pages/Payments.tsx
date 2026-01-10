@@ -54,6 +54,7 @@ import { toast } from "sonner";
 import { PageLayout } from "@/components/layout/PageLayout";
 import { PaymentsPageSkeleton } from "@/components/skeletons";
 import { Currency, DateDisplay } from "@/components/ui/typography";
+import { AnimatedCurrency, AnimatedInteger } from "@/components/ui/animated-number";
 
 const ITEMS_PER_PAGE = 10;
 
@@ -328,12 +329,12 @@ export default function Payments() {
             <CardHeader className="pb-2">
               <CardDescription>Total Received</CardDescription>
               <CardTitle className="text-2xl">
-                <Currency amount={stats.totalAmount} />
+                <AnimatedCurrency amount={Number(stats.totalAmount) || 0} bold duration={900} />
               </CardTitle>
             </CardHeader>
             <CardContent>
               <p className="text-sm text-muted-foreground">
-                <span className="font-numeric">{stats.totalCount}</span> payments
+                <AnimatedInteger value={stats.totalCount} duration={600} /> payments
               </p>
             </CardContent>
           </Card>
@@ -346,12 +347,12 @@ export default function Payments() {
                   {methodStat.method.replace("_", " ").toUpperCase()}
                 </CardDescription>
                 <CardTitle className="text-2xl">
-                  <Currency amount={methodStat.total} />
+                  <AnimatedCurrency amount={Number(methodStat.total) || 0} bold duration={900} delay={100} />
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <p className="text-sm text-muted-foreground">
-                  <span className="font-numeric">{methodStat.count}</span> payments
+                  <AnimatedInteger value={methodStat.count} duration={600} delay={100} /> payments
                 </p>
               </CardContent>
             </Card>
