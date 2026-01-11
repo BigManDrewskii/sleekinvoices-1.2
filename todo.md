@@ -1994,3 +1994,9 @@
 - [x] Update backend to make payCurrency optional in createPayment
 - [x] Update frontend to remove currency pre-selection for invoice payments
 - [x] Let customers choose currency on NOWPayments checkout page
+
+## Client Portal Crypto Payments
+- [x] Add backend endpoint for client-initiated crypto payments
+- [x] Update Client Portal UI with crypto payment button
+- [x] Add CryptoPaymentDialog to Client Portal
+- [x] Test end-to-end client crypto payment flow

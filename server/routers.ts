@@ -1904,6 +1904,82 @@ export const appRouter = router({
         
         return { success: true };
       }),
+    
+    // Create crypto payment for an invoice (public - client initiated)
+    createCryptoPayment: publicProcedure
+      .input(z.object({
+        accessToken: z.string(),
+        invoiceId: z.number(),
+      }))
+      .mutation(async ({ input }) => {
+        // Verify access token and get client
+        const client = await db.getClientByAccessToken(input.accessToken);
+        if (!client) {
+          throw new Error('Invalid or expired access token');
+        }
+        
+        // Get the invoice and verify it belongs to this client
+        const invoice = await db.getInvoiceById(input.invoiceId, client.userId);
+        if (!invoice || invoice.clientId !== client.id) {
+          throw new Error('Invoice not found');
+        }
+        
+        // Check invoice status - only allow payment for unpaid invoices
+        if (invoice.status === 'paid') {
+          throw new Error('Invoice is already paid');
+        }
+        if (invoice.status === 'draft') {
+          throw new Error('Cannot pay a draft invoice');
+        }
+        if (invoice.status === 'canceled') {
+          throw new Error('Cannot pay a cancelled invoice');
+        }
+        
+        // Calculate remaining amount to pay
+        const total = parseFloat(invoice.total);
+        const paid = parseFloat(invoice.amountPaid || '0');
+        const remaining = total - paid;
+        
+        if (remaining <= 0) {
+          throw new Error('Invoice is already fully paid');
+        }
+        
+        // Get the base URL for callbacks
+        const baseUrl = process.env.VITE_APP_URL || `https://${process.env.VITE_APP_ID}.manus.space`;
+        
+        // Create NOWPayments invoice - let customer choose currency on checkout
+        const payment = await nowpayments.createInvoice({
+          priceAmount: remaining,
+          priceCurrency: invoice.currency?.toLowerCase() || 'usd',
+          // Don't specify payCurrency - customer will choose on NOWPayments checkout
+          orderId: `INV-${invoice.id}-${Date.now()}`,
+          orderDescription: `Payment for Invoice ${invoice.invoiceNumber}`,
+          ipnCallbackUrl: `${baseUrl}/api/webhooks/nowpayments`,
+          successUrl: `${baseUrl}/portal/${input.accessToken}?payment=success&invoiceId=${invoice.id}`,
+          cancelUrl: `${baseUrl}/portal/${input.accessToken}?payment=cancelled&invoiceId=${invoice.id}`,
+          isFixedRate: true,
+        });
+        
+        // Update invoice with crypto payment info
+        // Note: We need to update without userId check since this is client-initiated
+        const dbInstance = await db.getDb();
+        if (dbInstance) {
+          const { invoices: invoicesTable } = await import('../drizzle/schema');
+          const { eq } = await import('drizzle-orm');
+          await dbInstance.update(invoicesTable).set({
+            cryptoPaymentId: payment.id,
+            cryptoCurrency: 'MULTI', // Customer will choose
+            cryptoPaymentUrl: payment.invoice_url,
+          }).where(eq(invoicesTable.id, invoice.id));
+        }
+        
+        return {
+          paymentId: payment.id,
+          invoiceUrl: payment.invoice_url,
+          priceAmount: remaining,
+          priceCurrency: invoice.currency || 'USD',
+        };
+      }),
   }),
 
   payments: router({
