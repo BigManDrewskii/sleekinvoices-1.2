@@ -40,6 +40,16 @@ interface ReceiptStyleInvoiceProps {
   // Template customization
   primaryColor?: string;
   accentColor?: string;
+  headingFont?: string;
+  bodyFont?: string;
+  fontSize?: number;
+  dateFormat?: string;
+  showCompanyAddress?: boolean;
+  showPaymentTerms?: boolean;
+  showTaxField?: boolean;
+  showDiscountField?: boolean;
+  showNotesField?: boolean;
+  footerText?: string;
 }
 
 /**
@@ -77,6 +87,16 @@ export function ReceiptStyleInvoice({
   logoUrl,
   primaryColor = "#18181b",
   accentColor = "#10b981",
+  headingFont = "IBM Plex Mono",
+  bodyFont = "IBM Plex Mono",
+  fontSize = 14,
+  dateFormat = "MMM DD, YYYY",
+  showCompanyAddress = true,
+  showPaymentTerms = true,
+  showTaxField = true,
+  showDiscountField = true,
+  showNotesField = true,
+  footerText,
 }: ReceiptStyleInvoiceProps) {
   
   // Calculate contrast-safe colors
@@ -124,9 +144,13 @@ export function ReceiptStyleInvoice({
   };
 
   return (
-    <div 
-      className="bg-white p-12 md:p-16 w-full max-w-[800px] mx-auto selection:bg-zinc-100 font-mono"
-      style={{ color: colors.primary }}
+    <div
+      className="bg-white p-12 md:p-16 w-full max-w-[800px] mx-auto selection:bg-zinc-100"
+      style={{
+        color: colors.primary,
+        fontFamily: `"${bodyFont}", monospace`,
+        fontSize: `${fontSize}px`
+      }}
     >
       {/* Header - Logo & Brand */}
       <div className="flex items-center gap-3 mb-8">
@@ -221,7 +245,7 @@ export function ReceiptStyleInvoice({
 
       {/* From */}
       <div className="mb-6">
-        <div 
+        <div
           className="text-[10px] uppercase tracking-widest font-medium leading-none mb-1"
           style={{ color: colors.muted }}
         >
@@ -229,7 +253,7 @@ export function ReceiptStyleInvoice({
         </div>
         <div className="text-sm leading-relaxed">
           <div className="font-medium">{companyName || "Your Company"}</div>
-          {companyAddress && (
+          {showCompanyAddress && companyAddress && (
             <div className="whitespace-pre-line" style={{ opacity: 0.8 }}>
               {companyAddress}
             </div>
@@ -241,7 +265,7 @@ export function ReceiptStyleInvoice({
             <div style={{ color: colors.muted }}>{companyPhone}</div>
           )}
           {taxId && (
-            <div 
+            <div
               className="text-xs mt-1 uppercase tracking-wider tabular-nums"
               style={{ color: colors.muted }}
             >
@@ -340,7 +364,7 @@ export function ReceiptStyleInvoice({
             <Currency amount={subtotal} />
           </div>
         </div>
-        {discountAmount > 0 && (
+        {showDiscountField && discountAmount > 0 && (
           <div className="grid grid-cols-2 gap-8 w-full max-w-[240px]">
             <div style={{ color: colors.accent }}>Discount</div>
             <div className="text-right tabular-nums" style={{ color: colors.accent }}>
@@ -348,7 +372,7 @@ export function ReceiptStyleInvoice({
             </div>
           </div>
         )}
-        {taxAmount > 0 && (
+        {showTaxField && taxAmount > 0 && (
           <div className="grid grid-cols-2 gap-8 w-full max-w-[240px]">
             <div style={{ color: colors.muted }}>Tax ({taxRate}%)</div>
             <div className="text-right tabular-nums">
@@ -356,7 +380,7 @@ export function ReceiptStyleInvoice({
             </div>
           </div>
         )}
-        <div 
+        <div
           className="w-full max-w-[240px] border-t my-1"
           style={{ borderColor: colors.divider }}
         />
@@ -375,47 +399,49 @@ export function ReceiptStyleInvoice({
       />
 
       {/* Payment & Notes */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        {paymentTerms && (
-          <div>
-            <div 
-              className="text-[10px] uppercase tracking-widest font-medium leading-none mb-1"
-              style={{ color: colors.muted }}
-            >
-              Payment Terms
+      {(showPaymentTerms || showNotesField) && (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          {showPaymentTerms && paymentTerms && (
+            <div>
+              <div
+                className="text-[10px] uppercase tracking-widest font-medium leading-none mb-1"
+                style={{ color: colors.muted }}
+              >
+                Payment Terms
+              </div>
+              <div
+                className="text-xs whitespace-pre-wrap leading-relaxed tabular-nums"
+                style={{ color: colors.muted }}
+              >
+                {paymentTerms}
+              </div>
             </div>
-            <div 
-              className="text-xs whitespace-pre-wrap leading-relaxed tabular-nums"
-              style={{ color: colors.muted }}
-            >
-              {paymentTerms}
+          )}
+          {showNotesField && notes && (
+            <div>
+              <div
+                className="text-[10px] uppercase tracking-widest font-medium leading-none mb-1"
+                style={{ color: colors.muted }}
+              >
+                Notes
+              </div>
+              <div
+                className="text-xs leading-relaxed italic"
+                style={{ color: colors.muted }}
+              >
+                {notes}
+              </div>
             </div>
-          </div>
-        )}
-        {notes && (
-          <div>
-            <div 
-              className="text-[10px] uppercase tracking-widest font-medium leading-none mb-1"
-              style={{ color: colors.muted }}
-            >
-              Notes
-            </div>
-            <div 
-              className="text-xs leading-relaxed italic"
-              style={{ color: colors.muted }}
-            >
-              {notes}
-            </div>
-          </div>
-        )}
-      </div>
+          )}
+        </div>
+      )}
 
       {/* Footer */}
-      <div 
+      <div
         className="mt-16 text-[10px] uppercase tracking-widest text-center"
         style={{ color: withAlpha(colors.primary, 0.25) }}
       >
-        This is a digital record generated by SleekInvoices
+        {footerText || "This is a digital record generated by SleekInvoices"}
       </div>
     </div>
   );

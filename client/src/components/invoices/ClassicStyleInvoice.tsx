@@ -40,6 +40,16 @@ interface ClassicStyleInvoiceProps {
   logoUrl?: string;
   primaryColor?: string;
   accentColor?: string;
+  headingFont?: string;
+  bodyFont?: string;
+  fontSize?: number;
+  dateFormat?: string;
+  showCompanyAddress?: boolean;
+  showPaymentTerms?: boolean;
+  showTaxField?: boolean;
+  showDiscountField?: boolean;
+  showNotesField?: boolean;
+  footerText?: string;
 }
 
 /**
@@ -73,6 +83,16 @@ export function ClassicStyleInvoice({
   logoUrl,
   primaryColor = "#18181b",
   accentColor = "#5f6fff",
+  headingFont = "Inter",
+  bodyFont = "Inter",
+  fontSize = 14,
+  dateFormat = "MMM DD, YYYY",
+  showCompanyAddress = true,
+  showPaymentTerms = true,
+  showTaxField = true,
+  showDiscountField = true,
+  showNotesField = true,
+  footerText,
 }: ClassicStyleInvoiceProps) {
   
   // Calculate contrast-safe colors
@@ -137,9 +157,13 @@ export function ClassicStyleInvoice({
   const statusStyles = getStatusStyles(status);
 
   return (
-    <div 
-      className="bg-white font-['Inter',system-ui,sans-serif] antialiased"
-      style={{ color: colors.primary }}
+    <div
+      className="bg-white antialiased"
+      style={{
+        color: colors.primary,
+        fontFamily: `"${bodyFont}", system-ui, sans-serif`,
+        fontSize: `${fontSize}px`
+      }}
     >
       {/* Header Section */}
       <div className="px-10 pt-10 pb-8">
@@ -176,8 +200,8 @@ export function ClassicStyleInvoice({
             {companyName && logoUrl && (
               <p className="text-lg font-semibold mb-1">{companyName}</p>
             )}
-            {companyAddress && (
-              <p 
+            {showCompanyAddress && companyAddress && (
+              <p
                 className="text-sm whitespace-pre-line leading-relaxed"
                 style={{ color: colors.muted }}
               >
@@ -372,7 +396,7 @@ export function ClassicStyleInvoice({
               </span>
             </div>
             
-            {discountAmount > 0 && (
+            {showDiscountField && discountAmount > 0 && (
               <div className="flex justify-between items-center py-2 text-sm">
                 <span style={{ color: colors.accent }}>Discount</span>
                 <span className="font-mono font-medium" style={{ color: colors.accent }}>
@@ -380,8 +404,8 @@ export function ClassicStyleInvoice({
                 </span>
               </div>
             )}
-            
-            {taxAmount > 0 && (
+
+            {showTaxField && taxAmount > 0 && (
               <div className="flex justify-between items-center py-2 text-sm">
                 <span style={{ color: colors.muted }}>
                   Tax {taxRate > 0 && `(${taxRate}%)`}
@@ -411,22 +435,22 @@ export function ClassicStyleInvoice({
       </div>
 
       {/* Notes & Payment Terms */}
-      {(notes || paymentTerms) && (
+      {(showNotesField || showPaymentTerms) && (notes || paymentTerms) && (
         <>
-          <div 
+          <div
             className="mx-10 h-px"
             style={{ backgroundColor: withAlpha(colors.primary, 0.1) }}
           />
           <div className="px-10 py-8 grid grid-cols-1 sm:grid-cols-2 gap-6">
-            {notes && (
+            {showNotesField && notes && (
               <div>
-                <p 
+                <p
                   className="text-[10px] font-semibold uppercase tracking-[0.15em] mb-2"
                   style={{ color: colors.muted }}
                 >
                   Notes
                 </p>
-                <p 
+                <p
                   className="text-sm leading-relaxed whitespace-pre-line"
                   style={{ color: colors.muted }}
                 >
@@ -434,15 +458,15 @@ export function ClassicStyleInvoice({
                 </p>
               </div>
             )}
-            {paymentTerms && (
+            {showPaymentTerms && paymentTerms && (
               <div>
-                <p 
+                <p
                   className="text-[10px] font-semibold uppercase tracking-[0.15em] mb-2"
                   style={{ color: colors.muted }}
                 >
                   Payment Terms
                 </p>
-                <p 
+                <p
                   className="text-sm leading-relaxed"
                   style={{ color: colors.muted }}
                 >
@@ -455,18 +479,18 @@ export function ClassicStyleInvoice({
       )}
 
       {/* Footer */}
-      <div 
+      <div
         className="px-10 py-6 border-t"
-        style={{ 
+        style={{
           backgroundColor: colors.tableHeaderBg,
           borderColor: withAlpha(colors.primary, 0.1)
         }}
       >
-        <div 
+        <div
           className="flex flex-col sm:flex-row justify-between items-center gap-4 text-xs"
           style={{ color: colors.muted, opacity: 0.7 }}
         >
-          <p>Thank you for your business</p>
+          <p>{footerText || "Thank you for your business"}</p>
           <p className="font-mono">Generated by SleekInvoices</p>
         </div>
       </div>

@@ -433,15 +433,7 @@ export function SleekTemplateEditor({ templateId, onComplete, onCancel }: SleekT
               </CollapsibleSection>
 
               {/* Typography */}
-              <CollapsibleSection
-                title="Typography"
-                disabled={true}
-                disabledMessage={
-                  invoiceStyle === 'receipt'
-                    ? "Receipt style uses fixed IBM Plex Mono font for authentic thermal receipt appearance."
-                    : "Classic style uses fixed Inter font family for clean, modern typography. Custom fonts coming soon."
-                }
-              >
+              <CollapsibleSection title="Typography">
                 <div className="space-y-4">
                   <div>
                     <Label className="text-sm font-medium">Heading Font</Label>
@@ -474,15 +466,7 @@ export function SleekTemplateEditor({ templateId, onComplete, onCancel }: SleekT
               </CollapsibleSection>
 
               {/* Layout */}
-              <CollapsibleSection
-                title="Layout"
-                disabled={true}
-                disabledMessage={
-                  invoiceStyle === 'receipt'
-                    ? "Receipt style uses a fixed vertical layout optimized for narrow receipt format."
-                    : "Classic style uses a fixed split-header layout with rounded table design. Custom layouts coming soon."
-                }
-              >
+              <CollapsibleSection title="Layout">
                 <div className="space-y-4">
                   <div>
                     <Label className="text-sm font-medium">Header Style</Label>
@@ -522,11 +506,7 @@ export function SleekTemplateEditor({ templateId, onComplete, onCancel }: SleekT
               </CollapsibleSection>
 
               {/* Field Visibility */}
-              <CollapsibleSection
-                title="Field Visibility"
-                disabled={true}
-                disabledMessage="Both styles show all available invoice fields by default. Conditional field visibility coming soon."
-              >
+              <CollapsibleSection title="Field Visibility">
                 <div className="space-y-3">
                   {[
                     { key: 'showCompanyAddress', label: 'Company Address' },
@@ -547,11 +527,7 @@ export function SleekTemplateEditor({ templateId, onComplete, onCancel }: SleekT
               </CollapsibleSection>
 
               {/* Footer */}
-              <CollapsibleSection
-                title="Footer"
-                disabled={true}
-                disabledMessage="Both styles use fixed footer text. Custom footer messages coming soon."
-              >
+              <CollapsibleSection title="Footer">
                 <div className="space-y-4">
                   <div>
                     <Label className="text-sm font-medium">Footer Message</Label>
@@ -746,6 +722,16 @@ export function SleekTemplateEditor({ templateId, onComplete, onCancel }: SleekT
                       logoUrl={settings.logoUrl || undefined}
                       primaryColor={settings.primaryColor}
                       accentColor={settings.accentColor}
+                      headingFont={settings.headingFont}
+                      bodyFont={settings.bodyFont}
+                      fontSize={settings.fontSize}
+                      dateFormat={settings.dateFormat}
+                      showCompanyAddress={settings.showCompanyAddress}
+                      showPaymentTerms={settings.showPaymentTerms}
+                      showTaxField={settings.showTaxField}
+                      showDiscountField={settings.showDiscountField}
+                      showNotesField={settings.showNotesField}
+                      footerText={settings.footerText || undefined}
                     />
                   ) : (
                     <ClassicStyleInvoice
@@ -753,6 +739,16 @@ export function SleekTemplateEditor({ templateId, onComplete, onCancel }: SleekT
                       logoUrl={settings.logoUrl || undefined}
                       primaryColor={settings.primaryColor}
                       accentColor={settings.accentColor}
+                      headingFont={settings.headingFont}
+                      bodyFont={settings.bodyFont}
+                      fontSize={settings.fontSize}
+                      dateFormat={settings.dateFormat}
+                      showCompanyAddress={settings.showCompanyAddress}
+                      showPaymentTerms={settings.showPaymentTerms}
+                      showTaxField={settings.showTaxField}
+                      showDiscountField={settings.showDiscountField}
+                      showNotesField={settings.showNotesField}
+                      footerText={settings.footerText || undefined}
                     />
                   )}
                 </div>
