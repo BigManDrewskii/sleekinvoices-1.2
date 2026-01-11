@@ -172,13 +172,13 @@ export const appRouter = router({
     
     create: protectedProcedure
       .input(z.object({
-        name: z.string(),
+        name: z.string().max(255),
         email: z.string().email().optional(),
-        companyName: z.string().optional(),
-        address: z.string().optional(),
-        phone: z.string().optional(),
-        notes: z.string().optional(),
-        vatNumber: z.string().max(50).optional(), // EU VAT number (e.g., DE123456789)
+        companyName: z.string().max(255).optional(),
+        address: z.string().max(500).optional(),
+        phone: z.string().max(50).optional(),
+        notes: z.string().max(2000).optional(),
+        vatNumber: z.string().max(50).nullable().optional(), // EU VAT number (e.g., DE123456789)
         taxExempt: z.boolean().optional(), // Tax exempt status
       }))
       .mutation(async ({ ctx, input }) => {
@@ -191,12 +191,12 @@ export const appRouter = router({
     update: protectedProcedure
       .input(z.object({
         id: z.number(),
-        name: z.string().optional(),
+        name: z.string().max(255).optional(),
         email: z.string().email().optional(),
-        companyName: z.string().optional(),
-        address: z.string().optional(),
-        phone: z.string().optional(),
-        notes: z.string().optional(),
+        companyName: z.string().max(255).optional(),
+        address: z.string().max(500).optional(),
+        phone: z.string().max(50).optional(),
+        notes: z.string().max(2000).optional(),
         vatNumber: z.string().max(50).nullable().optional(), // EU VAT number (e.g., DE123456789)
         taxExempt: z.boolean().optional(), // Tax exempt status
       }))
@@ -338,7 +338,50 @@ export const appRouter = router({
       .query(async ({ ctx, input }) => {
         return await db.getTagsForClient(input.clientId, ctx.user.id);
       }),
-    
+
+    getClientTagsForMultiple: protectedProcedure
+      .input(z.object({ clientIds: z.array(z.number()) }))
+      .query(async ({ ctx, input }) => {
+        if (input.clientIds.length === 0) return {};
+
+        const database = await db.getDb();
+        if (!database) throw new Error("Database not available");
+
+        const { clientTagAssignments, clientTags } = await import("../drizzle/schema");
+        const { eq, and, inArray } = await import("drizzle-orm");
+
+        const tagAssignments = await database
+          .select({
+            clientId: clientTagAssignments.clientId,
+            tagId: clientTags.id,
+            tagName: clientTags.name,
+            tagColor: clientTags.color,
+            tagDescription: clientTags.description,
+          })
+          .from(clientTagAssignments)
+          .leftJoin(clientTags, eq(clientTags.id, clientTagAssignments.tagId))
+          .where(
+            and(
+              inArray(clientTagAssignments.clientId, input.clientIds),
+              eq(clientTags.userId, ctx.user.id)
+            )
+          );
+
+        // Group by clientId
+        const grouped: Record<number, Array<{id: number; name: string; color: string; description: string | null}>> = {};
+        for (const row of tagAssignments) {
+          if (!row.tagId) continue;
+          if (!grouped[row.clientId]) grouped[row.clientId] = [];
+          grouped[row.clientId].push({
+            id: row.tagId,
+            name: row.tagName!,
+            color: row.tagColor!,
+            description: row.tagDescription,
+          });
+        }
+        return grouped;
+      }),
+
     assignTag: protectedProcedure
       .input(z.object({
         clientId: z.number(),
@@ -403,7 +446,7 @@ export const appRouter = router({
     create: protectedProcedure
       .input(z.object({
         name: z.string().min(1).max(255),
-        description: z.string().optional(),
+        description: z.string().max(1000).optional(),
         rate: z.string(), // String for decimal precision
         unit: z.string().max(50).optional(),
         category: z.string().max(100).optional(),
@@ -421,7 +464,7 @@ export const appRouter = router({
       .input(z.object({
         id: z.number(),
         name: z.string().min(1).max(255).optional(),
-        description: z.string().nullable().optional(),
+        description: z.string().max(1000).nullable().optional(),
         rate: z.string().optional(),
         unit: z.string().max(50).nullable().optional(),
         category: z.string().max(100).nullable().optional(),
@@ -481,20 +524,20 @@ export const appRouter = router({
     create: protectedProcedure
       .input(z.object({
         clientId: z.number(),
-        invoiceNumber: z.string(),
+        invoiceNumber: z.string().max(50),
         status: z.enum(['draft', 'sent', 'paid', 'overdue', 'canceled']),
         issueDate: z.date(),
         dueDate: z.date(),
         lineItems: z.array(z.object({
-          description: z.string(),
+          description: z.string().max(500),
           quantity: z.number(),
           rate: z.number(),
         })),
         taxRate: z.number().default(0),
         discountType: z.enum(['percentage', 'fixed']).optional(),
         discountValue: z.number().default(0),
-        notes: z.string().optional(),
-        paymentTerms: z.string().optional(),
+        notes: z.string().max(5000).optional(),
+        paymentTerms: z.string().max(500).optional(),
         expenseIds: z.array(z.number()).optional(),
         templateId: z.number().optional(), // Template to use for this invoice
         currency: z.string().default('USD'), // Invoice currency (fiat or crypto)
@@ -517,14 +560,6 @@ export const appRouter = router({
           );
         }
         
-        // Check for duplicate invoice number
-        const existingInvoice = await db.getInvoiceByNumber(ctx.user.id, input.invoiceNumber);
-        if (existingInvoice) {
-          throw new Error(
-            `Invoice number "${input.invoiceNumber}" already exists. Please use a unique invoice number.`
-          );
-        }
-        
         // Calculate totals
         const subtotal = input.lineItems.reduce((sum, item) => 
           sum + (item.quantity * item.rate), 0
@@ -542,28 +577,54 @@ export const appRouter = router({
         const afterDiscount = subtotal - discountAmount;
         const taxAmount = (afterDiscount * input.taxRate) / 100;
         const total = afterDiscount + taxAmount;
-        
-        // Create invoice
-        const invoice = await db.createInvoice({
-          userId: ctx.user.id,
-          clientId: input.clientId,
-          invoiceNumber: input.invoiceNumber,
-          status: input.status,
-          subtotal: subtotal.toString(),
-          taxRate: input.taxRate.toString(),
-          taxAmount: taxAmount.toString(),
-          discountType: input.discountType,
-          discountValue: input.discountValue.toString(),
-          discountAmount: discountAmount.toString(),
-          total: total.toString(),
-          amountPaid: "0",
-          issueDate: input.issueDate,
-          dueDate: input.dueDate,
-          notes: input.notes,
-          paymentTerms: input.paymentTerms,
-          templateId: input.templateId, // Store selected template
-          currency: input.currency, // Invoice currency
-        });
+
+        // Create invoice with retry on duplicate key error
+        let invoice;
+        let invoiceNumber = input.invoiceNumber;
+        let retries = 0;
+        const maxRetries = 3;
+
+        while (retries < maxRetries) {
+          try {
+            invoice = await db.createInvoice({
+              userId: ctx.user.id,
+              clientId: input.clientId,
+              invoiceNumber,
+              status: input.status,
+              subtotal: subtotal.toString(),
+              taxRate: input.taxRate.toString(),
+              taxAmount: taxAmount.toString(),
+              discountType: input.discountType,
+              discountValue: input.discountValue.toString(),
+              discountAmount: discountAmount.toString(),
+              total: total.toString(),
+              issueDate: input.issueDate,
+              dueDate: input.dueDate,
+              notes: input.notes,
+              paymentTerms: input.paymentTerms,
+              templateId: input.templateId,
+              currency: input.currency,
+            });
+            break; // Success, exit retry loop
+          } catch (err: any) {
+            // Check for duplicate key error
+            if (err.code === 'ER_DUP_ENTRY' || err.code === '23505' || err.message?.includes('Duplicate entry')) {
+              retries++;
+              if (retries >= maxRetries) {
+                throw new Error(`Invoice number "${invoiceNumber}" already exists. Please use a unique invoice number.`);
+              }
+              // Generate new invoice number and retry
+              invoiceNumber = await db.getNextInvoiceNumber(ctx.user.id);
+              console.log(`[Invoice Create] Duplicate detected, retrying with ${invoiceNumber} (attempt ${retries + 1})`);
+            } else {
+              throw err; // Re-throw non-duplicate errors
+            }
+          }
+        }
+
+        if (!invoice) {
+          throw new Error('Failed to create invoice after retries');
+        }
         
         // Create line items
         for (let i = 0; i < input.lineItems.length; i++) {
@@ -624,15 +685,15 @@ export const appRouter = router({
         issueDate: z.date().optional(),
         dueDate: z.date().optional(),
         lineItems: z.array(z.object({
-          description: z.string(),
+          description: z.string().max(500),
           quantity: z.number(),
           rate: z.number(),
         })).optional(),
         taxRate: z.number().optional(),
         discountType: z.enum(['percentage', 'fixed']).optional(),
         discountValue: z.number().optional(),
-        notes: z.string().optional(),
-        paymentTerms: z.string().optional(),
+        notes: z.string().max(5000).optional(),
+        paymentTerms: z.string().max(500).optional(),
         templateId: z.number().optional(), // Template to use for this invoice
       }))
       .mutation(async ({ ctx, input }) => {
@@ -1990,7 +2051,7 @@ export const appRouter = router({
       .input(z.object({
         enabled: z.boolean(),
         intervals: z.array(z.number()),
-        emailSubject: z.string().optional(),
+        emailSubject: z.string().min(1).default('Payment Reminder - Invoice {{invoiceNumber}}'),
         emailTemplate: z.string().optional(),
         ccEmail: z.string().email().optional().nullable(),
       }))

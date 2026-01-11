@@ -258,25 +258,33 @@ export default function Clients() {
     },
   });
 
-  // Load tags for each client
+  // Load tags for all clients in batch
   useEffect(() => {
     if (clients && isAuthenticated) {
-      // Load tags for visible clients
       const loadClientTags = async () => {
-        const newMap = new Map<number, ClientTag[]>();
-        for (const client of clients) {
-          try {
-            const clientTags = await utils.clients.getClientTags.fetch({ clientId: client.id });
-            newMap.set(client.id, clientTags);
-          } catch {
+        try {
+          const clientIds = clients.map(c => c.id);
+          const tagsMap = await utils.clients.getClientTagsForMultiple.fetch({ clientIds });
+
+          // Convert to Map format
+          const newMap = new Map<number, ClientTag[]>();
+          for (const client of clients) {
+            newMap.set(client.id, tagsMap[client.id] || []);
+          }
+          setClientTagsMap(newMap);
+        } catch (error) {
+          console.error('Failed to load client tags:', error);
+          // Set empty tags for all clients on error
+          const newMap = new Map<number, ClientTag[]>();
+          for (const client of clients) {
             newMap.set(client.id, []);
           }
+          setClientTagsMap(newMap);
         }
-        setClientTagsMap(newMap);
       };
       loadClientTags();
     }
-  }, [clients, isAuthenticated]);
+  }, [clients, isAuthenticated, utils]);
 
   // Get unique companies for filter dropdown
   const uniqueCompanies = useMemo(() => {
