@@ -1,5 +1,6 @@
 import { Resend } from 'resend';
 import { Invoice, Client, User } from '../drizzle/schema';
+import { logEmail } from './db';
 
 // Initialize Resend (will use RESEND_API_KEY from env if available)
 let resend: Resend | null = null;
@@ -304,7 +305,36 @@ export async function sendInvoiceEmail(params: SendInvoiceEmailParams): Promise<
     });
     
     if (result.error) {
+      // Log failed email
+      try {
+        await logEmail({
+          userId: user.id,
+          invoiceId: invoice.id,
+          recipientEmail: client.email,
+          subject: `Invoice ${invoice.invoiceNumber} from ${user.companyName || user.name}`,
+          emailType: 'invoice',
+          success: false,
+          errorMessage: result.error.message,
+        });
+      } catch (logError) {
+        console.error('[Email] Failed to log email error:', logError);
+      }
       return { success: false, error: result.error.message };
+    }
+    
+    // Log successful email
+    try {
+      await logEmail({
+        userId: user.id,
+        invoiceId: invoice.id,
+        recipientEmail: client.email,
+        subject: `Invoice ${invoice.invoiceNumber} from ${user.companyName || user.name}`,
+        emailType: 'invoice',
+        success: true,
+        messageId: result.data?.id,
+      });
+    } catch (logError) {
+      console.error('[Email] Failed to log email:', logError);
     }
     
     return { success: true, messageId: result.data?.id };
@@ -480,7 +510,36 @@ export async function sendPaymentReminderEmail(params: SendInvoiceEmailParams): 
     });
     
     if (result.error) {
+      // Log failed email
+      try {
+        await logEmail({
+          userId: user.id,
+          invoiceId: invoice.id,
+          recipientEmail: client.email,
+          subject: `${isOverdue ? 'Overdue' : 'Reminder'}: Invoice ${invoice.invoiceNumber}`,
+          emailType: 'reminder',
+          success: false,
+          errorMessage: result.error.message,
+        });
+      } catch (logError) {
+        console.error('[Email] Failed to log email error:', logError);
+      }
       return { success: false, error: result.error.message };
+    }
+    
+    // Log successful email
+    try {
+      await logEmail({
+        userId: user.id,
+        invoiceId: invoice.id,
+        recipientEmail: client.email,
+        subject: `${isOverdue ? 'Overdue' : 'Reminder'}: Invoice ${invoice.invoiceNumber}`,
+        emailType: 'reminder',
+        success: true,
+        messageId: result.data?.id,
+      });
+    } catch (logError) {
+      console.error('[Email] Failed to log email:', logError);
     }
     
     return { success: true, messageId: result.data?.id };
@@ -741,9 +800,38 @@ ${user.email}
     
     const result = await resendClient.emails.send(emailOptions);
     
+    // Log successful email
+    try {
+      await logEmail({
+        userId: user.id,
+        invoiceId: invoice.id,
+        recipientEmail: client.email,
+        subject: `Payment Reminder: Invoice ${invoice.invoiceNumber} is ${daysOverdue} days overdue`,
+        emailType: 'reminder',
+        success: true,
+        messageId: result.data?.id,
+      });
+    } catch (logError) {
+      console.error('[Email] Failed to log email:', logError);
+    }
+    
     return { success: true, messageId: result.data?.id };
   } catch (error: any) {
     console.error('Failed to send reminder email:', error);
+    // Log failed email
+    try {
+      await logEmail({
+        userId: user.id,
+        invoiceId: invoice.id,
+        recipientEmail: client.email,
+        subject: `Payment Reminder: Invoice ${invoice.invoiceNumber} is ${daysOverdue} days overdue`,
+        emailType: 'reminder',
+        success: false,
+        errorMessage: error.message,
+      });
+    } catch (logError) {
+      console.error('[Email] Failed to log email error:', logError);
+    }
     return { success: false, error: error.message };
   }
 }
@@ -879,10 +967,39 @@ If you have any questions, please contact ${user.email}
       text: emailText,
     });
 
+    // Log successful email
+    try {
+      await logEmail({
+        userId: user.id,
+        invoiceId: invoice.id,
+        recipientEmail: client.email,
+        subject: `Payment Received for Invoice ${invoice.invoiceNumber}`,
+        emailType: 'receipt',
+        success: true,
+        messageId: result.data?.id,
+      });
+    } catch (logError) {
+      console.error('[Email] Failed to log email:', logError);
+    }
+
     return { success: true, messageId: result.data?.id };
   } catch (error: unknown) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     console.error('Failed to send payment confirmation email:', errorMessage);
+    // Log failed email
+    try {
+      await logEmail({
+        userId: user.id,
+        invoiceId: invoice.id,
+        recipientEmail: client.email,
+        subject: `Payment Received for Invoice ${invoice.invoiceNumber}`,
+        emailType: 'receipt',
+        success: false,
+        errorMessage: errorMessage,
+      });
+    } catch (logError) {
+      console.error('[Email] Failed to log email error:', logError);
+    }
     return { success: false, error: errorMessage };
   }
 }

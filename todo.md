@@ -2000,3 +2000,25 @@
 - [x] Update Client Portal UI with crypto payment button
 - [x] Add CryptoPaymentDialog to Client Portal
 - [x] Test end-to-end client crypto payment flow
+
+
+## Email System Enhancements
+
+### Crypto Payment Confirmation Email
+- [x] Add payment confirmation email to NOWPayments webhook handler (already implemented)
+- [x] Include crypto payment details (currency, amount, transaction hash)
+- [x] Send email when invoice payment status changes to 'paid'
+- [x] Test crypto payment confirmation email
+
+### Email Delivery Tracking System
+- [x] Create emailLogs database table with schema (already exists)
+- [x] Add migration for emailLogs table (already exists)
+- [x] Create logEmail() function to record all sent emails (already exists)
+- [x] Update sendInvoiceEmail to log emails
+- [x] Update sendPaymentReminderEmail to log emails
+- [x] Update sendReminderEmail to log emails
+- [x] Update sendPaymentConfirmationEmail to log emails
+- [x] Update portal invitation email to log emails
+- [x] Add email status tracking (sent, delivered, failed)
+- [x] Store Resend message IDs for tracking
+- [x] Write comprehensive tests for email logging (25 tests passing)

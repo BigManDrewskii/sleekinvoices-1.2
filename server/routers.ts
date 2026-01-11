@@ -1900,7 +1900,36 @@ export const appRouter = router({
         });
         
         if (result.error) {
+          // Log failed email - use invoiceId 0 for portal invitations
+          try {
+            await db.logEmail({
+              userId: ctx.user.id,
+              invoiceId: 0, // Portal invitation, not tied to specific invoice
+              recipientEmail: client.email,
+              subject,
+              emailType: 'invoice', // Using 'invoice' as closest type for portal
+              success: false,
+              errorMessage: result.error.message,
+            });
+          } catch (logError) {
+            console.error('[Email] Failed to log email error:', logError);
+          }
           throw new Error(result.error.message);
+        }
+        
+        // Log successful email
+        try {
+          await db.logEmail({
+            userId: ctx.user.id,
+            invoiceId: 0, // Portal invitation, not tied to specific invoice
+            recipientEmail: client.email,
+            subject,
+            emailType: 'invoice', // Using 'invoice' as closest type for portal
+            success: true,
+            messageId: result.data?.id,
+          });
+        } catch (logError) {
+          console.error('[Email] Failed to log email:', logError);
         }
         
         return { success: true };
