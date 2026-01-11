@@ -42,7 +42,7 @@ const CATEGORIES = [
 
 /**
  * Elegant Typography Preview Component
- * Showcases font in a refined, manus.im-inspired layout
+ * Responsive preview that adapts to container size
  */
 function ElegantTypographyPreview({
   font,
@@ -59,40 +59,40 @@ function ElegantTypographyPreview({
 
   if (type === 'heading') {
     return (
-      <div className="space-y-8">
+      <div className="space-y-4 md:space-y-6">
         {/* Large Aa Display */}
-        <div className="flex flex-col items-center py-6">
+        <div className="flex flex-col items-center py-4 md:py-6">
           <span
             className={cn(
-              "text-7xl font-semibold text-foreground leading-none transition-all duration-300",
+              "text-5xl md:text-6xl lg:text-7xl font-semibold text-foreground leading-none transition-all duration-300",
               isHovering && "scale-105"
             )}
             style={fontStyle}
           >
             Aa
           </span>
-          <div className="mt-4 text-xs text-muted-foreground font-mono tabular-nums">
+          <div className="mt-3 md:mt-4 text-xs text-muted-foreground font-mono tabular-nums">
             {weight}
           </div>
         </div>
 
         {/* Refined Alphabet Preview */}
-        <div className="space-y-4">
-          <div className="space-y-1.5">
+        <div className="space-y-3">
+          <div className="space-y-1">
             <div
-              className="text-base tracking-[0.02em] text-foreground/90 text-center"
+              className="text-sm md:text-base tracking-[0.02em] text-foreground/90 text-center"
               style={fontStyle}
             >
               ABCDEFGHIJKLMNOPQRSTUVWXYZ
             </div>
             <div
-              className="text-base tracking-[0.01em] text-muted-foreground/80 text-center"
+              className="text-xs md:text-sm tracking-[0.01em] text-muted-foreground/80 text-center"
               style={fontStyle}
             >
               abcdefghijklmnopqrstuvwxyz
             </div>
             <div
-              className="text-sm tabular-nums text-muted-foreground/70 text-center"
+              className="text-xs tabular-nums text-muted-foreground/70 text-center"
               style={fontStyle}
             >
               0123456789
@@ -100,26 +100,13 @@ function ElegantTypographyPreview({
           </div>
         </div>
 
-        {/* Elegant Divider */}
-        <div className="relative">
-          <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-border/50" />
-          </div>
-        </div>
-
         {/* Sample Text */}
-        <div className="space-y-2">
+        <div className="space-y-1 pt-3 border-t border-border/50">
           <p
-            className="text-sm text-foreground/70 text-center leading-relaxed"
+            className="text-xs md:text-sm text-foreground/70 text-center leading-relaxed"
             style={fontStyle}
           >
-            The quick brown fox jumps
-          </p>
-          <p
-            className="text-sm text-foreground/70 text-center leading-relaxed"
-            style={fontStyle}
-          >
-            over the lazy dog
+            The quick brown fox jumps over the lazy dog
           </p>
         </div>
       </div>
@@ -128,57 +115,46 @@ function ElegantTypographyPreview({
 
   // Body font preview
   return (
-    <div className="space-y-8">
+    <div className="space-y-4 md:space-y-6">
       {/* Large Aa Display */}
-      <div className="flex flex-col items-center py-6">
+      <div className="flex flex-col items-center py-4 md:py-6">
         <span
           className={cn(
-            "text-7xl font-normal text-foreground leading-none transition-all duration-300",
+            "text-5xl md:text-6xl lg:text-7xl font-normal text-foreground leading-none transition-all duration-300",
             isHovering && "scale-105"
           )}
           style={fontStyle}
         >
           Aa
         </span>
-        <div className="mt-4 text-xs text-muted-foreground font-mono tabular-nums">
+        <div className="mt-3 md:mt-4 text-xs text-muted-foreground font-mono tabular-nums">
           {weight}
         </div>
       </div>
 
       {/* Sample Paragraphs */}
-      <div className="space-y-4">
+      <div className="space-y-3">
         <p
-          className="text-sm text-foreground/80 leading-relaxed"
+          className="text-xs md:text-sm text-foreground/80 leading-relaxed"
           style={fontStyle}
         >
           The quick brown fox jumps over the lazy dog. Pack my box with five dozen liquor jugs.
         </p>
         <p
-          className="text-xs text-muted-foreground/70 leading-relaxed"
+          className="text-[10px] md:text-xs text-muted-foreground/70 leading-relaxed"
           style={fontStyle}
         >
-          Professional typography establishes hierarchy, creates rhythm, and guides the reader through content with purpose and clarity.
+          Professional typography establishes hierarchy and guides the reader.
         </p>
       </div>
 
-      {/* Elegant Divider */}
-      <div className="relative">
-        <div className="absolute inset-0 flex items-center">
-          <div className="w-full border-t border-border/50" />
-        </div>
-      </div>
-
       {/* Invoice Style Numbers */}
-      <div className="space-y-2">
-        <div className="flex items-center justify-between text-sm" style={fontStyle}>
+      <div className="space-y-1.5 pt-3 border-t border-border/50">
+        <div className="flex items-center justify-between text-xs md:text-sm" style={fontStyle}>
           <span className="text-muted-foreground/70">Subtotal</span>
           <span className="tabular-nums text-foreground/80">$1,234.56</span>
         </div>
-        <div className="flex items-center justify-between text-sm" style={fontStyle}>
-          <span className="text-muted-foreground/70">Tax (8%)</span>
-          <span className="tabular-nums text-foreground/80">$98.76</span>
-        </div>
-        <div className="flex items-center justify-between text-base font-medium pt-2 border-t border-border/50" style={fontStyle}>
+        <div className="flex items-center justify-between text-sm md:text-base font-medium pt-1.5 border-t border-border/50" style={fontStyle}>
           <span className="text-foreground/90">Total</span>
           <span className="tabular-nums text-foreground">$1,333.32</span>
         </div>
@@ -202,6 +178,7 @@ export function GoogleFontPicker({
   const [category, setCategory] = useState<string>('all');
   const [weightOpen, setWeightOpen] = useState(false);
   const [hoveredFont, setHoveredFont] = useState<string | null>(null);
+  const [showPreview, setShowPreview] = useState(false);
 
   // Find the currently selected font
   const selectedFont = useMemo(() => {
@@ -269,6 +246,7 @@ export function GoogleFontPicker({
           setHoveredFont(null);
           setSearch('');
           setCategory('all');
+          setShowPreview(false);
         }
       }}>
         <PopoverTrigger asChild>
@@ -286,22 +264,22 @@ export function GoogleFontPicker({
           </Button>
         </PopoverTrigger>
         <PopoverContent
-          className="w-[600px] p-0 shadow-xl"
+          className="w-[calc(100vw-2rem)] sm:w-[500px] md:w-[600px] lg:w-[700px] p-0 shadow-xl"
           align="start"
           sideOffset={8}
         >
-          <div className="flex h-[480px]">
-            {/* Left side - Font list */}
-            <div className="w-[300px] border-r border-border/50 flex flex-col bg-muted/5">
+          <div className="flex flex-col md:flex-row max-h-[70vh] md:max-h-[600px]">
+            {/* Font List */}
+            <div className="flex-1 flex flex-col min-h-0 border-b md:border-b-0 md:border-r border-border/50 bg-muted/5">
               {/* Search Header */}
-              <div className="p-4 border-b border-border/50 bg-background/50 backdrop-blur-sm">
+              <div className="p-3 md:p-4 border-b border-border/50 bg-background/50 backdrop-blur-sm shrink-0">
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/50" />
                   <Input
                     placeholder="Search fonts..."
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
-                    className="pl-9 h-9 bg-background/50 border-border/50 focus-visible:ring-1"
+                    className="pl-9 h-9 text-sm bg-background/50 border-border/50 focus-visible:ring-1"
                     autoFocus
                   />
                   {search && (
@@ -316,14 +294,14 @@ export function GoogleFontPicker({
               </div>
 
               {/* Category Filter */}
-              <div className="px-3 py-2.5 border-b border-border/50 bg-background/30">
-                <div className="flex flex-wrap gap-1.5">
+              <div className="px-2 md:px-3 py-2 border-b border-border/50 bg-background/30 shrink-0">
+                <div className="flex flex-wrap gap-1 md:gap-1.5">
                   {CATEGORIES.map((cat) => (
                     <button
                       key={cat.value}
                       onClick={() => setCategory(cat.value)}
                       className={cn(
-                        'px-3 py-1.5 text-xs rounded-md font-medium transition-all duration-200',
+                        'px-2 md:px-3 py-1 md:py-1.5 text-[11px] md:text-xs rounded-md font-medium transition-all duration-200 touch-manipulation',
                         category === cat.value
                           ? 'bg-primary text-primary-foreground shadow-sm'
                           : 'bg-muted/40 text-muted-foreground hover:bg-muted hover:text-foreground'
@@ -335,16 +313,29 @@ export function GoogleFontPicker({
                 </div>
               </div>
 
-              {/* Font List */}
-              <ScrollArea className="flex-1">
+              {/* Mobile Preview Toggle */}
+              <div className="md:hidden px-3 py-2 border-b border-border/50 bg-muted/10 shrink-0">
+                <button
+                  onClick={() => setShowPreview(!showPreview)}
+                  className="w-full px-3 py-2 text-xs font-medium text-muted-foreground bg-background/50 rounded-md border border-border/50 hover:bg-background transition-colors"
+                >
+                  {showPreview ? 'Show Font List' : 'Show Preview'}
+                </button>
+              </div>
+
+              {/* Font List - Hidden on mobile when preview is shown */}
+              <ScrollArea className={cn(
+                "flex-1 min-h-0",
+                showPreview && "hidden md:block"
+              )}>
                 <div className="p-2">
                   {filteredFonts.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center py-12 text-center">
-                      <div className="w-12 h-12 rounded-full bg-muted/30 flex items-center justify-center mb-3">
-                        <Search className="h-5 w-5 text-muted-foreground/50" />
+                    <div className="flex flex-col items-center justify-center py-8 md:py-12 text-center">
+                      <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-muted/30 flex items-center justify-center mb-2 md:mb-3">
+                        <Search className="h-4 w-4 md:h-5 md:w-5 text-muted-foreground/50" />
                       </div>
-                      <p className="text-sm text-muted-foreground">No fonts found</p>
-                      <p className="text-xs text-muted-foreground/60 mt-1">Try a different search term</p>
+                      <p className="text-xs md:text-sm text-muted-foreground">No fonts found</p>
+                      <p className="text-[10px] md:text-xs text-muted-foreground/60 mt-1">Try a different search</p>
                     </div>
                   ) : (
                     <div className="space-y-0.5">
@@ -355,24 +346,24 @@ export function GoogleFontPicker({
                           onMouseEnter={() => loadFontForPreview(font.family)}
                           onMouseLeave={() => setHoveredFont(null)}
                           className={cn(
-                            'w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-left transition-all duration-200 group',
+                            'w-full flex items-center justify-between px-3 py-2 md:py-2.5 rounded-lg text-left transition-all duration-200 group touch-manipulation',
                             value === font.family
                               ? 'bg-primary/10 text-primary shadow-sm'
                               : hoveredFont === font.family
-                              ? 'bg-muted/60 text-foreground shadow-sm scale-[0.99]'
-                              : 'text-foreground/70 hover:bg-muted/40 hover:text-foreground'
+                              ? 'bg-muted/60 text-foreground shadow-sm'
+                              : 'text-foreground/70 hover:bg-muted/40 hover:text-foreground active:bg-muted/60'
                           )}
                         >
                           <span
-                            className="text-sm truncate transition-all"
+                            className="text-sm md:text-base truncate transition-all"
                             style={{ fontFamily: `"${font.family}", ${font.category}` }}
                           >
                             {font.family}
                           </span>
                           <div className="flex items-center gap-2 shrink-0 ml-2">
                             {value === font.family && (
-                              <div className="flex items-center justify-center w-5 h-5 rounded-full bg-primary/20">
-                                <Check className="h-3 w-3 text-primary" />
+                              <div className="flex items-center justify-center w-4 h-4 md:w-5 md:h-5 rounded-full bg-primary/20">
+                                <Check className="h-2.5 w-2.5 md:h-3 md:w-3 text-primary" />
                               </div>
                             )}
                           </div>
@@ -384,31 +375,38 @@ export function GoogleFontPicker({
               </ScrollArea>
 
               {/* Font Count Footer */}
-              <div className="px-4 py-2.5 border-t border-border/50 bg-muted/10">
-                <p className="text-xs text-muted-foreground/70 text-center font-medium">
+              <div className={cn(
+                "px-3 md:px-4 py-2 border-t border-border/50 bg-muted/10 shrink-0",
+                showPreview && "hidden md:block"
+              )}>
+                <p className="text-[10px] md:text-xs text-muted-foreground/70 text-center font-medium">
                   {filteredFonts.length} {filteredFonts.length === 1 ? 'font' : 'fonts'}
                   {search && ' matching'}
                 </p>
               </div>
             </div>
 
-            {/* Right side - Typography Preview */}
-            <div className="w-[300px] bg-gradient-to-br from-background via-muted/5 to-muted/10 p-6 overflow-y-auto">
+            {/* Typography Preview - Side panel on desktop, toggle on mobile */}
+            <div className={cn(
+              "flex-1 bg-gradient-to-br from-background via-muted/5 to-muted/10 p-4 md:p-6 overflow-y-auto",
+              !showPreview && "hidden md:block",
+              "md:max-w-[280px] lg:max-w-[320px]"
+            )}>
               {/* Preview Header */}
-              <div className="flex flex-col gap-2 mb-6 pb-4 border-b border-border/50">
+              <div className="flex flex-col gap-2 mb-4 md:mb-6 pb-3 md:pb-4 border-b border-border/50 shrink-0">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                  <span className="text-[10px] md:text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                     Preview
                   </span>
                   {hoveredFont && (
-                    <span className="text-xs text-primary font-medium animate-in fade-in slide-in-from-right-2 duration-200">
+                    <span className="text-[10px] md:text-xs text-primary font-medium animate-in fade-in slide-in-from-right-2 duration-200">
                       Hover
                     </span>
                   )}
                 </div>
                 {(hoveredFont || value) && (
                   <div className="flex items-baseline gap-2">
-                    <span className="text-sm font-medium text-foreground truncate">
+                    <span className="text-xs md:text-sm font-medium text-foreground truncate">
                       {hoveredFont || value}
                     </span>
                   </div>
@@ -435,14 +433,14 @@ export function GoogleFontPicker({
               variant="outline"
               role="combobox"
               aria-expanded={weightOpen}
-              className="w-[120px] justify-between h-9"
+              className="w-[100px] md:w-[120px] justify-between h-9 shrink-0"
             >
-              <span className="truncate text-sm">{currentWeight?.label || 'Regular'}</span>
-              <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+              <span className="truncate text-xs md:text-sm">{currentWeight?.label || 'Regular'}</span>
+              <ChevronDown className="ml-1 md:ml-2 h-3.5 w-3.5 md:h-4 md:w-4 shrink-0 opacity-50" />
             </Button>
           </PopoverTrigger>
           <PopoverContent
-            className="w-[180px] p-2 shadow-lg"
+            className="w-[160px] md:w-[180px] p-2 shadow-lg"
             align="start"
             sideOffset={8}
           >
@@ -452,15 +450,15 @@ export function GoogleFontPicker({
                   key={w.value}
                   onClick={() => handleSelectWeight(w)}
                   className={cn(
-                    'w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-left transition-all duration-200',
+                    'w-full flex items-center justify-between px-3 py-2 md:py-2.5 rounded-lg text-left transition-all duration-200 touch-manipulation',
                     weight === w.value
                       ? 'bg-primary/10 text-primary shadow-sm'
-                      : 'text-foreground hover:bg-muted'
+                      : 'text-foreground hover:bg-muted active:bg-muted/80'
                   )}
                   style={{ fontWeight: w.value }}
                 >
-                  <span className="text-sm">{w.label}</span>
-                  <span className="text-xs text-muted-foreground/70 tabular-nums font-mono">
+                  <span className="text-xs md:text-sm">{w.label}</span>
+                  <span className="text-[10px] md:text-xs text-muted-foreground/70 tabular-nums font-mono">
                     {w.value}
                   </span>
                 </button>

@@ -1,14 +1,15 @@
 import { Currency, DateDisplay } from "@/components/ui/typography";
 import { cn } from "@/lib/utils";
-import { 
-  getOptimalTextColor, 
+import {
+  getOptimalTextColor,
   adjustColorForContrast,
   isLightColor,
   withAlpha,
   lighten,
   darken
 } from "@/lib/color-contrast";
-import { useMemo } from "react";
+import { useMemo, useEffect } from "react";
+import { loadGoogleFont } from "@/lib/google-fonts";
 
 interface LineItem {
   description: string;
@@ -94,7 +95,17 @@ export function ClassicStyleInvoice({
   showNotesField = true,
   footerText,
 }: ClassicStyleInvoiceProps) {
-  
+
+  // Load custom fonts dynamically
+  useEffect(() => {
+    if (headingFont && headingFont !== 'Inter') {
+      loadGoogleFont(headingFont, ['400', '500', '600', '700']);
+    }
+    if (bodyFont && bodyFont !== 'Inter') {
+      loadGoogleFont(bodyFont, ['400', '500', '600', '700']);
+    }
+  }, [headingFont, bodyFont]);
+
   // Calculate contrast-safe colors
   const colors = useMemo(() => {
     const backgroundColor = "#ffffff";
@@ -192,13 +203,21 @@ export function ClassicStyleInvoice({
                     <path strokeLinecap="round" strokeLinejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                   </svg>
                 </div>
-                <span className="text-xl font-semibold tracking-tight">
+                <span
+                  className="text-xl font-semibold tracking-tight"
+                  style={{ fontFamily: `"${headingFont}", sans-serif` }}
+                >
                   {companyName || 'Your Company'}
                 </span>
               </div>
             )}
             {companyName && logoUrl && (
-              <p className="text-lg font-semibold mb-1">{companyName}</p>
+              <p
+                className="text-lg font-semibold mb-1"
+                style={{ fontFamily: `"${headingFont}", sans-serif` }}
+              >
+                {companyName}
+              </p>
             )}
             {showCompanyAddress && companyAddress && (
               <p
@@ -230,7 +249,10 @@ export function ClassicStyleInvoice({
 
           {/* Invoice Title & Number */}
           <div className="text-right">
-            <h1 className="text-3xl font-bold tracking-tight mb-1">
+            <h1
+              className="text-3xl font-bold tracking-tight mb-1"
+              style={{ fontFamily: `"${headingFont}", sans-serif` }}
+            >
               Invoice
             </h1>
             <p 
@@ -269,13 +291,18 @@ export function ClassicStyleInvoice({
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
           {/* Bill To */}
           <div>
-            <p 
+            <p
               className="text-[10px] font-semibold uppercase tracking-[0.15em] mb-2"
               style={{ color: colors.muted }}
             >
               Bill To
             </p>
-            <p className="text-lg font-semibold">{clientName}</p>
+            <p
+              className="text-lg font-semibold"
+              style={{ fontFamily: `"${headingFont}", sans-serif` }}
+            >
+              {clientName}
+            </p>
             {clientAddress && (
               <p 
                 className="text-sm whitespace-pre-line leading-relaxed mt-1"
@@ -416,12 +443,17 @@ export function ClassicStyleInvoice({
               </div>
             )}
             
-            <div 
+            <div
               className="border-t pt-3 mt-2"
               style={{ borderColor: withAlpha(colors.primary, 0.15) }}
             >
               <div className="flex justify-between items-center">
-                <span className="text-lg font-semibold">Total</span>
+                <span
+                  className="text-lg font-semibold"
+                  style={{ fontFamily: `"${headingFont}", sans-serif` }}
+                >
+                  Total
+                </span>
                 <span 
                   className="text-2xl font-bold font-mono"
                   style={{ color: colors.accent }}

@@ -1,13 +1,14 @@
 import { Currency, DateDisplay } from "@/components/ui/typography";
-import { 
-  getOptimalTextColor, 
+import {
+  getOptimalTextColor,
   adjustColorForContrast,
   isLightColor,
   withAlpha,
   darken,
   lighten
 } from "@/lib/color-contrast";
-import { useMemo } from "react";
+import { useMemo, useEffect } from "react";
+import { loadGoogleFont } from "@/lib/google-fonts";
 
 interface LineItem {
   description: string;
@@ -98,7 +99,17 @@ export function ReceiptStyleInvoice({
   showNotesField = true,
   footerText,
 }: ReceiptStyleInvoiceProps) {
-  
+
+  // Load custom fonts dynamically
+  useEffect(() => {
+    if (headingFont && headingFont !== 'IBM Plex Mono') {
+      loadGoogleFont(headingFont, ['400', '500', '600', '700']);
+    }
+    if (bodyFont && bodyFont !== 'IBM Plex Mono') {
+      loadGoogleFont(bodyFont, ['400', '500', '600', '700']);
+    }
+  }, [headingFont, bodyFont]);
+
   // Calculate contrast-safe colors
   const colors = useMemo(() => {
     const backgroundColor = "#ffffff";
@@ -171,9 +182,9 @@ export function ReceiptStyleInvoice({
             </svg>
           </div>
         )}
-        <span 
+        <span
           className="text-sm font-medium tracking-tight"
-          style={{ color: colors.primary }}
+          style={{ color: colors.primary, fontFamily: `"${headingFont}", monospace` }}
         >
           {companyName || "SleekInvoices"}
         </span>
@@ -252,7 +263,12 @@ export function ReceiptStyleInvoice({
           From
         </div>
         <div className="text-sm leading-relaxed">
-          <div className="font-medium">{companyName || "Your Company"}</div>
+          <div
+            className="font-medium"
+            style={{ fontFamily: `"${headingFont}", monospace` }}
+          >
+            {companyName || "Your Company"}
+          </div>
           {showCompanyAddress && companyAddress && (
             <div className="whitespace-pre-line" style={{ opacity: 0.8 }}>
               {companyAddress}
@@ -290,7 +306,12 @@ export function ReceiptStyleInvoice({
           To
         </div>
         <div className="text-sm leading-relaxed">
-          <div className="font-medium">{clientName}</div>
+          <div
+            className="font-medium"
+            style={{ fontFamily: `"${headingFont}", monospace` }}
+          >
+            {clientName}
+          </div>
           {clientAddress && (
             <div className="whitespace-pre-line" style={{ opacity: 0.8 }}>
               {clientAddress}
@@ -385,7 +406,7 @@ export function ReceiptStyleInvoice({
           style={{ borderColor: colors.divider }}
         />
         <div className="grid grid-cols-2 gap-8 w-full max-w-[240px] text-lg font-medium">
-          <div>Total</div>
+          <div style={{ fontFamily: `"${headingFont}", monospace` }}>Total</div>
           <div className="text-right tabular-nums" style={{ color: colors.accent }}>
             <Currency amount={total} />
           </div>
