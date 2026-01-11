@@ -102,7 +102,7 @@ export const invoices = mysqlTable("invoices", {
   status: mysqlEnum("status", ["draft", "sent", "viewed", "paid", "overdue", "canceled"]).default("draft").notNull(),
   
   // Financial details - DECIMAL(24,8) for crypto precision
-  currency: varchar("currency", { length: 3 }).default("USD").notNull(),
+  currency: varchar("currency", { length: 10 }).default("USD").notNull(),
   subtotal: decimal("subtotal", { precision: 24, scale: 8 }).notNull(),
   taxRate: decimal("taxRate", { precision: 5, scale: 2 }).default("0").notNull(),
   taxAmount: decimal("taxAmount", { precision: 24, scale: 8 }).default("0").notNull(),
@@ -354,7 +354,7 @@ export const expenses = mysqlTable("expenses", {
   
   // Financial details - DECIMAL(24,8) for crypto precision
   amount: decimal("amount", { precision: 24, scale: 8 }).notNull(),
-  currency: varchar("currency", { length: 3 }).default("USD").notNull(),
+  currency: varchar("currency", { length: 10 }).default("USD").notNull(),
   date: timestamp("date").notNull(),
   
   // Expense details
@@ -452,7 +452,7 @@ export const payments = mysqlTable("payments", {
   
   // Payment details - DECIMAL(24,8) for crypto precision
   amount: decimal("amount", { precision: 24, scale: 8 }).notNull(),
-  currency: varchar("currency", { length: 3 }).default("USD").notNull(),
+  currency: varchar("currency", { length: 10 }).default("USD").notNull(),
   paymentMethod: mysqlEnum("paymentMethod", ["stripe", "manual", "bank_transfer", "check", "cash", "crypto"]).notNull(),
   
   // Stripe integration
@@ -701,7 +701,7 @@ export const estimates = mysqlTable("estimates", {
   status: mysqlEnum("status", ["draft", "sent", "viewed", "accepted", "rejected", "expired", "converted"]).default("draft").notNull(),
   
   // Financial details - DECIMAL(24,8) for crypto precision
-  currency: varchar("currency", { length: 3 }).default("USD").notNull(),
+  currency: varchar("currency", { length: 10 }).default("USD").notNull(),
   subtotal: decimal("subtotal", { precision: 24, scale: 8 }).notNull(),
   taxRate: decimal("taxRate", { precision: 5, scale: 2 }).default("0").notNull(),
   taxAmount: decimal("taxAmount", { precision: 24, scale: 8 }).default("0").notNull(),
@@ -963,7 +963,7 @@ export const batchInvoiceTemplates = mysqlTable("batchInvoiceTemplates", {
   
   // Invoice settings
   dueInDays: int("dueInDays").default(30).notNull(), // Days until due date
-  currency: varchar("currency", { length: 3 }).default("USD").notNull(),
+  currency: varchar("currency", { length: 10 }).default("USD").notNull(),
   taxRate: decimal("taxRate", { precision: 5, scale: 2 }).default("0").notNull(),
   
   // Invoice template reference (optional)

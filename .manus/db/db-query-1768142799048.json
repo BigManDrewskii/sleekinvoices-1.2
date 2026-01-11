@@ -1,0 +1,17 @@
+{
+  "query": "SELECT id, invoiceNumber, userId, clientId, status FROM invoices WHERE invoiceNumber = 'INV-0001' AND userId = 1;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user REX6DRAh92xmf1o.58be8e717db2 --database coKdAkLfsbebvczbYNFn3V --execute SELECT id, invoiceNumber, userId, clientId, status FROM invoices WHERE invoiceNumber = 'INV-0001' AND userId = 1;",
+  "rows": [
+    {
+      "id": "420041",
+      "invoiceNumber": "INV-0001",
+      "userId": "1",
+      "clientId": "420068",
+      "status": "overdue"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tinvoiceNumber\tuserId\tclientId\tstatus\n420041\tINV-0001\t1\t420068\toverdue\n",
+  "stderr": "",
+  "execution_time_ms": 399
+}

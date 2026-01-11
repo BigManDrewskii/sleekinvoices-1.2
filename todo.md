@@ -1985,3 +1985,7 @@
 ## NOWPayments IPN Secret
 - [x] Add NOWPAYMENTS_IPN_SECRET environment variable for webhook signature verification
 - [x] Update nowpayments library to use IPN secret instead of public key for signature verification
+
+## Bug Fix: Invoice Creation Database Error
+- [x] Fix failed INSERT query when creating invoices
+- [x] Investigate clientId 690001 - may not exist in clients table

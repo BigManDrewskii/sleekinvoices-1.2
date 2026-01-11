@@ -1,0 +1,9 @@
+{
+  "query": "INSERT INTO invoices (userId, clientId, invoiceNumber, status, currency, subtotal, taxRate, taxAmount, discountType, discountValue, discountAmount, total, notes, paymentTerms, templateId, issueDate, dueDate) VALUES (1, 690001, 'INV-TEST-002', 'draft', 'USDC', '1', '0', '0', 'percentage', '0', '0', '1', '', 'Net 30', 270040, '2026-01-11 00:00:00', '2026-02-10 00:00:00');",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user REX6DRAh92xmf1o.58be8e717db2 --database coKdAkLfsbebvczbYNFn3V --execute INSERT INTO invoices (userId, clientId, invoiceNumber, status, currency, subtotal, taxRate, taxAmount, discountType, discountValue, discountAmount, total, notes, paymentTerms, templateId, issueDate, dueDate) VALUES (1, 690001, 'INV-TEST-002', 'draft', 'USDC', '1', '0', '0', 'percentage', '0', '0', '1', '', 'Net 30', 270040, '2026-01-11 00:00:00', '2026-02-10 00:00:00');",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 413
+}
