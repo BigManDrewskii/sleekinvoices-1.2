@@ -37,6 +37,9 @@ import {
   AiCredits,
   aiUsageLogs,
   InsertAiUsageLog,
+  aiCreditPurchases,
+  AiCreditPurchase,
+  InsertAiCreditPurchase,
   quickbooksInvoiceMapping,
   clientTags,
   ClientTag,
@@ -3457,23 +3460,27 @@ export async function getAiCredits(userId: number, isPro: boolean = false): Prom
 
 /**
  * Check if user has available AI credits
+ * Total available = creditsLimit + purchasedCredits - creditsUsed
  */
 export async function hasAiCredits(userId: number, isPro: boolean = false): Promise<boolean> {
   const credits = await getAiCredits(userId, isPro);
-  return credits.creditsUsed < credits.creditsLimit;
+  const totalAvailable = credits.creditsLimit + credits.purchasedCredits;
+  return credits.creditsUsed < totalAvailable;
 }
 
 /**
  * Use one AI credit
  * Returns false if no credits available
+ * Consumes from base credits first, then purchased credits
  */
 export async function useAiCredit(userId: number, isPro: boolean = false): Promise<boolean> {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
   
   const credits = await getAiCredits(userId, isPro);
+  const totalAvailable = credits.creditsLimit + credits.purchasedCredits;
   
-  if (credits.creditsUsed >= credits.creditsLimit) {
+  if (credits.creditsUsed >= totalAvailable) {
     return false;
   }
   
@@ -3545,6 +3552,75 @@ export async function getAiUsageStats(userId: number, days: number = 30) {
   };
 }
 
+
+// ============================================================================
+// AI CREDIT PURCHASES OPERATIONS
+// ============================================================================
+
+/**
+ * Create a pending credit purchase record
+ */
+export async function createCreditPurchase(data: {
+  userId: number;
+  stripeSessionId: string;
+  packType: 'starter' | 'standard' | 'pro_pack';
+  creditsAmount: number;
+  amountPaid: number;
+  currency?: string;
+}): Promise<AiCreditPurchase> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const result = await db.insert(aiCreditPurchases).values({
+    userId: data.userId,
+    stripeSessionId: data.stripeSessionId,
+    packType: data.packType,
+    creditsAmount: data.creditsAmount,
+    amountPaid: data.amountPaid,
+    currency: data.currency || 'usd',
+    status: 'pending',
+  });
+  
+  const insertedId = Number(result[0].insertId);
+  const created = await db.select().from(aiCreditPurchases).where(eq(aiCreditPurchases.id, insertedId)).limit(1);
+  return created[0]!;
+}
+
+/**
+ * Get credit purchase history for a user
+ */
+export async function getCreditPurchaseHistory(userId: number, limit: number = 20): Promise<AiCreditPurchase[]> {
+  const db = await getDb();
+  if (!db) return [];
+  
+  return await db
+    .select()
+    .from(aiCreditPurchases)
+    .where(eq(aiCreditPurchases.userId, userId))
+    .orderBy(desc(aiCreditPurchases.createdAt))
+    .limit(limit);
+}
+
+/**
+ * Get total purchased credits for a user in current month
+ */
+export async function getTotalPurchasedCredits(userId: number): Promise<number> {
+  const db = await getDb();
+  if (!db) return 0;
+  
+  const currentMonth = new Date().toISOString().slice(0, 7);
+  
+  const purchases = await db
+    .select()
+    .from(aiCreditPurchases)
+    .where(and(
+      eq(aiCreditPurchases.userId, userId),
+      eq(aiCreditPurchases.appliedToMonth, currentMonth),
+      eq(aiCreditPurchases.status, 'completed')
+    ));
+  
+  return purchases.reduce((sum, p) => sum + p.creditsAmount, 0);
+}
 
 // ============================================================================
 // CLIENT TAGS OPERATIONS

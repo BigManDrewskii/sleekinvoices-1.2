@@ -18,6 +18,7 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Orb } from "@/components/ui/orb";
 import { cn } from "@/lib/utils";
+import { LowCreditsPrompt, CreditTopUp } from "@/components/CreditTopUp";
 import { trpc } from "@/lib/trpc";
 import { useLocation } from "wouter";
 import { MarkdownRenderer } from "./MarkdownRenderer";
@@ -297,6 +298,17 @@ export function AIAssistant({ isOpen, onClose }: AIAssistantProps) {
             </div>
           </div>
           
+          {/* Top-up button when low on credits */}
+          {credits && credits.remaining <= 5 && (
+            <CreditTopUp
+              trigger={
+                <Button variant="ghost" size="sm" className="text-xs text-amber-500 hover:text-amber-400">
+                  + Get Credits
+                </Button>
+              }
+            />
+          )}
+          
           <div className="flex items-center gap-1">
             {messages.length > 0 && (
               <>
@@ -473,9 +485,20 @@ export function AIAssistant({ isOpen, onClose }: AIAssistantProps) {
           <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-border/50 to-transparent" />
           
           {!hasCredits && (
-            <div className="mb-3 p-3 rounded-xl bg-destructive/10 border border-destructive/20 text-destructive text-sm text-center">
-              <span className="font-medium">No credits remaining.</span>
-              <span className="text-destructive/80"> Upgrade to Pro for more.</span>
+            <div className="mb-3 p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 text-sm">
+              <div className="flex items-center justify-between">
+                <div>
+                  <span className="font-medium text-amber-600 dark:text-amber-400">No credits remaining.</span>
+                  <span className="text-muted-foreground ml-1">Get more to continue.</span>
+                </div>
+                <CreditTopUp
+                  trigger={
+                    <Button size="sm" variant="outline" className="gap-1.5 border-amber-500/50 hover:bg-amber-500/10 text-amber-600 dark:text-amber-400">
+                      Top Up Credits
+                    </Button>
+                  }
+                />
+              </div>
             </div>
           )}
           

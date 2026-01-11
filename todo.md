@@ -2065,3 +2065,15 @@
 - [x] Show trend indicators (up/down vs previous period)
 - [x] Add widget to Analytics page
 - [x] Write tests for analytics endpoint (15 tests passing)
+
+### AI Credit Top-Up System
+- [x] Create aiCreditPurchases table for tracking purchases
+- [x] Add purchasedCredits column to aiCredits table
+- [x] Create Stripe product/price for credit packs (Starter: 25/$2.99, Standard: 100/$9.99, Pro: 500/$39.99)
+- [x] Implement Stripe checkout session for credit purchase
+- [x] Handle checkout.session.completed webhook for credits
+- [x] Add tRPC endpoints: createCreditPurchase, getCreditPurchaseHistory, getCreditPacks
+- [x] Update getAiCredits to include purchased credits
+- [x] Create CreditTopUp UI component with pricing tiers
+- [x] Add top-up button to AI Assistant when low on credits
+- [x] Write tests for credit purchase flow (13 tests passing)

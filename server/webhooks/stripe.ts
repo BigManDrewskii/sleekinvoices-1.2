@@ -74,6 +74,10 @@ export async function handleStripeWebhook(req: Request, res: Response) {
         await handleSubscriptionDeleted(event);
         break;
       
+      case "checkout.session.completed":
+        await handleCheckoutSessionCompleted(event);
+        break;
+      
       default:
         console.log(`[Stripe Webhook] Unhandled event type: ${event.type}`);
     }
@@ -375,4 +379,101 @@ async function handleSubscriptionDeleted(event: any) {
     .where(eq(users.id, user.id));
   
   console.log(`[Stripe Webhook] User ${user.id} downgraded to free tier`);
+}
+
+
+/**
+ * Handle checkout session completed
+ * Used for credit pack purchases
+ */
+async function handleCheckoutSessionCompleted(event: any) {
+  const session = event.data.object;
+  
+  console.log(`[Stripe Webhook] Checkout session completed: ${session.id}`);
+  
+  // Check if this is a credit purchase
+  if (session.metadata?.type !== 'credit_purchase') {
+    console.log('[Stripe Webhook] Not a credit purchase, skipping');
+    return;
+  }
+  
+  const userId = parseInt(session.metadata.userId);
+  const packType = session.metadata.packType as 'starter' | 'standard' | 'pro_pack';
+  const creditsAmount = parseInt(session.metadata.creditsAmount);
+  
+  if (!userId || !packType || !creditsAmount) {
+    console.error('[Stripe Webhook] Missing credit purchase metadata');
+    return;
+  }
+  
+  const { aiCreditPurchases, aiCredits } = await import("../../drizzle/schema");
+  const { getDb } = await import("../db");
+  const { eq, and } = await import("drizzle-orm");
+  
+  const db = await getDb();
+  if (!db) return;
+  
+  // Get the current month
+  const now = new Date();
+  const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+  
+  // Create purchase record
+  await db.insert(aiCreditPurchases).values({
+    userId,
+    stripeSessionId: session.id,
+    stripePaymentIntentId: session.payment_intent,
+    packType,
+    creditsAmount,
+    amountPaid: session.amount_total || 0,
+    currency: session.currency || 'usd',
+    status: 'completed',
+    appliedToMonth: currentMonth,
+    completedAt: new Date(),
+  });
+  
+  console.log(`[Stripe Webhook] Credit purchase recorded: ${creditsAmount} credits for user ${userId}`);
+  
+  // Add credits to user's current month record
+  const existingCredits = await db
+    .select()
+    .from(aiCredits)
+    .where(and(
+      eq(aiCredits.userId, userId),
+      eq(aiCredits.month, currentMonth)
+    ))
+    .limit(1);
+  
+  if (existingCredits[0]) {
+    // Update existing record
+    await db
+      .update(aiCredits)
+      .set({
+        purchasedCredits: existingCredits[0].purchasedCredits + creditsAmount,
+        updatedAt: new Date(),
+      })
+      .where(eq(aiCredits.id, existingCredits[0].id));
+    
+    console.log(`[Stripe Webhook] Added ${creditsAmount} purchased credits to existing record`);
+  } else {
+    // Create new record with purchased credits
+    const { users } = await import("../../drizzle/schema");
+    const userResult = await db
+      .select()
+      .from(users)
+      .where(eq(users.id, userId))
+      .limit(1);
+    
+    const isPro = userResult[0]?.subscriptionStatus === 'active';
+    const creditsLimit = isPro ? 50 : 5;
+    
+    await db.insert(aiCredits).values({
+      userId,
+      month: currentMonth,
+      creditsUsed: 0,
+      creditsLimit,
+      purchasedCredits: creditsAmount,
+    });
+    
+    console.log(`[Stripe Webhook] Created new credit record with ${creditsAmount} purchased credits`);
+  }
 }

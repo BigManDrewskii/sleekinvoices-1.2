@@ -771,6 +771,7 @@ export const aiCredits = mysqlTable("aiCredits", {
   month: varchar("month", { length: 7 }).notNull(), // Format: YYYY-MM
   creditsUsed: int("creditsUsed").default(0).notNull(),
   creditsLimit: int("creditsLimit").default(5).notNull(), // 5 for free, 50 for pro
+  purchasedCredits: int("purchasedCredits").default(0).notNull(), // Additional purchased credits
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 }, (table) => ({
@@ -780,6 +781,31 @@ export const aiCredits = mysqlTable("aiCredits", {
 
 export type AiCredits = typeof aiCredits.$inferSelect;
 export type InsertAiCredits = typeof aiCredits.$inferInsert;
+
+/**
+ * AI Credit Purchases - Track credit pack purchases via Stripe
+ * Credit Packs:
+ * - Starter: 25 credits for $2.99
+ * - Standard: 100 credits for $9.99
+ * - Pro Pack: 500 credits for $39.99
+ */
+export const aiCreditPurchases = mysqlTable("aiCreditPurchases", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  stripeSessionId: varchar("stripeSessionId", { length: 255 }).notNull().unique(),
+  stripePaymentIntentId: varchar("stripePaymentIntentId", { length: 255 }),
+  packType: mysqlEnum("packType", ["starter", "standard", "pro_pack"]).notNull(),
+  creditsAmount: int("creditsAmount").notNull(), // 25, 100, or 500
+  amountPaid: int("amountPaid").notNull(), // Amount in cents (299, 999, 3999)
+  currency: varchar("currency", { length: 3 }).default("usd").notNull(),
+  status: mysqlEnum("status", ["pending", "completed", "failed", "refunded"]).default("pending").notNull(),
+  appliedToMonth: varchar("appliedToMonth", { length: 7 }), // Format: YYYY-MM, when credits were applied
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  completedAt: timestamp("completedAt"),
+});
+
+export type AiCreditPurchase = typeof aiCreditPurchases.$inferSelect;
+export type InsertAiCreditPurchase = typeof aiCreditPurchases.$inferInsert;
 
 /**
  * AI Usage logs for tracking and debugging AI features

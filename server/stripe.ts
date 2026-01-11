@@ -177,6 +177,79 @@ export function verifyWebhookSignature(
   return stripe.webhooks.constructEvent(payload, signature, secret);
 }
 
+// Credit pack pricing configuration
+export const CREDIT_PACKS = {
+  starter: {
+    credits: 25,
+    price: 299, // $2.99 in cents
+    name: 'Starter Pack',
+    description: '25 AI credits',
+  },
+  standard: {
+    credits: 100,
+    price: 999, // $9.99 in cents
+    name: 'Standard Pack',
+    description: '100 AI credits',
+  },
+  pro_pack: {
+    credits: 500,
+    price: 3999, // $39.99 in cents
+    name: 'Pro Pack',
+    description: '500 AI credits',
+  },
+} as const;
+
+export type CreditPackType = keyof typeof CREDIT_PACKS;
+
+/**
+ * Create a checkout session for purchasing AI credits
+ */
+export async function createCreditPurchaseCheckout(params: {
+  customerId: string;
+  userId: number;
+  packType: CreditPackType;
+  successUrl: string;
+  cancelUrl: string;
+}): Promise<{ sessionId: string; url: string }> {
+  const stripe = getStripe();
+  const pack = CREDIT_PACKS[params.packType];
+  
+  if (!pack) {
+    throw new Error(`Invalid credit pack type: ${params.packType}`);
+  }
+  
+  const session = await stripe.checkout.sessions.create({
+    customer: params.customerId,
+    mode: 'payment',
+    line_items: [
+      {
+        price_data: {
+          currency: 'usd',
+          unit_amount: pack.price,
+          product_data: {
+            name: pack.name,
+            description: pack.description,
+          },
+        },
+        quantity: 1,
+      },
+    ],
+    metadata: {
+      type: 'credit_purchase',
+      userId: params.userId.toString(),
+      packType: params.packType,
+      creditsAmount: pack.credits.toString(),
+    },
+    success_url: params.successUrl,
+    cancel_url: params.cancelUrl,
+  });
+  
+  return {
+    sessionId: session.id,
+    url: session.url!,
+  };
+}
+
 /**
  * Sync user's subscription status from Stripe
  * Useful for manual sync when webhooks fail or for testing

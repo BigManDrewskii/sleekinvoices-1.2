@@ -2859,12 +2859,77 @@ export const appRouter = router({
     getCredits: protectedProcedure.query(async ({ ctx }) => {
       const isPro = ctx.user.subscriptionStatus === 'active';
       const credits = await db.getAiCredits(ctx.user.id, isPro);
+      const totalLimit = credits.creditsLimit + credits.purchasedCredits;
       return {
         used: credits.creditsUsed,
         limit: credits.creditsLimit,
-        remaining: credits.creditsLimit - credits.creditsUsed,
+        purchased: credits.purchasedCredits,
+        totalLimit,
+        remaining: totalLimit - credits.creditsUsed,
         isPro,
       };
+    }),
+
+    // Get credit packs pricing
+    getCreditPacks: protectedProcedure.query(async () => {
+      const { CREDIT_PACKS } = await import('./stripe');
+      return Object.entries(CREDIT_PACKS).map(([key, pack]) => ({
+        id: key,
+        name: pack.name,
+        credits: pack.credits,
+        price: pack.price / 100, // Convert to dollars
+        pricePerCredit: Math.round((pack.price / pack.credits) * 100) / 100 / 100, // Price per credit in dollars
+      }));
+    }),
+
+    // Create checkout session for credit purchase
+    createCreditPurchase: protectedProcedure
+      .input(z.object({
+        packType: z.enum(['starter', 'standard', 'pro_pack']),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const { createCreditPurchaseCheckout, CREDIT_PACKS } = await import('./stripe');
+        
+        // Ensure user has Stripe customer ID
+        let customerId = ctx.user.stripeCustomerId;
+        if (!customerId) {
+          const { createStripeCustomer } = await import('./stripe');
+          customerId = await createStripeCustomer(
+            ctx.user.email || `user-${ctx.user.id}@sleekinvoices.com`,
+            ctx.user.name || undefined
+          );
+          // Update user with customer ID
+          await db.updateUserProfile(ctx.user.id, { stripeCustomerId: customerId });
+        }
+        
+        const pack = CREDIT_PACKS[input.packType];
+        const baseUrl = process.env.NODE_ENV === 'production' 
+          ? 'https://sleekinvoices.com' 
+          : 'http://localhost:3000';
+        
+        const { sessionId, url } = await createCreditPurchaseCheckout({
+          customerId,
+          userId: ctx.user.id,
+          packType: input.packType,
+          successUrl: `${baseUrl}/settings/ai?purchase=success`,
+          cancelUrl: `${baseUrl}/settings/ai?purchase=canceled`,
+        });
+        
+        // Create pending purchase record
+        await db.createCreditPurchase({
+          userId: ctx.user.id,
+          stripeSessionId: sessionId,
+          packType: input.packType,
+          creditsAmount: pack.credits,
+          amountPaid: pack.price,
+        });
+        
+        return { sessionId, url };
+      }),
+
+    // Get credit purchase history
+    getPurchaseHistory: protectedProcedure.query(async ({ ctx }) => {
+      return await db.getCreditPurchaseHistory(ctx.user.id);
     }),
 
     // Smart Compose - Extract invoice data from natural language
@@ -2892,10 +2957,11 @@ export const appRouter = router({
 
         // Get updated credits
         const credits = await db.getAiCredits(ctx.user.id, isPro);
+        const totalLimit = credits.creditsLimit + credits.purchasedCredits;
 
         return {
           ...result,
-          creditsRemaining: credits.creditsLimit - credits.creditsUsed,
+          creditsRemaining: totalLimit - credits.creditsUsed,
         };
       }),
 
