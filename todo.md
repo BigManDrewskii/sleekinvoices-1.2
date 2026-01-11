@@ -1958,3 +1958,26 @@
 - [x] Ensure PDF matches preview exactly
 - [x] Test all functionality (34 tests passing)
 - [x] Save checkpoint
+
+
+## Dynamic Colors with Contrast Ratio Optimization
+- [ ] Create contrast ratio utility functions (WCAG compliant)
+- [ ] Update ReceiptStyleInvoice to accept primaryColor, accentColor props
+- [ ] Update ClassicStyleInvoice to use contrast-safe text colors
+- [ ] Implement automatic text color adjustment based on background
+- [ ] Update InvoicePreviewModal to pass colors to both styles
+- [ ] Update PDF generation with contrast-safe colors
+- [ ] Test color combinations for accessibility
+- [ ] Save checkpoint
+
+
+## Dynamic Colors with Contrast Ratio Optimization
+- [x] Create color contrast utility functions (WCAG compliance)
+- [x] Implement automatic text color selection for backgrounds
+- [x] Update ReceiptStyleInvoice with dynamic color props
+- [x] Update ClassicStyleInvoice with contrast-safe colors
+- [x] Pass template colors through InvoicePreviewModal
+- [x] Update PDF generation to use dynamic colors
+- [x] Ensure all color combinations meet WCAG AA contrast (4.5:1)
+- [x] Test with various color combinations (18 tests passing)
+- [x] Save checkpoint

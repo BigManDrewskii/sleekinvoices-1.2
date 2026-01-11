@@ -1,6 +1,7 @@
 import puppeteer from 'puppeteer';
 import { Invoice, Client, InvoiceLineItem, User } from '../drizzle/schema';
 import type { InvoiceTemplate } from '../drizzle/schema';
+import { createPDFColorPalette, getOptimalTextColor, withAlpha } from './color-contrast';
 
 interface InvoicePDFData {
   invoice: Invoice;
@@ -74,12 +75,17 @@ function generateReceiptStyleHTML(data: InvoicePDFData): string {
   const companyPhone = user.companyPhone || '';
   const taxId = user.taxId || '';
   
+  // Get contrast-safe colors from template or defaults
+  const primaryColor = template?.primaryColor || '#18181b';
+  const accentColor = template?.accentColor || '#10b981';
+  const colors = createPDFColorPalette(primaryColor, accentColor);
+  
   const lineItemsHTML = lineItems.map(item => `
-    <div style="display: grid; grid-template-columns: repeat(12, 1fr); font-size: 14px; color: #27272a; gap: 4px 0; margin-bottom: 16px;">
+    <div style="display: grid; grid-template-columns: repeat(12, 1fr); font-size: 14px; color: ${colors.primary}; gap: 4px 0; margin-bottom: 16px;">
       <div style="grid-column: span 6; padding-right: 16px;">${item.description}</div>
-      <div style="grid-column: span 2; text-align: right; font-variant-numeric: tabular-nums; color: #71717a;">${item.quantity}</div>
+      <div style="grid-column: span 2; text-align: right; font-variant-numeric: tabular-nums; color: ${colors.muted};">${item.quantity}</div>
       <div style="grid-column: span 4; text-align: right; font-variant-numeric: tabular-nums;">${formatCurrency(item.amount)}</div>
-      <div style="grid-column: span 12; font-size: 10px; color: #a1a1aa; font-variant-numeric: tabular-nums;">
+      <div style="grid-column: span 12; font-size: 10px; color: ${colors.muted}; font-variant-numeric: tabular-nums;">
         ${item.quantity} × ${formatCurrency(item.rate)}
       </div>
     </div>
@@ -99,7 +105,7 @@ function generateReceiptStyleHTML(data: InvoicePDFData): string {
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
       font-family: 'IBM Plex Mono', monospace;
-      color: #18181b;
+      color: ${colors.primary};
       font-size: 14px;
       line-height: 1.6;
       background: white;
@@ -118,14 +124,14 @@ function generateReceiptStyleHTML(data: InvoicePDFData): string {
     }
     .divider {
       margin: 24px 0;
-      border-top: 1px dashed #e4e4e7;
+      border-top: 1px dashed ${colors.divider};
       width: 100%;
     }
     .label {
       font-size: 10px;
       text-transform: uppercase;
       letter-spacing: 0.1em;
-      color: #a1a1aa;
+      color: ${colors.muted};
       font-weight: 500;
       line-height: 1;
       margin-bottom: 4px;
@@ -139,14 +145,14 @@ function generateReceiptStyleHTML(data: InvoicePDFData): string {
       ${logoUrl ? `
         <img src="${logoUrl}" alt="Logo" style="height: 32px; width: auto; object-fit: contain;">
       ` : `
-        <div style="width: 32px; height: 32px; background: #18181b; border-radius: 4px; display: flex; align-items: center; justify-content: center;">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5">
+        <div style="width: 32px; height: 32px; background: ${colors.primary}; border-radius: 4px; display: flex; align-items: center; justify-content: center;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="${colors.primaryText}" stroke-width="2.5">
             <path d="M4 22h14a2 2 0 0 0 2-2V7.5L14.5 2H6a2 2 0 0 0-2 2v4" />
             <polyline points="14 2 14 8 20 8" />
           </svg>
         </div>
       `}
-      <span style="font-size: 14px; font-weight: 500; letter-spacing: -0.01em; color: #18181b;">
+      <span style="font-size: 14px; font-weight: 500; letter-spacing: -0.01em; color: ${colors.primary};">
         ${companyName}
       </span>
     </div>
@@ -212,7 +218,7 @@ function generateReceiptStyleHTML(data: InvoicePDFData): string {
     <div style="margin-bottom: 24px;">
       <div class="label">Items</div>
       <div style="margin-top: 16px;">
-        <div style="display: grid; grid-template-columns: repeat(12, 1fr); font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: #a1a1aa; font-weight: 500; margin-bottom: 8px; padding-bottom: 8px;">
+        <div style="display: grid; grid-template-columns: repeat(12, 1fr); font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: ${colors.muted}; font-weight: 500; margin-bottom: 8px; padding-bottom: 8px;">
           <div style="grid-column: span 6;">Description</div>
           <div style="grid-column: span 2; text-align: right;">Qty</div>
           <div style="grid-column: span 4; text-align: right;">Price</div>
@@ -224,33 +230,33 @@ function generateReceiptStyleHTML(data: InvoicePDFData): string {
     <div class="divider"></div>
 
     <!-- Totals -->
-    <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 8px; font-size: 14px; color: #27272a; margin-bottom: 24px;">
+    <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 8px; font-size: 14px; color: ${colors.primary}; margin-bottom: 24px;">
       <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 32px; width: 100%; max-width: 240px;">
-        <div style="color: #a1a1aa;">Subtotal</div>
+        <div style="color: ${colors.muted};">Subtotal</div>
         <div style="text-align: right; font-variant-numeric: tabular-nums;">${formatCurrency(invoice.subtotal)}</div>
       </div>
       ${Number(invoice.discountAmount) > 0 ? `
       <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 32px; width: 100%; max-width: 240px;">
-        <div style="color: #10b981;">Discount</div>
-        <div style="text-align: right; font-variant-numeric: tabular-nums; color: #10b981;">-${formatCurrency(invoice.discountAmount)}</div>
+        <div style="color: ${colors.accent};">Discount</div>
+        <div style="text-align: right; font-variant-numeric: tabular-nums; color: ${colors.accent};">-${formatCurrency(invoice.discountAmount)}</div>
       </div>
       ` : ''}
       ${Number(invoice.taxAmount) > 0 && !client.taxExempt ? `
       <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 32px; width: 100%; max-width: 240px;">
-        <div style="color: #a1a1aa;">Tax (${invoice.taxRate}%)</div>
+        <div style="color: ${colors.muted};">Tax (${invoice.taxRate}%)</div>
         <div style="text-align: right; font-variant-numeric: tabular-nums;">${formatCurrency(invoice.taxAmount)}</div>
       </div>
       ` : ''}
       ${client.taxExempt && client.vatNumber ? `
       <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 32px; width: 100%; max-width: 240px;">
-        <div style="color: #a1a1aa; font-size: 12px;">Reverse Charge - VAT 0%</div>
+        <div style="color: ${colors.muted}; font-size: 12px;">Reverse Charge - VAT 0%</div>
         <div style="text-align: right; font-variant-numeric: tabular-nums;">${formatCurrency(0)}</div>
       </div>
       ` : ''}
-      <div style="width: 100%; max-width: 240px; border-top: 1px solid #f4f4f5; margin: 4px 0;"></div>
+      <div style="width: 100%; max-width: 240px; border-top: 1px solid ${colors.divider}; margin: 4px 0;"></div>
       <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 32px; width: 100%; max-width: 240px; font-size: 18px; font-weight: 500;">
-        <div style="color: #18181b;">Total</div>
-        <div style="text-align: right; font-variant-numeric: tabular-nums;">${formatCurrency(invoice.total)}</div>
+        <div style="color: ${colors.primary};">Total</div>
+        <div style="text-align: right; font-variant-numeric: tabular-nums; color: ${colors.accent};">${formatCurrency(invoice.total)}</div>
       </div>
     </div>
 
@@ -261,7 +267,7 @@ function generateReceiptStyleHTML(data: InvoicePDFData): string {
       ${invoice.paymentTerms ? `
       <div>
         <div class="label">Payment Terms</div>
-        <div style="font-size: 12px; color: #71717a; white-space: pre-wrap; line-height: 1.7;">
+        <div style="font-size: 12px; color: ${colors.muted}; white-space: pre-wrap; line-height: 1.7;">
           ${invoice.paymentTerms}
         </div>
       </div>
@@ -269,7 +275,7 @@ function generateReceiptStyleHTML(data: InvoicePDFData): string {
       ${invoice.notes ? `
       <div>
         <div class="label">Notes</div>
-        <div style="font-size: 12px; color: #71717a; line-height: 1.7; font-style: italic;">
+        <div style="font-size: 12px; color: ${colors.muted}; line-height: 1.7; font-style: italic;">
           ${invoice.notes}
         </div>
       </div>
@@ -277,14 +283,14 @@ function generateReceiptStyleHTML(data: InvoicePDFData): string {
     </div>
 
     ${client.taxExempt && client.vatNumber ? `
-    <div style="margin-top: 32px; padding: 16px; background: #fafafa; border-left: 4px solid #18181b; font-size: 12px;">
-      <strong style="color: #18181b;">Reverse Charge Notice:</strong><br>
-      <span style="color: #71717a;">VAT reverse charge applies. The customer is liable for VAT in their country of establishment under Article 196 of Council Directive 2006/112/EC.</span>
+    <div style="margin-top: 32px; padding: 16px; background: ${withAlpha(colors.primary, 0.05)}; border-left: 4px solid ${colors.primary}; font-size: 12px;">
+      <strong style="color: ${colors.primary};">Reverse Charge Notice:</strong><br>
+      <span style="color: ${colors.muted};">VAT reverse charge applies. The customer is liable for VAT in their country of establishment under Article 196 of Council Directive 2006/112/EC.</span>
     </div>
     ` : ''}
 
     <!-- Footer -->
-    <div style="margin-top: 64px; font-size: 10px; color: #d4d4d8; text-transform: uppercase; letter-spacing: 0.1em; text-align: center;">
+    <div style="margin-top: 64px; font-size: 10px; color: ${withAlpha(colors.primary, 0.25)}; text-transform: uppercase; letter-spacing: 0.1em; text-align: center;">
       This is a digital record generated by SleekInvoices
     </div>
   </div>
@@ -300,8 +306,11 @@ function generateReceiptStyleHTML(data: InvoicePDFData): string {
 function generateClassicStyleHTML(data: InvoicePDFData): string {
   const { invoice, client, lineItems, user, template } = data;
   
-  // Template values with modern defaults
+  // Get contrast-safe colors from template or defaults
+  const primaryColor = template?.primaryColor || '#18181b';
   const accentColor = template?.accentColor || '#5f6fff';
+  const colors = createPDFColorPalette(primaryColor, accentColor);
+  
   const logoUrl = template?.logoUrl || user.logoUrl;
   
   const companyName = user.companyName || user.name || 'Your Company';
@@ -311,11 +320,11 @@ function generateClassicStyleHTML(data: InvoicePDFData): string {
   const taxId = user.taxId || '';
   
   const lineItemsHTML = lineItems.map(item => `
-    <div style="display: grid; grid-template-columns: 6fr 2fr 2fr 2fr; gap: 16px; padding: 16px 20px; border-bottom: 1px solid #f4f4f5;">
-      <div style="font-size: 14px; color: #18181b;">${item.description}</div>
-      <div style="font-size: 14px; color: #71717a; text-align: right; font-variant-numeric: tabular-nums;">${item.quantity}</div>
-      <div style="font-size: 14px; color: #71717a; text-align: right; font-variant-numeric: tabular-nums;">${formatCurrency(item.rate)}</div>
-      <div style="font-size: 14px; color: #18181b; text-align: right; font-weight: 500; font-variant-numeric: tabular-nums;">${formatCurrency(item.amount)}</div>
+    <div style="display: grid; grid-template-columns: 6fr 2fr 2fr 2fr; gap: 16px; padding: 16px 20px; border-bottom: 1px solid ${colors.divider};">
+      <div style="font-size: 14px; color: ${colors.primary};">${item.description}</div>
+      <div style="font-size: 14px; color: ${colors.muted}; text-align: right; font-variant-numeric: tabular-nums;">${item.quantity}</div>
+      <div style="font-size: 14px; color: ${colors.muted}; text-align: right; font-variant-numeric: tabular-nums;">${formatCurrency(item.rate)}</div>
+      <div style="font-size: 14px; color: ${colors.primary}; text-align: right; font-weight: 500; font-variant-numeric: tabular-nums;">${formatCurrency(item.amount)}</div>
     </div>
   `).join('');
 
@@ -333,7 +342,7 @@ function generateClassicStyleHTML(data: InvoicePDFData): string {
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      color: #18181b;
+      color: ${colors.primary};
       font-size: 14px;
       line-height: 1.6;
       background: white;
@@ -362,25 +371,25 @@ function generateClassicStyleHTML(data: InvoicePDFData): string {
             <img src="${logoUrl}" alt="Logo" style="height: 40px; width: auto; object-fit: contain; margin-bottom: 16px;">
           ` : `
             <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
-              <div style="width: 40px; height: 40px; background: ${accentColor}; border-radius: 8px; display: flex; align-items: center; justify-content: center;">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+              <div style="width: 40px; height: 40px; background: ${colors.accent}; border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="${colors.accentText}" stroke-width="2">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                 </svg>
               </div>
-              <span style="font-size: 20px; font-weight: 600; color: #18181b; letter-spacing: -0.02em;">${companyName}</span>
+              <span style="font-size: 20px; font-weight: 600; color: ${colors.primary}; letter-spacing: -0.02em;">${companyName}</span>
             </div>
           `}
-          ${logoUrl ? `<p style="font-size: 16px; font-weight: 600; color: #18181b; margin-bottom: 4px;">${companyName}</p>` : ''}
-          ${companyAddress ? `<p style="font-size: 13px; color: #71717a; white-space: pre-line; line-height: 1.6;">${companyAddress}</p>` : ''}
-          ${companyEmail ? `<p style="font-size: 13px; color: #71717a; margin-top: 4px;">${companyEmail}</p>` : ''}
-          ${companyPhone ? `<p style="font-size: 13px; color: #71717a;">${companyPhone}</p>` : ''}
-          ${taxId ? `<p style="font-size: 11px; color: #a1a1aa; margin-top: 8px; font-weight: 500; letter-spacing: 0.05em;">TAX ID: ${taxId}</p>` : ''}
+          ${logoUrl ? `<p style="font-size: 16px; font-weight: 600; color: ${colors.primary}; margin-bottom: 4px;">${companyName}</p>` : ''}
+          ${companyAddress ? `<p style="font-size: 13px; color: ${colors.muted}; white-space: pre-line; line-height: 1.6;">${companyAddress}</p>` : ''}
+          ${companyEmail ? `<p style="font-size: 13px; color: ${colors.muted}; margin-top: 4px;">${companyEmail}</p>` : ''}
+          ${companyPhone ? `<p style="font-size: 13px; color: ${colors.muted};">${companyPhone}</p>` : ''}
+          ${taxId ? `<p style="font-size: 11px; color: ${colors.muted}; margin-top: 8px; font-weight: 500; letter-spacing: 0.05em; opacity: 0.7;">TAX ID: ${taxId}</p>` : ''}
         </div>
 
         <!-- Invoice Title & Number -->
         <div style="text-align: right;">
-          <h1 style="font-size: 28px; font-weight: 700; color: #18181b; letter-spacing: -0.02em; margin-bottom: 4px;">Invoice</h1>
-          <p style="font-size: 16px; font-weight: 500; color: #71717a; font-variant-numeric: tabular-nums;">${invoice.invoiceNumber}</p>
+          <h1 style="font-size: 28px; font-weight: 700; color: ${colors.primary}; letter-spacing: -0.02em; margin-bottom: 4px;">Invoice</h1>
+          <p style="font-size: 16px; font-weight: 500; color: ${colors.muted}; font-variant-numeric: tabular-nums;">${invoice.invoiceNumber}</p>
           <div style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; border-radius: 9999px; margin-top: 12px; background: ${getStatusBgColor(invoice.status)}; color: ${getStatusColor(invoice.status)};">
             <span style="width: 6px; height: 6px; border-radius: 50%; background: currentColor;"></span>
             <span style="font-size: 12px; font-weight: 500;">${getStatusLabel(invoice.status)}</span>
@@ -390,28 +399,28 @@ function generateClassicStyleHTML(data: InvoicePDFData): string {
     </div>
 
     <!-- Divider -->
-    <div style="margin: 0 40px; height: 1px; background: linear-gradient(to right, #e4e4e7, #d4d4d8, #e4e4e7);"></div>
+    <div style="margin: 0 40px; height: 1px; background: linear-gradient(to right, ${colors.divider}, ${withAlpha(colors.primary, 0.2)}, ${colors.divider});"></div>
 
     <!-- Bill To & Dates Section -->
     <div style="padding: 32px 40px;">
       <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 32px;">
         <!-- Bill To -->
         <div>
-          <p style="font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.15em; color: #a1a1aa; margin-bottom: 8px;">Bill To</p>
-          <p style="font-size: 16px; font-weight: 600; color: #18181b;">${client.name}</p>
-          ${client.companyName ? `<p style="font-size: 13px; color: #71717a; margin-top: 2px;">${client.companyName}</p>` : ''}
-          ${client.address ? `<p style="font-size: 13px; color: #71717a; white-space: pre-line; line-height: 1.6; margin-top: 4px;">${client.address}</p>` : ''}
-          ${client.email ? `<p style="font-size: 13px; color: #71717a; margin-top: 4px;">${client.email}</p>` : ''}
-          ${client.vatNumber ? `<p style="font-size: 11px; color: #a1a1aa; margin-top: 8px; font-weight: 500; letter-spacing: 0.05em;">VAT: ${client.vatNumber}</p>` : ''}
+          <p style="font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.15em; color: ${colors.muted}; margin-bottom: 8px;">Bill To</p>
+          <p style="font-size: 16px; font-weight: 600; color: ${colors.primary};">${client.name}</p>
+          ${client.companyName ? `<p style="font-size: 13px; color: ${colors.muted}; margin-top: 2px;">${client.companyName}</p>` : ''}
+          ${client.address ? `<p style="font-size: 13px; color: ${colors.muted}; white-space: pre-line; line-height: 1.6; margin-top: 4px;">${client.address}</p>` : ''}
+          ${client.email ? `<p style="font-size: 13px; color: ${colors.muted}; margin-top: 4px;">${client.email}</p>` : ''}
+          ${client.vatNumber ? `<p style="font-size: 11px; color: ${colors.muted}; margin-top: 8px; font-weight: 500; letter-spacing: 0.05em; opacity: 0.7;">VAT: ${client.vatNumber}</p>` : ''}
         </div>
 
         <!-- Dates -->
         <div style="text-align: right;">
           <div style="display: inline-grid; grid-template-columns: auto auto; gap: 8px 24px; text-align: left;">
-            <span style="font-size: 13px; color: #a1a1aa; font-weight: 500;">Issue Date</span>
-            <span style="font-size: 13px; color: #18181b; font-weight: 500; font-variant-numeric: tabular-nums;">${formatDate(invoice.issueDate)}</span>
-            <span style="font-size: 13px; color: #a1a1aa; font-weight: 500;">Due Date</span>
-            <span style="font-size: 13px; color: #18181b; font-weight: 500; font-variant-numeric: tabular-nums;">${formatDate(invoice.dueDate)}</span>
+            <span style="font-size: 13px; color: ${colors.muted}; font-weight: 500;">Issue Date</span>
+            <span style="font-size: 13px; color: ${colors.primary}; font-weight: 500; font-variant-numeric: tabular-nums;">${formatDate(invoice.issueDate)}</span>
+            <span style="font-size: 13px; color: ${colors.muted}; font-weight: 500;">Due Date</span>
+            <span style="font-size: 13px; color: ${colors.primary}; font-weight: 500; font-variant-numeric: tabular-nums;">${formatDate(invoice.dueDate)}</span>
           </div>
         </div>
       </div>
@@ -419,14 +428,14 @@ function generateClassicStyleHTML(data: InvoicePDFData): string {
 
     <!-- Line Items Table -->
     <div style="padding: 0 40px 24px;">
-      <div style="border: 1px solid #e4e4e7; border-radius: 12px; overflow: hidden;">
+      <div style="border: 1px solid ${colors.divider}; border-radius: 12px; overflow: hidden;">
         <!-- Table Header -->
-        <div style="background: #fafafa; border-bottom: 1px solid #e4e4e7;">
+        <div style="background: ${withAlpha(colors.primary, 0.03)}; border-bottom: 1px solid ${colors.divider};">
           <div style="display: grid; grid-template-columns: 6fr 2fr 2fr 2fr; gap: 16px; padding: 12px 20px;">
-            <div style="font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.15em; color: #71717a;">Description</div>
-            <div style="font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.15em; color: #71717a; text-align: right;">Qty</div>
-            <div style="font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.15em; color: #71717a; text-align: right;">Rate</div>
-            <div style="font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.15em; color: #71717a; text-align: right;">Amount</div>
+            <div style="font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.15em; color: ${colors.muted};">Description</div>
+            <div style="font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.15em; color: ${colors.muted}; text-align: right;">Qty</div>
+            <div style="font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.15em; color: ${colors.muted}; text-align: right;">Rate</div>
+            <div style="font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.15em; color: ${colors.muted}; text-align: right;">Amount</div>
           </div>
         </div>
         <!-- Table Body -->
@@ -439,31 +448,31 @@ function generateClassicStyleHTML(data: InvoicePDFData): string {
       <div style="display: flex; justify-content: flex-end;">
         <div style="width: 280px;">
           <div style="display: flex; justify-content: space-between; padding: 8px 0; font-size: 14px;">
-            <span style="color: #71717a;">Subtotal</span>
-            <span style="color: #18181b; font-weight: 500; font-variant-numeric: tabular-nums;">${formatCurrency(invoice.subtotal)}</span>
+            <span style="color: ${colors.muted};">Subtotal</span>
+            <span style="color: ${colors.primary}; font-weight: 500; font-variant-numeric: tabular-nums;">${formatCurrency(invoice.subtotal)}</span>
           </div>
           ${Number(invoice.discountAmount) > 0 ? `
           <div style="display: flex; justify-content: space-between; padding: 8px 0; font-size: 14px;">
-            <span style="color: #10b981;">Discount</span>
-            <span style="color: #10b981; font-weight: 500; font-variant-numeric: tabular-nums;">-${formatCurrency(invoice.discountAmount)}</span>
+            <span style="color: ${colors.accent};">Discount</span>
+            <span style="color: ${colors.accent}; font-weight: 500; font-variant-numeric: tabular-nums;">-${formatCurrency(invoice.discountAmount)}</span>
           </div>
           ` : ''}
           ${Number(invoice.taxAmount) > 0 && !client.taxExempt ? `
           <div style="display: flex; justify-content: space-between; padding: 8px 0; font-size: 14px;">
-            <span style="color: #71717a;">Tax (${invoice.taxRate}%)</span>
-            <span style="color: #18181b; font-weight: 500; font-variant-numeric: tabular-nums;">${formatCurrency(invoice.taxAmount)}</span>
+            <span style="color: ${colors.muted};">Tax (${invoice.taxRate}%)</span>
+            <span style="color: ${colors.primary}; font-weight: 500; font-variant-numeric: tabular-nums;">${formatCurrency(invoice.taxAmount)}</span>
           </div>
           ` : ''}
           ${client.taxExempt && client.vatNumber ? `
           <div style="display: flex; justify-content: space-between; padding: 8px 0; font-size: 12px;">
-            <span style="color: #71717a;">Reverse Charge - VAT 0%</span>
-            <span style="color: #18181b; font-weight: 500; font-variant-numeric: tabular-nums;">${formatCurrency(0)}</span>
+            <span style="color: ${colors.muted};">Reverse Charge - VAT 0%</span>
+            <span style="color: ${colors.primary}; font-weight: 500; font-variant-numeric: tabular-nums;">${formatCurrency(0)}</span>
           </div>
           ` : ''}
-          <div style="border-top: 1px solid #e4e4e7; margin-top: 8px; padding-top: 12px;">
+          <div style="border-top: 1px solid ${colors.divider}; margin-top: 8px; padding-top: 12px;">
             <div style="display: flex; justify-content: space-between; align-items: center;">
-              <span style="font-size: 16px; font-weight: 600; color: #18181b;">Total</span>
-              <span style="font-size: 24px; font-weight: 700; color: ${accentColor}; font-variant-numeric: tabular-nums;">${formatCurrency(invoice.total)}</span>
+              <span style="font-size: 16px; font-weight: 600; color: ${colors.primary};">Total</span>
+              <span style="font-size: 24px; font-weight: 700; color: ${colors.accent}; font-variant-numeric: tabular-nums;">${formatCurrency(invoice.total)}</span>
             </div>
           </div>
         </div>
@@ -472,33 +481,33 @@ function generateClassicStyleHTML(data: InvoicePDFData): string {
 
     <!-- Notes & Payment Terms -->
     ${(invoice.notes || invoice.paymentTerms) ? `
-    <div style="margin: 0 40px; border-top: 1px solid #e4e4e7;"></div>
+    <div style="margin: 0 40px; border-top: 1px solid ${colors.divider};"></div>
     <div style="padding: 32px 40px; display: grid; grid-template-columns: 1fr 1fr; gap: 32px;">
       ${invoice.notes ? `
       <div>
-        <p style="font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.15em; color: #a1a1aa; margin-bottom: 8px;">Notes</p>
-        <p style="font-size: 13px; color: #71717a; line-height: 1.7; white-space: pre-line;">${invoice.notes}</p>
+        <p style="font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.15em; color: ${colors.muted}; margin-bottom: 8px;">Notes</p>
+        <p style="font-size: 13px; color: ${colors.muted}; line-height: 1.7; white-space: pre-line;">${invoice.notes}</p>
       </div>
       ` : ''}
       ${invoice.paymentTerms ? `
       <div>
-        <p style="font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.15em; color: #a1a1aa; margin-bottom: 8px;">Payment Terms</p>
-        <p style="font-size: 13px; color: #71717a; line-height: 1.7;">${invoice.paymentTerms}</p>
+        <p style="font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.15em; color: ${colors.muted}; margin-bottom: 8px;">Payment Terms</p>
+        <p style="font-size: 13px; color: ${colors.muted}; line-height: 1.7;">${invoice.paymentTerms}</p>
       </div>
       ` : ''}
     </div>
     ` : ''}
 
     ${client.taxExempt && client.vatNumber ? `
-    <div style="margin: 0 40px 24px; padding: 16px; background: #fafafa; border-left: 4px solid #18181b; border-radius: 0 8px 8px 0;">
-      <p style="font-size: 12px; color: #18181b; font-weight: 600; margin-bottom: 4px;">Reverse Charge Notice</p>
-      <p style="font-size: 12px; color: #71717a; line-height: 1.6;">VAT reverse charge applies. The customer is liable for VAT in their country of establishment under Article 196 of Council Directive 2006/112/EC.</p>
+    <div style="margin: 0 40px 24px; padding: 16px; background: ${withAlpha(colors.primary, 0.03)}; border-left: 4px solid ${colors.primary}; border-radius: 0 8px 8px 0;">
+      <p style="font-size: 12px; color: ${colors.primary}; font-weight: 600; margin-bottom: 4px;">Reverse Charge Notice</p>
+      <p style="font-size: 12px; color: ${colors.muted}; line-height: 1.6;">VAT reverse charge applies. The customer is liable for VAT in their country of establishment under Article 196 of Council Directive 2006/112/EC.</p>
     </div>
     ` : ''}
 
     <!-- Footer -->
-    <div style="padding: 24px 40px; background: #fafafa; border-top: 1px solid #e4e4e7;">
-      <div style="display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: #a1a1aa;">
+    <div style="padding: 24px 40px; background: ${withAlpha(colors.primary, 0.03)}; border-top: 1px solid ${colors.divider};">
+      <div style="display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: ${colors.muted}; opacity: 0.7;">
         <span>Thank you for your business</span>
         <span style="font-variant-numeric: tabular-nums;">Generated by SleekInvoices</span>
       </div>

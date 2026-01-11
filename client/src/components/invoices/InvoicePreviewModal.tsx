@@ -284,6 +284,8 @@ export function InvoicePreviewModal({
                   taxId={taxId}
                   status={status}
                   logoUrl={logoUrl || undefined}
+                  primaryColor={primaryColor}
+                  accentColor={accentColor}
                 />
               ) : (
                 <ClassicStyleInvoice
