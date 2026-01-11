@@ -2505,7 +2505,7 @@ export const appRouter = router({
     createPayment: protectedProcedure
       .input(z.object({
         invoiceId: z.number(),
-        cryptoCurrency: z.string(),
+        cryptoCurrency: z.string().optional(), // Optional - if not provided, customer chooses on NOWPayments checkout
       }))
       .mutation(async ({ ctx, input }) => {
         // Get the invoice
@@ -2527,10 +2527,11 @@ export const appRouter = router({
         const baseUrl = process.env.VITE_APP_URL || `https://${process.env.VITE_APP_ID}.manus.space`;
 
         // Create NOWPayments invoice
+        // If cryptoCurrency is not provided, NOWPayments will show a currency selector
         const payment = await nowpayments.createInvoice({
           priceAmount: remaining,
           priceCurrency: invoice.currency?.toLowerCase() || 'usd',
-          payCurrency: input.cryptoCurrency.toLowerCase(),
+          payCurrency: input.cryptoCurrency?.toLowerCase(), // Optional - undefined lets customer choose
           orderId: `INV-${invoice.id}-${Date.now()}`,
           orderDescription: `Payment for Invoice ${invoice.invoiceNumber}`,
           ipnCallbackUrl: `${baseUrl}/api/webhooks/nowpayments`,
@@ -2542,14 +2543,14 @@ export const appRouter = router({
         // Store the payment reference in the database
         await db.updateInvoice(invoice.id, ctx.user.id, {
           cryptoPaymentId: payment.id,
-          cryptoCurrency: input.cryptoCurrency.toUpperCase(),
+          cryptoCurrency: input.cryptoCurrency?.toUpperCase() || 'MULTI', // 'MULTI' indicates customer will choose
           cryptoPaymentUrl: payment.invoice_url,
         });
 
         return {
           paymentId: payment.id,
           invoiceUrl: payment.invoice_url,
-          cryptoCurrency: input.cryptoCurrency,
+          cryptoCurrency: input.cryptoCurrency || 'MULTI',
           priceAmount: remaining,
           priceCurrency: invoice.currency || 'USD',
         };

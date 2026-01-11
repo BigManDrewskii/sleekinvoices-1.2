@@ -1989,3 +1989,8 @@
 ## Bug Fix: Invoice Creation Database Error
 - [x] Fix failed INSERT query when creating invoices
 - [x] Investigate clientId 690001 - may not exist in clients table
+
+## NOWPayments Currency Selector
+- [x] Update backend to make payCurrency optional in createPayment
+- [x] Update frontend to remove currency pre-selection for invoice payments
+- [x] Let customers choose currency on NOWPayments checkout page

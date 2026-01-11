@@ -8,16 +8,9 @@ import {
 } from "@/components/ui/dialog";
 import { DialogBody, DialogActions } from "@/components/shared/DialogPatterns";
 import { Button } from "@/components/ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { trpc } from "@/lib/trpc";
 import { formatCurrency } from "@/lib/utils";
-import { Loader2, ExternalLink, Bitcoin, Copy, Check, Wallet } from "lucide-react";
+import { Loader2, ExternalLink, Bitcoin, Copy, Check, Coins } from "lucide-react";
 import { toast } from "sonner";
 
 interface CryptoPaymentDialogProps {
@@ -29,20 +22,6 @@ interface CryptoPaymentDialogProps {
   onPaymentCreated?: () => void;
 }
 
-// Currency icons mapping
-const currencyIcons: Record<string, string> = {
-  btc: "₿",
-  eth: "Ξ",
-  usdt: "₮",
-  usdc: "$",
-  ltc: "Ł",
-  doge: "Ð",
-  sol: "◎",
-  xrp: "✕",
-  bnb: "B",
-  matic: "M",
-};
-
 export function CryptoPaymentDialog({
   open,
   onOpenChange,
@@ -51,31 +30,14 @@ export function CryptoPaymentDialog({
   currency,
   onPaymentCreated,
 }: CryptoPaymentDialogProps) {
-  const [selectedCrypto, setSelectedCrypto] = useState<string>("");
   const [paymentUrl, setPaymentUrl] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
 
-  // Fetch available currencies
-  const { data: currencies, isLoading: currenciesLoading } = trpc.crypto.getCurrencies.useQuery(
-    undefined,
-    { enabled: open }
-  );
-
-  // Get price estimate when crypto is selected
-  const { data: estimate, isLoading: estimateLoading } = trpc.crypto.getEstimate.useQuery(
-    {
-      amount,
-      fiatCurrency: currency.toLowerCase(),
-      cryptoCurrency: selectedCrypto,
-    },
-    { enabled: open && !!selectedCrypto }
-  );
-
-  // Create payment mutation
+  // Create payment mutation - no crypto currency specified, customer chooses on NOWPayments
   const createPayment = trpc.crypto.createPayment.useMutation({
     onSuccess: (data) => {
       setPaymentUrl(data.invoiceUrl);
-      toast.success("Crypto payment created! Click the link to complete payment.");
+      toast.success("Payment link created! Choose your preferred cryptocurrency on the checkout page.");
       onPaymentCreated?.();
     },
     onError: (error) => {
@@ -86,20 +48,15 @@ export function CryptoPaymentDialog({
   // Reset state when dialog closes
   useEffect(() => {
     if (!open) {
-      setSelectedCrypto("");
       setPaymentUrl(null);
       setCopied(false);
     }
   }, [open]);
 
   const handleCreatePayment = () => {
-    if (!selectedCrypto) {
-      toast.error("Please select a cryptocurrency");
-      return;
-    }
+    // Don't pass cryptoCurrency - let customer choose on NOWPayments checkout
     createPayment.mutate({
       invoiceId,
-      cryptoCurrency: selectedCrypto,
     });
   };
 
@@ -136,57 +93,41 @@ export function CryptoPaymentDialog({
         <DialogBody spacing="relaxed">
           {!paymentUrl ? (
             <>
-              {/* Currency Selection */}
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Select Cryptocurrency</label>
-                <Select value={selectedCrypto} onValueChange={setSelectedCrypto}>
-                  <SelectTrigger className="w-full">
-                    <div className="flex items-center gap-2">
-                      <Wallet className="size-4 text-muted-foreground" />
-                      <SelectValue placeholder="Choose a cryptocurrency..." />
-                    </div>
-                  </SelectTrigger>
-                  <SelectContent>
-                    {currenciesLoading ? (
-                      <div className="flex items-center justify-center p-4">
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                      </div>
-                    ) : (
-                      currencies?.popular.map((crypto) => (
-                        <SelectItem key={crypto} value={crypto}>
-                          <span className="flex items-center gap-2">
-                            <span className="font-mono text-lg">
-                              {currencyIcons[crypto] || "○"}
-                            </span>
-                            {crypto.toUpperCase()}
-                          </span>
-                        </SelectItem>
-                      ))
-                    )}
-                  </SelectContent>
-                </Select>
+              {/* Info about crypto payment */}
+              <div className="rounded-lg bg-[#f7931a]/5 border border-[#f7931a]/20 p-4 space-y-3">
+                <div className="flex items-center gap-2 text-[#f7931a]">
+                  <Coins className="h-5 w-5" />
+                  <span className="font-medium">300+ Cryptocurrencies Supported</span>
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  Click the button below to create a payment link. You'll be able to choose from Bitcoin, Ethereum, USDT, USDC, and 300+ other cryptocurrencies on the secure checkout page.
+                </p>
+                <div className="flex flex-wrap gap-2 pt-1">
+                  <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-background text-xs font-medium">
+                    <span className="text-[#f7931a]">₿</span> BTC
+                  </span>
+                  <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-background text-xs font-medium">
+                    <span className="text-[#627eea]">Ξ</span> ETH
+                  </span>
+                  <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-background text-xs font-medium">
+                    <span className="text-[#26a17b]">₮</span> USDT
+                  </span>
+                  <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-background text-xs font-medium">
+                    <span className="text-[#2775ca]">$</span> USDC
+                  </span>
+                  <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-background text-xs font-medium text-muted-foreground">
+                    +300 more
+                  </span>
+                </div>
               </div>
 
-              {/* Price Estimate */}
-              {selectedCrypto && (
-                <div className="rounded-lg bg-[#f7931a]/5 border border-[#f7931a]/20 p-4 space-y-2">
-                  <div className="text-sm text-muted-foreground">Estimated Amount</div>
-                  {estimateLoading ? (
-                    <div className="flex items-center gap-2">
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                      <span>Calculating...</span>
-                    </div>
-                  ) : estimate ? (
-                    <div className="text-2xl font-bold text-[#f7931a]">
-                      {parseFloat(estimate.cryptoAmount).toFixed(8)}{" "}
-                      {selectedCrypto.toUpperCase()}
-                    </div>
-                  ) : null}
-                  <div className="text-xs text-muted-foreground">
-                    Rate is locked when you create the payment
-                  </div>
+              {/* Amount Display */}
+              <div className="rounded-lg border p-4 space-y-1">
+                <div className="text-sm text-muted-foreground">Amount to Pay</div>
+                <div className="text-2xl font-bold">
+                  {formatCurrency(amount)} {currency}
                 </div>
-              )}
+              </div>
 
               {/* Create Payment Button */}
               <Button
@@ -194,12 +135,12 @@ export function CryptoPaymentDialog({
                 size="lg"
                 className="w-full"
                 onClick={handleCreatePayment}
-                disabled={!selectedCrypto || createPayment.isPending}
+                disabled={createPayment.isPending}
               >
                 {createPayment.isPending ? (
                   <>
                     <Loader2 className="size-4 animate-spin" />
-                    Creating Payment...
+                    Creating Payment Link...
                   </>
                 ) : (
                   <>
@@ -215,10 +156,10 @@ export function CryptoPaymentDialog({
               <div className="rounded-lg bg-green-500/10 border border-green-500/20 p-4 space-y-3">
                 <div className="flex items-center gap-2 text-green-600 dark:text-green-400">
                   <Check className="h-5 w-5" />
-                  <span className="font-medium">Payment Created!</span>
+                  <span className="font-medium">Payment Link Created!</span>
                 </div>
                 <p className="text-sm text-muted-foreground">
-                  Click the button below to complete your payment on the NOWPayments secure checkout page.
+                  Click the button below to choose your preferred cryptocurrency and complete your payment on the NOWPayments secure checkout page.
                 </p>
               </div>
 
@@ -226,7 +167,7 @@ export function CryptoPaymentDialog({
               <div className="flex flex-col gap-2">
                 <Button variant="crypto" size="lg" onClick={handleOpenPayment} className="w-full">
                   <ExternalLink className="size-4" />
-                  Open Payment Page
+                  Choose Crypto & Pay
                 </Button>
                 <Button variant="outline" onClick={handleCopyLink} className="w-full">
                   {copied ? (
