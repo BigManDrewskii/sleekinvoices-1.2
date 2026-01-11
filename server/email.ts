@@ -42,7 +42,7 @@ function formatDate(date: Date | null): string {
 /**
  * Escape HTML special characters to prevent XSS in emails
  */
-function escapeHtml(text: string): string {
+function escapeHtml(text: string | null | undefined): string {
   if (!text) return '';
   return text
     .replace(/&/g, '&amp;')
