@@ -34,78 +34,154 @@ interface GoogleFontPickerProps {
 
 const CATEGORIES = [
   { value: 'all', label: 'All' },
-  { value: 'sans-serif', label: 'Sans Serif' },
+  { value: 'sans-serif', label: 'Sans' },
   { value: 'serif', label: 'Serif' },
   { value: 'display', label: 'Display' },
-  { value: 'handwriting', label: 'Handwriting' },
-  { value: 'monospace', label: 'Monospace' },
+  { value: 'monospace', label: 'Mono' },
 ] as const;
 
 /**
- * Live Invoice Preview Component
- * Shows how the font will look on actual invoice elements
+ * Elegant Typography Preview Component
+ * Showcases font in a refined, manus.im-inspired layout
  */
-function LiveInvoicePreview({ 
-  font, 
+function ElegantTypographyPreview({
+  font,
   weight,
-  type 
-}: { 
-  font: string; 
+  type,
+  isHovering
+}: {
+  font: string;
   weight: number;
   type: 'heading' | 'body';
+  isHovering?: boolean;
 }) {
   const fontStyle = { fontFamily: `"${font}", sans-serif`, fontWeight: weight };
-  
+
   if (type === 'heading') {
     return (
-      <div className="p-4 bg-white rounded-lg text-slate-900 space-y-3">
-        <div className="flex items-center justify-between">
-          <span 
-            className="text-2xl font-semibold text-primary"
+      <div className="space-y-8">
+        {/* Large Aa Display */}
+        <div className="flex flex-col items-center py-6">
+          <span
+            className={cn(
+              "text-7xl font-semibold text-foreground leading-none transition-all duration-300",
+              isHovering && "scale-105"
+            )}
             style={fontStyle}
           >
-            INVOICE
+            Aa
           </span>
-          <span className="text-xs text-slate-400">#INV-001</span>
-        </div>
-        <div className="grid grid-cols-2 gap-4 text-xs">
-          <div>
-            <span className="text-slate-500 uppercase tracking-wide" style={fontStyle}>From</span>
-            <p className="text-slate-700 mt-1">Your Company</p>
-          </div>
-          <div>
-            <span className="text-slate-500 uppercase tracking-wide" style={fontStyle}>Bill To</span>
-            <p className="text-slate-700 mt-1">Client Name</p>
+          <div className="mt-4 text-xs text-muted-foreground font-mono tabular-nums">
+            {weight}
           </div>
         </div>
-        <div className="pt-2 border-t border-slate-200">
-          <div className="flex justify-between text-sm">
-            <span style={fontStyle} className="font-medium">Total</span>
-            <span style={fontStyle} className="font-semibold text-primary">$1,234.56</span>
+
+        {/* Refined Alphabet Preview */}
+        <div className="space-y-4">
+          <div className="space-y-1.5">
+            <div
+              className="text-base tracking-[0.02em] text-foreground/90 text-center"
+              style={fontStyle}
+            >
+              ABCDEFGHIJKLMNOPQRSTUVWXYZ
+            </div>
+            <div
+              className="text-base tracking-[0.01em] text-muted-foreground/80 text-center"
+              style={fontStyle}
+            >
+              abcdefghijklmnopqrstuvwxyz
+            </div>
+            <div
+              className="text-sm tabular-nums text-muted-foreground/70 text-center"
+              style={fontStyle}
+            >
+              0123456789
+            </div>
           </div>
+        </div>
+
+        {/* Elegant Divider */}
+        <div className="relative">
+          <div className="absolute inset-0 flex items-center">
+            <div className="w-full border-t border-border/50" />
+          </div>
+        </div>
+
+        {/* Sample Text */}
+        <div className="space-y-2">
+          <p
+            className="text-sm text-foreground/70 text-center leading-relaxed"
+            style={fontStyle}
+          >
+            The quick brown fox jumps
+          </p>
+          <p
+            className="text-sm text-foreground/70 text-center leading-relaxed"
+            style={fontStyle}
+          >
+            over the lazy dog
+          </p>
         </div>
       </div>
     );
   }
-  
+
   // Body font preview
   return (
-    <div className="p-4 bg-white rounded-lg text-slate-900 space-y-3">
-      <div className="text-xs text-slate-400 mb-2">Body Text Preview</div>
-      <div className="space-y-2" style={fontStyle}>
-        <p className="text-sm text-slate-700">
-          Professional Services - Web Development
+    <div className="space-y-8">
+      {/* Large Aa Display */}
+      <div className="flex flex-col items-center py-6">
+        <span
+          className={cn(
+            "text-7xl font-normal text-foreground leading-none transition-all duration-300",
+            isHovering && "scale-105"
+          )}
+          style={fontStyle}
+        >
+          Aa
+        </span>
+        <div className="mt-4 text-xs text-muted-foreground font-mono tabular-nums">
+          {weight}
+        </div>
+      </div>
+
+      {/* Sample Paragraphs */}
+      <div className="space-y-4">
+        <p
+          className="text-sm text-foreground/80 leading-relaxed"
+          style={fontStyle}
+        >
+          The quick brown fox jumps over the lazy dog. Pack my box with five dozen liquor jugs.
         </p>
-        <p className="text-sm text-slate-700">
-          Consulting & Strategy Session (2 hours)
-        </p>
-        <p className="text-xs text-slate-500">
-          Payment is due within 30 days of invoice date.
+        <p
+          className="text-xs text-muted-foreground/70 leading-relaxed"
+          style={fontStyle}
+        >
+          Professional typography establishes hierarchy, creates rhythm, and guides the reader through content with purpose and clarity.
         </p>
       </div>
-      <div className="pt-2 border-t border-slate-200 flex justify-between text-sm" style={fontStyle}>
-        <span>Subtotal</span>
-        <span>$1,000.00</span>
+
+      {/* Elegant Divider */}
+      <div className="relative">
+        <div className="absolute inset-0 flex items-center">
+          <div className="w-full border-t border-border/50" />
+        </div>
+      </div>
+
+      {/* Invoice Style Numbers */}
+      <div className="space-y-2">
+        <div className="flex items-center justify-between text-sm" style={fontStyle}>
+          <span className="text-muted-foreground/70">Subtotal</span>
+          <span className="tabular-nums text-foreground/80">$1,234.56</span>
+        </div>
+        <div className="flex items-center justify-between text-sm" style={fontStyle}>
+          <span className="text-muted-foreground/70">Tax (8%)</span>
+          <span className="tabular-nums text-foreground/80">$98.76</span>
+        </div>
+        <div className="flex items-center justify-between text-base font-medium pt-2 border-t border-border/50" style={fontStyle}>
+          <span className="text-foreground/90">Total</span>
+          <span className="tabular-nums text-foreground">$1,333.32</span>
+        </div>
       </div>
     </div>
   );
@@ -141,15 +217,15 @@ export function GoogleFontPicker({
   // Filter fonts based on search and category
   const filteredFonts = useMemo(() => {
     let fonts = POPULAR_FONTS;
-    
+
     if (category !== 'all') {
       fonts = filterFontsByCategory(category as GoogleFont['category'], fonts);
     }
-    
+
     if (search) {
       fonts = searchFonts(search, fonts);
     }
-    
+
     return fonts;
   }, [search, category]);
 
@@ -180,7 +256,7 @@ export function GoogleFontPicker({
   };
 
   const currentWeight = availableWeights.find(w => w.value === weight) || availableWeights.find(w => w.value === 400);
-  
+
   // Determine which font to show in preview
   const previewFont = hoveredFont || value || 'Inter';
 
@@ -189,129 +265,163 @@ export function GoogleFontPicker({
       {/* Font Family Picker */}
       <Popover open={open} onOpenChange={(isOpen) => {
         setOpen(isOpen);
-        if (!isOpen) setHoveredFont(null);
+        if (!isOpen) {
+          setHoveredFont(null);
+          setSearch('');
+          setCategory('all');
+        }
       }}>
         <PopoverTrigger asChild>
           <Button
             variant="outline"
             role="combobox"
             aria-expanded={open}
-            className="flex-1 justify-between bg-slate-800/50 border-slate-700 hover:bg-slate-700/50 text-left font-normal"
+            className="flex-1 justify-between font-normal h-9"
             style={{ fontFamily: value || 'inherit' }}
           >
-            <span className="truncate">
+            <span className="truncate text-sm">
               {value || placeholder}
             </span>
             <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-[600px] p-0 bg-slate-900 border-slate-700" align="start">
-          <div className="flex">
+        <PopoverContent
+          className="w-[600px] p-0 shadow-xl"
+          align="start"
+          sideOffset={8}
+        >
+          <div className="flex h-[480px]">
             {/* Left side - Font list */}
-            <div className="w-[320px] border-r border-slate-700">
-              {/* Search */}
-              <div className="p-3 border-b border-slate-700">
+            <div className="w-[300px] border-r border-border/50 flex flex-col bg-muted/5">
+              {/* Search Header */}
+              <div className="p-4 border-b border-border/50 bg-background/50 backdrop-blur-sm">
                 <div className="relative">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/50" />
                   <Input
                     placeholder="Search fonts..."
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
-                    className="pl-9 bg-slate-800 border-slate-700"
+                    className="pl-9 h-9 bg-background/50 border-border/50 focus-visible:ring-1"
+                    autoFocus
                   />
                   {search && (
                     <button
                       onClick={() => setSearch('')}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-200"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground/50 hover:text-foreground transition-colors"
                     >
-                      <X className="h-4 w-4" />
+                      <X className="h-3.5 w-3.5" />
                     </button>
                   )}
                 </div>
               </div>
 
               {/* Category Filter */}
-              <div className="p-2 border-b border-slate-700 flex gap-1 flex-wrap">
-                {CATEGORIES.map((cat) => (
-                  <button
-                    key={cat.value}
-                    onClick={() => setCategory(cat.value)}
-                    className={cn(
-                      'px-2 py-1 text-xs rounded-md transition-colors',
-                      category === cat.value
-                        ? 'bg-primary text-primary-foreground'
-                        : 'bg-slate-800 text-slate-400 hover:bg-slate-700 hover:text-slate-200'
-                    )}
-                  >
-                    {cat.label}
-                  </button>
-                ))}
+              <div className="px-3 py-2.5 border-b border-border/50 bg-background/30">
+                <div className="flex flex-wrap gap-1.5">
+                  {CATEGORIES.map((cat) => (
+                    <button
+                      key={cat.value}
+                      onClick={() => setCategory(cat.value)}
+                      className={cn(
+                        'px-3 py-1.5 text-xs rounded-md font-medium transition-all duration-200',
+                        category === cat.value
+                          ? 'bg-primary text-primary-foreground shadow-sm'
+                          : 'bg-muted/40 text-muted-foreground hover:bg-muted hover:text-foreground'
+                      )}
+                    >
+                      {cat.label}
+                    </button>
+                  ))}
+                </div>
               </div>
 
               {/* Font List */}
-              <ScrollArea className="h-[320px]">
+              <ScrollArea className="flex-1">
                 <div className="p-2">
                   {filteredFonts.length === 0 ? (
-                    <div className="text-center py-6 text-slate-400 text-sm">
-                      No fonts found
+                    <div className="flex flex-col items-center justify-center py-12 text-center">
+                      <div className="w-12 h-12 rounded-full bg-muted/30 flex items-center justify-center mb-3">
+                        <Search className="h-5 w-5 text-muted-foreground/50" />
+                      </div>
+                      <p className="text-sm text-muted-foreground">No fonts found</p>
+                      <p className="text-xs text-muted-foreground/60 mt-1">Try a different search term</p>
                     </div>
                   ) : (
-                    filteredFonts.map((font) => (
-                      <button
-                        key={font.family}
-                        onClick={() => handleSelectFont(font)}
-                        onMouseEnter={() => loadFontForPreview(font.family)}
-                        className={cn(
-                          'w-full flex items-center justify-between px-3 py-2 rounded-md text-left transition-colors',
-                          value === font.family
-                            ? 'bg-primary/20 text-primary'
-                            : hoveredFont === font.family
-                            ? 'bg-slate-800 text-slate-100'
-                            : 'hover:bg-slate-800 text-slate-200'
-                        )}
-                      >
-                        <span
-                          className="text-base truncate"
-                          style={{ fontFamily: `"${font.family}", ${font.category}` }}
-                        >
-                          {font.family}
-                        </span>
-                        <div className="flex items-center gap-2">
-                          <span className="text-xs text-slate-500 capitalize">
-                            {font.category}
-                          </span>
-                          {value === font.family && (
-                            <Check className="h-4 w-4 text-primary" />
+                    <div className="space-y-0.5">
+                      {filteredFonts.map((font) => (
+                        <button
+                          key={font.family}
+                          onClick={() => handleSelectFont(font)}
+                          onMouseEnter={() => loadFontForPreview(font.family)}
+                          onMouseLeave={() => setHoveredFont(null)}
+                          className={cn(
+                            'w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-left transition-all duration-200 group',
+                            value === font.family
+                              ? 'bg-primary/10 text-primary shadow-sm'
+                              : hoveredFont === font.family
+                              ? 'bg-muted/60 text-foreground shadow-sm scale-[0.99]'
+                              : 'text-foreground/70 hover:bg-muted/40 hover:text-foreground'
                           )}
-                        </div>
-                      </button>
-                    ))
+                        >
+                          <span
+                            className="text-sm truncate transition-all"
+                            style={{ fontFamily: `"${font.family}", ${font.category}` }}
+                          >
+                            {font.family}
+                          </span>
+                          <div className="flex items-center gap-2 shrink-0 ml-2">
+                            {value === font.family && (
+                              <div className="flex items-center justify-center w-5 h-5 rounded-full bg-primary/20">
+                                <Check className="h-3 w-3 text-primary" />
+                              </div>
+                            )}
+                          </div>
+                        </button>
+                      ))}
+                    </div>
                   )}
                 </div>
               </ScrollArea>
 
-              {/* Font Count */}
-              <div className="p-2 border-t border-slate-700 text-xs text-slate-500 text-center">
-                {filteredFonts.length} fonts available
+              {/* Font Count Footer */}
+              <div className="px-4 py-2.5 border-t border-border/50 bg-muted/10">
+                <p className="text-xs text-muted-foreground/70 text-center font-medium">
+                  {filteredFonts.length} {filteredFonts.length === 1 ? 'font' : 'fonts'}
+                  {search && ' matching'}
+                </p>
               </div>
             </div>
 
-            {/* Right side - Live Preview */}
-            <div className="w-[280px] p-4 bg-slate-800/50">
-              <div className="text-xs text-slate-400 mb-3 flex items-center justify-between">
-                <span>Live Preview</span>
-                {hoveredFont && (
-                  <span className="text-primary font-medium">{hoveredFont}</span>
+            {/* Right side - Typography Preview */}
+            <div className="w-[300px] bg-gradient-to-br from-background via-muted/5 to-muted/10 p-6 overflow-y-auto">
+              {/* Preview Header */}
+              <div className="flex flex-col gap-2 mb-6 pb-4 border-b border-border/50">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                    Preview
+                  </span>
+                  {hoveredFont && (
+                    <span className="text-xs text-primary font-medium animate-in fade-in slide-in-from-right-2 duration-200">
+                      Hover
+                    </span>
+                  )}
+                </div>
+                {(hoveredFont || value) && (
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-sm font-medium text-foreground truncate">
+                      {hoveredFont || value}
+                    </span>
+                  </div>
                 )}
               </div>
-              <LiveInvoicePreview 
-                font={previewFont} 
+
+              {/* Preview Content */}
+              <ElegantTypographyPreview
+                font={previewFont}
                 weight={weight}
                 type={previewType}
+                isHovering={!!hoveredFont}
               />
-              <div className="mt-3 text-xs text-slate-500 text-center">
-                Hover over fonts to preview
-              </div>
             </div>
           </div>
         </PopoverContent>
@@ -325,29 +435,37 @@ export function GoogleFontPicker({
               variant="outline"
               role="combobox"
               aria-expanded={weightOpen}
-              className="w-[120px] justify-between bg-slate-800/50 border-slate-700 hover:bg-slate-700/50"
+              className="w-[120px] justify-between h-9"
             >
-              <span className="truncate">{currentWeight?.label || 'Regular'}</span>
+              <span className="truncate text-sm">{currentWeight?.label || 'Regular'}</span>
               <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
             </Button>
           </PopoverTrigger>
-          <PopoverContent className="w-[160px] p-2 bg-slate-900 border-slate-700" align="start">
-            {availableWeights.map((w) => (
-              <button
-                key={w.value}
-                onClick={() => handleSelectWeight(w)}
-                className={cn(
-                  'w-full flex items-center justify-between px-3 py-2 rounded-md text-left transition-colors',
-                  weight === w.value
-                    ? 'bg-primary/20 text-primary'
-                    : 'hover:bg-slate-800 text-slate-200'
-                )}
-                style={{ fontWeight: w.value }}
-              >
-                <span>{w.label}</span>
-                <span className="text-xs text-slate-500">{w.value}</span>
-              </button>
-            ))}
+          <PopoverContent
+            className="w-[180px] p-2 shadow-lg"
+            align="start"
+            sideOffset={8}
+          >
+            <div className="space-y-0.5">
+              {availableWeights.map((w) => (
+                <button
+                  key={w.value}
+                  onClick={() => handleSelectWeight(w)}
+                  className={cn(
+                    'w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-left transition-all duration-200',
+                    weight === w.value
+                      ? 'bg-primary/10 text-primary shadow-sm'
+                      : 'text-foreground hover:bg-muted'
+                  )}
+                  style={{ fontWeight: w.value }}
+                >
+                  <span className="text-sm">{w.label}</span>
+                  <span className="text-xs text-muted-foreground/70 tabular-nums font-mono">
+                    {w.value}
+                  </span>
+                </button>
+              ))}
+            </div>
           </PopoverContent>
         </Popover>
       )}

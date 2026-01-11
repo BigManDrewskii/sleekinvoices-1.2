@@ -1,5 +1,5 @@
 import * as React from "react";
-import { ChevronUp } from "lucide-react";
+import { ChevronUp, Info } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface CollapsibleSectionProps {
@@ -7,6 +7,8 @@ interface CollapsibleSectionProps {
   defaultOpen?: boolean;
   children: React.ReactNode;
   className?: string;
+  disabled?: boolean;
+  disabledMessage?: string;
 }
 
 export function CollapsibleSection({
@@ -14,15 +16,24 @@ export function CollapsibleSection({
   defaultOpen = true,
   children,
   className,
+  disabled = false,
+  disabledMessage,
 }: CollapsibleSectionProps) {
   const [isOpen, setIsOpen] = React.useState(defaultOpen);
 
   return (
-    <div className={cn("rounded-lg bg-card/50 border border-border/50", className)}>
+    <div className={cn(
+      "rounded-lg bg-card/50 border border-border/50",
+      disabled && "opacity-60",
+      className
+    )}>
       <button
         type="button"
-        onClick={() => setIsOpen(!isOpen)}
-        className="w-full flex items-center justify-between px-4 py-3 text-left hover:bg-muted/30 transition-colors rounded-t-lg"
+        onClick={() => !disabled && setIsOpen(!isOpen)}
+        className={cn(
+          "w-full flex items-center justify-between px-4 py-3 text-left rounded-t-lg transition-colors",
+          disabled ? "cursor-not-allowed" : "hover:bg-muted/30"
+        )}
       >
         <span className="text-sm font-medium text-foreground">{title}</span>
         <ChevronUp
@@ -32,13 +43,25 @@ export function CollapsibleSection({
           )}
         />
       </button>
+
+      {disabled && disabledMessage && (
+        <div className="px-4 pb-3 pt-0">
+          <div className="flex items-start gap-2 p-3 rounded-lg bg-muted/50 text-xs text-muted-foreground">
+            <Info className="h-4 w-4 shrink-0 mt-0.5" />
+            <p className="leading-relaxed">{disabledMessage}</p>
+          </div>
+        </div>
+      )}
+
       <div
         className={cn(
           "overflow-hidden transition-all duration-200",
-          isOpen ? "max-h-[2000px] opacity-100" : "max-h-0 opacity-0"
+          isOpen && !disabled ? "max-h-[2000px] opacity-100" : "max-h-0 opacity-0"
         )}
       >
-        <div className="px-4 pb-4 pt-1">{children}</div>
+        <div className={cn("px-4 pb-4 pt-1", disabled && "pointer-events-none")}>
+          {children}
+        </div>
       </div>
     </div>
   );

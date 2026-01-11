@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { ArrowLeft, Loader2, Upload, X, RotateCcw, Receipt, FileText, Eye, Smartphone, Monitor, Tablet } from "lucide-react";
+import { ArrowLeft, Loader2, Upload, X, RotateCcw, Receipt, FileText, Eye, Smartphone, Monitor, Tablet, CheckCircle2, Circle } from "lucide-react";
 import { FloppyDisk } from "@phosphor-icons/react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -382,6 +382,15 @@ export function SleekTemplateEditor({ templateId, onComplete, onCancel }: SleekT
               {/* Colors */}
               <CollapsibleSection title="Colors" defaultOpen>
                 <div className="space-y-4">
+                  {/* Color Usage Info */}
+                  {invoiceStyle === 'receipt' && (
+                    <div className="bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 rounded-lg p-2.5">
+                      <p className="text-xs text-blue-700 dark:text-blue-300 leading-relaxed">
+                        <strong className="font-medium">Receipt style</strong> uses minimal colors: Primary for text/dividers, Accent for totals/highlights.
+                      </p>
+                    </div>
+                  )}
+
                   {/* Color Presets */}
                   <div>
                     <Label className="text-sm font-medium mb-2 block">Quick Presets</Label>
@@ -424,7 +433,15 @@ export function SleekTemplateEditor({ templateId, onComplete, onCancel }: SleekT
               </CollapsibleSection>
 
               {/* Typography */}
-              <CollapsibleSection title="Typography">
+              <CollapsibleSection
+                title="Typography"
+                disabled={true}
+                disabledMessage={
+                  invoiceStyle === 'receipt'
+                    ? "Receipt style uses fixed IBM Plex Mono font for authentic thermal receipt appearance."
+                    : "Classic style uses fixed Inter font family for clean, modern typography. Custom fonts coming soon."
+                }
+              >
                 <div className="space-y-4">
                   <div>
                     <Label className="text-sm font-medium">Heading Font</Label>
@@ -457,7 +474,15 @@ export function SleekTemplateEditor({ templateId, onComplete, onCancel }: SleekT
               </CollapsibleSection>
 
               {/* Layout */}
-              <CollapsibleSection title="Layout">
+              <CollapsibleSection
+                title="Layout"
+                disabled={true}
+                disabledMessage={
+                  invoiceStyle === 'receipt'
+                    ? "Receipt style uses a fixed vertical layout optimized for narrow receipt format."
+                    : "Classic style uses a fixed split-header layout with rounded table design. Custom layouts coming soon."
+                }
+              >
                 <div className="space-y-4">
                   <div>
                     <Label className="text-sm font-medium">Header Style</Label>
@@ -497,7 +522,11 @@ export function SleekTemplateEditor({ templateId, onComplete, onCancel }: SleekT
               </CollapsibleSection>
 
               {/* Field Visibility */}
-              <CollapsibleSection title="Field Visibility">
+              <CollapsibleSection
+                title="Field Visibility"
+                disabled={true}
+                disabledMessage="Both styles show all available invoice fields by default. Conditional field visibility coming soon."
+              >
                 <div className="space-y-3">
                   {[
                     { key: 'showCompanyAddress', label: 'Company Address' },
@@ -518,7 +547,11 @@ export function SleekTemplateEditor({ templateId, onComplete, onCancel }: SleekT
               </CollapsibleSection>
 
               {/* Footer */}
-              <CollapsibleSection title="Footer">
+              <CollapsibleSection
+                title="Footer"
+                disabled={true}
+                disabledMessage="Both styles use fixed footer text. Custom footer messages coming soon."
+              >
                 <div className="space-y-4">
                   <div>
                     <Label className="text-sm font-medium">Footer Message</Label>
@@ -529,7 +562,7 @@ export function SleekTemplateEditor({ templateId, onComplete, onCancel }: SleekT
                       className="mt-1.5 min-h-[80px]"
                     />
                   </div>
-                  
+
                   <div className="flex items-center justify-between">
                     <Label className="text-sm">Set as Default Template</Label>
                     <Switch
@@ -559,89 +592,142 @@ export function SleekTemplateEditor({ templateId, onComplete, onCancel }: SleekT
         <div className="flex-1 min-h-[calc(100vh-57px)] bg-muted/20">
           {/* Preview Controls */}
           <div className="sticky top-[57px] z-40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b px-4 py-3">
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-              {/* Style Toggle */}
-              <div className="flex items-center gap-2">
-                <span className="text-sm font-medium text-muted-foreground mr-2">Style:</span>
-                <div className="flex bg-muted p-1 rounded-lg">
-                  <button
-                    onClick={() => setInvoiceStyle('receipt')}
-                    className={cn(
-                      "flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium transition-all",
-                      invoiceStyle === 'receipt' 
-                        ? "bg-background text-foreground shadow-sm" 
-                        : "text-muted-foreground hover:text-foreground"
-                    )}
+            <div className="flex flex-col gap-3">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                {/* Style Toggle */}
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-medium text-muted-foreground mr-2">Style:</span>
+                  <div className="flex bg-muted p-1 rounded-lg">
+                    <button
+                      onClick={() => setInvoiceStyle('receipt')}
+                      className={cn(
+                        "flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium transition-all",
+                        invoiceStyle === 'receipt'
+                          ? "bg-background text-foreground shadow-sm"
+                          : "text-muted-foreground hover:text-foreground"
+                      )}
+                    >
+                      <Receipt className="h-4 w-4" />
+                      <span className="hidden sm:inline">Receipt</span>
+                    </button>
+                    <button
+                      onClick={() => setInvoiceStyle('classic')}
+                      className={cn(
+                        "flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium transition-all",
+                        invoiceStyle === 'classic'
+                          ? "bg-background text-foreground shadow-sm"
+                          : "text-muted-foreground hover:text-foreground"
+                      )}
+                    >
+                      <FileText className="h-4 w-4" />
+                      <span className="hidden sm:inline">Classic</span>
+                    </button>
+                  </div>
+                </div>
+
+                {/* Device Preview Toggle */}
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-medium text-muted-foreground mr-2 hidden sm:inline">Preview:</span>
+                  <div className="flex bg-muted p-1 rounded-lg">
+                    <button
+                      onClick={() => setPreviewDevice('mobile')}
+                      className={cn(
+                        "p-1.5 rounded-md transition-all",
+                        previewDevice === 'mobile'
+                          ? "bg-background text-foreground shadow-sm"
+                          : "text-muted-foreground hover:text-foreground"
+                      )}
+                      title="Mobile"
+                    >
+                      <Smartphone className="h-4 w-4" />
+                    </button>
+                    <button
+                      onClick={() => setPreviewDevice('tablet')}
+                      className={cn(
+                        "p-1.5 rounded-md transition-all",
+                        previewDevice === 'tablet'
+                          ? "bg-background text-foreground shadow-sm"
+                          : "text-muted-foreground hover:text-foreground"
+                      )}
+                      title="Tablet"
+                    >
+                      <Tablet className="h-4 w-4" />
+                    </button>
+                    <button
+                      onClick={() => setPreviewDevice('desktop')}
+                      className={cn(
+                        "p-1.5 rounded-md transition-all",
+                        previewDevice === 'desktop'
+                          ? "bg-background text-foreground shadow-sm"
+                          : "text-muted-foreground hover:text-foreground"
+                      )}
+                      title="Desktop"
+                    >
+                      <Monitor className="h-4 w-4" />
+                    </button>
+                  </div>
+
+                  {/* Mobile: Toggle Editor */}
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setShowSidebar(!showSidebar)}
+                    className="lg:hidden ml-2"
                   >
-                    <Receipt className="h-4 w-4" />
-                    <span className="hidden sm:inline">Receipt</span>
-                  </button>
-                  <button
-                    onClick={() => setInvoiceStyle('classic')}
-                    className={cn(
-                      "flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium transition-all",
-                      invoiceStyle === 'classic' 
-                        ? "bg-background text-foreground shadow-sm" 
-                        : "text-muted-foreground hover:text-foreground"
-                    )}
-                  >
-                    <FileText className="h-4 w-4" />
-                    <span className="hidden sm:inline">Classic</span>
-                  </button>
+                    {showSidebar ? 'Preview' : 'Edit'}
+                  </Button>
                 </div>
               </div>
 
-              {/* Device Preview Toggle */}
-              <div className="flex items-center gap-2">
-                <span className="text-sm font-medium text-muted-foreground mr-2 hidden sm:inline">Preview:</span>
-                <div className="flex bg-muted p-1 rounded-lg">
-                  <button
-                    onClick={() => setPreviewDevice('mobile')}
-                    className={cn(
-                      "p-1.5 rounded-md transition-all",
-                      previewDevice === 'mobile' 
-                        ? "bg-background text-foreground shadow-sm" 
-                        : "text-muted-foreground hover:text-foreground"
-                    )}
-                    title="Mobile"
-                  >
-                    <Smartphone className="h-4 w-4" />
-                  </button>
-                  <button
-                    onClick={() => setPreviewDevice('tablet')}
-                    className={cn(
-                      "p-1.5 rounded-md transition-all",
-                      previewDevice === 'tablet' 
-                        ? "bg-background text-foreground shadow-sm" 
-                        : "text-muted-foreground hover:text-foreground"
-                    )}
-                    title="Tablet"
-                  >
-                    <Tablet className="h-4 w-4" />
-                  </button>
-                  <button
-                    onClick={() => setPreviewDevice('desktop')}
-                    className={cn(
-                      "p-1.5 rounded-md transition-all",
-                      previewDevice === 'desktop' 
-                        ? "bg-background text-foreground shadow-sm" 
-                        : "text-muted-foreground hover:text-foreground"
-                    )}
-                    title="Desktop"
-                  >
-                    <Monitor className="h-4 w-4" />
-                  </button>
-                </div>
-                
-                {/* Mobile: Toggle Editor */}
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  onClick={() => setShowSidebar(!showSidebar)}
-                  className="lg:hidden ml-2"
-                >
-                  {showSidebar ? 'Preview' : 'Edit'}
-                </Button>
+              {/* Style Capabilities Indicator */}
+              <div className="w-full">
+                {invoiceStyle === 'receipt' ? (
+                  <div className="bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 rounded-lg p-3">
+                    <div className="flex items-start gap-2">
+                      <Receipt className="h-4 w-4 text-blue-600 dark:text-blue-400 shrink-0 mt-0.5" />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs font-medium text-blue-900 dark:text-blue-100 mb-1">Receipt Style - Minimalist Design</p>
+                        <div className="space-y-1 text-xs text-blue-700 dark:text-blue-300">
+                          <div className="flex items-center gap-1.5">
+                            <CheckCircle2 className="h-3 w-3 shrink-0" />
+                            <span>Logo customization</span>
+                          </div>
+                          <div className="flex items-center gap-1.5">
+                            <CheckCircle2 className="h-3 w-3 shrink-0" />
+                            <span>Primary color (text) & accent color (totals)</span>
+                          </div>
+                          <div className="flex items-center gap-1.5">
+                            <Circle className="h-3 w-3 shrink-0 opacity-50" />
+                            <span className="opacity-75">Fixed monospace typography & minimal layout</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="bg-purple-50 dark:bg-purple-950/30 border border-purple-200 dark:border-purple-800 rounded-lg p-3">
+                    <div className="flex items-start gap-2">
+                      <FileText className="h-4 w-4 text-purple-600 dark:text-purple-400 shrink-0 mt-0.5" />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs font-medium text-purple-900 dark:text-purple-100 mb-1">Classic Style - Modern Professional</p>
+                        <div className="space-y-1 text-xs text-purple-700 dark:text-purple-300">
+                          <div className="flex items-center gap-1.5">
+                            <CheckCircle2 className="h-3 w-3 shrink-0" />
+                            <span>Logo customization</span>
+                          </div>
+                          <div className="flex items-center gap-1.5">
+                            <CheckCircle2 className="h-3 w-3 shrink-0" />
+                            <span>Primary & accent colors with gradient accents</span>
+                          </div>
+                          <div className="flex items-center gap-1.5">
+                            <Circle className="h-3 w-3 shrink-0 opacity-50" />
+                            <span className="opacity-75">Fixed Inter typography & rounded table design</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -658,6 +744,8 @@ export function SleekTemplateEditor({ templateId, onComplete, onCancel }: SleekT
                     <ReceiptStyleInvoice
                       {...sampleInvoiceData}
                       logoUrl={settings.logoUrl || undefined}
+                      primaryColor={settings.primaryColor}
+                      accentColor={settings.accentColor}
                     />
                   ) : (
                     <ClassicStyleInvoice
