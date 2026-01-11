@@ -238,3 +238,100 @@ export function withAlpha(hex: string, alpha: number): string {
   if (!rgb) return hex;
   return `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${alpha})`;
 }
+
+/**
+ * Convert hex color to HSL
+ */
+export function hexToHsl(hex: string): { h: number; s: number; l: number } | null {
+  const rgb = hexToRgb(hex);
+  if (!rgb) return null;
+
+  const r = rgb.r / 255;
+  const g = rgb.g / 255;
+  const b = rgb.b / 255;
+
+  const max = Math.max(r, g, b);
+  const min = Math.min(r, g, b);
+  let h = 0;
+  let s = 0;
+  const l = (max + min) / 2;
+
+  if (max !== min) {
+    const d = max - min;
+    s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+
+    switch (max) {
+      case r:
+        h = ((g - b) / d + (g < b ? 6 : 0)) / 6;
+        break;
+      case g:
+        h = ((b - r) / d + 2) / 6;
+        break;
+      case b:
+        h = ((r - g) / d + 4) / 6;
+        break;
+    }
+  }
+
+  return {
+    h: Math.round(h * 360),
+    s: Math.round(s * 100),
+    l: Math.round(l * 100),
+  };
+}
+
+/**
+ * Convert HSL to hex color
+ */
+export function hslToHex(h: number, s: number, l: number): string {
+  h = h / 360;
+  s = s / 100;
+  l = l / 100;
+
+  let r: number, g: number, b: number;
+
+  if (s === 0) {
+    r = g = b = l;
+  } else {
+    const hue2rgb = (p: number, q: number, t: number) => {
+      if (t < 0) t += 1;
+      if (t > 1) t -= 1;
+      if (t < 1 / 6) return p + (q - p) * 6 * t;
+      if (t < 1 / 2) return q;
+      if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6;
+      return p;
+    };
+
+    const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+    const p = 2 * l - q;
+
+    r = hue2rgb(p, q, h + 1 / 3);
+    g = hue2rgb(p, q, h);
+    b = hue2rgb(p, q, h - 1 / 3);
+  }
+
+  return rgbToHex(Math.round(r * 255), Math.round(g * 255), Math.round(b * 255));
+}
+
+/**
+ * Generate harmonious accent color from primary using color theory
+ * Uses complementary color (180° hue rotation) with saturation/lightness adjustments
+ */
+export function generateAccentColor(primaryColor: string): string {
+  const hsl = hexToHsl(primaryColor);
+  if (!hsl) return '#10b981'; // Default green accent
+
+  // Rotate hue by 180° for complementary color
+  let accentHue = (hsl.h + 180) % 360;
+
+  // Adjust saturation and lightness for visual harmony
+  // If primary is very saturated, reduce accent saturation slightly
+  // If primary is dark, make accent lighter (and vice versa)
+  const accentSaturation = hsl.s > 70 ? Math.max(50, hsl.s - 20) : hsl.s;
+  const accentLightness = hsl.l < 40 ? Math.min(65, hsl.l + 25) : Math.max(35, hsl.l - 10);
+
+  const accentHex = hslToHex(accentHue, accentSaturation, accentLightness);
+
+  // Ensure the accent meets WCAG AA contrast against white background
+  return adjustColorForContrast(accentHex, '#ffffff', 4.5);
+}

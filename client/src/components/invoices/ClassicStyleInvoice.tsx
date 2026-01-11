@@ -39,6 +39,8 @@ interface ClassicStyleInvoiceProps {
   taxId?: string;
   status?: string;
   logoUrl?: string;
+  logoPosition?: 'left' | 'center' | 'right';
+  logoWidth?: number;
   primaryColor?: string;
   accentColor?: string;
   headingFont?: string;
@@ -82,6 +84,8 @@ export function ClassicStyleInvoice({
   taxId,
   status = "draft",
   logoUrl,
+  logoPosition = 'left',
+  logoWidth = 120,
   primaryColor = "#18181b",
   accentColor = "#5f6fff",
   headingFont = "Inter",
@@ -180,12 +184,22 @@ export function ClassicStyleInvoice({
       <div className="px-10 pt-10 pb-8">
         <div className="flex flex-col sm:flex-row justify-between items-start gap-6">
           {/* Company Info */}
-          <div className="flex-1">
+          <div
+            className={cn(
+              "flex-1",
+              logoPosition === 'center' && "flex flex-col items-center",
+              logoPosition === 'right' && "flex flex-col items-end"
+            )}
+          >
             {logoUrl ? (
-              <img 
-                src={logoUrl} 
-                alt="Company Logo" 
-                className="h-10 w-auto object-contain mb-4"
+              <img
+                src={logoUrl}
+                alt="Company Logo"
+                className="object-contain mb-4"
+                style={{
+                  height: `${logoWidth}px`,
+                  width: 'auto'
+                }}
               />
             ) : (
               <div className="flex items-center gap-3 mb-4">
@@ -323,11 +337,11 @@ export function ClassicStyleInvoice({
             <div className="inline-grid grid-cols-2 gap-x-6 gap-y-3 text-sm">
               <span style={{ color: colors.muted }} className="font-medium">Issue Date</span>
               <span className="font-medium font-mono">
-                <DateDisplay date={issueDate} format="short" />
+                <DateDisplay date={issueDate} format={dateFormat} />
               </span>
               <span style={{ color: colors.muted }} className="font-medium">Due Date</span>
               <span className="font-medium font-mono">
-                <DateDisplay date={dueDate} format="short" />
+                <DateDisplay date={dueDate} format={dateFormat} />
               </span>
             </div>
           </div>

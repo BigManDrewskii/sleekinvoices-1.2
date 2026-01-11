@@ -1,6 +1,7 @@
 import * as React from "react";
-import { ChevronUp, Info } from "lucide-react";
+import { ChevronUp, Info, Copy, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 
 interface CollapsibleSectionProps {
   title: string;
@@ -71,38 +72,88 @@ interface ColorInputProps {
   label: string;
   value: string;
   onChange: (value: string) => void;
-  showSwap?: boolean;
+  readonly?: boolean;
+  subtitle?: string;
 }
 
-export function ColorInput({ label, value, onChange, showSwap }: ColorInputProps) {
+export function ColorInput({
+  label,
+  value,
+  onChange,
+  readonly = false,
+  subtitle
+}: ColorInputProps) {
+  const [copied, setCopied] = React.useState(false);
+
+  const handleCopy = async () => {
+    await navigator.clipboard.writeText(value);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
   return (
     <div className="space-y-2">
-      <label className="text-xs text-muted-foreground">{label}</label>
-      <div className="flex items-center gap-2 bg-muted/30 rounded-lg p-1.5">
-        <input
-          type="color"
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          className="w-8 h-8 rounded cursor-pointer border-0 bg-transparent"
-        />
-        <input
-          type="text"
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          className="flex-1 bg-transparent border-0 text-sm font-mono text-foreground focus:outline-none"
-          placeholder="#000000"
-        />
-        {showSwap && (
-          <button
-            type="button"
-            className="p-1.5 hover:bg-muted rounded transition-colors"
-            title="Swap colors"
-          >
-            <svg className="w-4 h-4 text-muted-foreground" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M7 16V4m0 0L3 8m4-4l4 4M17 8v12m0 0l4-4m-4 4l-4-4" />
-            </svg>
-          </button>
+      <div className="flex items-baseline gap-2">
+        <label className="text-sm font-medium text-foreground">{label}</label>
+        {subtitle && (
+          <span className="text-xs text-muted-foreground font-normal">{subtitle}</span>
         )}
+      </div>
+
+      <div className="relative group">
+        <div className={cn(
+          "flex items-center gap-3 p-3 rounded-xl border transition-all duration-200",
+          readonly
+            ? "border-border bg-muted/30"
+            : "border-border bg-card hover:border-primary/50 hover:shadow-sm"
+        )}>
+          {/* Large Color Swatch */}
+          <div className="relative">
+            {readonly ? (
+              <div
+                className="w-12 h-12 rounded-lg border-2 border-border/50 shadow-sm"
+                style={{ backgroundColor: value }}
+              />
+            ) : (
+              <input
+                type="color"
+                value={value}
+                onChange={(e) => onChange(e.target.value)}
+                className="w-12 h-12 rounded-lg cursor-pointer shadow-sm border-2 border-border/50 hover:shadow-md hover:scale-105 transition-all"
+                style={{ backgroundColor: value }}
+              />
+            )}
+          </div>
+
+          {/* Hex Input */}
+          <input
+            type="text"
+            value={value}
+            onChange={(e) => !readonly && onChange(e.target.value)}
+            readOnly={readonly}
+            className={cn(
+              "flex-1 bg-transparent border-0 text-sm font-mono focus:outline-none",
+              readonly ? "text-muted-foreground" : "text-foreground"
+            )}
+            placeholder="#000000"
+            maxLength={7}
+          />
+
+          {/* Copy Button */}
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            onClick={handleCopy}
+            className="h-8 w-8 shrink-0"
+          >
+            {copied ? (
+              <Check className="h-4 w-4 text-green-500" />
+            ) : (
+              <Copy className="h-4 w-4" />
+            )}
+          </Button>
+        </div>
       </div>
     </div>
   );

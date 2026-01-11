@@ -38,6 +38,8 @@ interface ReceiptStyleInvoiceProps {
   taxId?: string;
   status?: string;
   logoUrl?: string;
+  logoPosition?: 'left' | 'center' | 'right';
+  logoWidth?: number;
   // Template customization
   primaryColor?: string;
   accentColor?: string;
@@ -86,6 +88,8 @@ export function ReceiptStyleInvoice({
   taxId,
   status = "pending",
   logoUrl,
+  logoPosition = 'left',
+  logoWidth = 120,
   primaryColor = "#18181b",
   accentColor = "#10b981",
   headingFont = "IBM Plex Mono",
@@ -164,15 +168,25 @@ export function ReceiptStyleInvoice({
       }}
     >
       {/* Header - Logo & Brand */}
-      <div className="flex items-center gap-3 mb-8">
+      <div
+        className={cn(
+          "flex items-center gap-3 mb-8",
+          logoPosition === 'center' && "justify-center",
+          logoPosition === 'right' && "justify-end"
+        )}
+      >
         {logoUrl ? (
-          <img 
-            src={logoUrl} 
-            alt="Company Logo" 
-            className="h-8 w-auto object-contain"
+          <img
+            src={logoUrl}
+            alt="Company Logo"
+            className="object-contain"
+            style={{
+              height: `${logoWidth}px`,
+              width: 'auto'
+            }}
           />
         ) : (
-          <div 
+          <div
             className="w-8 h-8 rounded flex items-center justify-center"
             style={{ backgroundColor: colors.primary, color: colors.primaryText }}
           >
@@ -216,18 +230,18 @@ export function ReceiptStyleInvoice({
               Issued
             </div>
             <div className="text-sm tabular-nums">
-              <DateDisplay date={issueDate} format="long" />
+              <DateDisplay date={issueDate} format={dateFormat} />
             </div>
           </div>
           <div>
-            <div 
+            <div
               className="text-[10px] uppercase tracking-widest font-medium leading-none mb-1"
               style={{ color: colors.muted }}
             >
               Due
             </div>
             <div className="text-sm tabular-nums">
-              <DateDisplay date={dueDate} format="long" />
+              <DateDisplay date={dueDate} format={dateFormat} />
             </div>
           </div>
         </div>

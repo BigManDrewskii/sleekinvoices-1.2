@@ -1,5 +1,6 @@
 import { formatCurrency, formatDate, formatDateShort } from '@/lib/utils';
 import { cn } from '@/lib/utils';
+import { format as formatDateFns } from 'date-fns';
 
 /**
  * Currency component - renders monetary values with SUSE Mono font
@@ -26,18 +27,32 @@ export function Currency({
 
 /**
  * Date display component - renders dates with monospace font
- * Supports both short and long formats
+ * Supports template format strings and legacy short/long formats
  */
+const FORMAT_MAP: Record<string, string> = {
+  // Template format strings
+  'MM/DD/YYYY': 'MM/dd/yyyy',
+  'DD/MM/YYYY': 'dd/MM/yyyy',
+  'YYYY-MM-DD': 'yyyy-MM-dd',
+  'MMM DD, YYYY': 'MMM dd, yyyy',
+  // Legacy formats
+  'short': 'MM/dd/yyyy',
+  'medium': 'MMM dd, yyyy',
+  'long': 'MMMM dd, yyyy',
+};
+
 export function DateDisplay({
   date,
-  format = 'short',
+  format = 'MMM DD, YYYY',
   className,
 }: {
   date: Date | string;
-  format?: 'short' | 'long';
+  format?: string;
   className?: string;
 }) {
-  const formatted = format === 'short' ? formatDateShort(date) : formatDate(date);
+  const dateObj = typeof date === 'string' ? new Date(date) : date;
+  const formatString = FORMAT_MAP[format] || FORMAT_MAP['MMM DD, YYYY'];
+  const formatted = formatDateFns(dateObj, formatString);
   return <span className={cn("font-numeric", className)}>{formatted}</span>;
 }
 

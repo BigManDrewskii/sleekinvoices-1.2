@@ -16,6 +16,7 @@ import { loadGoogleFont } from "@/lib/google-fonts";
 import { ReceiptStyleInvoice } from "@/components/invoices/ReceiptStyleInvoice";
 import { ClassicStyleInvoice } from "@/components/invoices/ClassicStyleInvoice";
 import { cn } from "@/lib/utils";
+import { generateAccentColor } from "@/lib/color-contrast";
 
 interface SleekTemplateEditorProps {
   templateId?: number | null;
@@ -27,15 +28,16 @@ type InvoiceStyle = 'receipt' | 'classic';
 type PreviewDevice = 'desktop' | 'tablet' | 'mobile';
 
 // Brand color presets - curated for professional invoices
+// Accent colors are auto-generated from primary
 const BRAND_PRESETS = [
-  { name: 'Ocean', primary: '#0ea5e9', secondary: '#0f172a', accent: '#22d3ee', bg: '#ffffff' },
-  { name: 'Forest', primary: '#22c55e', secondary: '#14532d', accent: '#4ade80', bg: '#ffffff' },
-  { name: 'Sunset', primary: '#f97316', secondary: '#431407', accent: '#fb923c', bg: '#ffffff' },
-  { name: 'Berry', primary: '#a855f7', secondary: '#3b0764', accent: '#c084fc', bg: '#ffffff' },
-  { name: 'Slate', primary: '#64748b', secondary: '#1e293b', accent: '#94a3b8', bg: '#ffffff' },
-  { name: 'Rose', primary: '#f43f5e', secondary: '#4c0519', accent: '#fb7185', bg: '#ffffff' },
-  { name: 'Indigo', primary: '#6366f1', secondary: '#1e1b4b', accent: '#818cf8', bg: '#ffffff' },
-  { name: 'Teal', primary: '#14b8a6', secondary: '#134e4a', accent: '#2dd4bf', bg: '#ffffff' },
+  { name: 'Ocean', primary: '#0ea5e9' },
+  { name: 'Forest', primary: '#22c55e' },
+  { name: 'Sunset', primary: '#f97316' },
+  { name: 'Berry', primary: '#a855f7' },
+  { name: 'Slate', primary: '#64748b' },
+  { name: 'Rose', primary: '#f43f5e' },
+  { name: 'Indigo', primary: '#6366f1' },
+  { name: 'Teal', primary: '#14b8a6' },
 ];
 
 // Sample invoice data for preview
@@ -163,12 +165,19 @@ export function SleekTemplateEditor({ templateId, onComplete, onCancel }: SleekT
     loadGoogleFont(settings.bodyFont, ['400', '500', '600', '700']);
   }, [settings.headingFont, settings.bodyFont]);
 
+  // Auto-generate accent color when primary changes
+  useEffect(() => {
+    const autoAccent = generateAccentColor(settings.primaryColor);
+    if (autoAccent !== settings.accentColor) {
+      updateSetting('accentColor', autoAccent);
+    }
+  }, [settings.primaryColor]);
+
   // Apply brand preset
   const applyPreset = (preset: typeof BRAND_PRESETS[0]) => {
     updateSetting('primaryColor', preset.primary);
-    updateSetting('secondaryColor', preset.secondary);
-    updateSetting('accentColor', preset.accent);
-    updateSetting('backgroundColor', preset.bg);
+    const autoAccent = generateAccentColor(preset.primary);
+    updateSetting('accentColor', autoAccent);
   };
 
   // Reset to defaults
@@ -395,22 +404,23 @@ export function SleekTemplateEditor({ templateId, onComplete, onCancel }: SleekT
                   <div>
                     <Label className="text-sm font-medium mb-2 block">Quick Presets</Label>
                     <div className="grid grid-cols-4 gap-2">
-                      {BRAND_PRESETS.map((preset) => (
-                        <button
-                          key={preset.name}
-                          onClick={() => applyPreset(preset)}
-                          className="group relative aspect-square rounded-lg overflow-hidden border hover:ring-2 hover:ring-primary transition-all"
-                          title={preset.name}
-                        >
-                          <div className="absolute inset-0 flex">
-                            <div className="w-1/2 h-full" style={{ backgroundColor: preset.primary }} />
-                            <div className="w-1/2 h-full" style={{ backgroundColor: preset.accent }} />
-                          </div>
-                          <div className="absolute inset-x-0 bottom-0 bg-black/60 py-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
-                            <span className="text-[10px] text-white font-medium">{preset.name}</span>
-                          </div>
-                        </button>
-                      ))}
+                      {BRAND_PRESETS.map((preset) => {
+                        const autoAccent = generateAccentColor(preset.primary);
+                        return (
+                          <button
+                            key={preset.name}
+                            onClick={() => applyPreset(preset)}
+                            className="group relative aspect-square rounded-lg overflow-hidden border hover:ring-2 hover:ring-primary transition-all shadow-sm"
+                            title={preset.name}
+                          >
+                            <div className="absolute inset-0" style={{ backgroundColor: preset.primary }} />
+                            <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 via-black/40 to-transparent py-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                              <div className="text-[10px] text-white font-medium text-center">{preset.name}</div>
+                              <div className="w-full h-3 mt-0.5" style={{ backgroundColor: autoAccent }} />
+                            </div>
+                          </button>
+                        );
+                      })}
                     </div>
                   </div>
 
@@ -420,14 +430,11 @@ export function SleekTemplateEditor({ templateId, onComplete, onCancel }: SleekT
                     onChange={(v) => updateSetting('primaryColor', v)}
                   />
                   <ColorInput
-                    label="Secondary Color"
-                    value={settings.secondaryColor}
-                    onChange={(v) => updateSetting('secondaryColor', v)}
-                  />
-                  <ColorInput
                     label="Accent Color"
                     value={settings.accentColor}
                     onChange={(v) => updateSetting('accentColor', v)}
+                    readonly={true}
+                    subtitle="(Auto-generated)"
                   />
                 </div>
               </CollapsibleSection>
@@ -468,23 +475,6 @@ export function SleekTemplateEditor({ templateId, onComplete, onCancel }: SleekT
               {/* Layout */}
               <CollapsibleSection title="Layout">
                 <div className="space-y-4">
-                  <div>
-                    <Label className="text-sm font-medium">Header Style</Label>
-                    <Select
-                      value={settings.headerLayout}
-                      onValueChange={(v) => updateSetting('headerLayout', v as 'standard' | 'centered' | 'split')}
-                    >
-                      <SelectTrigger className="mt-1.5">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="standard">Standard</SelectItem>
-                        <SelectItem value="centered">Centered</SelectItem>
-                        <SelectItem value="split">Split</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-
                   <div>
                     <Label className="text-sm font-medium">Date Format</Label>
                     <Select
@@ -720,6 +710,8 @@ export function SleekTemplateEditor({ templateId, onComplete, onCancel }: SleekT
                     <ReceiptStyleInvoice
                       {...sampleInvoiceData}
                       logoUrl={settings.logoUrl || undefined}
+                      logoPosition={settings.logoPosition}
+                      logoWidth={settings.logoWidth}
                       primaryColor={settings.primaryColor}
                       accentColor={settings.accentColor}
                       headingFont={settings.headingFont}
@@ -737,6 +729,8 @@ export function SleekTemplateEditor({ templateId, onComplete, onCancel }: SleekT
                     <ClassicStyleInvoice
                       {...sampleInvoiceData}
                       logoUrl={settings.logoUrl || undefined}
+                      logoPosition={settings.logoPosition}
+                      logoWidth={settings.logoWidth}
                       primaryColor={settings.primaryColor}
                       accentColor={settings.accentColor}
                       headingFont={settings.headingFont}
