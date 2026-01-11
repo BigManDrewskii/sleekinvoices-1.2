@@ -40,6 +40,19 @@ function formatDate(date: Date | null): string {
 }
 
 /**
+ * Escape HTML special characters to prevent XSS in emails
+ */
+function escapeHtml(text: string): string {
+  if (!text) return '';
+  return text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
+/**
  * Send invoice email to client
  */
 export async function sendInvoiceEmail(params: SendInvoiceEmailParams): Promise<{ success: boolean; messageId?: string; error?: string }> {
@@ -219,7 +232,7 @@ export async function sendInvoiceEmail(params: SendInvoiceEmailParams): Promise<
 
     <!-- Greeting -->
     <div class="message">
-      <p style="margin: 0 0 12px 0;">Hello ${client.name},</p>
+      <p style="margin: 0 0 12px 0;">Hello ${escapeHtml(client.name)},</p>
       <p style="margin: 0;">Thank you for your business! Please find your invoice details below.</p>
     </div>
 
@@ -228,7 +241,7 @@ export async function sendInvoiceEmail(params: SendInvoiceEmailParams): Promise<
     <!-- Invoice Meta -->
     <div style="margin-bottom: 16px;">
       <div class="label">Invoice #</div>
-      <div class="value value-bold">${invoice.invoiceNumber}</div>
+      <div class="value value-bold">${escapeHtml(invoice.invoiceNumber)}</div>
     </div>
 
     <div class="info-grid">
@@ -416,14 +429,14 @@ export async function sendPaymentReminderEmail(params: SendInvoiceEmailParams): 
   </div>
   
   <div class="message">
-    <p>Hello ${client.name},</p>
-    <p>This is a ${isOverdue ? 'friendly reminder that payment for' : 'reminder about'} invoice ${invoice.invoiceNumber} ${isOverdue ? 'was due on' : 'is due on'} ${formatDate(invoice.dueDate)}.</p>
+    <p>Hello ${escapeHtml(client.name)},</p>
+    <p>This is a ${isOverdue ? 'friendly reminder that payment for' : 'reminder about'} invoice ${escapeHtml(invoice.invoiceNumber)} ${isOverdue ? 'was due on' : 'is due on'} ${formatDate(invoice.dueDate)}.</p>
   </div>
   
   <div class="invoice-details">
     <div class="detail-row">
       <span class="detail-label">Invoice Number:</span>
-      <span class="detail-value">${invoice.invoiceNumber}</span>
+      <span class="detail-value">${escapeHtml(invoice.invoiceNumber)}</span>
     </div>
     <div class="detail-row">
       <span class="detail-label">Due Date:</span>
@@ -451,8 +464,8 @@ export async function sendPaymentReminderEmail(params: SendInvoiceEmailParams): 
   </div>
   
   <div class="footer">
-    ${user.companyName ? `<p>${user.companyName}</p>` : ''}
-    ${user.email ? `<p>${user.email}</p>` : ''}
+    ${user.companyName ? `<p>${escapeHtml(user.companyName)}</p>` : ''}
+    ${user.email ? `<p>${escapeHtml(user.email)}</p>` : ''}
   </div>
 </body>
 </html>
@@ -688,13 +701,37 @@ export async function sendReminderEmail(params: SendReminderEmailParams): Promis
       daysOverdue,
       invoiceUrl,
     });
-    
+
+    const emailText = `
+Payment Reminder
+
+Hello ${client.name},
+
+This is a reminder that Invoice ${invoice.invoiceNumber} is ${daysOverdue} days overdue.
+
+Invoice Details:
+- Invoice Number: ${invoice.invoiceNumber}
+- Due Date: ${formatDate(invoice.dueDate)}
+- Amount Due: ${formatCurrency(invoice.total)}
+
+Please submit payment at your earliest convenience.
+
+View Invoice: ${invoiceUrl}
+
+Thank you for your attention to this matter.
+
+Best regards,
+${user.companyName || user.name}
+${user.email}
+    `.trim();
+
     const emailOptions: any = {
       from: `${user.companyName || user.name || 'SleekInvoices'} <reminders@sleekinvoices.com>`,
       replyTo: user.email || 'support@sleekinvoices.com',
       to: client.email,
       subject: `Payment Reminder: Invoice ${invoice.invoiceNumber} is ${daysOverdue} days overdue`,
       html: emailHtml,
+      text: emailText,
     };
     
     // Add CC if provided
@@ -757,28 +794,28 @@ export async function sendPaymentConfirmationEmail(params: SendPaymentConfirmati
           </div>
 
           <div style="background: #ffffff; padding: 30px; border: 1px solid #e5e7eb; border-top: none; border-radius: 0 0 10px 10px;">
-            <p style="font-size: 16px; margin-bottom: 20px;">Hi ${client.name || 'there'},</p>
+            <p style="font-size: 16px; margin-bottom: 20px;">Hi ${escapeHtml(client.name || 'there')},</p>
 
-            <p style="font-size: 16px; margin-bottom: 20px;">Great news! We've received your payment for <strong>Invoice ${invoice.invoiceNumber}</strong>.</p>
+            <p style="font-size: 16px; margin-bottom: 20px;">Great news! We've received your payment for <strong>Invoice ${escapeHtml(invoice.invoiceNumber)}</strong>.</p>
 
             <div style="background: #f9fafb; padding: 20px; border-radius: 8px; margin: 25px 0;">
               <h2 style="margin: 0 0 15px 0; font-size: 18px; color: #374151;">Payment Details</h2>
               <table style="width: 100%; border-collapse: collapse;">
                 <tr style="border-bottom: 1px solid #e5e7eb;">
                   <td style="padding: 12px 0; color: #6b7280;">Invoice Number</td>
-                  <td style="padding: 12px 0; text-align: right; font-weight: 600;">${invoice.invoiceNumber}</td>
+                  <td style="padding: 12px 0; text-align: right; font-weight: 600;">${escapeHtml(invoice.invoiceNumber)}</td>
                 </tr>
                 <tr style="border-bottom: 1px solid #e5e7eb;">
                   <td style="padding: 12px 0; color: #6b7280;">Amount Paid</td>
-                  <td style="padding: 12px 0; text-align: right; font-weight: 600; color: #10b981;">${paidAmount}</td>
+                  <td style="padding: 12px 0; text-align: right; font-weight: 600; color: #10b981;">${escapeHtml(paidAmount)}</td>
                 </tr>
                 <tr style="border-bottom: 1px solid #e5e7eb;">
                   <td style="padding: 12px 0; color: #6b7280;">Invoice Total</td>
-                  <td style="padding: 12px 0; text-align: right; font-weight: 600;">${invoiceTotal}</td>
+                  <td style="padding: 12px 0; text-align: right; font-weight: 600;">${escapeHtml(invoiceTotal)}</td>
                 </tr>
                 <tr style="border-bottom: 1px solid #e5e7eb;">
                   <td style="padding: 12px 0; color: #6b7280;">Payment Method</td>
-                  <td style="padding: 12px 0; text-align: right;">${paymentMethod}</td>
+                  <td style="padding: 12px 0; text-align: right;">${escapeHtml(paymentMethod)}</td>
                 </tr>
                 <tr>
                   <td style="padding: 12px 0; color: #6b7280;">Payment Date</td>
@@ -797,17 +834,41 @@ export async function sendPaymentConfirmationEmail(params: SendPaymentConfirmati
 
             <p style="font-size: 14px; color: #6b7280; margin: 0;">
               Best regards,<br>
-              <strong>${user.companyName || user.name}</strong>
+              <strong>${escapeHtml(user.companyName || user.name)}</strong>
             </p>
           </div>
 
           <div style="text-align: center; margin-top: 20px; padding: 20px; color: #6b7280; font-size: 12px;">
             <p>This is an automated payment confirmation email.</p>
-            <p>If you have any questions, please contact ${user.email}</p>
+            <p>If you have any questions, please contact ${escapeHtml(user.email)}</p>
           </div>
         </body>
       </html>
     `;
+
+    const emailText = `
+Payment Received!
+
+Hi ${client.name || 'there'},
+
+Great news! We've received your payment for Invoice ${invoice.invoiceNumber}.
+
+Payment Details:
+- Invoice Number: ${invoice.invoiceNumber}
+- Amount Paid: ${paidAmount}
+- Invoice Total: ${invoiceTotal}
+- Payment Method: ${paymentMethod}
+- Payment Date: ${formatDate(new Date())}
+
+Thank you for your prompt payment. If you have any questions or concerns, please don't hesitate to reach out.
+
+Best regards,
+${user.companyName || user.name}
+
+---
+This is an automated payment confirmation email.
+If you have any questions, please contact ${user.email}
+    `.trim();
 
     const result = await resendClient.emails.send({
       from: `${user.companyName || user.name || 'SleekInvoices'} <payments@sleekinvoices.com>`,
@@ -815,6 +876,7 @@ export async function sendPaymentConfirmationEmail(params: SendPaymentConfirmati
       to: client.email,
       subject: `Payment Received for Invoice ${invoice.invoiceNumber}`,
       html: emailHtml,
+      text: emailText,
     });
 
     return { success: true, messageId: result.data?.id };

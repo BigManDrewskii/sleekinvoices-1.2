@@ -1879,23 +1879,24 @@ export const appRouter = router({
         
         // Generate email content
         const portalUrl = `${process.env.VITE_FRONTEND_FORGE_API_URL?.replace('/api', '') || 'http://localhost:3000'}/portal/${input.accessToken}`;
-        const { subject, html } = generatePortalInvitationEmail({
+        const { subject, html, text } = generatePortalInvitationEmail({
           clientName: client.name,
           portalUrl,
           companyName: ctx.user.companyName || ctx.user.name || 'SleekInvoices',
           expiresInDays: 90,
         });
-        
+
         // Send email using Resend
         const { Resend } = await import('resend');
         const resend = new Resend(process.env.RESEND_API_KEY);
-        
+
         const result = await resend.emails.send({
           from: `${ctx.user.name || ctx.user.companyName || 'SleekInvoices'} <portal@sleekinvoices.com>`,
           replyTo: ctx.user.email || 'support@sleekinvoices.com',
           to: [client.email],
           subject,
           html,
+          text,
         });
         
         if (result.error) {

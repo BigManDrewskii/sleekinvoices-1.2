@@ -12,6 +12,7 @@ import { invoices, payments, users, cryptoSubscriptionPayments } from '../../dri
 import { eq, and, sql } from 'drizzle-orm';
 import { calculateExtendedEndDate, calculateNewEndDate } from '../lib/subscription-utils';
 import { sendSubscriptionConfirmationEmail } from '../lib/email-notifications';
+import { sendPaymentConfirmationEmail } from '../email';
 
 const router = Router();
 
@@ -164,6 +165,32 @@ router.post('/nowpayments', async (req: Request, res: Response) => {
         cryptoPaid: paidAmount,
         newStatus,
       });
+
+      // Send payment confirmation email if invoice is fully paid
+      if (newStatus === 'paid') {
+        try {
+          const client = await db.getClientById(invoice.clientId, invoice.userId);
+          const user = await db.getUserById(invoice.userId);
+
+          if (client?.email && user?.email) {
+            await sendPaymentConfirmationEmail({
+              invoice: {
+                ...invoice,
+                amountPaid: newAmountPaid.toFixed(8),
+                status: newStatus,
+              },
+              client,
+              user,
+              amountPaid: fiatPaid,
+              paymentMethod: `Crypto (${payload.pay_currency.toUpperCase()})`,
+            });
+            console.log('[NOWPayments IPN] Payment confirmation email sent to client');
+          }
+        } catch (emailError) {
+          console.error('[NOWPayments IPN] Failed to send payment confirmation email:', emailError);
+          // Don't fail the webhook if email fails
+        }
+      }
     } else if (nowpayments.isPaymentFailed(status)) {
       // Payment failed - log but don't change invoice status
       console.log('[NOWPayments IPN] Payment failed:', {

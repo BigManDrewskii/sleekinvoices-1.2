@@ -10,7 +10,20 @@ interface PortalInvitationEmailParams {
   expiresInDays: number;
 }
 
-export function generatePortalInvitationEmail(params: PortalInvitationEmailParams): { subject: string; html: string } {
+/**
+ * Escape HTML special characters to prevent XSS in emails
+ */
+function escapeHtml(text: string): string {
+  if (!text) return '';
+  return text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
+export function generatePortalInvitationEmail(params: PortalInvitationEmailParams): { subject: string; html: string; text: string } {
   const { clientName, portalUrl, companyName = "SleekInvoices", expiresInDays } = params;
 
   const subject = `Access Your Invoices - ${companyName}`;
@@ -33,7 +46,7 @@ export function generatePortalInvitationEmail(params: PortalInvitationEmailParam
           <tr>
             <td style="padding: 40px 40px 30px; text-align: center; background: linear-gradient(135deg, #111d22 0%, #162025 100%); border-radius: 12px 12px 0 0;">
               <h1 style="margin: 0; color: #ffffff; font-size: 28px; font-weight: 600;">
-                ${companyName}
+                ${escapeHtml(companyName)}
               </h1>
               <p style="margin: 10px 0 0; color: #a3b1b8; font-size: 14px;">
                 Professional Invoice Management
@@ -45,7 +58,7 @@ export function generatePortalInvitationEmail(params: PortalInvitationEmailParam
           <tr>
             <td style="padding: 40px;">
               <h2 style="margin: 0 0 20px; color: #111d22; font-size: 24px; font-weight: 600;">
-                Hello ${clientName},
+                Hello ${escapeHtml(clientName)},
               </h2>
               
               <p style="margin: 0 0 20px; color: #374d58; font-size: 16px; line-height: 1.6;">
@@ -96,7 +109,7 @@ export function generatePortalInvitationEmail(params: PortalInvitationEmailParam
 
               <p style="margin: 20px 0 0; color: #374d58; font-size: 14px;">
                 Best regards,<br>
-                <strong>${companyName} Team</strong>
+                <strong>${escapeHtml(companyName)} Team</strong>
               </p>
             </td>
           </tr>
@@ -105,7 +118,7 @@ export function generatePortalInvitationEmail(params: PortalInvitationEmailParam
           <tr>
             <td style="padding: 30px 40px; text-align: center; background-color: #f1f6f9; border-radius: 0 0 12px 12px;">
               <p style="margin: 0; color: #a3b1b8; font-size: 12px; line-height: 1.6;">
-                This email was sent by ${companyName}.<br>
+                This email was sent by ${escapeHtml(companyName)}.<br>
                 You received this because you are a valued client.
               </p>
               <p style="margin: 15px 0 0; color: #a3b1b8; font-size: 11px;">
@@ -122,5 +135,35 @@ export function generatePortalInvitationEmail(params: PortalInvitationEmailParam
 </html>
   `.trim();
 
-  return { subject, html };
+  const text = `
+${companyName}
+Professional Invoice Management
+
+Hello ${clientName},
+
+You've been invited to access your invoices through our secure client portal. View all your invoices, download PDFs, and make payments online—all in one convenient place.
+
+Access Your Portal: ${portalUrl}
+
+What you can do in the portal:
+• View all your invoices in one place
+• Download invoice PDFs anytime
+• Make secure payments with Stripe
+• Track your payment history
+
+🔒 Security Notice: This access link is unique to you and expires in ${expiresInDays} days. Do not share this link with others.
+
+If you have any questions or need assistance, please don't hesitate to reach out.
+
+Best regards,
+${companyName} Team
+
+---
+This email was sent by ${companyName}.
+You received this because you are a valued client.
+
+Powered by SleekInvoices - https://sleekinvoices.com
+  `.trim();
+
+  return { subject, html, text };
 }
