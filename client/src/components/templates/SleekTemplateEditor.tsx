@@ -457,16 +457,6 @@ export function SleekTemplateEditor({ templateId, onComplete, onCancel }: SleekT
                       className="mt-1.5"
                     />
                   </div>
-
-                  <SliderInput
-                    label="Base Font Size"
-                    value={settings.fontSize}
-                    onChange={(v) => updateSetting('fontSize', v)}
-                    min={12}
-                    max={18}
-                    step={1}
-                    unit="px"
-                  />
                 </div>
               </CollapsibleSection>
 
@@ -553,9 +543,9 @@ export function SleekTemplateEditor({ templateId, onComplete, onCancel }: SleekT
         </div>
 
         {/* Live Preview */}
-        <div className="flex-1 min-h-[calc(100vh-57px)] bg-muted/20">
+        <div className="flex-1 h-[calc(100vh-57px)] bg-muted/20 overflow-y-auto">
           {/* Preview Controls */}
-          <div className="sticky top-[57px] z-40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b px-4 py-3">
+          <div className="sticky top-0 z-40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b px-4 py-3">
             <div className="flex flex-col gap-3">
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                 {/* Style Toggle */}
