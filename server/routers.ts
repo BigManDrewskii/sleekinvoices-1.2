@@ -3151,6 +3151,72 @@ export const appRouter = router({
       return await pollPaymentsFromQB(ctx.user.id);
     }),
   }),
+
+  // Email History Routes
+  emailHistory: router({
+    // Get paginated email logs
+    list: protectedProcedure
+      .input(z.object({
+        limit: z.number().min(1).max(100).default(20),
+        offset: z.number().min(0).default(0),
+        emailType: z.enum(['invoice', 'reminder', 'receipt']).optional(),
+        deliveryStatus: z.enum(['sent', 'delivered', 'opened', 'clicked', 'bounced', 'complained', 'failed']).optional(),
+        search: z.string().optional(),
+      }))
+      .query(async ({ ctx, input }) => {
+        return await db.getEmailLogsByUserId(ctx.user.id, input);
+      }),
+
+    // Get single email log details
+    get: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .query(async ({ ctx, input }) => {
+        const emailLog = await db.getEmailLogById(input.id);
+        if (!emailLog || emailLog.userId !== ctx.user.id) {
+          throw new Error('Email log not found');
+        }
+        return emailLog;
+      }),
+
+    // Retry a failed email
+    retry: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ ctx, input }) => {
+        const emailLog = await db.getEmailLogById(input.id);
+        if (!emailLog || emailLog.userId !== ctx.user.id) {
+          throw new Error('Email log not found');
+        }
+        
+        if (emailLog.success) {
+          throw new Error('Email was already sent successfully');
+        }
+        
+        const { retryEmail } = await import('./lib/email-retry');
+        return await retryEmail(input.id);
+      }),
+
+    // Get email statistics
+    stats: protectedProcedure.query(async ({ ctx }) => {
+      const { logs } = await db.getEmailLogsByUserId(ctx.user.id, { limit: 1000 });
+      
+      const stats = {
+        total: logs.length,
+        sent: logs.filter(l => l.deliveryStatus === 'sent').length,
+        delivered: logs.filter(l => l.deliveryStatus === 'delivered').length,
+        opened: logs.filter(l => l.deliveryStatus === 'opened').length,
+        clicked: logs.filter(l => l.deliveryStatus === 'clicked').length,
+        bounced: logs.filter(l => l.deliveryStatus === 'bounced').length,
+        failed: logs.filter(l => !l.success).length,
+        byType: {
+          invoice: logs.filter(l => l.emailType === 'invoice').length,
+          reminder: logs.filter(l => l.emailType === 'reminder').length,
+          receipt: logs.filter(l => l.emailType === 'receipt').length,
+        },
+      };
+      
+      return stats;
+    }),
+  }),
 });
 
 export type AppRouter = typeof appRouter;

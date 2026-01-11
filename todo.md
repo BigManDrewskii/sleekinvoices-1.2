@@ -2022,3 +2022,36 @@
 - [x] Add email status tracking (sent, delivered, failed)
 - [x] Store Resend message IDs for tracking
 - [x] Write comprehensive tests for email logging (25 tests passing)
+
+
+### Email History UI
+- [x] Create EmailHistory page component
+- [x] Display email list with columns: recipient, subject, type, status, sent date
+- [x] Add delivery status badges (sent, delivered, opened, bounced, failed)
+- [x] Show open/click counts for tracked emails
+- [x] Add filtering by email type and status
+- [x] Add search by recipient email or invoice number
+- [x] Add pagination for large email lists
+- [x] Add email detail modal with full tracking info
+- [x] Add retry button for failed emails
+- [x] Add navigation link in sidebar
+
+### Resend Webhooks
+- [x] Create /api/webhooks/resend endpoint (already exists)
+- [x] Verify Resend webhook signatures (already implemented)
+- [x] Handle email.delivered event
+- [x] Handle email.opened event
+- [x] Handle email.clicked event
+- [x] Handle email.bounced event
+- [x] Handle email.complained event
+- [x] Update emailLog table with delivery status
+- [x] Increment open/click counts on repeat events
+
+### Email Retry System
+- [x] Add retryCount and lastRetryAt columns to emailLog table
+- [x] Create retryEmail function with exponential backoff
+- [x] Implement max retry limit (3 attempts)
+- [x] Add retry delay calculation (1min, 5min, 15min)
+- [x] Create tRPC endpoint for manual retry
+- [x] Log retry attempts and results
+- [x] Write tests for email retry system (17 tests passing)

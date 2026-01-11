@@ -32,6 +32,7 @@ import {
   LayoutTemplate,
   LayoutDashboard,
   Sparkles,
+  Mail,
 } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import { Plus } from "@phosphor-icons/react";
@@ -64,6 +65,7 @@ const navigationConfig = {
       { href: "/expenses", label: "Expenses", icon: Receipt, description: "Track business expenses" },
       { href: "/products", label: "Products", icon: Package, description: "Products & services catalog" },
       { href: "/analytics", label: "Analytics", icon: BarChart3, description: "Revenue insights" },
+      { href: "/email-history", label: "Email History", icon: Mail, description: "Track sent emails" },
     ],
   },
   templates: { href: "/templates", label: "Templates", icon: LayoutTemplate },

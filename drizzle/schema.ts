@@ -186,6 +186,10 @@ export const emailLog = mysqlTable("emailLog", {
   clickCount: int("clickCount").default(0),
   bouncedAt: timestamp("bouncedAt"),
   bounceType: varchar("bounceType", { length: 50 }), // hard, soft, etc.
+  // Retry tracking
+  retryCount: int("retryCount").default(0),
+  lastRetryAt: timestamp("lastRetryAt"),
+  nextRetryAt: timestamp("nextRetryAt"),
 });
 
 export type EmailLog = typeof emailLog.$inferSelect;
