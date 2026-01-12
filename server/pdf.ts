@@ -1,4 +1,10 @@
-import puppeteer from 'puppeteer';
+import puppeteer, { Browser } from 'puppeteer';
+
+// Track active browser instances for cleanup
+let activeBrowser: Browser | null = null;
+
+// Default timeout for PDF generation (30 seconds)
+const PDF_GENERATION_TIMEOUT_MS = 30000;
 import { Invoice, Client, InvoiceLineItem, User } from '../drizzle/schema';
 import type { InvoiceTemplate } from '../drizzle/schema';
 import { createPDFColorPalette, getOptimalTextColor, withAlpha } from './color-contrast';
@@ -532,34 +538,75 @@ function generateInvoiceHTML(data: InvoicePDFData): string {
 }
 
 /**
- * Generate PDF from invoice data with optional template
+ * Clean up any hanging browser instances
  */
-export async function generateInvoicePDF(data: InvoicePDFData): Promise<Buffer> {
+async function cleanupBrowserInstances(): Promise<void> {
+  if (activeBrowser) {
+    try {
+      await activeBrowser.close();
+    } catch (e) {
+      // Browser may already be closed
+    }
+    activeBrowser = null;
+  }
+}
+
+/**
+ * Generate PDF from invoice data with optional template
+ * Includes timeout protection to prevent hanging
+ */
+export async function generateInvoicePDF(
+  data: InvoicePDFData,
+  timeoutMs: number = PDF_GENERATION_TIMEOUT_MS
+): Promise<Buffer> {
   const html = generateInvoiceHTML(data);
   
-  const browser = await puppeteer.launch({
-    headless: true,
-    args: ['--no-sandbox', '--disable-setuid-sandbox'],
+  // Create timeout promise
+  const timeoutPromise = new Promise<never>((_, reject) => {
+    setTimeout(() => {
+      reject(new Error(`PDF generation timeout after ${timeoutMs}ms`));
+    }, timeoutMs);
   });
   
-  try {
-    const page = await browser.newPage();
-    await page.setContent(html, { waitUntil: 'networkidle0' });
-    
-    const pdf = await page.pdf({
-      format: 'A4',
-      printBackground: true,
-      margin: {
-        top: '20px',
-        right: '20px',
-        bottom: '20px',
-        left: '20px',
-      },
+  // Create PDF generation promise
+  const pdfPromise = async (): Promise<Buffer> => {
+    const browser = await puppeteer.launch({
+      headless: true,
+      args: ['--no-sandbox', '--disable-setuid-sandbox'],
     });
     
-    return Buffer.from(pdf);
-  } finally {
-    await browser.close();
+    // Track browser for cleanup
+    activeBrowser = browser;
+    
+    try {
+      const page = await browser.newPage();
+      await page.setContent(html, { waitUntil: 'networkidle0' });
+      
+      const pdf = await page.pdf({
+        format: 'A4',
+        printBackground: true,
+        margin: {
+          top: '20px',
+          right: '20px',
+          bottom: '20px',
+          left: '20px',
+        },
+      });
+      
+      return Buffer.from(pdf);
+    } finally {
+      await browser.close();
+      activeBrowser = null;
+    }
+  };
+  
+  try {
+    // Race between PDF generation and timeout
+    return await Promise.race([pdfPromise(), timeoutPromise]);
+  } catch (error) {
+    // Clean up any hanging browser instances on error
+    await cleanupBrowserInstances();
+    throw error;
   }
 }
 

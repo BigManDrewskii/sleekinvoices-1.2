@@ -11,15 +11,23 @@ import { initializeScheduler } from "../jobs/scheduler";
 import { initializeDefaultCurrencies } from "../currency";
 import { standardRateLimit, strictRateLimit } from "./rateLimit";
 
+import { initializeErrorMonitoring, captureException, flushErrorMonitoring } from './errorMonitoring';
+
 // Global error handler for uncaught exceptions
-process.on('uncaughtException', (error) => {
+process.on('uncaughtException', async (error) => {
   console.error('[CRITICAL] Uncaught Exception:', error);
-  // In production, you would send this to an error monitoring service
+  captureException(error, { action: 'uncaughtException' });
+  // Allow time for error to be sent before exit
+  await flushErrorMonitoring(2000);
+  process.exit(1);
 });
 
 process.on('unhandledRejection', (reason, promise) => {
   console.error('[CRITICAL] Unhandled Rejection at:', promise, 'reason:', reason);
-  // In production, you would send this to an error monitoring service
+  captureException(reason instanceof Error ? reason : new Error(String(reason)), { 
+    action: 'unhandledRejection',
+    metadata: { promise: String(promise) }
+  });
 });
 
 function isPortAvailable(port: number): Promise<boolean> {
@@ -306,11 +314,15 @@ async function startServer() {
   server.listen(port, async () => {
     console.log(`Server running on http://localhost:${port}/`);
     
+    // Initialize error monitoring (Sentry if configured)
+    await initializeErrorMonitoring();
+    
     // Initialize default currencies if needed
     try {
       await initializeDefaultCurrencies();
     } catch (error) {
       console.error("[Server] Failed to initialize currencies:", error);
+      captureException(error, { action: 'initializeDefaultCurrencies' });
     }
     
     // Initialize cron jobs for automated tasks

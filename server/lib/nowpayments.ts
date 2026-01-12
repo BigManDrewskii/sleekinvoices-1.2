@@ -300,8 +300,13 @@ export function verifyIPNSignature(
   const secretKey = config.ipnSecret || config.publicKey;
   
   if (!secretKey) {
-    console.warn('[NOWPayments] No IPN secret configured, skipping signature verification');
-    return true; // Allow through if no secret configured (development mode)
+    // SECURITY: Fail hard in production if no secret configured
+    if (process.env.NODE_ENV === 'production') {
+      console.error('[NOWPayments] CRITICAL: No IPN secret configured in production - rejecting webhook');
+      return false;
+    }
+    console.warn('[NOWPayments] ⚠️  No IPN secret configured - accepting unsigned webhook (DEVELOPMENT ONLY)');
+    return true;
   }
   
   // Sort payload keys alphabetically and create string

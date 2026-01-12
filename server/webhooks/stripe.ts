@@ -3,8 +3,6 @@ import {
   logStripeWebhookEvent,
   markWebhookEventProcessed,
   isWebhookEventProcessed,
-  createPayment,
-  updateInvoice,
 } from "../db";
 
 /**
@@ -93,7 +91,8 @@ export async function handleStripeWebhook(req: Request, res: Response) {
 }
 
 /**
- * Handle successful payment
+ * Handle successful payment - ATOMIC TRANSACTION
+ * Creates payment record and updates invoice status in a single transaction
  */
 async function handlePaymentSucceeded(event: any) {
   const paymentIntent = event.data.object;
@@ -108,7 +107,7 @@ async function handlePaymentSucceeded(event: any) {
   }
   
   // Get invoice details (without userId check since webhook doesn't have it)
-  const { invoices } = await import("../../drizzle/schema");
+  const { invoices, payments, clients, users } = await import("../../drizzle/schema");
   const { getDb } = await import("../db");
   const { eq } = await import("drizzle-orm");
   
@@ -127,27 +126,36 @@ async function handlePaymentSucceeded(event: any) {
     return;
   }
   
-  // Create payment record
-  await createPayment({
-    invoiceId: invoice.id,
-    userId: invoice.userId,
-    amount: (paymentIntent.amount / 100).toString(), // Convert from cents
-    currency: paymentIntent.currency.toUpperCase(),
-    paymentMethod: "stripe",
-    stripePaymentIntentId: paymentIntent.id,
-    paymentDate: new Date(paymentIntent.created * 1000),
-    status: "completed",
-    notes: `Stripe payment: ${paymentIntent.id}`,
+  // ATOMIC TRANSACTION: Create payment and update invoice together
+  await db.transaction(async (tx) => {
+    // Create payment record
+    await tx.insert(payments).values({
+      invoiceId: invoice.id,
+      userId: invoice.userId,
+      amount: (paymentIntent.amount / 100).toString(), // Convert from cents
+      currency: paymentIntent.currency.toUpperCase(),
+      paymentMethod: "stripe",
+      stripePaymentIntentId: paymentIntent.id,
+      paymentDate: new Date(paymentIntent.created * 1000),
+      status: "completed",
+      notes: `Stripe payment: ${paymentIntent.id}`,
+    });
+    
+    // Update invoice status to paid
+    await tx
+      .update(invoices)
+      .set({ 
+        status: "paid",
+        paidAt: new Date(),
+        updatedAt: new Date(),
+      })
+      .where(eq(invoices.id, invoice.id));
   });
   
-  // Update invoice status to paid
-  await updateInvoice(invoice.id, invoice.userId, { status: "paid" });
+  console.log(`[Stripe Webhook] Payment recorded for invoice ${invoiceId} (atomic transaction)`);
   
-  console.log(`[Stripe Webhook] Payment recorded for invoice ${invoiceId}`);
-  
-  // Send payment confirmation email
+  // Send payment confirmation email (outside transaction - non-critical)
   try {
-    const { clients, users } = await import("../../drizzle/schema");
     const { sendPaymentConfirmationEmail } = await import("../email");
 
     const clientResult = await db
@@ -198,7 +206,7 @@ async function handlePaymentFailed(event: any) {
   }
   
   // Get invoice details
-  const { invoices } = await import("../../drizzle/schema");
+  const { invoices, payments } = await import("../../drizzle/schema");
   const { getDb } = await import("../db");
   const { eq } = await import("drizzle-orm");
   
@@ -218,7 +226,7 @@ async function handlePaymentFailed(event: any) {
   }
   
   // Create failed payment record
-  await createPayment({
+  await db.insert(payments).values({
     invoiceId: invoice.id,
     userId: invoice.userId,
     amount: (paymentIntent.amount / 100).toString(),
@@ -243,7 +251,7 @@ async function handleChargeRefunded(event: any) {
   
   // Find the payment by Stripe payment intent ID
   const { payments, invoices } = await import("../../drizzle/schema");
-  const { getDb } = await import("../db");
+  const { getDb, updateInvoice } = await import("../db");
   const { eq } = await import("drizzle-orm");
   
   const db = await getDb();
@@ -417,63 +425,50 @@ async function handleCheckoutSessionCompleted(event: any) {
   const now = new Date();
   const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
   
-  // Create purchase record
-  await db.insert(aiCreditPurchases).values({
-    userId,
-    stripeSessionId: session.id,
-    stripePaymentIntentId: session.payment_intent,
-    packType,
-    creditsAmount,
-    amountPaid: session.amount_total || 0,
-    currency: session.currency || 'usd',
-    status: 'completed',
-    appliedToMonth: currentMonth,
-    completedAt: new Date(),
-  });
-  
-  console.log(`[Stripe Webhook] Credit purchase recorded: ${creditsAmount} credits for user ${userId}`);
-  
-  // Add credits to user's current month record
-  const existingCredits = await db
-    .select()
-    .from(aiCredits)
-    .where(and(
-      eq(aiCredits.userId, userId),
-      eq(aiCredits.month, currentMonth)
-    ))
-    .limit(1);
-  
-  if (existingCredits[0]) {
-    // Update existing record
-    await db
-      .update(aiCredits)
-      .set({
-        purchasedCredits: existingCredits[0].purchasedCredits + creditsAmount,
-        updatedAt: new Date(),
-      })
-      .where(eq(aiCredits.id, existingCredits[0].id));
-    
-    console.log(`[Stripe Webhook] Added ${creditsAmount} purchased credits to existing record`);
-  } else {
-    // Create new record with purchased credits
-    const { users } = await import("../../drizzle/schema");
-    const userResult = await db
-      .select()
-      .from(users)
-      .where(eq(users.id, userId))
-      .limit(1);
-    
-    const isPro = userResult[0]?.subscriptionStatus === 'active';
-    const creditsLimit = isPro ? 50 : 5;
-    
-    await db.insert(aiCredits).values({
+  // ATOMIC TRANSACTION: Create purchase record and add credits together
+  await db.transaction(async (tx) => {
+    // Create purchase record
+    await tx.insert(aiCreditPurchases).values({
       userId,
-      month: currentMonth,
-      creditsUsed: 0,
-      creditsLimit,
-      purchasedCredits: creditsAmount,
+      stripeSessionId: session.id,
+      stripePaymentIntentId: session.payment_intent,
+      packType,
+      creditsAmount,
+      amountPaid: session.amount_total || 0,
+      currency: session.currency || 'usd',
+      status: 'completed',
+      appliedToMonth: currentMonth,
+      completedAt: new Date(),
     });
     
-    console.log(`[Stripe Webhook] Created new credit record with ${creditsAmount} purchased credits`);
-  }
+    // Add credits to user's current month record
+    const existingCredits = await tx
+      .select()
+      .from(aiCredits)
+      .where(and(
+        eq(aiCredits.userId, userId),
+        eq(aiCredits.month, currentMonth)
+      ))
+      .limit(1);
+    
+    if (existingCredits[0]) {
+      // Update existing record
+      await tx
+        .update(aiCredits)
+        .set({
+          purchasedCredits: (existingCredits[0].purchasedCredits || 0) + creditsAmount,
+          updatedAt: new Date(),
+        })
+        .where(eq(aiCredits.id, existingCredits[0].id));
+    } else {
+      // Create new record
+      await tx.insert(aiCredits).values({
+        userId,
+        month: currentMonth,
+        purchasedCredits: creditsAmount,
+      });
+    }
+  });
+  
+  console.log(`[Stripe Webhook] Credit purchase completed: ${creditsAmount} credits for user ${userId} (atomic transaction)`);
 }

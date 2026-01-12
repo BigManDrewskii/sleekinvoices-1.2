@@ -67,6 +67,34 @@ function parseSubscriptionOrderId(orderId: string): {
   return null;
 }
 
+/**
+ * Check if a NOWPayments payment has already been processed (deduplication)
+ */
+async function isNOWPaymentsPaymentProcessed(paymentId: string | number): Promise<boolean> {
+  const database = await db.getDb();
+  if (!database) return false;
+  
+  // Check in payments table for invoice payments
+  const existingPayment = await database
+    .select()
+    .from(payments)
+    .where(sql`${payments.notes} LIKE ${'%NOWPayments ID: ' + paymentId + '%'}`)
+    .limit(1);
+  
+  if (existingPayment.length > 0) {
+    return true;
+  }
+  
+  // Check in crypto subscription payments table
+  const existingSubPayment = await database
+    .select()
+    .from(cryptoSubscriptionPayments)
+    .where(eq(cryptoSubscriptionPayments.paymentId, String(paymentId)))
+    .limit(1);
+  
+  return existingSubPayment.length > 0 && existingSubPayment[0].paymentStatus === 'finished';
+}
+
 router.post('/nowpayments', async (req: Request, res: Response) => {
   try {
     const signature = req.headers['x-nowpayments-sig'] as string;
@@ -78,10 +106,16 @@ router.post('/nowpayments', async (req: Request, res: Response) => {
       orderId: payload.order_id,
     });
 
-    // Verify signature
+    // Verify signature - SECURITY: Fail hard in production if no secret
     if (signature && !nowpayments.verifyIPNSignature(payload as unknown as Record<string, unknown>, signature)) {
       console.error('[NOWPayments IPN] Invalid signature');
       return res.status(401).json({ error: 'Invalid signature' });
+    }
+
+    // DEDUPLICATION: Check if this payment has already been processed
+    if (await isNOWPaymentsPaymentProcessed(payload.payment_id)) {
+      console.log(`[NOWPayments IPN] Duplicate webhook for payment ${payload.payment_id}, skipping`);
+      return res.status(200).json({ success: true, message: 'Already processed' });
     }
 
     // Check if this is a subscription payment
@@ -120,7 +154,7 @@ router.post('/nowpayments', async (req: Request, res: Response) => {
     console.log('[NOWPayments IPN] Processing status:', status);
 
     if (nowpayments.isPaymentComplete(status)) {
-      // Payment is complete - update invoice
+      // Payment is complete - ATOMIC TRANSACTION: update invoice and create payment together
       const paidAmount = payload.actually_paid || payload.pay_amount;
       const currentPaid = parseFloat(invoice.amountPaid || '0');
       const invoiceTotal = parseFloat(invoice.total);
@@ -132,41 +166,45 @@ router.post('/nowpayments', async (req: Request, res: Response) => {
       // Determine new status
       const newStatus = newAmountPaid >= invoiceTotal ? 'paid' : invoice.status;
 
-      // Update invoice
-      await database
-        .update(invoices)
-        .set({
-          amountPaid: newAmountPaid.toFixed(8),
-          status: newStatus,
-          cryptoAmount: paidAmount.toString(),
-          paidAt: newStatus === 'paid' ? new Date() : invoice.paidAt,
-        })
-        .where(eq(invoices.id, invoiceId));
+      // ATOMIC TRANSACTION: Update invoice and create payment together
+      await database.transaction(async (tx) => {
+        // Update invoice
+        await tx
+          .update(invoices)
+          .set({
+            amountPaid: newAmountPaid.toFixed(8),
+            status: newStatus,
+            cryptoAmount: paidAmount.toString(),
+            paidAt: newStatus === 'paid' ? new Date() : invoice.paidAt,
+            updatedAt: new Date(),
+          })
+          .where(eq(invoices.id, invoiceId));
 
-      // Record the payment
-      await database.insert(payments).values({
-        invoiceId: invoiceId,
-        userId: invoice.userId,
-        amount: fiatPaid.toFixed(8),
-        currency: payload.price_currency.toUpperCase(),
-        paymentMethod: 'crypto',
-        paymentDate: new Date(),
-        status: 'completed',
-        cryptoAmount: paidAmount.toString(),
-        cryptoCurrency: payload.pay_currency.toUpperCase(),
-        cryptoTxHash: payload.purchase_id,
-        cryptoWalletAddress: payload.pay_address,
-        notes: `NOWPayments ID: ${payload.payment_id}`,
+        // Record the payment
+        await tx.insert(payments).values({
+          invoiceId: invoiceId,
+          userId: invoice.userId,
+          amount: fiatPaid.toFixed(8),
+          currency: payload.price_currency.toUpperCase(),
+          paymentMethod: 'crypto',
+          paymentDate: new Date(),
+          status: 'completed',
+          cryptoAmount: paidAmount.toString(),
+          cryptoCurrency: payload.pay_currency.toUpperCase(),
+          cryptoTxHash: payload.purchase_id,
+          cryptoWalletAddress: payload.pay_address,
+          notes: `NOWPayments ID: ${payload.payment_id}`,
+        });
       });
 
-      console.log('[NOWPayments IPN] Payment recorded successfully:', {
+      console.log('[NOWPayments IPN] Payment recorded successfully (atomic transaction):', {
         invoiceId,
         fiatPaid,
         cryptoPaid: paidAmount,
         newStatus,
       });
 
-      // Send payment confirmation email if invoice is fully paid
+      // Send payment confirmation email if invoice is fully paid (outside transaction - non-critical)
       if (newStatus === 'paid') {
         try {
           const client = await db.getClientById(invoice.clientId, invoice.userId);
@@ -291,7 +329,7 @@ async function handleSubscriptionPayment(
       newEndDate: newEndDate.toISOString(),
     });
 
-    // Send confirmation email
+    // Send confirmation email (outside transaction - non-critical)
     try {
       await sendSubscriptionConfirmationEmail({
         userEmail: user.email,

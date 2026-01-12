@@ -13,8 +13,17 @@ export async function createContext(
 ): Promise<TrpcContext> {
   let user: User | null = null;
 
-  // Development mode: Auto-authenticate with dev user if SKIP_AUTH is enabled
-  if (process.env.NODE_ENV === "development" && process.env.SKIP_AUTH === "true") {
+  // SECURITY: Explicitly block SKIP_AUTH in production
+  if (process.env.SKIP_AUTH === "true") {
+    if (process.env.NODE_ENV === "production") {
+      throw new Error(
+        "CRITICAL SECURITY ERROR: SKIP_AUTH is enabled in production. " +
+        "This is a severe security vulnerability. Deployment blocked."
+      );
+    }
+    
+    // Development mode only: Auto-authenticate with dev user
+    console.warn("⚠️  AUTH BYPASS ENABLED - Development mode only");
     const { getUserByOpenId, upsertUser } = await import("../db");
 
     let devUser = await getUserByOpenId("dev-user-local");

@@ -426,3 +426,58 @@
 
 - [x] Fix non-functional dropdown on Expenses page
 - [x] Standardize Expenses list to use Table component for consistency
+
+
+---
+
+## 🔒 Security Audit P0 Fixes (Production Blockers)
+
+- [ ] P0-1: Add production error monitoring (Sentry integration)
+- [ ] P0-2: Validate SKIP_AUTH flag against production environment
+- [ ] P0-3: Wrap payment processing in database transactions (Stripe + NOWPayments)
+- [ ] P0-4: Add PDF generation timeout
+- [ ] P0-5: Add NOWPayments webhook deduplication
+
+## 🔐 Security Audit P1 Fixes (First Production Week)
+
+- [ ] P1-1: Fix NOWPayments signature bypass vulnerability
+- [ ] P1-2: Encrypt QuickBooks OAuth tokens
+- [ ] P1-3: Replace in-memory rate limiting with Redis (future)
+- [ ] P1-4: Add invoice status race condition protection
+
+
+---
+
+## 🔒 SECURITY AUDIT P0 FIXES (Production Readiness)
+
+### P0-1: Auth Bypass Validation
+- [x] Add explicit production check for SKIP_AUTH flag
+- [x] Fail hard if SKIP_AUTH=true in production environment
+
+### P0-2: Non-Atomic Payments
+- [x] Wrap Stripe payment processing in database transaction
+- [x] Wrap NOWPayments processing in database transaction
+- [x] Ensure payment record + invoice update happen atomically
+
+### P0-3: PDF Generation Timeout
+- [x] Add 30-second timeout to PDF generation
+- [x] Implement browser cleanup on timeout
+- [x] Track active browser instances for cleanup
+
+### P0-4: Webhook Deduplication
+- [x] Add idempotency check for NOWPayments webhooks
+- [x] Check both payments and crypto subscription tables
+- [x] Skip processing for already-processed payment IDs
+
+### P0-5: NOWPayments Signature Bypass
+- [x] Fail hard in production if no IPN secret configured
+- [x] Only allow unsigned webhooks in development mode
+
+### P0-6: Error Monitoring Infrastructure
+- [x] Create errorMonitoring.ts module
+- [x] Add Sentry integration (optional, activated with SENTRY_DSN)
+- [x] Capture uncaught exceptions and unhandled rejections
+- [x] Add context-aware error reporting
+
+---
+
