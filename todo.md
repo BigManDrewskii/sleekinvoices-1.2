@@ -326,3 +326,28 @@
 | User satisfaction | Unknown | >4.5/5 |
 | Mobile/tablet usage | Unknown | Track separately |
 
+
+
+## GDPR Data Export Feature
+
+### Phase 1: Backend API
+- [x] Create exportUserData tRPC procedure
+- [x] Export user profile data
+- [x] Export all invoices with line items
+- [x] Export all clients
+- [x] Export all expenses
+- [x] Export all products
+- [x] Export payment history
+- [x] Export email logs
+- [x] Generate JSON file with all data
+
+### Phase 2: Frontend UI
+- [x] Add "Download My Data" card to Settings page
+- [x] Add download button with loading state
+- [x] Show data categories being exported
+- [x] Trigger JSON file download
+
+### Phase 3: Testing
+- [x] Write vitest tests for data export (10 tests passing)
+- [x] Test all data categories are included
+- [x] Test file download functionality

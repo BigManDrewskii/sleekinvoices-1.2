@@ -8,7 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { getLoginUrl } from "@/const";
 import { trpc } from "@/lib/trpc";
-import { Save, Upload, User, Building2, LogOut, Mail, Bell, Link2, HelpCircle, Cookie } from "lucide-react";
+import { Save, Upload, User, Building2, LogOut, Mail, Bell, Link2, HelpCircle, Cookie, Download, FileJson, Users, FileText, Package, Receipt, Shield } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Switch } from "@/components/ui/switch";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -25,6 +25,23 @@ import { Link } from "wouter";
 export default function Settings() {
   const { user, loading, isAuthenticated, logout } = useAuth();
   const { preferences: cookiePrefs, setPreferences: setCookiePrefs, resetConsent } = useConsent();
+  
+  // Data export mutation
+  const exportAllData = trpc.user.exportAllData.useMutation({
+    onSuccess: (data) => {
+      // Trigger download
+      const link = document.createElement('a');
+      link.href = data.url;
+      link.download = `sleek-invoices-data-export-${new Date().toISOString().split('T')[0]}.json`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      toast.success("Your data export is ready and downloading!");
+    },
+    onError: (error) => {
+      toast.error(error.message || "Failed to export data. Please try again.");
+    },
+  });
 
   // Profile state
   const [name, setName] = useState("");
@@ -649,6 +666,94 @@ export default function Settings() {
                     We typically respond to support requests within 24 hours during business days.
                     For urgent issues, please mark your email as "URGENT" in the subject line.
                   </p>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Download My Data Card - GDPR Compliance */}
+            <Card>
+              <CardHeader>
+                <div className="flex items-center gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-emerald-500/10">
+                    <Download className="h-5 w-5 text-emerald-500" />
+                  </div>
+                  <div>
+                    <CardTitle>Download My Data</CardTitle>
+                    <CardDescription>
+                      Export all your personal data in JSON format (GDPR compliant)
+                    </CardDescription>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <p className="text-sm text-muted-foreground">
+                  Under GDPR and other privacy regulations, you have the right to receive a copy of all your personal data. 
+                  Click the button below to download a complete export of your data.
+                </p>
+                
+                {/* Data Categories */}
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                  <div className="flex items-center gap-2 p-3 rounded-lg border border-border bg-accent/5">
+                    <User className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-sm">Profile</span>
+                  </div>
+                  <div className="flex items-center gap-2 p-3 rounded-lg border border-border bg-accent/5">
+                    <FileText className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-sm">Invoices</span>
+                  </div>
+                  <div className="flex items-center gap-2 p-3 rounded-lg border border-border bg-accent/5">
+                    <Users className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-sm">Clients</span>
+                  </div>
+                  <div className="flex items-center gap-2 p-3 rounded-lg border border-border bg-accent/5">
+                    <Receipt className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-sm">Expenses</span>
+                  </div>
+                  <div className="flex items-center gap-2 p-3 rounded-lg border border-border bg-accent/5">
+                    <Package className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-sm">Products</span>
+                  </div>
+                  <div className="flex items-center gap-2 p-3 rounded-lg border border-border bg-accent/5">
+                    <Mail className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-sm">Email Logs</span>
+                  </div>
+                </div>
+
+                {/* Download Button */}
+                <div className="pt-2">
+                  <Button
+                    onClick={() => exportAllData.mutate()}
+                    disabled={exportAllData.isPending}
+                    className="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700"
+                  >
+                    {exportAllData.isPending ? (
+                      <>
+                        <svg className="animate-spin -ml-1 mr-2 h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        Preparing Export...
+                      </>
+                    ) : (
+                      <>
+                        <FileJson className="h-4 w-4 mr-2" />
+                        Download My Data (JSON)
+                      </>
+                    )}
+                  </Button>
+                </div>
+
+                {/* Info Note */}
+                <div className="rounded-lg bg-muted/50 p-4 flex items-start gap-3">
+                  <Shield className="h-5 w-5 text-muted-foreground flex-shrink-0 mt-0.5" />
+                  <div className="text-sm text-muted-foreground">
+                    <p className="font-medium text-foreground mb-1">Your data, your rights</p>
+                    <p>
+                      This export includes all data associated with your account. The file is generated securely 
+                      and will be available for download immediately. For data deletion requests, please use the 
+                      "Delete Account" option below.
+                    </p>
+                  </div>
                 </div>
               </CardContent>
             </Card>
