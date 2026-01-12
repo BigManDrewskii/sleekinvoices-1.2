@@ -351,3 +351,22 @@
 - [x] Write vitest tests for data export (10 tests passing)
 - [x] Test all data categories are included
 - [x] Test file download functionality
+
+
+## CSV Export Option for Download My Data
+
+### Phase 1: Backend
+- [x] Update exportAllData procedure to accept format parameter (json/csv)
+- [x] Create CSV conversion utility for each data type
+- [x] Generate ZIP file containing multiple CSV files (one per data category)
+- [x] Upload ZIP to S3 and return download URL
+
+### Phase 2: Frontend UI
+- [x] Add format selector (JSON/CSV) to Download My Data card
+- [x] Update button text based on selected format
+- [x] Handle different file extensions for download
+
+### Phase 3: Testing
+- [x] Write tests for CSV export functionality (23 tests passing)
+- [x] Test ZIP file generation
+- [x] Test format selector UI

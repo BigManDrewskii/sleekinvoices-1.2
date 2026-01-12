@@ -8,7 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { getLoginUrl } from "@/const";
 import { trpc } from "@/lib/trpc";
-import { Save, Upload, User, Building2, LogOut, Mail, Bell, Link2, HelpCircle, Cookie, Download, FileJson, Users, FileText, Package, Receipt, Shield } from "lucide-react";
+import { Save, Upload, User, Building2, LogOut, Mail, Bell, Link2, HelpCircle, Cookie, Download, FileJson, Users, FileText, Package, Receipt, Shield, FileArchive } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Switch } from "@/components/ui/switch";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -26,17 +26,24 @@ export default function Settings() {
   const { user, loading, isAuthenticated, logout } = useAuth();
   const { preferences: cookiePrefs, setPreferences: setCookiePrefs, resetConsent } = useConsent();
   
+  // Export format state
+  const [exportFormat, setExportFormat] = useState<'json' | 'csv'>('json');
+  
   // Data export mutation
   const exportAllData = trpc.user.exportAllData.useMutation({
     onSuccess: (data) => {
       // Trigger download
       const link = document.createElement('a');
       link.href = data.url;
-      link.download = `sleek-invoices-data-export-${new Date().toISOString().split('T')[0]}.json`;
+      const ext = data.format === 'csv' ? 'zip' : 'json';
+      link.download = `sleek-invoices-data-export-${new Date().toISOString().split('T')[0]}.${ext}`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-      toast.success("Your data export is ready and downloading!");
+      toast.success(data.format === 'csv' 
+        ? "Your CSV export (ZIP) is ready and downloading!" 
+        : "Your JSON export is ready and downloading!"
+      );
     },
     onError: (error) => {
       toast.error(error.message || "Failed to export data. Please try again.");
@@ -680,7 +687,7 @@ export default function Settings() {
                   <div>
                     <CardTitle>Download My Data</CardTitle>
                     <CardDescription>
-                      Export all your personal data in JSON format (GDPR compliant)
+                      Export all your personal data (GDPR compliant)
                     </CardDescription>
                   </div>
                 </div>
@@ -688,8 +695,45 @@ export default function Settings() {
               <CardContent className="space-y-4">
                 <p className="text-sm text-muted-foreground">
                   Under GDPR and other privacy regulations, you have the right to receive a copy of all your personal data. 
-                  Click the button below to download a complete export of your data.
+                  Choose your preferred format and download a complete export of your data.
                 </p>
+                
+                {/* Format Selector */}
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium">Export Format</Label>
+                  <div className="grid grid-cols-2 gap-3">
+                    <button
+                      type="button"
+                      onClick={() => setExportFormat('json')}
+                      className={`flex items-center gap-3 p-4 rounded-lg border-2 transition-all ${
+                        exportFormat === 'json'
+                          ? 'border-emerald-500 bg-emerald-500/10'
+                          : 'border-border bg-accent/5 hover:border-muted-foreground/30'
+                      }`}
+                    >
+                      <FileJson className={`h-5 w-5 ${exportFormat === 'json' ? 'text-emerald-500' : 'text-muted-foreground'}`} />
+                      <div className="text-left">
+                        <p className={`text-sm font-medium ${exportFormat === 'json' ? 'text-emerald-500' : 'text-foreground'}`}>JSON</p>
+                        <p className="text-xs text-muted-foreground">Single file, nested data</p>
+                      </div>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setExportFormat('csv')}
+                      className={`flex items-center gap-3 p-4 rounded-lg border-2 transition-all ${
+                        exportFormat === 'csv'
+                          ? 'border-emerald-500 bg-emerald-500/10'
+                          : 'border-border bg-accent/5 hover:border-muted-foreground/30'
+                      }`}
+                    >
+                      <FileArchive className={`h-5 w-5 ${exportFormat === 'csv' ? 'text-emerald-500' : 'text-muted-foreground'}`} />
+                      <div className="text-left">
+                        <p className={`text-sm font-medium ${exportFormat === 'csv' ? 'text-emerald-500' : 'text-foreground'}`}>CSV (ZIP)</p>
+                        <p className="text-xs text-muted-foreground">Spreadsheet-ready</p>
+                      </div>
+                    </button>
+                  </div>
+                </div>
                 
                 {/* Data Categories */}
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
@@ -722,7 +766,7 @@ export default function Settings() {
                 {/* Download Button */}
                 <div className="pt-2">
                   <Button
-                    onClick={() => exportAllData.mutate()}
+                    onClick={() => exportAllData.mutate({ format: exportFormat })}
                     disabled={exportAllData.isPending}
                     className="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700"
                   >
@@ -736,8 +780,12 @@ export default function Settings() {
                       </>
                     ) : (
                       <>
-                        <FileJson className="h-4 w-4 mr-2" />
-                        Download My Data (JSON)
+                        {exportFormat === 'csv' ? (
+                          <FileArchive className="h-4 w-4 mr-2" />
+                        ) : (
+                          <FileJson className="h-4 w-4 mr-2" />
+                        )}
+                        Download My Data ({exportFormat === 'csv' ? 'CSV ZIP' : 'JSON'})
                       </>
                     )}
                   </Button>
@@ -749,9 +797,10 @@ export default function Settings() {
                   <div className="text-sm text-muted-foreground">
                     <p className="font-medium text-foreground mb-1">Your data, your rights</p>
                     <p>
-                      This export includes all data associated with your account. The file is generated securely 
-                      and will be available for download immediately. For data deletion requests, please use the 
-                      "Delete Account" option below.
+                      {exportFormat === 'csv' 
+                        ? 'CSV export creates a ZIP file with separate spreadsheets for each data category (profile, invoices, clients, etc.). Perfect for Excel or Google Sheets.'
+                        : 'JSON export creates a single file with all your data in a structured format. Ideal for developers or data portability.'
+                      }
                     </p>
                   </div>
                 </div>

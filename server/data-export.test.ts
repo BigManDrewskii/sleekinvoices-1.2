@@ -46,7 +46,7 @@ describe('GDPR Data Export', () => {
       expect(content).toContain('getRecurringInvoicesByUserId');
       expect(content).toContain('getEstimatesByUserId');
       expect(content).toContain('getPaymentsByUserId');
-      expect(content).toContain('getEmailLogsByUserId');
+      expect(content).toContain('getAllEmailLogsByUserId');
     });
 
     it('should include line items with invoices', async () => {
@@ -92,6 +92,86 @@ describe('GDPR Data Export', () => {
       expect(content).toContain('ctx.user.name');
     });
   });
+
+  describe('CSV Export Format Support', () => {
+    it('should accept format parameter (json/csv)', async () => {
+      const fs = await import('fs');
+      const path = await import('path');
+      const routersPath = path.join(__dirname, 'routers.ts');
+      const content = fs.readFileSync(routersPath, 'utf-8');
+
+      expect(content).toContain("format: z.enum(['json', 'csv'])");
+    });
+
+    it('should have CSV conversion logic', async () => {
+      const fs = await import('fs');
+      const path = await import('path');
+      const routersPath = path.join(__dirname, 'routers.ts');
+      const content = fs.readFileSync(routersPath, 'utf-8');
+
+      expect(content).toContain('arrayToCSV');
+      expect(content).toContain("if (format === 'csv')");
+    });
+
+    it('should create ZIP archive for CSV export', async () => {
+      const fs = await import('fs');
+      const path = await import('path');
+      const routersPath = path.join(__dirname, 'routers.ts');
+      const content = fs.readFileSync(routersPath, 'utf-8');
+
+      expect(content).toContain('archiver');
+      expect(content).toContain("archiver.default('zip'");
+      expect(content).toContain('application/zip');
+    });
+
+    it('should generate separate CSV files for each data category', async () => {
+      const fs = await import('fs');
+      const path = await import('path');
+      const routersPath = path.join(__dirname, 'routers.ts');
+      const content = fs.readFileSync(routersPath, 'utf-8');
+
+      expect(content).toContain("name: 'profile.csv'");
+      expect(content).toContain("name: 'clients.csv'");
+      expect(content).toContain("name: 'invoices.csv'");
+      expect(content).toContain("name: 'invoice_line_items.csv'");
+      expect(content).toContain("name: 'products.csv'");
+      expect(content).toContain("name: 'expenses.csv'");
+      expect(content).toContain("name: 'payments.csv'");
+      expect(content).toContain("name: 'email_logs.csv'");
+    });
+
+    it('should include README.txt in ZIP', async () => {
+      const fs = await import('fs');
+      const path = await import('path');
+      const routersPath = path.join(__dirname, 'routers.ts');
+      const content = fs.readFileSync(routersPath, 'utf-8');
+
+      expect(content).toContain("name: 'README.txt'");
+    });
+
+    it('should return format in response', async () => {
+      const fs = await import('fs');
+      const path = await import('path');
+      const routersPath = path.join(__dirname, 'routers.ts');
+      const content = fs.readFileSync(routersPath, 'utf-8');
+
+      expect(content).toContain("format: 'csv'");
+      expect(content).toContain("format: 'json'");
+    });
+
+    it('should handle CSV escaping for special characters', async () => {
+      const fs = await import('fs');
+      const path = await import('path');
+      const routersPath = path.join(__dirname, 'routers.ts');
+      const content = fs.readFileSync(routersPath, 'utf-8');
+
+      // Check for proper CSV escaping
+      expect(content).toContain("str.includes(',')");
+      expect(content).toContain('str.includes(\'"\')'); 
+      expect(content).toContain("str.includes('\\n')");
+      expect(content).toContain('replace(/"/g');
+    });
+  });
 });
 
 
@@ -131,10 +211,10 @@ describe('Settings Page - Download My Data UI', () => {
     const content = fs.readFileSync(settingsPath, 'utf-8');
 
     // Check for button and loading state
-    expect(content).toContain('exportAllData.mutate()');
+    expect(content).toContain('exportAllData.mutate(');
     expect(content).toContain('exportAllData.isPending');
     expect(content).toContain('Preparing Export');
-    expect(content).toContain('Download My Data (JSON)');
+    expect(content).toContain('Download My Data');
   });
 
   it('should trigger file download on success', async () => {
@@ -148,5 +228,68 @@ describe('Settings Page - Download My Data UI', () => {
     expect(content).toContain('link.href = data.url');
     expect(content).toContain('link.download');
     expect(content).toContain('link.click()');
+  });
+
+  it('should have format selector (JSON/CSV)', async () => {
+    const fs = await import('fs');
+    const path = await import('path');
+    const settingsPath = path.join(__dirname, '..', 'client', 'src', 'pages', 'Settings.tsx');
+    const content = fs.readFileSync(settingsPath, 'utf-8');
+
+    // Check for format selector
+    expect(content).toContain('exportFormat');
+    expect(content).toContain("setExportFormat('json')");
+    expect(content).toContain("setExportFormat('csv')");
+    expect(content).toContain('Export Format');
+  });
+
+  it('should have JSON format option', async () => {
+    const fs = await import('fs');
+    const path = await import('path');
+    const settingsPath = path.join(__dirname, '..', 'client', 'src', 'pages', 'Settings.tsx');
+    const content = fs.readFileSync(settingsPath, 'utf-8');
+
+    expect(content).toContain('JSON');
+    expect(content).toContain('Single file, nested data');
+    expect(content).toContain('FileJson');
+  });
+
+  it('should have CSV format option', async () => {
+    const fs = await import('fs');
+    const path = await import('path');
+    const settingsPath = path.join(__dirname, '..', 'client', 'src', 'pages', 'Settings.tsx');
+    const content = fs.readFileSync(settingsPath, 'utf-8');
+
+    expect(content).toContain('CSV (ZIP)');
+    expect(content).toContain('Spreadsheet-ready');
+    expect(content).toContain('FileArchive');
+  });
+
+  it('should pass format to mutation', async () => {
+    const fs = await import('fs');
+    const path = await import('path');
+    const settingsPath = path.join(__dirname, '..', 'client', 'src', 'pages', 'Settings.tsx');
+    const content = fs.readFileSync(settingsPath, 'utf-8');
+
+    expect(content).toContain('exportAllData.mutate({ format: exportFormat })');
+  });
+
+  it('should handle different file extensions for download', async () => {
+    const fs = await import('fs');
+    const path = await import('path');
+    const settingsPath = path.join(__dirname, '..', 'client', 'src', 'pages', 'Settings.tsx');
+    const content = fs.readFileSync(settingsPath, 'utf-8');
+
+    expect(content).toContain("data.format === 'csv' ? 'zip' : 'json'");
+  });
+
+  it('should show different success messages for each format', async () => {
+    const fs = await import('fs');
+    const path = await import('path');
+    const settingsPath = path.join(__dirname, '..', 'client', 'src', 'pages', 'Settings.tsx');
+    const content = fs.readFileSync(settingsPath, 'utf-8');
+
+    expect(content).toContain('CSV export (ZIP)');
+    expect(content).toContain('JSON export');
   });
 });
