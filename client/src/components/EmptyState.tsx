@@ -64,21 +64,21 @@ export function EmptyState({
   const sizeClasses = {
     sm: {
       container: 'py-8',
-      illustration: 'h-40 w-40',
+      illustration: 'h-52 w-52',
       icon: 'h-10 w-10',
       title: 'text-base',
       description: 'text-sm',
     },
     md: {
       container: 'py-12',
-      illustration: 'h-56 w-56',
+      illustration: 'h-72 w-72',
       icon: 'h-12 w-12',
       title: 'text-lg',
       description: 'text-sm',
     },
     lg: {
       container: 'py-16',
-      illustration: 'h-72 w-72',
+      illustration: 'h-96 w-96',
       icon: 'h-16 w-16',
       title: 'text-xl',
       description: 'text-base',
@@ -102,7 +102,7 @@ export function EmptyState({
             <img
               src={illustration}
               alt=""
-              className={cn(sizes.illustration, 'object-contain')}
+              className={cn(sizes.illustration, 'object-contain opacity-95')}
             />
           ) : (
             <div className={sizes.illustration}>{illustration}</div>

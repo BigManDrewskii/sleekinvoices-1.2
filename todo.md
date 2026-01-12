@@ -403,3 +403,9 @@
 
 - [x] Update EmptyState component illustration sizes to be larger (sm: h-40, md: h-56, lg: h-72)
 - [x] Verify Sleeky appears more prominent in all empty states
+
+
+## Make Sleeky Even Bigger with Opacity
+
+- [x] Increase Sleeky illustration sizes further in EmptyState (sm: h-52, md: h-72, lg: h-96)
+- [x] Add 95% opacity to empty state illustrations (not avatars)
