@@ -30,17 +30,24 @@ export function SortableTableHeader({
 
   return (
     <TableHead
-      onClick={() => onSort(sortKey)}
       className={cn(
-        "cursor-pointer select-none hover:bg-muted/50 transition-colors",
         alignClass,
         className
       )}
     >
-      <div className="flex items-center gap-2">
+      <button
+        type="button"
+        onClick={() => onSort(sortKey)}
+        className={cn(
+          "w-full text-left px-0 bg-transparent border-0",
+          "cursor-pointer select-none hover:bg-muted/50 transition-colors",
+          "flex items-center gap-2"
+        )}
+        aria-label={`Sort by ${label}${isActive ? (isAscending ? ', currently ascending' : ', currently descending') : ''}`}
+      >
         <span>{label}</span>
         {isActive && (
-          <span className="inline-flex">
+          <span className="inline-flex" aria-hidden="true">
             {isAscending ? (
               <ChevronUp className="h-4 w-4 text-primary" />
             ) : (
@@ -48,7 +55,7 @@ export function SortableTableHeader({
             )}
           </span>
         )}
-      </div>
+      </button>
     </TableHead>
   );
 }

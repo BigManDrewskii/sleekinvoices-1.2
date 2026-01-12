@@ -229,12 +229,15 @@ export function CommandPalette() {
       )}
     >
       {/* Backdrop */}
-      <div 
+      <div
         className={cn(
           "fixed inset-0 bg-black/50 backdrop-blur-sm transition-opacity duration-200",
           open ? "opacity-100" : "opacity-0"
         )}
         onClick={() => setOpen(false)}
+        aria-label="Close command palette"
+        role="button"
+        tabIndex={-1}
       />
       
       {/* Command Dialog */}

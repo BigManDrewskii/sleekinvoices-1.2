@@ -13,7 +13,7 @@ const buttonVariants = cva(
     "disabled:pointer-events-none disabled:opacity-40 disabled:scale-100",
     "[&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0",
     "[&_svg]:transition-transform [&_svg]:duration-150",
-    "outline-none focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-offset-1 focus-visible:ring-offset-background",
+    "outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 focus-visible:ring-offset-background",
     "select-none cursor-pointer",
   ].join(" "),
   {

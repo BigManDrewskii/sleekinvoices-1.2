@@ -13,6 +13,7 @@ import { getLoginUrl } from "@/const";
 export function LandingNavigation() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [scrollAnnouncement, setScrollAnnouncement] = useState("");
 
   useEffect(() => {
     const handleScroll = () => {
@@ -27,6 +28,9 @@ export function LandingNavigation() {
     if (element) {
       element.scrollIntoView({ behavior: "smooth", block: "start" });
       setMobileMenuOpen(false);
+      // Announce to screen readers
+      setScrollAnnouncement(`Navigating to ${id} section`);
+      setTimeout(() => setScrollAnnouncement(""), 1000);
     }
   };
 
@@ -136,6 +140,15 @@ export function LandingNavigation() {
             </SheetContent>
           </Sheet>
         </div>
+      </div>
+      {/* ARIA live region for scroll announcements */}
+      <div
+        className="sr-only"
+        role="status"
+        aria-live="polite"
+        aria-atomic="true"
+      >
+        {scrollAnnouncement}
       </div>
     </nav>
   );

@@ -8,7 +8,7 @@ interface StatusBadgeProps {
 export function StatusBadge({ status, className }: StatusBadgeProps) {
   // Capitalize first letter only (not all uppercase)
   const displayStatus = status.charAt(0).toUpperCase() + status.slice(1).toLowerCase();
-  
+
   return (
     <span
       className={cn(
@@ -16,8 +16,11 @@ export function StatusBadge({ status, className }: StatusBadgeProps) {
         `status-${status.toLowerCase()}`,
         className
       )}
+      role="status"
+      aria-label={`Status: ${displayStatus}`}
     >
-      {displayStatus}
+      <span aria-hidden="true">{displayStatus}</span>
+      <span className="sr-only">{displayStatus} status</span>
     </span>
   );
 }

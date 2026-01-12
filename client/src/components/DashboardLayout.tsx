@@ -90,7 +90,10 @@ export default function DashboardLayout({
         } as CSSProperties
       }
     >
-      <DashboardLayoutContent setSidebarWidth={setSidebarWidth}>
+      <DashboardLayoutContent
+        sidebarWidth={sidebarWidth}
+        setSidebarWidth={setSidebarWidth}
+      >
         {children}
       </DashboardLayoutContent>
     </SidebarProvider>
@@ -99,11 +102,13 @@ export default function DashboardLayout({
 
 type DashboardLayoutContentProps = {
   children: React.ReactNode;
+  sidebarWidth: number;
   setSidebarWidth: (width: number) => void;
 };
 
 function DashboardLayoutContent({
   children,
+  sidebarWidth,
   setSidebarWidth,
 }: DashboardLayoutContentProps) {
   const { user, logout } = useAuth();
@@ -234,9 +239,27 @@ function DashboardLayoutContent({
         </Sidebar>
         <div
           className={`absolute top-0 right-0 w-1 h-full cursor-col-resize hover:bg-primary/20 transition-colors ${isCollapsed ? "hidden" : ""}`}
+          role="separator"
+          aria-label="Sidebar resize handle"
+          aria-valuenow={sidebarWidth}
+          aria-valuemin={MIN_WIDTH}
+          aria-valuemax={MAX_WIDTH}
+          aria-orientation="vertical"
+          tabIndex={0}
           onMouseDown={() => {
             if (isCollapsed) return;
             setIsResizing(true);
+          }}
+          onKeyDown={(e) => {
+            if (isCollapsed) return;
+            const step = 20;
+            if (e.key === 'ArrowLeft') {
+              e.preventDefault();
+              setSidebarWidth(Math.max(MIN_WIDTH, sidebarWidth - step));
+            } else if (e.key === 'ArrowRight') {
+              e.preventDefault();
+              setSidebarWidth(Math.min(MAX_WIDTH, sidebarWidth + step));
+            }
           }}
           style={{ zIndex: 50 }}
         />
