@@ -485,18 +485,18 @@ export function Navigation() {
             className="navbar-logo group relative"
             aria-label="SleekInvoices - Go to Dashboard"
           >
-            {/* Full logo for desktop */}
+            {/* Wide logo for desktop and tablet (md+) */}
             <img
-              src="/logo-full.svg"
+              src="/logos/wide/SleekInvoices-Logo-Wide.svg"
               alt="SleekInvoices"
-              className="navbar-logo-wide transition-all duration-150 ease-out group-hover:scale-[1.03] group-hover:brightness-110 group-active:scale-[0.98]"
-              style={{ height: '28px', width: 'auto', maxWidth: '180px' }}
+              className="hidden md:block navbar-logo-wide transition-all duration-150 ease-out group-hover:scale-[1.03] group-hover:brightness-110 group-active:scale-[0.98]"
+              style={{ height: '28px', width: 'auto', maxWidth: '200px' }}
             />
-            {/* Icon logo for mobile/tablet */}
+            {/* Monogram icon for mobile (below md) */}
             <img
-              src="/logo-icon.svg"
+              src="/logos/monogram/SleekInvoices-Monogram-White.svg"
               alt="SleekInvoices"
-              className="navbar-logo-compact transition-all duration-150 ease-out group-hover:scale-110 group-hover:brightness-110 group-hover:drop-shadow-[0_0_8px_rgba(99,102,241,0.3)] group-active:scale-95"
+              className="md:hidden navbar-logo-compact transition-all duration-150 ease-out group-hover:scale-110 group-hover:brightness-110 group-hover:drop-shadow-[0_0_8px_rgba(99,102,241,0.3)] group-active:scale-95"
               style={{ height: '32px', width: '32px', maxWidth: '32px' }}
             />
           </Link>
