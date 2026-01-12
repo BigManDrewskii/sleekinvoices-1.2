@@ -14,11 +14,11 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { UserAvatar } from "@/components/UserAvatar";
-import { 
-  Menu, 
-  User, 
-  Settings, 
-  LogOut, 
+import {
+  Menu,
+  User,
+  Settings,
+  LogOut,
   FileText,
   X,
   FileCheck,
@@ -33,6 +33,7 @@ import {
   LayoutDashboard,
   Sparkles,
   Mail,
+  Search,
 } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import { Plus } from "@phosphor-icons/react";
@@ -42,6 +43,7 @@ import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { GlobalSearch } from "@/components/GlobalSearch";
+import { useKeyboardShortcuts } from "@/contexts/KeyboardShortcutsContext";
 import { cn } from "@/lib/utils";
 
 // Navigation structure with grouped items and icons
@@ -106,6 +108,7 @@ export function Navigation() {
   const { user } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { scrolled, scrollDirection } = useScrollEffect();
+  const { setSearchOpen } = useKeyboardShortcuts();
   
   const logout = trpc.auth.logout.useMutation({
     onSuccess: () => {
@@ -129,10 +132,10 @@ export function Navigation() {
   const QuickActionsMenu = () => (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button 
-          size="sm" 
+        <Button
+          size="sm"
           variant="outline"
-          className="navbar-quick-action h-10 min-w-[44px] gap-1.5 px-3 group relative overflow-hidden border-primary/50 hover:border-primary hover:bg-primary/10 text-primary transition-all duration-200"
+          className="navbar-quick-action h-11 min-w-[44px] min-h-[44px] gap-1.5 px-3 group relative overflow-hidden border-primary/50 hover:border-primary hover:bg-primary/10 text-primary transition-all duration-200"
         >
           <Plus weight="bold" className="h-4 w-4 transition-transform duration-200 group-hover:rotate-90" />
           <span className="hidden sm:inline">New</span>
@@ -335,12 +338,13 @@ export function Navigation() {
             onClick={() => setBillingOpen(!billingOpen)}
             className={cn(
               "w-full flex items-center justify-between px-4 py-3 text-base font-medium rounded-lg transition-all duration-200 min-h-[48px]",
-              isGroupActive(navigationConfig.billing.items) 
-                ? "bg-accent/50 text-foreground" 
+              isGroupActive(navigationConfig.billing.items)
+                ? "bg-accent/50 text-foreground"
                 : "text-muted-foreground hover:text-foreground hover:bg-accent/50"
             )}
             aria-expanded={billingOpen}
             aria-controls="billing-submenu"
+            aria-label="Billing menu"
           >
             <span className="flex items-center gap-3">
               <NavigationIcon icon={FileText} isActive={isGroupActive(navigationConfig.billing.items)} className="h-5 w-5" />
@@ -403,12 +407,13 @@ export function Navigation() {
             onClick={() => setFinancesOpen(!financesOpen)}
             className={cn(
               "w-full flex items-center justify-between px-4 py-3 text-base font-medium rounded-lg transition-all duration-200 min-h-[48px]",
-              isGroupActive(navigationConfig.finances.items) 
-                ? "bg-accent/50 text-foreground" 
+              isGroupActive(navigationConfig.finances.items)
+                ? "bg-accent/50 text-foreground"
                 : "text-muted-foreground hover:text-foreground hover:bg-accent/50"
             )}
             aria-expanded={financesOpen}
             aria-controls="finances-submenu"
+            aria-label="Finances menu"
           >
             <span className="flex items-center gap-3">
               <NavigationIcon icon={BarChart3} isActive={isGroupActive(navigationConfig.finances.items)} className="h-5 w-5" />
@@ -511,6 +516,21 @@ export function Navigation() {
 
           {/* Right Side Actions */}
           <div className="navbar-actions">
+            {/* Search Button - Mobile/Tablet only (hidden at xl where full search bar appears) */}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setSearchOpen(true)}
+              className="xl:hidden h-11 min-h-[44px] gap-2 border-border/50 hover:border-border"
+              aria-label="Open search (Cmd+K)"
+            >
+              <Search className="h-4 w-4" />
+              <span className="hidden md:inline text-muted-foreground">Search</span>
+              <kbd className="hidden md:inline-flex pointer-events-none h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground">
+                ⌘K
+              </kbd>
+            </Button>
+
             {/* Quick Actions */}
             <QuickActionsMenu />
 

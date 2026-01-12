@@ -79,8 +79,8 @@ export default function Dashboard() {
                 <p className="page-header-subtitle">Welcome back, {user?.name || "there"}!</p>
               </div>
 
-              {/* Quick Stats Chips - Desktop/Tablet only */}
-              <div className="hidden lg:flex items-center gap-2">
+              {/* Quick Stats Chips - All viewports */}
+              <div className="flex items-center gap-2 flex-wrap">
                 {overdueCount > 0 && (
                   <QuickStatChip
                     label="Overdue"
