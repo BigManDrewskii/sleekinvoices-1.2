@@ -481,3 +481,10 @@
 
 ---
 
+
+## Search UI Refinement
+
+- [x] Remove wide search bar from navbar
+- [x] Refine GlobalSearch modal UI
+- [x] Fix mini search modal for tablet/mobile
+

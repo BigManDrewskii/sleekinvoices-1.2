@@ -510,17 +510,17 @@ export function Navigation() {
 
           {/* Right Side Actions */}
           <div className="navbar-actions">
-            {/* Search Button - Mobile/Tablet only */}
+            {/* Search Button - All viewports */}
             <Button
-              variant="outline"
+              variant="ghost"
               size="sm"
               onClick={() => setSearchOpen(true)}
-              className="xl:hidden h-11 min-h-[44px] gap-2 border-border/50 hover:border-border"
+              className="h-9 gap-2 px-3 text-muted-foreground hover:text-foreground hover:bg-accent/50"
               aria-label="Open search (Cmd+K)"
             >
               <Search className="h-4 w-4" />
-              <span className="hidden md:inline text-muted-foreground">Search</span>
-              <kbd className="hidden md:inline-flex pointer-events-none h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground">
+              <span className="hidden sm:inline">Search</span>
+              <kbd className="hidden md:inline-flex pointer-events-none h-5 select-none items-center gap-1 rounded border border-border/50 bg-muted/50 px-1.5 font-mono text-[10px] font-medium text-muted-foreground">
                 ⌘K
               </kbd>
             </Button>
@@ -610,16 +610,16 @@ export function Navigation() {
                       <span className="sr-only">Close menu</span>
                     </SheetClose>
                     <Button
-                      variant="outline"
-                      onClick={() => setSearchOpen(true)}
-                      className="flex-1 justify-start text-muted-foreground"
-                      aria-label="Open search (Cmd+K)"
+                      variant="ghost"
+                      onClick={() => {
+                        setMobileMenuOpen(false);
+                        setTimeout(() => setSearchOpen(true), 150);
+                      }}
+                      className="flex-1 justify-start text-muted-foreground hover:text-foreground h-10"
+                      aria-label="Open search"
                     >
                       <Search className="mr-2 h-4 w-4" />
                       <span>Search...</span>
-                      <kbd className="pointer-events-none ml-auto h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium opacity-100 hidden sm:flex">
-                        ⌘K
-                      </kbd>
                     </Button>
                   </div>
                   

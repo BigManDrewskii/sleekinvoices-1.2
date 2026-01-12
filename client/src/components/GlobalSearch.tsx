@@ -1,8 +1,7 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useLocation } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import {
   Command,
   CommandEmpty,
@@ -10,19 +9,15 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { Search, FileText, Users } from "lucide-react";
-import { formatCurrency } from "@/lib/utils";
+import { Search, FileText, Users, X, ArrowRight } from "lucide-react";
+import { formatCurrency, cn } from "@/lib/utils";
 import { useKeyboardShortcuts } from "@/contexts/KeyboardShortcutsContext";
 
 export function GlobalSearch() {
   const [, setLocation] = useLocation();
   const { isSearchOpen, setSearchOpen } = useKeyboardShortcuts();
   const [searchQuery, setSearchQuery] = useState("");
+  const inputRef = useRef<HTMLInputElement>(null);
   const [results, setResults] = useState<{
     invoices: any[];
     clients: any[];
@@ -31,9 +26,21 @@ export function GlobalSearch() {
   const { data: invoices } = trpc.invoices.list.useQuery();
   const { data: clients } = trpc.clients.list.useQuery();
 
-  // Sync local state with context (keyboard shortcut opens search)
-  const open = isSearchOpen;
-  const setOpen = setSearchOpen;
+  // Focus input when modal opens
+  useEffect(() => {
+    if (isSearchOpen && inputRef.current) {
+      // Small delay to ensure the modal is rendered
+      setTimeout(() => inputRef.current?.focus(), 50);
+    }
+  }, [isSearchOpen]);
+
+  // Clear search when modal closes
+  useEffect(() => {
+    if (!isSearchOpen) {
+      setSearchQuery("");
+      setResults({ invoices: [], clients: [] });
+    }
+  }, [isSearchOpen]);
 
   // Search logic
   useEffect(() => {
@@ -80,91 +87,166 @@ export function GlobalSearch() {
     setSearchQuery("");
   };
 
+  const handleClose = () => {
+    setSearchOpen(false);
+    setSearchQuery("");
+  };
+
+  // Handle escape key
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && isSearchOpen) {
+        handleClose();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isSearchOpen]);
+
   const hasResults = results.invoices.length > 0 || results.clients.length > 0;
 
+  if (!isSearchOpen) return null;
+
   return (
-    <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
-        <Button
-          variant="outline"
-          className="relative w-full md:w-64 justify-start text-muted-foreground"
-          onClick={() => setOpen(true)}
+    <>
+      {/* Backdrop */}
+      <div 
+        className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm animate-in fade-in-0 duration-200"
+        onClick={handleClose}
+        aria-hidden="true"
+      />
+      
+      {/* Search Modal */}
+      <div className="fixed inset-x-0 top-0 z-50 flex items-start justify-center pt-[10vh] sm:pt-[15vh] px-4">
+        <div 
+          className={cn(
+            "w-full max-w-lg bg-card border border-border rounded-xl shadow-2xl overflow-hidden",
+            "animate-in fade-in-0 slide-in-from-top-4 duration-200"
+          )}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Search"
         >
-          <Search className="mr-2 h-4 w-4" />
-          <span className="hidden sm:inline-flex">Search invoices, clients...</span>
-          <span className="inline-flex sm:hidden">Search...</span>
-          <kbd className="pointer-events-none absolute right-1.5 hidden h-6 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium opacity-100 sm:flex">
-            <span className="text-xs">⌘</span>K
-          </kbd>
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent className="w-[calc(100vw-2rem)] max-w-md p-0" align="center" side="bottom" sideOffset={8}>
-        <Command>
-          <div className="flex items-center border-b px-3 py-2">
-            <Search className="mr-2 h-4 w-4 opacity-50" />
-            <Input
-              aria-label="Search invoices and clients"
-              placeholder="Search invoices, clients..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="border-0 outline-none focus-visible:ring-0"
-              autoFocus
-            />
-          </div>
-          <CommandList>
-            {!hasResults && searchQuery && (
-              <CommandEmpty>No results found.</CommandEmpty>
-            )}
+          <Command className="bg-transparent">
+            {/* Search Input Header */}
+            <div className="flex items-center gap-3 px-4 py-3 border-b border-border/50">
+              <Search className="h-5 w-5 text-muted-foreground shrink-0" />
+              <Input
+                ref={inputRef}
+                aria-label="Search invoices and clients"
+                placeholder="Search invoices, clients..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="flex-1 border-0 bg-transparent p-0 text-base placeholder:text-muted-foreground focus-visible:ring-0 focus-visible:ring-offset-0"
+              />
+              <button
+                onClick={handleClose}
+                className="shrink-0 p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
+                aria-label="Close search"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
 
-            {results.invoices.length > 0 && (
-              <CommandGroup heading="Invoices" className="overflow-hidden p-1.5 text-foreground">
-                {results.invoices.map((invoice) => (
-                  <CommandItem
-                    key={invoice.id}
-                    onSelect={() => handleSelectInvoice(invoice.id)}
-                    className="cursor-pointer"
-                  >
-                    <FileText className="mr-2 h-4 w-4" />
-                    <div className="flex flex-1 items-center justify-between">
-                      <span>{invoice.invoiceNumber}</span>
-                      <span className="text-xs text-muted-foreground">
-                        {formatCurrency(invoice.total)}
-                      </span>
+            {/* Results */}
+            <CommandList className="max-h-[60vh] overflow-y-auto">
+              {!hasResults && searchQuery && (
+                <CommandEmpty className="py-12 text-center">
+                  <div className="flex flex-col items-center gap-2">
+                    <Search className="h-10 w-10 text-muted-foreground/30" />
+                    <p className="text-sm text-muted-foreground">No results found for "{searchQuery}"</p>
+                    <p className="text-xs text-muted-foreground/70">Try a different search term</p>
+                  </div>
+                </CommandEmpty>
+              )}
+
+              {results.invoices.length > 0 && (
+                <CommandGroup heading="Invoices" className="p-2">
+                  {results.invoices.map((invoice) => (
+                    <CommandItem
+                      key={invoice.id}
+                      onSelect={() => handleSelectInvoice(invoice.id)}
+                      className="flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer group"
+                    >
+                      <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 text-primary shrink-0">
+                        <FileText className="h-4 w-4" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between gap-2">
+                          <span className="font-medium truncate">{invoice.invoiceNumber}</span>
+                          <span className="text-sm font-medium text-primary">
+                            {formatCurrency(invoice.total)}
+                          </span>
+                        </div>
+                        <p className="text-xs text-muted-foreground truncate">
+                          {invoice.client.name}
+                        </p>
+                      </div>
+                      <ArrowRight className="h-4 w-4 text-muted-foreground/50 opacity-0 group-hover:opacity-100 group-data-[selected=true]:opacity-100 transition-opacity shrink-0" />
+                    </CommandItem>
+                  ))}
+                </CommandGroup>
+              )}
+
+              {results.clients.length > 0 && (
+                <CommandGroup heading="Clients" className="p-2">
+                  {results.clients.map((client) => (
+                    <CommandItem
+                      key={client.id}
+                      onSelect={() => handleSelectClient(client.id)}
+                      className="flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer group"
+                    >
+                      <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-green-500/10 text-green-500 shrink-0">
+                        <Users className="h-4 w-4" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <span className="font-medium truncate block">{client.name}</span>
+                        {client.email && (
+                          <p className="text-xs text-muted-foreground truncate">{client.email}</p>
+                        )}
+                      </div>
+                      <ArrowRight className="h-4 w-4 text-muted-foreground/50 opacity-0 group-hover:opacity-100 group-data-[selected=true]:opacity-100 transition-opacity shrink-0" />
+                    </CommandItem>
+                  ))}
+                </CommandGroup>
+              )}
+
+              {/* Empty state when no search query */}
+              {!searchQuery && (
+                <div className="px-4 py-8 text-center">
+                  <div className="flex flex-col items-center gap-3">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted">
+                      <Search className="h-5 w-5 text-muted-foreground" />
                     </div>
-                  </CommandItem>
-                ))}
-              </CommandGroup>
-            )}
-
-            {results.clients.length > 0 && (
-              <CommandGroup heading="Clients" className="overflow-hidden p-1.5 text-foreground">
-                {results.clients.map((client) => (
-                  <CommandItem
-                    key={client.id}
-                    onSelect={() => handleSelectClient(client.id)}
-                    className="cursor-pointer"
-                  >
-                    <Users className="mr-2 h-4 w-4" />
-                    <div className="flex flex-1 flex-col">
-                      <span>{client.name}</span>
-                      {client.email && (
-                        <span className="text-xs text-muted-foreground">{client.email}</span>
-                      )}
+                    <div>
+                      <p className="text-sm text-muted-foreground">Search for invoices and clients</p>
+                      <p className="text-xs text-muted-foreground/70 mt-1">Type to start searching</p>
                     </div>
-                  </CommandItem>
-                ))}
-              </CommandGroup>
-            )}
+                  </div>
+                </div>
+              )}
+            </CommandList>
 
-            {!searchQuery && (
-              <div className="px-3 py-6 text-center text-sm text-muted-foreground">
-                <p>Start typing to search invoices and clients</p>
-                <p className="text-xs mt-2">Press Esc to close</p>
+            {/* Footer */}
+            <div className="flex items-center justify-between px-4 py-2.5 border-t border-border/50 bg-muted/30 text-xs text-muted-foreground">
+              <div className="flex items-center gap-3">
+                <span className="flex items-center gap-1">
+                  <kbd className="px-1.5 py-0.5 rounded bg-muted border border-border font-mono">↑↓</kbd>
+                  <span>Navigate</span>
+                </span>
+                <span className="flex items-center gap-1">
+                  <kbd className="px-1.5 py-0.5 rounded bg-muted border border-border font-mono">↵</kbd>
+                  <span>Select</span>
+                </span>
               </div>
-            )}
-          </CommandList>
-        </Command>
-      </PopoverContent>
-    </Popover>
+              <span className="flex items-center gap-1">
+                <kbd className="px-1.5 py-0.5 rounded bg-muted border border-border font-mono">Esc</kbd>
+                <span>Close</span>
+              </span>
+            </div>
+          </Command>
+        </div>
+      </div>
+    </>
   );
 }
