@@ -37,8 +37,11 @@ export default function SubscriptionSuccess() {
         <CardHeader className="text-center space-y-4">
           <div className="flex justify-center">
             <div className="relative">
-              <CheckCircle className="h-20 w-20 text-green-500" />
-              <Sparkles className="h-8 w-8 text-yellow-500 absolute -top-2 -right-2 animate-pulse" />
+              <img 
+                src="/sleeky/success-states/subscription-upgraded.png" 
+                alt="Sleeky celebrating your Pro upgrade!" 
+                className="h-40 w-40 object-contain animate-bounce-subtle"
+              />
             </div>
           </div>
           <CardTitle className="text-3xl font-bold">
