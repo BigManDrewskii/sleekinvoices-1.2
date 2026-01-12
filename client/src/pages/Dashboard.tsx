@@ -17,6 +17,7 @@ import {
 import { Link } from "wouter";
 import { Navigation } from "@/components/Navigation";
 import { UpgradePromoBanner } from "@/components/UpgradePromoBanner";
+import { EmptyState, EmptyStatePresets } from "@/components/EmptyState";
 import { MagicInput } from "@/components/MagicInput";
 import { useLocation } from "wouter";
 import { MonthlyUsageCard } from "@/components/dashboard/MonthlyUsageCard";
@@ -26,6 +27,7 @@ import { Currency, DateDisplay, Numeric, InvoiceNumber } from "@/components/ui/t
 import { AnimatedCurrency, AnimatedInteger, AnimatedPercentage } from "@/components/ui/animated-number";
 
 export default function Dashboard() {
+  const [, setLocation] = useLocation();
   const { user, loading, isAuthenticated } = useAuth();
   const { data: stats, isLoading: statsLoading } = trpc.analytics.getStats.useQuery(undefined, {
     enabled: isAuthenticated,
@@ -282,14 +284,14 @@ export default function Dashboard() {
                   ))}
                 </div>
               ) : recentInvoices.length === 0 ? (
-                <div className="text-center py-12">
-                  <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                  <h3 className="text-lg font-semibold text-foreground mb-2">No invoices yet</h3>
-                  <p className="text-muted-foreground mb-4">Create your first invoice to get started</p>
-                  <Button asChild>
-                    <Link href="/invoices/create">Create Invoice</Link>
-                  </Button>
-                </div>
+                <EmptyState
+                  {...EmptyStatePresets.invoices}
+                  action={{
+                    label: "Create Invoice",
+                    onClick: () => setLocation("/invoices/create"),
+                    icon: Plus,
+                  }}
+                />
               ) : (
                 <div className="space-y-2">
                   {recentInvoices.map((invoice) => (

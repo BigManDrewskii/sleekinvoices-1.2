@@ -911,7 +911,6 @@ export default function Invoices() {
               <InvoiceListSkeleton />
             ) : !invoices || invoices.length === 0 ? (
               <EmptyState
-                icon={FileText}
                 {...EmptyStatePresets.invoices}
                 action={{
                   label: "Create Invoice",
@@ -921,7 +920,6 @@ export default function Invoices() {
               />
             ) : filteredInvoices.length === 0 ? (
               <EmptyState
-                icon={Search}
                 {...EmptyStatePresets.search}
                 size="sm"
               />

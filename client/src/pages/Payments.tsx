@@ -53,6 +53,7 @@ import {
 import { toast } from "sonner";
 import { PageLayout } from "@/components/layout/PageLayout";
 import { PaymentsPageSkeleton } from "@/components/skeletons";
+import { EmptyState, EmptyStatePresets } from "@/components/EmptyState";
 import { Currency, DateDisplay } from "@/components/ui/typography";
 import { AnimatedCurrency, AnimatedInteger } from "@/components/ui/animated-number";
 
@@ -444,32 +445,23 @@ export default function Payments() {
           {isLoading ? (
             <PaymentsPageSkeleton />
           ) : !payments || payments.length === 0 ? (
-            <div className="text-center py-12">
-              <div className="p-4 rounded-full bg-muted/50 w-fit mx-auto mb-4">
-                <DollarSign className="h-8 w-8 text-muted-foreground" />
-              </div>
-              <p className="text-lg font-medium">No payments recorded yet</p>
-              <p className="text-sm text-muted-foreground mt-1">
-                Record your first payment to start tracking
-              </p>
-              <Button onClick={() => setRecordPaymentOpen(true)} className="mt-4">
-                <Plus className="h-4 w-4 mr-2" />
-                Record Payment
-              </Button>
-            </div>
+            <EmptyState
+              {...EmptyStatePresets.payments}
+              action={{
+                label: "Record Payment",
+                onClick: () => setRecordPaymentOpen(true),
+                icon: Plus,
+              }}
+            />
           ) : filteredAndSortedPayments.length === 0 ? (
-            <div className="text-center py-12">
-              <div className="p-4 rounded-full bg-muted/50 w-fit mx-auto mb-4">
-                <Search className="h-8 w-8 text-muted-foreground" />
-              </div>
-              <p className="text-lg font-medium">No matching payments</p>
-              <p className="text-sm text-muted-foreground mt-1">
-                Try adjusting your search or filters
-              </p>
-              <Button variant="outline" onClick={clearFilters} className="mt-4">
-                Clear Filters
-              </Button>
-            </div>
+            <EmptyState
+              {...EmptyStatePresets.search}
+              action={{
+                label: "Clear Filters",
+                onClick: clearFilters,
+              }}
+              size="sm"
+            />
           ) : (
             <>
               <div className="rounded-lg border overflow-hidden">

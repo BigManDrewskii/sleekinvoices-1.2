@@ -55,6 +55,7 @@ import {
 } from "lucide-react";
 import { PageLayout } from "@/components/layout/PageLayout";
 import { ProductsPageSkeleton, Skeleton } from "@/components/skeletons";
+import { EmptyState, EmptyStatePresets } from "@/components/EmptyState";
 
 type Product = {
   id: number;
@@ -472,20 +473,14 @@ export default function Products() {
               </TableBody>
             </Table>
           ) : (
-            <div className="text-center py-12">
-              <Package className="mx-auto h-12 w-12 text-muted-foreground/50" />
-              <h3 className="mt-4 text-lg font-semibold">No products yet</h3>
-              <p className="text-muted-foreground mt-2">
-                Add your first product to speed up invoice creation
-              </p>
-              <Button
-                className="mt-4"
-                onClick={() => { resetForm(); setIsCreateDialogOpen(true); }}
-              >
-                <Plus className="mr-2 h-4 w-4" />
-                Add Product
-              </Button>
-            </div>
+            <EmptyState
+              {...EmptyStatePresets.products}
+              action={{
+                label: "Add Product",
+                onClick: () => { resetForm(); setIsCreateDialogOpen(true); },
+                icon: Plus,
+              }}
+            />
           )}
         </CardContent>
       </Card>

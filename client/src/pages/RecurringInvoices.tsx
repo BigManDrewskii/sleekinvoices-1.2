@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { useLocation } from "wouter";
 import { PageLayout } from "@/components/layout/PageLayout";
 import { RecurringInvoicesPageSkeleton } from "@/components/skeletons";
+import { EmptyState, EmptyStatePresets } from "@/components/EmptyState";
 import { DateDisplay } from "@/components/ui/typography";
 
 export default function RecurringInvoices() {
@@ -135,16 +136,15 @@ export default function RecurringInvoices() {
       }
     >
       {!recurringInvoices || recurringInvoices.length === 0 ? (
-        <Card className="p-8 sm:p-12 text-center">
-          <Calendar className="w-12 h-12 sm:w-16 sm:h-16 mx-auto text-muted-foreground mb-4" />
-          <h3 className="text-lg font-semibold mb-2">No recurring invoices yet</h3>
-          <p className="text-muted-foreground mb-6 max-w-md mx-auto">
-            Set up automatic invoice generation for your subscription clients
-          </p>
-          <Button onClick={() => setLocation("/recurring-invoices/create")}>
-            <Plus className="w-4 h-4 mr-2" />
-            Create Your First Recurring Invoice
-          </Button>
+        <Card className="p-8">
+          <EmptyState
+            {...EmptyStatePresets.recurring}
+            action={{
+              label: "Create Recurring Invoice",
+              onClick: () => setLocation("/recurring-invoices/create"),
+              icon: Plus,
+            }}
+          />
         </Card>
       ) : (
         <>

@@ -35,6 +35,7 @@ import { Link, useLocation } from "wouter";
 import { toast } from "sonner";
 import { Navigation } from "@/components/Navigation";
 import { EstimatesPageSkeleton } from "@/components/skeletons";
+import { EmptyState, EmptyStatePresets } from "@/components/EmptyState";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -326,23 +327,19 @@ export default function Estimates() {
             {isLoading ? (
               <EstimatesPageSkeleton />
             ) : !estimates || estimates.length === 0 ? (
-              <div className="text-center py-12">
-                <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                <h3 className="text-lg font-semibold text-foreground mb-2">No estimates yet</h3>
-                <p className="text-muted-foreground mb-4">
-                  Create your first estimate to get started
-                </p>
-                <Link href="/estimates/create">
-                  <Button>
-                    <Plus className="h-4 w-4 mr-2" />
-                    Create Estimate
-                  </Button>
-                </Link>
-              </div>
+              <EmptyState
+                {...EmptyStatePresets.estimates}
+                action={{
+                  label: "Create Estimate",
+                  onClick: () => setLocation("/estimates/create"),
+                  icon: Plus,
+                }}
+              />
             ) : filteredEstimates?.length === 0 ? (
-              <div className="text-center py-8 text-muted-foreground">
-                No estimates match your search
-              </div>
+              <EmptyState
+                {...EmptyStatePresets.search}
+                size="sm"
+              />
             ) : (
               <>
                 {/* Desktop Table */}

@@ -920,7 +920,6 @@ export default function Clients() {
               <ClientsTableSkeleton rows={8} />
             ) : !clients || clients.length === 0 ? (
               <EmptyState
-                icon={Users}
                 {...EmptyStatePresets.clients}
                 action={{
                   label: "Add Client",
@@ -930,7 +929,6 @@ export default function Clients() {
               />
             ) : filteredAndSortedClients.length === 0 ? (
               <EmptyState
-                icon={Search}
                 {...EmptyStatePresets.search}
                 size="sm"
               />

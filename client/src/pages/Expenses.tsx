@@ -884,7 +884,6 @@ export default function Expenses() {
       {!expenses || expenses.length === 0 ? (
         <Card className="p-4">
           <EmptyState
-            icon={Receipt}
             {...EmptyStatePresets.expenses}
             action={{
               label: "Add Your First Expense",
@@ -896,7 +895,7 @@ export default function Expenses() {
       ) : filteredExpenses.length === 0 ? (
         <Card className="p-4">
           <EmptyState
-            icon={Filter}
+            illustration="/sleeky/empty-states/search-results.png"
             title="No matching expenses"
             description="No expenses match your current filters"
             action={{

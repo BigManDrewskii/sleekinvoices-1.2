@@ -378,3 +378,16 @@
 - [x] Update AIAssistant panel to use SleekyAvatar component
 - [x] Ensure PNG images display without unwanted borders (audited - all clean)
 - [x] Test all empty states and verify Sleeky images load correctly
+
+
+## Empty State Sleeky Illustrations
+
+- [x] Replace generic icons with Sleeky illustrations in Invoices empty state
+- [x] Replace generic icons with Sleeky illustrations in Clients empty state
+- [x] Replace generic icons with Sleeky illustrations in Expenses empty state
+- [x] Replace generic icons with Sleeky illustrations in Estimates empty state
+- [x] Replace generic icons with Sleeky illustrations in Products empty state
+- [x] Replace generic icons with Sleeky illustrations in Payments empty state
+- [x] Replace generic icons with Sleeky illustrations in Recurring Invoices empty state
+- [x] Replace generic icons with Sleeky illustrations in Dashboard empty state
+- [x] Test all empty states display Sleeky correctly
