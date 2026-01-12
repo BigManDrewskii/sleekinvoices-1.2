@@ -59,6 +59,11 @@ export default function Dashboard() {
            invoiceDate.getFullYear() === now.getFullYear();
   }).length || 0;
 
+  // Calculate quick stats for header chips
+  const overdueCount = invoices?.filter(inv => inv.status === 'overdue').length || 0;
+  const pendingCount = invoices?.filter(inv => inv.status === 'sent').length || 0;
+  const draftCount = invoices?.filter(inv => inv.status === 'draft').length || 0;
+
   return (
     <div className="page-wrapper">
       <Navigation />
@@ -69,10 +74,39 @@ export default function Dashboard() {
           {/* Header */}
           <div className="page-header">
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-              <div>
+              <div className="flex-1">
                 <h1 className="page-header-title" data-onboarding="dashboard-title">Dashboard</h1>
                 <p className="page-header-subtitle">Welcome back, {user?.name || "there"}!</p>
               </div>
+
+              {/* Quick Stats Chips - Desktop/Tablet only */}
+              <div className="hidden lg:flex items-center gap-2">
+                {overdueCount > 0 && (
+                  <QuickStatChip
+                    label="Overdue"
+                    count={overdueCount}
+                    variant="destructive"
+                    onClick={() => setLocation('/invoices?status=overdue')}
+                  />
+                )}
+                {pendingCount > 0 && (
+                  <QuickStatChip
+                    label="Pending"
+                    count={pendingCount}
+                    variant="warning"
+                    onClick={() => setLocation('/invoices?status=sent')}
+                  />
+                )}
+                {draftCount > 0 && (
+                  <QuickStatChip
+                    label="Draft"
+                    count={draftCount}
+                    variant="secondary"
+                    onClick={() => setLocation('/invoices?status=draft')}
+                  />
+                )}
+              </div>
+
               <Dialog>
                 <DialogTrigger asChild>
                   <Button className="touch-target gap-2" data-onboarding="new-invoice-btn">
@@ -90,8 +124,9 @@ export default function Dashboard() {
                   </DialogHeader>
                   <div className="grid gap-4 px-6 py-4">
                     {/* AI Magic Invoice - Top option */}
-                    <div 
-                      className="group relative rounded-xl border border-emerald-500/30 bg-gradient-to-br from-emerald-500/5 to-emerald-500/10 p-4 cursor-pointer transition-all duration-200 hover:border-emerald-500/50 hover:shadow-lg hover:shadow-emerald-500/10"
+                    <button
+                      type="button"
+                      className="group relative rounded-xl border border-emerald-500/30 bg-gradient-to-br from-emerald-500/5 to-emerald-500/10 p-4 cursor-pointer transition-all duration-200 hover:border-emerald-500/50 hover:shadow-lg hover:shadow-emerald-500/10 w-full text-left"
                       onClick={() => {
                         // Scroll to Magic Invoice section and focus the input
                         const magicSection = document.querySelector('[data-magic-invoice]');
@@ -121,7 +156,7 @@ export default function Dashboard() {
                           Fastest
                         </span>
                       </div>
-                    </div>
+                    </button>
 
                     {/* Smart Invoice Builder */}
                     <Link href="/invoices/guided">
@@ -377,5 +412,35 @@ function StatusBadge({ status }: { status: string }) {
     <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${config.bg} ${config.text}`}>
       {config.label}
     </span>
+  );
+}
+
+function QuickStatChip({
+  label,
+  count,
+  variant,
+  onClick
+}: {
+  label: string;
+  count: number;
+  variant: 'destructive' | 'warning' | 'secondary';
+  onClick: () => void;
+}) {
+  const variantStyles = {
+    destructive: "bg-red-500/10 text-red-500 border-red-500/20 hover:bg-red-500/20 hover:border-red-500/30",
+    warning: "bg-amber-500/10 text-amber-500 border-amber-500/20 hover:bg-amber-500/20 hover:border-amber-500/30",
+    secondary: "bg-gray-500/10 text-gray-400 border-gray-500/20 hover:bg-gray-500/20 hover:border-gray-500/30",
+  };
+
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border transition-all duration-200 hover:scale-105 ${variantStyles[variant]}`}
+      aria-label={`${count} ${label} invoices, click to view`}
+    >
+      <span className="font-semibold">{count}</span>
+      <span>{label}</span>
+    </button>
   );
 }

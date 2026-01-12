@@ -60,10 +60,10 @@ import {
   Check,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { useState, useMemo, useRef } from "react";
+import { useState, useMemo, useRef, useEffect } from "react";
 import { useTableSort } from "@/hooks/useTableSort";
 import { SortableTableHeader } from "@/components/shared/SortableTableHeader";
-import { Link, useLocation } from "wouter";
+import { Link, useLocation, useSearch } from "wouter";
 import { toast } from "sonner";
 import { Navigation } from "@/components/Navigation";
 import { CurrencyBadge } from "@/components/CurrencySelector";
@@ -107,6 +107,7 @@ interface Invoice {
 export default function Invoices() {
   const { user, loading, isAuthenticated } = useAuth();
   const [, setLocation] = useLocation();
+  const searchString = useSearch();
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [paymentFilter, setPaymentFilter] = useState<string>("all");
@@ -127,6 +128,16 @@ export default function Invoices() {
   
   // Export dialog state
   const [showExportDialog, setShowExportDialog] = useState(false);
+
+  // Parse URL parameters for initial filter (e.g., from Dashboard quick stats)
+  useEffect(() => {
+    if (!searchString) return;
+    const params = new URLSearchParams(searchString);
+    const statusParam = params.get('status');
+    if (statusParam && ['draft', 'sent', 'paid', 'overdue', 'canceled'].includes(statusParam)) {
+      setStatusFilter(statusParam);
+    }
+  }, [searchString]);
 
   const { data: invoices, isLoading: invoicesLoading } = trpc.invoices.list.useQuery(undefined, {
     enabled: isAuthenticated,
