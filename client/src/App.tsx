@@ -7,6 +7,7 @@ import { ThemeProvider } from "./contexts/ThemeContext";
 import { KeyboardShortcutsHelp } from "./components/KeyboardShortcutsHelp";
 import { GlobalShortcuts } from "./components/GlobalShortcuts";
 import { CommandPalette } from "./components/CommandPalette";
+import { GlobalSearch } from "./components/GlobalSearch";
 import { ConfettiTrigger } from "./components/Confetti";
 import { OnboardingTour } from "./components/OnboardingTour";
 import { AIAssistantProvider } from "./contexts/AIAssistantContext";
@@ -128,6 +129,7 @@ function App() {
             <Toaster />
             <KeyboardShortcutsHelp />
             <GlobalShortcuts />
+            <GlobalSearch />
             <CommandPalette />
             <ConfettiTrigger />
             <CookieConsentBanner />

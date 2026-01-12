@@ -42,7 +42,6 @@ import { useState, useEffect, useCallback } from "react";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
 import { useAuth } from "@/_core/hooks/useAuth";
-import { GlobalSearch } from "@/components/GlobalSearch";
 import { useKeyboardShortcuts } from "@/contexts/KeyboardShortcutsContext";
 import { cn } from "@/lib/utils";
 
@@ -509,16 +508,6 @@ export function Navigation() {
           {/* Desktop & Tablet Navigation - Unified UX (768px+) */}
           <DesktopTabletNav />
 
-          {/* Global Search - Always rendered for popover functionality */}
-          <div className="hidden xl:block flex-1 max-w-xs ml-4" data-onboarding="search-bar">
-            <GlobalSearch />
-          </div>
-
-          {/* Hidden GlobalSearch instance for mobile/tablet - trigger via context */}
-          <div className="xl:hidden absolute opacity-0 pointer-events-none">
-            <GlobalSearch />
-          </div>
-
           {/* Right Side Actions */}
           <div className="navbar-actions">
             {/* Search Button - Mobile/Tablet only */}
@@ -612,17 +601,26 @@ export function Navigation() {
               >
                 <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
                 <div className="flex flex-col h-full">
-                  {/* Mobile Menu Header with integrated close button */}
+                  {/* Mobile Menu Header with close button and search */}
                   <div className="flex items-center gap-3 p-4 border-b border-border/50">
-                    <SheetClose 
+                    <SheetClose
                       className="flex-shrink-0 rounded-full p-2 bg-accent/50 text-muted-foreground hover:text-foreground hover:bg-accent transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-ring"
                     >
                       <X className="size-4" />
                       <span className="sr-only">Close menu</span>
                     </SheetClose>
-                    <div className="flex-1 min-w-0">
-                      <GlobalSearch />
-                    </div>
+                    <Button
+                      variant="outline"
+                      onClick={() => setSearchOpen(true)}
+                      className="flex-1 justify-start text-muted-foreground"
+                      aria-label="Open search (Cmd+K)"
+                    >
+                      <Search className="mr-2 h-4 w-4" />
+                      <span>Search...</span>
+                      <kbd className="pointer-events-none ml-auto h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium opacity-100 hidden sm:flex">
+                        ⌘K
+                      </kbd>
+                    </Button>
                   </div>
                   
                   {/* Mobile Navigation */}

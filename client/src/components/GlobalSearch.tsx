@@ -98,11 +98,12 @@ export function GlobalSearch() {
           </kbd>
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-full md:w-96 p-0" align="start">
+      <PopoverContent className="w-[calc(100vw-2rem)] max-w-md p-0" align="center" side="bottom" sideOffset={8}>
         <Command>
           <div className="flex items-center border-b px-3 py-2">
             <Search className="mr-2 h-4 w-4 opacity-50" />
             <Input
+              aria-label="Search invoices and clients"
               placeholder="Search invoices, clients..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
