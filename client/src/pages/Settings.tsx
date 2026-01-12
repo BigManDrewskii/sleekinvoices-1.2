@@ -8,7 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { getLoginUrl } from "@/const";
 import { trpc } from "@/lib/trpc";
-import { Save, Upload, User, Building2, LogOut, Mail, Bell, Link2, HelpCircle } from "lucide-react";
+import { Save, Upload, User, Building2, LogOut, Mail, Bell, Link2, HelpCircle, Cookie } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Switch } from "@/components/ui/switch";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -19,10 +19,13 @@ import { OnboardingRestartButton } from "@/components/OnboardingRestartButton";
 import { EmailTemplateEditor } from "@/components/EmailTemplateEditor";
 import { DeleteAccountDialog } from "@/components/DeleteAccountDialog";
 import { AvatarSelector } from "@/components/AvatarSelector";
+import { useConsent } from "@/contexts/CookieConsentContext";
+import { Link } from "wouter";
 
 export default function Settings() {
   const { user, loading, isAuthenticated, logout } = useAuth();
-  
+  const { preferences: cookiePrefs, setPreferences: setCookiePrefs, resetConsent } = useConsent();
+
   // Profile state
   const [name, setName] = useState("");
   const [companyName, setCompanyName] = useState("");
@@ -646,6 +649,127 @@ export default function Settings() {
                     We typically respond to support requests within 24 hours during business days.
                     For urgent issues, please mark your email as "URGENT" in the subject line.
                   </p>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Cookie Preferences Card */}
+            <Card>
+              <CardHeader>
+                <div className="flex items-center gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+                    <Cookie className="h-5 w-5 text-primary" />
+                  </div>
+                  <div>
+                    <CardTitle>Cookie Preferences</CardTitle>
+                    <CardDescription>
+                      Manage your cookie and tracking preferences
+                    </CardDescription>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {/* Essential Cookies */}
+                <div className="flex items-start gap-4 p-4 rounded-lg border border-border bg-accent/5">
+                  <Switch checked={true} disabled className="mt-1" aria-label="Essential cookies (required)" />
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-1">
+                      <h4 className="font-semibold text-sm text-foreground">Essential Cookies</h4>
+                      <span className="text-xs px-2 py-0.5 rounded-full bg-primary/10 text-primary font-medium">
+                        Required
+                      </span>
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      Required for authentication, security, and core functionality. These cannot be disabled.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Functional Cookies */}
+                <div className="flex items-start gap-4 p-4 rounded-lg border border-border bg-accent/5">
+                  <Switch checked={true} disabled className="mt-1" aria-label="Functional cookies (required)" />
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-1">
+                      <h4 className="font-semibold text-sm text-foreground">Functional Cookies</h4>
+                      <span className="text-xs px-2 py-0.5 rounded-full bg-primary/10 text-primary font-medium">
+                        Required
+                      </span>
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      Remember your preferences like theme and onboarding progress. These improve your experience.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Analytics Cookies */}
+                <div className="flex items-start gap-4 p-4 rounded-lg border border-border hover:bg-accent/5 transition-colors">
+                  <Switch
+                    checked={cookiePrefs.analytics}
+                    onCheckedChange={(checked) => {
+                      setCookiePrefs({ analytics: checked });
+                      toast.success(
+                        checked
+                          ? "Analytics enabled - helping us improve SleekInvoices"
+                          : "Analytics disabled - your privacy is respected"
+                      );
+                    }}
+                    className="mt-1"
+                    aria-label="Analytics cookies"
+                  />
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-1">
+                      <h4 className="font-semibold text-sm text-foreground">Analytics Cookies</h4>
+                      <span className="text-xs px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-500 font-medium">
+                        Optional
+                      </span>
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      Help us understand how you use SleekInvoices with privacy-respecting analytics.
+                      Only anonymized usage patterns - no personal data.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Marketing Cookies - Currently None */}
+                <div className="flex items-start gap-4 p-4 rounded-lg border border-dashed border-border bg-muted/30 opacity-60">
+                  <Switch
+                    checked={false}
+                    disabled
+                    className="mt-1"
+                    aria-label="Marketing cookies (not used)"
+                  />
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-1">
+                      <h4 className="font-semibold text-sm text-foreground">Marketing Cookies</h4>
+                      <span className="text-xs px-2 py-0.5 rounded-full bg-muted text-muted-foreground font-medium">
+                        Not Used
+                      </span>
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      We don't use any marketing or advertising cookies.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Action Buttons */}
+                <div className="pt-4 flex flex-col sm:flex-row gap-3">
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      resetConsent();
+                      toast.info("Cookie preferences reset. The consent banner will appear on next page load.");
+                    }}
+                    className="w-full sm:w-auto"
+                  >
+                    <Cookie className="h-4 w-4 mr-2" />
+                    Reset Consent Preferences
+                  </Button>
+                  <div className="flex-1" />
+                  <Link href="/privacy">
+                    <Button variant="ghost" className="w-full sm:w-auto">
+                      View Privacy Policy
+                    </Button>
+                  </Link>
                 </div>
               </CardContent>
             </Card>

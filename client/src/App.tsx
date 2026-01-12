@@ -10,6 +10,8 @@ import { CommandPalette } from "./components/CommandPalette";
 import { ConfettiTrigger } from "./components/Confetti";
 import { OnboardingTour } from "./components/OnboardingTour";
 import { AIAssistantProvider } from "./contexts/AIAssistantContext";
+import { CookieConsentProvider } from "./contexts/CookieConsentContext";
+import { CookieConsentBanner } from "./components/CookieConsentBanner";
 
 // Eager load: Public pages (landing, home, client portal)
 // These are needed immediately for anonymous visitors
@@ -121,17 +123,20 @@ function App() {
   return (
     <ErrorBoundary>
       <ThemeProvider defaultTheme="dark">
-        <TooltipProvider>
-          <Toaster />
-          <KeyboardShortcutsHelp />
-          <GlobalShortcuts />
-          <CommandPalette />
-          <ConfettiTrigger />
-          <AIAssistantProvider>
-            <OnboardingTour />
-            <Router />
-          </AIAssistantProvider>
-        </TooltipProvider>
+        <CookieConsentProvider>
+          <TooltipProvider>
+            <Toaster />
+            <KeyboardShortcutsHelp />
+            <GlobalShortcuts />
+            <CommandPalette />
+            <ConfettiTrigger />
+            <CookieConsentBanner />
+            <AIAssistantProvider>
+              <OnboardingTour />
+              <Router />
+            </AIAssistantProvider>
+          </TooltipProvider>
+        </CookieConsentProvider>
       </ThemeProvider>
     </ErrorBoundary>
   );
