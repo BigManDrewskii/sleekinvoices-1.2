@@ -509,14 +509,19 @@ export function Navigation() {
           {/* Desktop & Tablet Navigation - Unified UX (768px+) */}
           <DesktopTabletNav />
 
-          {/* Global Search - Only at xl (1280px+) */}
+          {/* Global Search - Always rendered for popover functionality */}
           <div className="hidden xl:block flex-1 max-w-xs ml-4" data-onboarding="search-bar">
+            <GlobalSearch />
+          </div>
+
+          {/* Hidden GlobalSearch instance for mobile/tablet - trigger via context */}
+          <div className="xl:hidden absolute opacity-0 pointer-events-none">
             <GlobalSearch />
           </div>
 
           {/* Right Side Actions */}
           <div className="navbar-actions">
-            {/* Search Button - Mobile/Tablet only (hidden at xl where full search bar appears) */}
+            {/* Search Button - Mobile/Tablet only */}
             <Button
               variant="outline"
               size="sm"
