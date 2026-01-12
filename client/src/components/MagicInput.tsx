@@ -2,10 +2,9 @@ import { useState, useRef, useEffect } from "react";
 import { Loader2, X, Wand2, AlertCircle, ArrowRight, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Badge } from "@/components/ui/badge";
 import { trpc } from "@/lib/trpc";
 import { cn } from "@/lib/utils";
-import { SleekyAIAvatar } from "@/components/SleekyAIAvatar";
+import { SleekyAvatar } from "@/components/SleekyAvatar";
 
 interface ExtractedData {
   clientName?: string;
@@ -78,13 +77,17 @@ export function MagicInput({ onExtract, onClose, className }: MagicInputProps) {
         className={cn(
           "group w-full flex items-center gap-3 px-4 py-3 rounded-xl",
           "bg-gradient-to-r from-primary/5 via-primary/8 to-emerald-500/5",
-          "border border-primary/20 hover:border-primary/40",
+          "border border-border/40 hover:border-border/60",
           "transition-all duration-300 hover:shadow-lg hover:shadow-primary/10",
           "disabled:opacity-50 disabled:cursor-not-allowed",
           className
         )}
       >
-        <SleekyAIAvatar size="sm" className="ring-1 ring-primary/20 group-hover:ring-primary/40 transition-all" />
+        <SleekyAvatar 
+          size="sm" 
+          bordered={true}
+          className="group-hover:scale-105 transition-transform"
+        />
         <div className="flex-1 text-left">
           <div className="flex items-center gap-2">
             <span className="text-sm font-medium text-foreground">Sleeky's Magic Invoice</span>
@@ -109,8 +112,8 @@ export function MagicInput({ onExtract, onClose, className }: MagicInputProps) {
       data-magic-invoice
       className={cn(
         "relative overflow-hidden rounded-xl",
-        "bg-gradient-to-br from-card via-card to-card/95",
-        "border border-primary/30",
+        "bg-gradient-to-br from-card via-card/95 to-card/90",
+        "border border-border/40",
         "shadow-xl shadow-primary/5",
         "animate-in fade-in slide-in-from-top-1 duration-200",
         className
@@ -123,9 +126,7 @@ export function MagicInput({ onExtract, onClose, className }: MagicInputProps) {
         {/* Header */}
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-primary/20 to-primary/10 ring-1 ring-primary/30">
-              <SleekyAIAvatar size="sm" />
-            </div>
+            <SleekyAvatar size="sm" bordered={true} glow={true} />
             <div>
               <h3 className="font-semibold text-foreground">Sleeky's Magic Invoice</h3>
               <p className="text-xs text-muted-foreground">

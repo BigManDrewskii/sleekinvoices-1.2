@@ -17,7 +17,7 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Orb } from "@/components/ui/orb";
 import { cn } from "@/lib/utils";
-import { SleekyAIAvatar } from "@/components/SleekyAIAvatar";
+import { SleekyAvatar } from "@/components/SleekyAvatar";
 import { LowCreditsPrompt, CreditTopUp } from "@/components/CreditTopUp";
 import { trpc } from "@/lib/trpc";
 import { useLocation } from "wouter";
@@ -274,7 +274,7 @@ export function AIAssistant({ isOpen, onClose }: AIAssistantProps) {
           
           <div className="flex items-center gap-3">
             <div className="relative">
-              <SleekyAIAvatar size="md" />
+              <SleekyAvatar size="md" bordered={true} glow={true} />
               {/* Subtle glow effect */}
               <div className="absolute inset-0 rounded-xl bg-primary/10 blur-md -z-10" />
             </div>
@@ -348,7 +348,7 @@ export function AIAssistant({ isOpen, onClose }: AIAssistantProps) {
               {/* Welcome Section - Manus-inspired */}
               <div className="text-center pt-8 pb-4">
                 <div className="relative inline-flex mb-5">
-                  <SleekyAIAvatar size="xl" />
+                  <SleekyAvatar size="xl" bordered={true} glow={true} />
                   {/* Animated glow */}
                   <div className="absolute inset-0 rounded-2xl bg-primary/20 blur-xl animate-pulse" />
                 </div>
@@ -420,7 +420,7 @@ export function AIAssistant({ isOpen, onClose }: AIAssistantProps) {
                 >
                   {message.role === "assistant" && (
                     <div className="shrink-0">
-                      <SleekyAIAvatar size="sm" />
+                      <SleekyAvatar size="sm" bordered={true} />
                     </div>
                   )}
                   <div
@@ -570,7 +570,6 @@ export function AIAssistantTrigger({ onClick, className }: { onClick: () => void
         onClick={onClick}
         size="md"
         state="idle"
-        colors={["#818cf8", "#6366f1"]}
         className="shadow-lg hover:shadow-xl transition-shadow duration-300"
       />
       {credits && credits.remaining > 0 && (

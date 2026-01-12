@@ -368,3 +368,13 @@
 - [x] Replace Wand2 icon with Sleeky avatar in MagicInput collapsed state
 - [x] Replace sparkle orb with Sleeky avatar in AI Assistant button
 - [x] Remove outer frame from Magic Invoice section on Dashboard
+
+
+## SleekyAvatar Component Unification
+
+- [x] Create unified SleekyAvatar component with card-matching border styles
+- [x] Update MagicInput to use SleekyAvatar component
+- [x] Update Orb/AI Assistant button to use SleekyAvatar component
+- [x] Update AIAssistant panel to use SleekyAvatar component
+- [x] Ensure PNG images display without unwanted borders (audited - all clean)
+- [x] Test all empty states and verify Sleeky images load correctly
