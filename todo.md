@@ -1351,3 +1351,64 @@
 - [ ] Gather user feedback
 - [ ] Refine based on feedback
 >>>>>>> Stashed changes
+
+
+## Regulatory Pages Audit & Refinement
+
+### Phase 1: Audit Existing Pages
+- [x] Review Privacy Policy page content and structure
+- [x] Review Terms of Service page content and structure
+- [x] Review Refund Policy page content and structure
+- [x] Identify gaps in data collection disclosures
+- [x] Identify Manus-managed data processing that needs disclosure
+
+### Phase 2: Research & Best Practices
+- [x] Research GDPR compliance requirements for SaaS
+- [x] Research CCPA compliance requirements
+- [x] Research industry best practices for privacy policies
+- [x] Evaluate need for Manus privacy policy integration
+
+### Phase 3: Privacy Policy Refinement
+- [x] Add comprehensive data collection disclosures
+- [x] Add Manus platform data handling section (Manus as infrastructure provider)
+- [x] Add third-party service providers section (subprocessors list)
+- [x] Add user rights section (GDPR/CCPA with Do Not Sell)
+- [x] Add data retention policy
+- [x] Add cookie policy section
+- [x] Add contact information for privacy inquiries
+- [x] Add AI features (Sleeky AI) data processing disclosure
+- [x] Add legal basis for processing (GDPR compliance)
+- [x] Add automated decision-making disclosure
+- [x] Link to Manus privacy policy
+
+### Phase 4: Terms of Service Refinement
+- [x] Review and update service description
+- [x] Update user responsibilities section
+- [x] Update intellectual property section
+- [x] Update limitation of liability section
+- [x] Add dispute resolution section (arbitration clause)
+- [x] Add governing law section (Delaware)
+- [x] Add AI usage terms section
+- [x] Add subscription billing details
+- [x] Add age requirement (18+)
+- [x] Add indemnification clause
+- [x] Add severability and entire agreement clauses
+- [x] Add force majeure clause
+
+### Phase 5: Refund Policy Refinement
+- [x] Review and clarify refund eligibility
+- [x] Add subscription cancellation terms
+- [x] Add pro-rata refund calculations (with formula)
+- [x] Add refund request process
+- [x] Add exceptions and limitations
+- [x] Update layout to match other legal pages
+
+### Phase 6: Implementation & Testing
+- [x] Implement updated Privacy Policy page
+- [x] Implement updated Terms of Service page
+- [x] Implement updated Refund Policy page
+- [x] Add last updated timestamps
+- [x] Add Refund Policy to footer links on all legal pages
+- [x] Ensure consistent navigation across all legal pages
+- [x] Write tests for regulatory pages (53 tests passing)
+- [x] Verify all links work correctly
