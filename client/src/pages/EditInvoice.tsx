@@ -270,32 +270,40 @@ export default function EditInvoice() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label>
+                    <Label htmlFor="issueDate">
                       Issue Date <span className="text-red-500">*</span>
                     </Label>
                     <Input
+                      id="issueDate"
                       type="date"
                       value={issueDate}
                       onChange={(e) => setIssueDate(e.target.value)}
                       className={errors.issueDate ? "border-red-500" : ""}
+                      aria-required="true"
+                      aria-invalid={!!errors.issueDate}
+                      aria-describedby={errors.issueDate ? "issueDate-error" : undefined}
                     />
                     {errors.issueDate && (
-                      <p className="text-sm text-red-500">{errors.issueDate}</p>
+                      <p id="issueDate-error" className="text-sm text-red-500" role="alert">{errors.issueDate}</p>
                     )}
                   </div>
 
                   <div className="space-y-2">
-                    <Label>
+                    <Label htmlFor="dueDate">
                       Due Date <span className="text-red-500">*</span>
                     </Label>
                     <Input
+                      id="dueDate"
                       type="date"
                       value={dueDate}
                       onChange={(e) => setDueDate(e.target.value)}
                       className={errors.dueDate ? "border-red-500" : ""}
+                      aria-required="true"
+                      aria-invalid={!!errors.dueDate}
+                      aria-describedby={errors.dueDate ? "dueDate-error" : undefined}
                     />
                     {errors.dueDate && (
-                      <p className="text-sm text-red-500">{errors.dueDate}</p>
+                      <p id="dueDate-error" className="text-sm text-red-500" role="alert">{errors.dueDate}</p>
                     )}
                   </div>
                 </div>
@@ -373,8 +381,9 @@ export default function EditInvoice() {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
-                  <Label>Notes</Label>
+                  <Label htmlFor="notes">Notes</Label>
                   <Textarea
+                    id="notes"
                     placeholder="Add any additional notes or comments..."
                     value={notes}
                     onChange={(e) => setNotes(e.target.value)}
@@ -383,8 +392,9 @@ export default function EditInvoice() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label>Payment Terms</Label>
+                  <Label htmlFor="paymentTerms">Payment Terms</Label>
                   <Input
+                    id="paymentTerms"
                     placeholder="e.g., Net 30, Due on receipt"
                     value={paymentTerms}
                     onChange={(e) => setPaymentTerms(e.target.value)}

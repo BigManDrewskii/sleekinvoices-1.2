@@ -499,8 +499,9 @@ export default function CreateInvoice() {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
-                  <Label>Notes</Label>
+                  <Label htmlFor="notes">Notes</Label>
                   <Textarea
+                    id="notes"
                     placeholder="Add any additional notes or comments..."
                     value={notes}
                     onChange={(e) => setNotes(e.target.value)}
@@ -509,8 +510,9 @@ export default function CreateInvoice() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label>Payment Terms</Label>
+                  <Label htmlFor="paymentTerms">Payment Terms</Label>
                   <Input
+                    id="paymentTerms"
                     placeholder="e.g., Net 30, Due on receipt"
                     value={paymentTerms}
                     onChange={(e) => setPaymentTerms(e.target.value)}

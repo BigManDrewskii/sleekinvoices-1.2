@@ -1019,8 +1019,12 @@ export default function Clients() {
                             ))}
                             <DropdownMenu>
                               <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
-                                  <Tag className="h-3 w-3" />
+                                <Button
+                                  variant="ghost"
+                                  size="icon-sm"
+                                  aria-label={`Add tag to ${client.name}`}
+                                >
+                                  <Tag className="h-4 w-4" />
                                 </Button>
                               </DropdownMenuTrigger>
                               <DropdownMenuContent>
@@ -1082,7 +1086,7 @@ export default function Clients() {
                               variant="ghost"
                               size="sm"
                               onClick={() => handlePortalAccess(client)}
-                              title="Portal Access"
+                              aria-label={`Manage portal access for ${client.name}`}
                             >
                               <Key className="h-4 w-4" />
                             </Button>
@@ -1090,7 +1094,7 @@ export default function Clients() {
                               variant="ghost"
                               size="sm"
                               onClick={() => handleEdit(client)}
-                              title="Edit"
+                              aria-label={`Edit ${client.name}`}
                             >
                               <Edit className="h-4 w-4" />
                             </Button>
@@ -1099,7 +1103,7 @@ export default function Clients() {
                               size="sm"
                               onClick={() => handleDelete(client)}
                               className="text-destructive hover:text-destructive"
-                              title="Delete"
+                              aria-label={`Delete ${client.name}`}
                             >
                               <Trash2 className="h-4 w-4" />
                             </Button>
@@ -1137,7 +1141,7 @@ export default function Clients() {
                           variant="ghost"
                           size="sm"
                           onClick={() => handlePortalAccess(client)}
-                          title="Portal Access"
+                          aria-label={`Manage portal access for ${client.name}`}
                         >
                           <Key className="h-4 w-4" />
                         </Button>
@@ -1145,7 +1149,7 @@ export default function Clients() {
                           variant="ghost"
                           size="sm"
                           onClick={() => handleEdit(client)}
-                          title="Edit"
+                          aria-label={`Edit ${client.name}`}
                         >
                           <Edit className="h-4 w-4" />
                         </Button>
@@ -1154,7 +1158,7 @@ export default function Clients() {
                           size="sm"
                           onClick={() => handleDelete(client)}
                           className="text-destructive hover:text-destructive"
-                          title="Delete"
+                          aria-label={`Delete ${client.name}`}
                         >
                           <Trash2 className="h-4 w-4" />
                         </Button>
@@ -1309,15 +1313,27 @@ export default function Clients() {
                   value={newTagColor}
                   onChange={(e) => setNewTagColor(e.target.value)}
                   className="w-10 h-10 rounded cursor-pointer border-0"
+                  aria-label="Custom color picker"
                 />
-                <div className="flex gap-2">
-                  {['#6366f1', '#22c55e', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4', '#ec4899'].map(color => (
+                <div className="flex gap-2" role="radiogroup" aria-label="Preset tag colors">
+                  {[
+                    { hex: '#6366f1', name: 'Indigo' },
+                    { hex: '#22c55e', name: 'Green' },
+                    { hex: '#f59e0b', name: 'Amber' },
+                    { hex: '#ef4444', name: 'Red' },
+                    { hex: '#8b5cf6', name: 'Purple' },
+                    { hex: '#06b6d4', name: 'Cyan' },
+                    { hex: '#ec4899', name: 'Pink' }
+                  ].map(color => (
                     <button
-                      key={color}
+                      key={color.hex}
                       type="button"
-                      className={`w-6 h-6 rounded-full border-2 ${newTagColor === color ? 'border-foreground' : 'border-transparent'}`}
-                      style={{ backgroundColor: color }}
-                      onClick={() => setNewTagColor(color)}
+                      role="radio"
+                      aria-checked={newTagColor === color.hex}
+                      aria-label={`Select ${color.name} color`}
+                      className={`w-6 h-6 rounded-full border-2 ${newTagColor === color.hex ? 'border-foreground' : 'border-transparent'}`}
+                      style={{ backgroundColor: color.hex }}
+                      onClick={() => setNewTagColor(color.hex)}
                     />
                   ))}
                 </div>
