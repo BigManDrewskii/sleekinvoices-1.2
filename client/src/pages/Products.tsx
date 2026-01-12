@@ -1,4 +1,4 @@
-import { useState, useMemo, useRef } from "react";
+import { useState, useMemo, useRef, useEffect } from "react";
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { Currency } from "@/components/ui/typography";
@@ -29,6 +29,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import {
   Select,
@@ -42,13 +43,12 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 import { toast } from "sonner";
-import { 
-  Plus, 
-  MoreHorizontal, 
-  Pencil, 
-  Trash2, 
-  Package, 
-  Search,
+import {
+  Plus,
+  MoreHorizontal,
+  Pencil,
+  Trash2,
+  Package,
   DollarSign,
   Tag,
   BarChart3
@@ -56,6 +56,10 @@ import {
 import { PageLayout } from "@/components/layout/PageLayout";
 import { ProductsPageSkeleton, Skeleton } from "@/components/skeletons";
 import { EmptyState, EmptyStatePresets } from "@/components/EmptyState";
+import { Pagination } from "@/components/shared/Pagination";
+import { SortableTableHeader } from "@/components/shared/SortableTableHeader";
+import { useTableSort } from "@/hooks/useTableSort";
+import { FilterSection, FilterSelect } from "@/components/ui/filter-section";
 
 type Product = {
   id: number;
@@ -86,11 +90,20 @@ export default function Products() {
   const { user, loading } = useAuth();
   const [searchQuery, setSearchQuery] = useState("");
   const [showInactive, setShowInactive] = useState(false);
+  const [categoryFilter, setCategoryFilter] = useState<string>("all");
+  const [dateRange, setDateRange] = useState<string>("all");
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
-  
+
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(25);
+
+  // Sorting
+  const { sort, handleSort, sortData } = useTableSort({ defaultKey: "name", defaultDirection: "asc" });
+
   // Form state
   const [formData, setFormData] = useState({
     name: "",
@@ -277,21 +290,94 @@ export default function Products() {
     setIsDeleteDialogOpen(true);
   };
 
-  // Filter products by search query
-  const filteredProducts = products?.filter((product) => {
-    const searchLower = searchQuery.toLowerCase();
-    return (
-      product.name.toLowerCase().includes(searchLower) ||
-      product.description?.toLowerCase().includes(searchLower) ||
-      product.sku?.toLowerCase().includes(searchLower) ||
-      product.category?.toLowerCase().includes(searchLower)
-    );
-  });
+  // Filter, sort, and paginate products
+  const filteredAndSortedProducts = useMemo(() => {
+    if (!products) return [];
 
-  // Calculate stats
+    let result = [...products];
+
+    // Search filter
+    if (searchQuery) {
+      const searchLower = searchQuery.toLowerCase();
+      result = result.filter((product) =>
+        product.name.toLowerCase().includes(searchLower) ||
+        product.description?.toLowerCase().includes(searchLower) ||
+        product.sku?.toLowerCase().includes(searchLower) ||
+        product.category?.toLowerCase().includes(searchLower)
+      );
+    }
+
+    // Active/Inactive filter
+    if (!showInactive) {
+      result = result.filter(p => p.isActive);
+    }
+
+    // Category filter
+    if (categoryFilter !== "all") {
+      result = result.filter(p => p.category === categoryFilter);
+    }
+
+    // Date range filter (by createdAt)
+    if (dateRange !== "all") {
+      const now = new Date();
+      result = result.filter((product) => {
+        const productDate = new Date(product.createdAt);
+
+        switch (dateRange) {
+          case "today":
+            return productDate.toDateString() === now.toDateString();
+          case "7days":
+            return productDate >= new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+          case "30days":
+            return productDate >= new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+          case "90days":
+            return productDate >= new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000);
+          case "year":
+            return productDate >= new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000);
+          default:
+            return true;
+        }
+      });
+    }
+
+    // Apply sorting
+    return sortData(result);
+  }, [products, searchQuery, showInactive, categoryFilter, dateRange, sortData]);
+
+  // Pagination
+  const totalItems = filteredAndSortedProducts.length;
+  const totalPages = Math.ceil(totalItems / pageSize);
+  const paginatedProducts = filteredAndSortedProducts.slice(
+    (currentPage - 1) * pageSize,
+    currentPage * pageSize
+  );
+
+  // Reset to page 1 when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, showInactive, categoryFilter, dateRange]);
+
+  // Get unique categories for filter
+  const categories = useMemo(() => {
+    if (!products) return [];
+    const uniqueCategories = new Set(products.map(p => p.category).filter(Boolean));
+    return Array.from(uniqueCategories).sort();
+  }, [products]);
+
+  // Calculate stats (use all products, not filtered)
   const totalProducts = products?.length || 0;
   const activeProducts = products?.filter(p => p.isActive).length || 0;
   const totalUsage = products?.reduce((sum, p) => sum + p.usageCount, 0) || 0;
+
+  const clearFilters = () => {
+    setSearchQuery("");
+    setShowInactive(false);
+    setCategoryFilter("all");
+    setDateRange("all");
+    setCurrentPage(1);
+  };
+
+  const hasActiveFilters = !!(searchQuery || showInactive || categoryFilter !== "all" || dateRange !== "all");
 
   if (loading) {
     return <ProductsPageSkeleton />;
@@ -350,38 +436,74 @@ export default function Products() {
       </div>
 
       {/* Filters */}
-      <Card className="mb-6">
-        <CardContent className="p-4">
-          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-            <div className="relative flex-1 max-w-sm">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Search products..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-9"
-              />
-            </div>
-            <div className="flex items-center gap-2">
-              <Switch
-                id="show-inactive"
-                checked={showInactive}
-                onCheckedChange={setShowInactive}
-              />
-              <Label htmlFor="show-inactive" className="text-sm">
-                Show archived
-              </Label>
-            </div>
+      <FilterSection
+        hasActiveFilters={hasActiveFilters}
+        onClearFilters={clearFilters}
+      >
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 w-full">
+          {/* Search */}
+          <div className="relative flex-1">
+            <Input
+              placeholder="Search products..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
           </div>
-        </CardContent>
-      </Card>
+
+          {/* Category Filter */}
+          <FilterSelect label="Category">
+            <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+              <SelectTrigger>
+                <SelectValue placeholder="All Categories" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Categories</SelectItem>
+                {categories.map((cat) => (
+                  <SelectItem key={cat || 'uncategorized'} value={cat || ''}>
+                    {cat || 'Uncategorized'}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </FilterSelect>
+
+          {/* Date Range Filter */}
+          <FilterSelect label="Date Added">
+            <Select value={dateRange} onValueChange={setDateRange}>
+              <SelectTrigger>
+                <SelectValue placeholder="All Time" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Time</SelectItem>
+                <SelectItem value="today">Today</SelectItem>
+                <SelectItem value="7days">Last 7 Days</SelectItem>
+                <SelectItem value="30days">Last 30 Days</SelectItem>
+                <SelectItem value="90days">Last 90 Days</SelectItem>
+                <SelectItem value="year">Last Year</SelectItem>
+              </SelectContent>
+            </Select>
+          </FilterSelect>
+
+          {/* Show Inactive Toggle */}
+          <div className="flex items-center gap-2 p-2">
+            <Switch
+              id="show-inactive"
+              checked={showInactive}
+              onCheckedChange={setShowInactive}
+            />
+            <Label htmlFor="show-inactive" className="text-sm cursor-pointer">
+              Show archived
+            </Label>
+          </div>
+        </div>
+      </FilterSection>
 
       {/* Products Table */}
       <Card>
         <CardHeader>
           <CardTitle>All Products</CardTitle>
           <CardDescription>
-            {filteredProducts?.length || 0} products found
+            {filteredAndSortedProducts.length} product{filteredAndSortedProducts.length !== 1 ? 's' : ''} found
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -391,21 +513,47 @@ export default function Products() {
                 <Skeleton key={i} className="h-16 w-full" />
               ))}
             </div>
-          ) : filteredProducts && filteredProducts.length > 0 ? (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Product</TableHead>
-                  <TableHead>Rate</TableHead>
-                  <TableHead>Unit</TableHead>
-                  <TableHead>Category</TableHead>
-                  <TableHead className="text-center">Used</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead className="w-[50px]"></TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredProducts.map((product) => (
+          ) : !products || filteredAndSortedProducts.length === 0 ? (
+            <EmptyState
+              {...EmptyStatePresets.products}
+              size="sm"
+              action={{
+                label: "Add Product",
+                onClick: () => { resetForm(); setIsCreateDialogOpen(true); },
+                icon: Plus,
+              }}
+            />
+          ) : (
+            <>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <SortableTableHeader
+                      label="Product"
+                      sortKey="name"
+                      currentSort={sort}
+                      onSort={handleSort}
+                    />
+                    <SortableTableHeader
+                      label="Rate"
+                      sortKey="rate"
+                      currentSort={sort}
+                      onSort={handleSort}
+                    />
+                    <TableHead>Unit</TableHead>
+                    <SortableTableHeader
+                      label="Category"
+                      sortKey="category"
+                      currentSort={sort}
+                      onSort={handleSort}
+                    />
+                    <TableHead className="text-center">Used</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead className="w-[50px]"></TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {paginatedProducts.map((product) => (
                   <TableRow key={product.id} className={!product.isActive ? "opacity-50" : ""}>
                     <TableCell>
                       <div>
@@ -472,15 +620,25 @@ export default function Products() {
                 ))}
               </TableBody>
             </Table>
-          ) : (
-            <EmptyState
-              {...EmptyStatePresets.products}
-              action={{
-                label: "Add Product",
-                onClick: () => { resetForm(); setIsCreateDialogOpen(true); },
-                icon: Plus,
-              }}
-            />
+
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <div className="mt-4 pt-4 border-t border-border/20">
+                <Pagination
+                  currentPage={currentPage}
+                  totalPages={totalPages}
+                  pageSize={pageSize}
+                  totalItems={totalItems}
+                  onPageChange={setCurrentPage}
+                  onPageSizeChange={(size) => {
+                    setPageSize(size);
+                    setCurrentPage(1);
+                  }}
+                  pageSizeOptions={[10, 25, 50, 100]}
+                />
+              </div>
+            )}
+            </>
           )}
         </CardContent>
       </Card>

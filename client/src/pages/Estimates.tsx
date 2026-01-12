@@ -20,7 +20,6 @@ import { Currency, DateDisplay } from "@/components/ui/typography";
 import {
   FileText,
   Plus,
-  Search,
   Edit,
   Trash2,
   Eye,
@@ -29,8 +28,9 @@ import {
   CheckCircle,
   XCircle,
   Send,
+  MoreHorizontal,
 } from "lucide-react";
-import { useState, useRef } from "react";
+import { useState, useRef, useMemo, useEffect } from "react";
 import { Link, useLocation } from "wouter";
 import { toast } from "sonner";
 import { Navigation } from "@/components/Navigation";
@@ -43,7 +43,11 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { MoreHorizontal } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Pagination } from "@/components/shared/Pagination";
+import { SortableTableHeader } from "@/components/shared/SortableTableHeader";
+import { useTableSort } from "@/hooks/useTableSort";
+import { FilterSection, FilterSelect } from "@/components/ui/filter-section";
 
 const STATUS_CONFIG: Record<string, { label: string; variant: "default" | "secondary" | "destructive" | "outline"; icon: any }> = {
   draft: { label: "Draft", variant: "secondary", icon: FileText },
@@ -59,8 +63,17 @@ export default function Estimates() {
   const { user, loading, isAuthenticated } = useAuth();
   const [, setLocation] = useLocation();
   const [searchQuery, setSearchQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [dateRange, setDateRange] = useState<string>("all");
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [estimateToDelete, setEstimateToDelete] = useState<any>(null);
+
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(25);
+
+  // Sorting
+  const { sort, handleSort, sortData } = useTableSort({ defaultKey: "issueDate", defaultDirection: "desc" });
 
   const { data: estimates, isLoading } = trpc.estimates.list.useQuery(undefined, {
     enabled: isAuthenticated,
@@ -251,14 +264,75 @@ export default function Estimates() {
     return null;
   }
 
-  const filteredEstimates = estimates?.filter((estimate) => {
-    const query = searchQuery.toLowerCase();
-    return (
-      estimate.estimateNumber.toLowerCase().includes(query) ||
-      estimate.clientName?.toLowerCase().includes(query) ||
-      estimate.title?.toLowerCase().includes(query)
-    );
-  });
+  // Filter, sort, and paginate estimates
+  const filteredAndSortedEstimates = useMemo(() => {
+    if (!estimates) return [];
+
+    let result = [...estimates];
+
+    // Search filter
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase();
+      result = result.filter((estimate) =>
+        estimate.estimateNumber.toLowerCase().includes(query) ||
+        estimate.clientName?.toLowerCase().includes(query) ||
+        estimate.title?.toLowerCase().includes(query)
+      );
+    }
+
+    // Status filter
+    if (statusFilter !== "all") {
+      result = result.filter((estimate) => estimate.status === statusFilter);
+    }
+
+    // Date range filter (by issue date)
+    if (dateRange !== "all") {
+      const now = new Date();
+      result = result.filter((estimate) => {
+        const estimateDate = new Date(estimate.issueDate);
+
+        switch (dateRange) {
+          case "today":
+            return estimateDate.toDateString() === now.toDateString();
+          case "7days":
+            return estimateDate >= new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+          case "30days":
+            return estimateDate >= new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+          case "90days":
+            return estimateDate >= new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000);
+          case "year":
+            return estimateDate >= new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000);
+          default:
+            return true;
+        }
+      });
+    }
+
+    // Apply sorting
+    return sortData(result);
+  }, [estimates, searchQuery, statusFilter, dateRange, sortData]);
+
+  // Pagination
+  const totalItems = filteredAndSortedEstimates.length;
+  const totalPages = Math.ceil(totalItems / pageSize);
+  const paginatedEstimates = filteredAndSortedEstimates.slice(
+    (currentPage - 1) * pageSize,
+    currentPage * pageSize
+  );
+
+  // Reset to page 1 when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, statusFilter, dateRange]);
+
+  const clearFilters = () => {
+    setSearchQuery("");
+    setStatusFilter("all");
+    setDateRange("all");
+    setCurrentPage(1);
+  };
+
+  const hasActiveFilters = !!(searchQuery || statusFilter !== "all" || dateRange !== "all");
 
   const handleDelete = (estimate: any) => {
     setEstimateToDelete(estimate);
@@ -302,25 +376,65 @@ export default function Estimates() {
           </Link>
         </div>
 
-        {/* Search Bar */}
-        <div className="mb-6">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Search estimates by number, client, or title..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10"
-            />
+        {/* Filters */}
+        <FilterSection
+          hasActiveFilters={hasActiveFilters}
+          onClearFilters={clearFilters}
+        >
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 w-full">
+            {/* Search */}
+            <div className="relative flex-1">
+              <Input
+                placeholder="Search estimates by number, client, or title..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+            </div>
+
+            {/* Status Filter */}
+            <FilterSelect label="Status">
+              <Select value={statusFilter} onValueChange={setStatusFilter}>
+                <SelectTrigger>
+                  <SelectValue placeholder="All Status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Status</SelectItem>
+                  <SelectItem value="draft">Draft</SelectItem>
+                  <SelectItem value="sent">Sent</SelectItem>
+                  <SelectItem value="viewed">Viewed</SelectItem>
+                  <SelectItem value="accepted">Accepted</SelectItem>
+                  <SelectItem value="rejected">Rejected</SelectItem>
+                  <SelectItem value="expired">Expired</SelectItem>
+                  <SelectItem value="converted">Converted</SelectItem>
+                </SelectContent>
+              </Select>
+            </FilterSelect>
+
+            {/* Date Range Filter */}
+            <FilterSelect label="Date Range">
+              <Select value={dateRange} onValueChange={setDateRange}>
+                <SelectTrigger>
+                  <SelectValue placeholder="All Time" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Time</SelectItem>
+                  <SelectItem value="today">Today</SelectItem>
+                  <SelectItem value="7days">Last 7 Days</SelectItem>
+                  <SelectItem value="30days">Last 30 Days</SelectItem>
+                  <SelectItem value="90days">Last 90 Days</SelectItem>
+                  <SelectItem value="year">Last Year</SelectItem>
+                </SelectContent>
+              </Select>
+            </FilterSelect>
           </div>
-        </div>
+        </FilterSection>
 
         {/* Estimates Table */}
         <Card>
           <CardHeader>
             <CardTitle>All Estimates</CardTitle>
             <CardDescription>
-              <span className="font-numeric">{filteredEstimates?.length || 0}</span> estimate{filteredEstimates?.length !== 1 ? "s" : ""} found
+              <span className="font-numeric">{filteredAndSortedEstimates.length}</span> estimate{filteredAndSortedEstimates.length !== 1 ? "s" : ""} found
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -335,7 +449,7 @@ export default function Estimates() {
                   icon: Plus,
                 }}
               />
-            ) : filteredEstimates?.length === 0 ? (
+            ) : filteredAndSortedEstimates.length === 0 ? (
               <EmptyState
                 {...EmptyStatePresets.search}
                 size="sm"
@@ -347,17 +461,43 @@ export default function Estimates() {
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead>Estimate #</TableHead>
-                        <TableHead>Client</TableHead>
+                        <SortableTableHeader
+                          label="Estimate #"
+                          sortKey="estimateNumber"
+                          currentSort={sort}
+                          onSort={handleSort}
+                        />
+                        <SortableTableHeader
+                          label="Client"
+                          sortKey="clientName"
+                          currentSort={sort}
+                          onSort={handleSort}
+                        />
                         <TableHead>Title</TableHead>
-                        <TableHead>Status</TableHead>
-                        <TableHead>Valid Until</TableHead>
-                        <TableHead className="text-right">Amount</TableHead>
+                        <SortableTableHeader
+                          label="Status"
+                          sortKey="status"
+                          currentSort={sort}
+                          onSort={handleSort}
+                        />
+                        <SortableTableHeader
+                          label="Valid Until"
+                          sortKey="validUntil"
+                          currentSort={sort}
+                          onSort={handleSort}
+                        />
+                        <SortableTableHeader
+                          label="Amount"
+                          sortKey="total"
+                          currentSort={sort}
+                          onSort={handleSort}
+                          align="right"
+                        />
                         <TableHead className="w-[50px]"></TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {filteredEstimates?.map((estimate) => (
+                      {paginatedEstimates.map((estimate) => (
                         <TableRow key={estimate.id}>
                           <TableCell className="font-medium">
                             <Link href={`/estimates/${estimate.id}`}>
@@ -444,7 +584,7 @@ export default function Estimates() {
 
                 {/* Mobile Cards */}
                 <div className="md:hidden space-y-4">
-                  {filteredEstimates?.map((estimate) => (
+                  {paginatedEstimates.map((estimate) => (
                     <div
                       key={estimate.id}
                       className="p-4 border rounded-lg space-y-3"
@@ -504,6 +644,24 @@ export default function Estimates() {
                     </div>
                   ))}
                 </div>
+
+                {/* Pagination */}
+                {totalPages > 1 && (
+                  <div className="mt-6 pt-4 border-t border-border/20">
+                    <Pagination
+                      currentPage={currentPage}
+                      totalPages={totalPages}
+                      pageSize={pageSize}
+                      totalItems={totalItems}
+                      onPageChange={setCurrentPage}
+                      onPageSizeChange={(size) => {
+                        setPageSize(size);
+                        setCurrentPage(1);
+                      }}
+                      pageSizeOptions={[10, 25, 50, 100]}
+                    />
+                  </div>
+                )}
               </>
             )}
           </CardContent>

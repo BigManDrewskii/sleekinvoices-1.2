@@ -23,9 +23,11 @@ import { ClientDialog } from "@/components/clients/ClientDialog";
 import { PortalAccessDialog } from "@/components/clients/PortalAccessDialog";
 import { DeleteConfirmDialog } from "@/components/shared/DeleteConfirmDialog";
 import { Pagination } from "@/components/shared/Pagination";
+import { SortableTableHeader } from "@/components/shared/SortableTableHeader";
+import { useTableSort } from "@/hooks/useTableSort";
 import { getLoginUrl } from "@/const";
 import { trpc } from "@/lib/trpc";
-import { FileText, Plus, Search, Edit, Trash2, Mail, Phone, MapPin, Users, Key, ShieldCheck, Upload, ArrowUpDown, ArrowUp, ArrowDown, Filter, Download, X, Calendar, Tag, Tags, MoreHorizontal } from "lucide-react";
+import { FileText, Plus, Edit, Trash2, Mail, Phone, MapPin, Users, Key, ShieldCheck, Upload, Download, X, Calendar, Tag, Tags, MoreHorizontal, Search, Filter, ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -940,28 +942,24 @@ export default function Clients() {
                   <TableHeader>
                     <TableRow>
                       <TableHead className="w-[40px]">
-                        <Checkbox 
+                        <Checkbox
                           checked={isAllSelected}
                           onCheckedChange={handleSelectAll}
                           aria-label="Select all"
                         />
                       </TableHead>
-                      <TableHead>
-                        <button 
-                          className="flex items-center hover:text-foreground transition-colors"
-                          onClick={() => handleSort('name')}
-                        >
-                          Name {getSortIcon('name')}
-                        </button>
-                      </TableHead>
-                      <TableHead>
-                        <button 
-                          className="flex items-center hover:text-foreground transition-colors"
-                          onClick={() => handleSort('email')}
-                        >
-                          Contact {getSortIcon('email')}
-                        </button>
-                      </TableHead>
+                      <SortableTableHeader
+                        label="Name"
+                        sortKey="name"
+                        currentSort={{ key: sortField, direction: sortDirection }}
+                        onSort={(key) => handleSort(key as SortField)}
+                      />
+                      <SortableTableHeader
+                        label="Contact"
+                        sortKey="email"
+                        currentSort={{ key: sortField, direction: sortDirection }}
+                        onSort={(key) => handleSort(key as SortField)}
+                      />
                       <TableHead>Company</TableHead>
                       <TableHead>Tags</TableHead>
                       <TableHead>VAT</TableHead>
