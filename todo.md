@@ -391,3 +391,9 @@
 - [x] Replace generic icons with Sleeky illustrations in Recurring Invoices empty state
 - [x] Replace generic icons with Sleeky illustrations in Dashboard empty state
 - [x] Test all empty states display Sleeky correctly
+
+
+## Update Sleeky Images with Larger Versions
+
+- [x] Replace existing Sleeky images with new larger versions
+- [x] Verify all empty states display correctly with new images
