@@ -535,10 +535,10 @@ export function Navigation() {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <button
-                  className="flex items-center justify-center rounded-full h-10 w-10 sm:h-11 sm:w-11 min-w-[40px] min-h-[40px] sm:min-w-[44px] sm:min-h-[44px] hover:ring-2 hover:ring-primary/20 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary"
+                  className="flex items-center justify-center rounded-xl h-10 w-10 sm:h-11 sm:w-11 min-w-[40px] min-h-[40px] sm:min-w-[44px] sm:min-h-[44px] hover:ring-2 hover:ring-primary/20 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary"
                   aria-label="User menu"
                 >
-                  {user && <UserAvatar user={user} size={40} className="sm:w-11 sm:h-11" />}
+                  {user && <UserAvatar user={user} size="sm" bordered />}
                 </button>
               </DropdownMenuTrigger>
               <DropdownMenuContent
@@ -548,7 +548,7 @@ export function Navigation() {
               >
                 <div className="px-3 py-3 border-b border-border/50">
                   <div className="flex items-center gap-3">
-                    {user && <UserAvatar user={user} size={48} />}
+                    {user && <UserAvatar user={user} size="md" bordered />}
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium truncate">{user?.name}</p>
                       <p className="text-xs text-muted-foreground truncate">{user?.email}</p>

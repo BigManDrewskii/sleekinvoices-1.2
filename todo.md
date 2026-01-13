@@ -524,3 +524,9 @@
 
 ### AI Assistant UI Improvements
 - [x] Update AI Assistant to show dynamic user avatar instead of static "You" text
+
+## User Avatar Styling Consistency (Jan 13, 2026)
+- [x] Update UserAvatar component to use rounded-xl style matching SleekyAvatar
+- [x] Update AI Assistant user message avatar to use new styling
+- [x] Update navbar user avatar to use new styling
+- [x] Eliminate fully circular avatar style for consistent UI

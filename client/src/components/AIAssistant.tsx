@@ -464,9 +464,7 @@ export function AIAssistant({ isOpen, onClose }: AIAssistantProps) {
                     )}
                   </div>
                   {message.role === "user" && user && (
-                    <div className="shrink-0 rounded-xl ring-1 ring-border/40 overflow-hidden">
-                      <UserAvatar user={user} size={32} className="rounded-xl" />
-                    </div>
+                    <UserAvatar user={user} size="sm" bordered />
                   )}
                 </div>
               ))}
