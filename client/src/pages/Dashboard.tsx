@@ -75,7 +75,7 @@ export default function Dashboard() {
           <div className="page-header">
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
               <div className="flex-1">
-                <h1 className="page-header-title" data-onboarding="dashboard-title">Dashboard</h1>
+                <h1 className="page-header-title">Dashboard</h1>
                 <p className="page-header-subtitle">Welcome back, {user?.name || "there"}!</p>
               </div>
 
@@ -109,7 +109,7 @@ export default function Dashboard() {
 
               <Dialog>
                 <DialogTrigger asChild>
-                  <Button className="touch-target gap-2" data-onboarding="new-invoice-btn">
+                  <Button className="touch-target gap-2">
                     <Plus weight="bold" className="h-4 w-4" />
                     <span className="hidden sm:inline">New Invoice</span>
                     <span className="sm:hidden">New</span>
@@ -218,7 +218,7 @@ export default function Dashboard() {
           {statsLoading ? (
             <StatsGridSkeleton />
           ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4" data-onboarding="stats-grid">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {/* Total Revenue */}
             <div className="rounded-2xl bg-gradient-to-br from-card to-card/80 border border-border/50 p-5 backdrop-blur-sm transition-all duration-200 hover:border-border hover:shadow-lg hover:shadow-primary/5">
               <div className="flex items-center justify-between mb-3">
@@ -391,7 +391,7 @@ function MagicInvoiceSection() {
   };
 
   return (
-    <div data-onboarding="magic-invoice" data-magic-invoice>
+    <div data-magic-invoice>
       <MagicInput onExtract={handleExtract} className="w-full" />
     </div>
   );

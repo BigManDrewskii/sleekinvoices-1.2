@@ -602,3 +602,15 @@
 - [x] Improve crypto payments section UI
 - [x] Create better animation with modern design and improved copy
 - [x] Remove unnecessary design elements
+
+
+---
+
+## 🗑️ Remove Onboarding Feature - Jan 13, 2026
+
+- [x] Identify all onboarding-related files and components
+- [x] Remove onboarding components and pages
+- [x] Remove onboarding context/state management
+- [x] No database schema fields to remove (onboarding was localStorage-based)
+- [x] Clean up imports and references
+- [x] Test application works correctly without onboarding

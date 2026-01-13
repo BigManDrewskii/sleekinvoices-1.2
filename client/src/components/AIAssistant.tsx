@@ -582,7 +582,7 @@ export function AIAssistantTrigger({ onClick, className }: { onClick: () => void
   });
   
   return (
-    <div className={cn("fixed bottom-6 right-6 z-40", className)} data-onboarding="ai-assistant">
+    <div className={cn("fixed bottom-6 right-6 z-40", className)}>
       <Orb
         onClick={onClick}
         size="md"

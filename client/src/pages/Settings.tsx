@@ -15,7 +15,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 import { Navigation } from "@/components/Navigation";
 import { QuickBooksSettings } from "@/components/QuickBooksSettings";
-import { OnboardingRestartButton } from "@/components/OnboardingRestartButton";
+
 import { EmailTemplateEditor } from "@/components/EmailTemplateEditor";
 import { DeleteAccountDialog } from "@/components/DeleteAccountDialog";
 import { AvatarSelector } from "@/components/AvatarSelector";
@@ -348,7 +348,6 @@ export default function Settings() {
                 <CardDescription>Manage your account</CardDescription>
               </CardHeader>
               <CardContent className="flex flex-wrap gap-3">
-                <OnboardingRestartButton />
                 <Button variant="outline" onClick={handleLogout}>
                   <LogOut className="h-4 w-4 mr-2" />
                   Log Out
@@ -662,19 +661,6 @@ export default function Settings() {
                       support@sleekinvoices.com
                     </a>
                   </div>
-                </div>
-
-                {/* Product Tour */}
-                <div className="flex items-center justify-between p-4 border border-border rounded-lg bg-accent/5">
-                  <div>
-                    <h3 className="text-base font-semibold text-foreground mb-1">
-                      Product Tour
-                    </h3>
-                    <p className="text-sm text-muted-foreground">
-                      Replay the onboarding tour to learn about all features
-                    </p>
-                  </div>
-                  <OnboardingRestartButton />
                 </div>
 
                 {/* Support Information */}

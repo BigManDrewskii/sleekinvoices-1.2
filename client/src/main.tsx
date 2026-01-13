@@ -7,7 +7,7 @@ import superjson from "superjson";
 import App from "./App";
 import { getLoginUrl } from "./const";
 import { KeyboardShortcutsProvider } from "./contexts/KeyboardShortcutsContext";
-import { OnboardingProvider } from "./contexts/OnboardingContext";
+
 import "./index.css";
 
 // Suppress benign ResizeObserver warnings
@@ -92,9 +92,7 @@ createRoot(document.getElementById("root")!).render(
   <trpc.Provider client={trpcClient} queryClient={queryClient}>
     <QueryClientProvider client={queryClient}>
       <KeyboardShortcutsProvider>
-        <OnboardingProvider>
-          <App />
-        </OnboardingProvider>
+        <App />
       </KeyboardShortcutsProvider>
     </QueryClientProvider>
   </trpc.Provider>
