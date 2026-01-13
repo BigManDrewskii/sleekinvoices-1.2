@@ -21,6 +21,8 @@ import { SleekyAvatar } from "@/components/SleekyAvatar";
 import { LowCreditsPrompt, CreditTopUp } from "@/components/CreditTopUp";
 import { trpc } from "@/lib/trpc";
 import { useLocation } from "wouter";
+import { useAuth } from "@/_core/hooks/useAuth";
+import { UserAvatar } from "@/components/UserAvatar";
 import { MarkdownRenderer } from "./MarkdownRenderer";
 import { parseAIResponse, AIActionButtonGroup } from "./AIActionButton";
 
@@ -106,6 +108,7 @@ export function AIAssistant({ isOpen, onClose }: AIAssistantProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const [location] = useLocation();
+  const { user } = useAuth();
 
   const { data: credits } = trpc.ai.getCredits.useQuery();
   const { data: stats } = trpc.analytics.getStats.useQuery();
@@ -460,9 +463,9 @@ export function AIAssistant({ isOpen, onClose }: AIAssistantProps) {
                       <p className="text-sm whitespace-pre-wrap leading-relaxed">{message.content}</p>
                     )}
                   </div>
-                  {message.role === "user" && (
-                    <div className="shrink-0 h-8 w-8 rounded-xl bg-primary/20 flex items-center justify-center ring-1 ring-primary/30 overflow-hidden">
-                      <span className="text-xs font-semibold text-primary">You</span>
+                  {message.role === "user" && user && (
+                    <div className="shrink-0 rounded-xl ring-1 ring-border/40 overflow-hidden">
+                      <UserAvatar user={user} size={32} className="rounded-xl" />
                     </div>
                   )}
                 </div>
