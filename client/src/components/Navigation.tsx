@@ -34,6 +34,7 @@ import {
   Sparkles,
   Mail,
   Search,
+  BookOpen,
 } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import { Plus } from "@phosphor-icons/react";
@@ -70,6 +71,7 @@ const navigationConfig = {
     ],
   },
   templates: { href: "/templates", label: "Templates", icon: LayoutTemplate },
+  docs: { href: "/docs", label: "Docs", icon: BookOpen },
 };
 
 // Custom hook for scroll-based navbar effects
@@ -306,6 +308,19 @@ export function Navigation() {
           <NavigationIcon icon={LayoutTemplate} isActive={isActive("/templates")} className="h-4 w-4" />
           <span>Templates</span>
         </Link>
+        
+        <Link
+          href="/docs"
+          className={cn(
+            "flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-lg transition-all min-h-[44px]",
+            isActive("/docs")
+              ? "bg-accent text-foreground"
+              : "text-muted-foreground hover:bg-accent/50 hover:text-foreground"
+          )}
+        >
+          <NavigationIcon icon={BookOpen} isActive={isActive("/docs")} className="h-4 w-4" />
+          <span>Docs</span>
+        </Link>
     </div>
   );
 
@@ -468,6 +483,21 @@ export function Navigation() {
         >
           <NavigationIcon icon={LayoutTemplate} isActive={isActive("/templates")} className="h-5 w-5" />
           Templates
+        </Link>
+        
+        {/* Docs */}
+        <Link
+          href="/docs"
+          className={cn(
+            "flex items-center gap-3 px-4 py-3 text-base font-medium rounded-lg transition-all duration-200 min-h-[48px]",
+            isActive("/docs") 
+              ? "bg-accent text-foreground shadow-sm" 
+              : "text-muted-foreground hover:text-foreground hover:bg-accent/50"
+          )}
+          onClick={() => setMobileMenuOpen(false)}
+        >
+          <NavigationIcon icon={BookOpen} isActive={isActive("/docs")} className="h-5 w-5" />
+          Docs
         </Link>
       </div>
     );

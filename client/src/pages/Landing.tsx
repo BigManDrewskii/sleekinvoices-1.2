@@ -33,85 +33,114 @@ export default function Landing() {
     <div className="min-h-screen bg-background">
       <LandingNavigation />
 
-      {/* Hero Section - Clean, focused */}
-      <section className="pt-28 pb-16 md:pt-36 md:pb-24">
-        <div className="container max-w-4xl mx-auto px-6 text-center">
-          {/* Sleeky Mascot */}
-          <div className="mb-6">
+      {/* Hero Section - Headroom-inspired bold typography */}
+      <section className="pt-32 pb-20 md:pt-40 md:pb-28">
+        <div className="container max-w-6xl mx-auto px-6 text-center">
+          {/* Sleeky Mascot - Integrated with headline */}
+          <div className="mb-8">
             <img
               src="/sleeky.svg"
               alt="Sleeky - SleekInvoices mascot"
-              className="h-40 sm:h-48 md:h-56 mx-auto sleeky-float"
+              className="h-48 sm:h-56 md:h-64 mx-auto sleeky-float"
             />
           </div>
 
-          {/* Main headline - Concise */}
-          <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-foreground leading-[1.1] tracking-tight mb-5">
-            Invoice smarter.
+          {/* Main headline - BOLD & MASSIVE like Headroom */}
+          <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-black text-foreground leading-[0.95] tracking-tight mb-6 uppercase">
+            Invoice on
             <br />
-            <span className="text-primary">Get paid faster.</span>
+            <span className="text-primary">Autopilot</span>
           </h1>
 
-          {/* Subheadline - One clear value prop */}
-          <p className="text-lg text-muted-foreground max-w-xl mx-auto mb-10">
-            Professional invoicing with Stripe, crypto payments, and QuickBooks sync. 
-            Starting at $0/month.
+          {/* Subheadline - Clear and confident */}
+          <p className="text-xl md:text-2xl text-foreground/80 max-w-2xl mx-auto mb-12 font-medium">
+            Professional invoicing that works so you don't have to
           </p>
 
-          {/* Single CTA */}
-          <div className="flex flex-col sm:flex-row gap-3 justify-center mb-8">
-            <Button size="lg" asChild className="text-base px-8 h-12 rounded-full">
+          {/* Dual CTAs - Primary + Ghost */}
+          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-10">
+            <Button size="lg" asChild className="text-base px-10 h-14 rounded-full font-semibold">
               <a href={getLoginUrl()}>
-                Start Free
-                <ArrowRight className="ml-2 h-4 w-4" />
+                Get Started Now
+                <ArrowRight className="ml-2 h-5 w-5" />
               </a>
             </Button>
             <Button
               size="lg"
-              variant="ghost"
+              variant="outline"
               asChild
-              className="text-base px-8 h-12 rounded-full text-zinc-400 hover:text-white hover:bg-white/5"
+              className="text-base px-10 h-14 rounded-full font-semibold border-2"
             >
-              <a href="#features">See Features</a>
+              <Link href="/docs">See How It Works</Link>
             </Button>
           </div>
 
           {/* Trust indicators - Minimal */}
           <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm text-muted-foreground">
-            <span>No credit card required</span>
+            <span>✓ No credit card required</span>
             <span className="hidden sm:inline">•</span>
-            <span>3 free invoices/month</span>
+            <span>✓ 3 free invoices/month</span>
             <span className="hidden sm:inline">•</span>
-            <span>Cancel anytime</span>
+            <span>✓ Cancel anytime</span>
           </div>
         </div>
       </section>
 
-      {/* Demo Video Section */}
-      <DemoVideoSection />
-
-      {/* AI-Powered Features Narrative */}
-      <section id="features" className="py-20 md:py-24">
+      {/* Product Demo Section - Solid color background like Headroom */}
+      <section className="py-24 md:py-32 bg-primary">
         <div className="container max-w-6xl mx-auto px-6">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-3">
-              AI does the work, you get paid
+          <div className="text-center mb-16">
+            <h2 className="text-4xl md:text-5xl lg:text-6xl font-black text-white mb-6 uppercase tracking-tight">
+              Everything you need
             </h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto">
+            <p className="text-xl md:text-2xl text-white/90 max-w-3xl mx-auto font-medium">
+              Create, send, and track invoices in seconds
+            </p>
+          </div>
+
+          {/* Product Screenshot Placeholder */}
+          <div className="relative w-full rounded-2xl overflow-hidden shadow-2xl border-4 border-white/20">
+            <div className="relative w-full bg-white/10 backdrop-blur-sm" style={{ paddingBottom: "56.25%" }}>
+              <div className="absolute inset-0 flex flex-col items-center justify-center p-8">
+                <div className="text-center">
+                  <Sparkles className="h-16 w-16 md:h-20 md:w-20 text-white/80 mx-auto mb-4" />
+                  <p className="text-white/90 text-lg md:text-xl font-semibold">
+                    Product dashboard coming soon
+                  </p>
+                  <p className="text-white/70 text-sm md:text-base mt-2">
+                    See the full experience in our docs
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* AI-Powered Features Narrative - Headroom-inspired */}
+      <section id="features" className="py-24 md:py-32">
+        <div className="container max-w-6xl mx-auto px-6">
+          <div className="text-center mb-20">
+            <h2 className="text-4xl md:text-5xl lg:text-6xl font-black text-foreground mb-6 uppercase tracking-tight">
+              AI does the work,
+              <br />
+              <span className="text-primary">You get paid</span>
+            </h2>
+            <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto">
               Watch SleekInvoices handle your invoicing workflow automatically,
               from creation to payment tracking.
             </p>
           </div>
 
           {/* Two-column layout: AI Actions + Product Demo */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-start">
             {/* Left: AI Action Feed */}
-            <div className="space-y-6">
+            <div className="space-y-8">
               <div>
-                <h3 className="text-xl font-bold text-foreground mb-2">
+                <h3 className="text-2xl md:text-3xl font-bold text-foreground mb-3">
                   Real-time automation
                 </h3>
-                <p className="text-muted-foreground mb-6">
+                <p className="text-base md:text-lg text-muted-foreground">
                   See how AI handles every step of your invoicing process
                 </p>
               </div>
@@ -119,12 +148,12 @@ export default function Landing() {
             </div>
 
             {/* Right: Product Demo */}
-            <div className="space-y-6">
+            <div className="space-y-8">
               <div>
-                <h3 className="text-xl font-bold text-foreground mb-2">
+                <h3 className="text-2xl md:text-3xl font-bold text-foreground mb-3">
                   Your invoicing journey
                 </h3>
-                <p className="text-muted-foreground mb-6">
+                <p className="text-base md:text-lg text-muted-foreground">
                   From blank canvas to payment received in seconds
                 </p>
               </div>
@@ -135,7 +164,7 @@ export default function Landing() {
       </section>
 
       {/* Crypto Highlight - Streamlined */}
-      <section className="py-16 border-y border-border/50">
+      <section className="py-20 md:py-24 border-y border-border/50">
         <div className="container max-w-4xl mx-auto px-6">
           <div className="flex flex-col md:flex-row items-center justify-between gap-10">
             <div className="flex-1">
@@ -143,7 +172,7 @@ export default function Landing() {
                 <Bitcoin className="h-4 w-4" />
                 Exclusive
               </div>
-              <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-3">
+              <h2 className="text-3xl md:text-4xl font-black text-foreground mb-4 uppercase">
                 Accept crypto payments
               </h2>
               <p className="text-muted-foreground mb-5">
@@ -180,11 +209,11 @@ export default function Landing() {
       {/* Competitor Comparison Section */}
       <section id="compare" className="py-20 md:py-24">
         <div className="container max-w-4xl mx-auto px-6">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-3">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl md:text-5xl lg:text-6xl font-black text-foreground mb-6 uppercase tracking-tight">
               See how we compare
             </h2>
-            <p className="text-muted-foreground">
+            <p className="text-lg md:text-xl text-muted-foreground">
               All the features at a fraction of the price
             </p>
           </div>
@@ -362,11 +391,11 @@ export default function Landing() {
       {/* Pricing Section */}
       <section id="pricing" className="py-20 md:py-24 border-t border-border/50">
         <div className="container max-w-4xl mx-auto px-6">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-3">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl md:text-5xl lg:text-6xl font-black text-foreground mb-6 uppercase tracking-tight">
               Simple pricing
             </h2>
-            <p className="text-muted-foreground">
+            <p className="text-lg md:text-xl text-muted-foreground">
               Start free, upgrade when ready
             </p>
           </div>
@@ -414,8 +443,8 @@ export default function Landing() {
       {/* FAQ Section */}
       <section id="faq" className="py-20 md:py-24 border-t border-border/50">
         <div className="container max-w-4xl mx-auto px-6">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-3">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl md:text-5xl lg:text-6xl font-black text-foreground mb-6 uppercase tracking-tight">
               Questions?
             </h2>
           </div>
@@ -491,6 +520,7 @@ export default function Landing() {
                   <li><a href="#features" className="hover:text-foreground transition-colors">Features</a></li>
                   <li><a href="#pricing" className="hover:text-foreground transition-colors">Pricing</a></li>
                   <li><a href="#compare" className="hover:text-foreground transition-colors">Compare</a></li>
+                  <li><Link href="/docs" className="hover:text-foreground transition-colors">Docs</Link></li>
                   <li><a href="#faq" className="hover:text-foreground transition-colors">FAQ</a></li>
                 </ul>
               </div>
