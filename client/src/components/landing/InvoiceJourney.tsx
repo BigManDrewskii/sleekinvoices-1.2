@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Sparkles, Send, CheckCircle2, Zap, Mail, Bell } from "lucide-react";
+import { Sparkles, Send, CheckCircle2, Zap } from "lucide-react";
 
 const journeySteps = [
   {
@@ -8,7 +8,6 @@ const journeySteps = [
     description: "Tell Sleeky what you did in plain English. No forms, no templates.",
     example: '"Built landing page for Acme Corp, 40 hours at $150/hr"',
     icon: Sparkles,
-    color: "from-violet-500 to-purple-600",
   },
   {
     step: 2,
@@ -16,7 +15,6 @@ const journeySteps = [
     description: "Sleeky extracts client, items, rates, and generates a professional invoice instantly.",
     detail: "Auto-matches existing clients • Applies your branding • Calculates totals",
     icon: Zap,
-    color: "from-blue-500 to-cyan-500",
   },
   {
     step: 3,
@@ -24,7 +22,6 @@ const journeySteps = [
     description: "Review and send directly to your client's inbox. PDF attached automatically.",
     detail: "Personalized email • Professional PDF • Tracking enabled",
     icon: Send,
-    color: "from-emerald-500 to-green-500",
   },
   {
     step: 4,
@@ -32,7 +29,6 @@ const journeySteps = [
     description: "Automatic payment reminders. Real-time notifications when you get paid.",
     detail: "Smart reminders • Payment tracking • Revenue analytics",
     icon: CheckCircle2,
-    color: "from-amber-500 to-orange-500",
   },
 ];
 
@@ -61,10 +57,8 @@ export function InvoiceJourney() {
     >
       {/* Main Card */}
       <div className="relative rounded-2xl border border-border bg-card overflow-hidden">
-        {/* Animated gradient background */}
-        <div 
-          className={`absolute inset-0 opacity-5 bg-gradient-to-br ${currentStep.color} transition-all duration-1000`}
-        />
+        {/* Subtle gradient background */}
+        <div className="absolute inset-0 opacity-5 bg-gradient-to-br from-primary to-primary/50" />
         
         {/* Content */}
         <div className="relative p-8 md:p-10">
@@ -100,8 +94,8 @@ export function InvoiceJourney() {
           >
             {/* Icon and Title */}
             <div className="flex items-start gap-4">
-              <div className={`p-4 rounded-2xl bg-gradient-to-br ${currentStep.color} shadow-lg`}>
-                <Icon className="h-8 w-8 text-white" />
+              <div className="p-4 rounded-2xl bg-primary shadow-lg">
+                <Icon className="h-8 w-8 text-primary-foreground" />
               </div>
               <div className="flex-1">
                 <h3 className="text-2xl md:text-3xl font-bold text-foreground mb-2">
@@ -141,7 +135,7 @@ export function InvoiceJourney() {
         {/* Bottom progress bar */}
         <div className="h-1 bg-muted">
           <div 
-            className={`h-full bg-gradient-to-r ${currentStep.color} transition-all duration-300`}
+            className="h-full bg-primary transition-all duration-300"
             style={{ 
               width: isPaused ? "100%" : "0%",
               animation: isPaused ? "none" : "progress 4s linear infinite"

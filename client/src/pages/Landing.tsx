@@ -144,9 +144,12 @@ export default function Landing() {
                     Get paid in crypto
                   </h2>
                   
-                  <p className="text-lg text-muted-foreground mb-8 leading-relaxed">
+                  <p className="text-lg text-muted-foreground mb-6 leading-relaxed">
                     Accept Bitcoin, Ethereum, and 300+ cryptocurrencies. 
                     Instant settlement, zero chargebacks, global reach.
+                  </p>
+                  <p className="text-sm text-muted-foreground/80 mb-8">
+                    Powered by <span className="text-foreground font-medium">NOWPayments</span> — trusted crypto payment infrastructure
                   </p>
                   
                   {/* Crypto badges */}
@@ -425,30 +428,41 @@ export default function Landing() {
       </section>
 
       {/* FAQ Section */}
-      <section id="faq" className="py-20 md:py-24 border-t border-border/50">
-        <div className="container max-w-4xl mx-auto px-6">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl lg:text-6xl font-black text-foreground mb-6 uppercase tracking-tight">
-              Questions?
+      <section id="faq" className="py-20 md:py-28">
+        <div className="container max-w-3xl mx-auto px-6">
+          <div className="text-center mb-12">
+            <h2 className="text-4xl md:text-5xl font-black text-foreground mb-4 uppercase tracking-tight">
+              Common Questions
             </h2>
+            <p className="text-lg text-muted-foreground">
+              Everything you need to know about SleekInvoices
+            </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="space-y-4">
             <FAQItem
-              question="How does the free tier work?"
-              answer="Get 3 free invoices per month forever. No credit card required. Upgrade to Pro anytime for unlimited invoices."
+              question="Is SleekInvoices really free to start?"
+              answer="Yes! Create up to 3 invoices per month completely free, forever. No credit card required to sign up. When you need more, upgrade to Pro for $12/month."
             />
             <FAQItem
-              question="Why so much cheaper?"
-              answer="We focus on invoicing, not bloated accounting features. Just powerful invoicing at a fair price."
+              question="How does the AI invoice creation work?"
+              answer="Just describe your work in plain English (e.g., 'Website design for Acme Corp, 20 hours at $100/hr'). Sleeky automatically extracts the client, line items, rates, and generates a professional invoice instantly."
             />
             <FAQItem
-              question="How do crypto payments work?"
-              answer="Enable crypto and clients can pay with Bitcoin, Ethereum, and 300+ cryptocurrencies. Instant settlement, no chargebacks."
+              question="What payment methods can my clients use?"
+              answer="Clients can pay via Stripe (credit/debit cards, Apple Pay, Google Pay) or cryptocurrency through NOWPayments (Bitcoin, Ethereum, USDT, and 300+ coins). You choose which options to enable."
             />
             <FAQItem
-              question="Can I migrate from AND.CO?"
-              answer="Yes! Export your client list and import directly into SleekInvoices. We're building direct migration tools."
+              question="Can I customize my invoice design?"
+              answer="Absolutely. Add your logo, choose colors, and select from professional templates. Your invoices will match your brand perfectly."
+            />
+            <FAQItem
+              question="How do automatic payment reminders work?"
+              answer="Set your reminder schedule and SleekInvoices automatically sends polite follow-ups to clients with overdue invoices. You can customize the timing and message."
+            />
+            <FAQItem
+              question="Is my data secure?"
+              answer="Yes. We use industry-standard encryption, secure authentication, and never share your data. Your financial information stays private and protected."
             />
           </div>
         </div>
@@ -660,9 +674,9 @@ function FAQItem({
   answer: string;
 }) {
   return (
-    <div className="p-5 rounded-xl bg-card border border-border">
-      <h3 className="font-medium text-foreground mb-2">{question}</h3>
-      <p className="text-sm text-muted-foreground">{answer}</p>
+    <div className="p-6 rounded-2xl bg-card/50 border border-border/50 hover:border-primary/30 transition-colors">
+      <h3 className="font-semibold text-foreground text-lg mb-3">{question}</h3>
+      <p className="text-muted-foreground leading-relaxed">{answer}</p>
     </div>
   );
 }
