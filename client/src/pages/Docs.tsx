@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Link } from "wouter";
+import { LandingNavigation } from "@/components/LandingNavigation";
 import {
   Menu,
   X,
@@ -73,40 +73,31 @@ export default function Docs() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="container flex h-16 items-center px-6">
-          <Link href="/landing" className="flex items-center gap-2 font-bold text-xl text-foreground hover:text-primary transition-colors">
-            <img src="/sleeky.svg" alt="Sleeky" className="h-8 w-8" />
-            <span>SleekInvoices Docs</span>
-          </Link>
+      {/* Landing Navigation - handles both authenticated and unauthenticated users */}
+      <LandingNavigation />
 
-          <div className="flex-1" />
-
-          {/* Mobile menu toggle */}
-          <button
+      <div className="container mx-auto px-6 py-8 pt-24">
+        {/* Mobile: Docs Sidebar Toggle */}
+        <div className="lg:hidden mb-4 flex items-center gap-3">
+          <Button
+            variant="outline"
+            size="sm"
             onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="lg:hidden p-2 hover:bg-accent rounded-md transition-colors"
-            aria-label="Toggle sidebar"
+            className="gap-2"
           >
-            {sidebarOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-          </button>
-
-          {/* Desktop: Back to Landing button */}
-          <Button variant="ghost" asChild className="hidden lg:flex">
-            <Link href="/landing">
-              Back to Home
-            </Link>
+            {sidebarOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
+            {sidebarOpen ? "Close" : "Browse"} Docs
           </Button>
+          <span className="text-sm text-muted-foreground">
+            {sections.find(s => s.id === activeSectionId)?.title}
+          </span>
         </div>
-      </header>
 
-      <div className="container mx-auto px-6 py-8">
         <div className="flex gap-8 relative">
           {/* Sidebar Navigation */}
           <aside
             className={`
-              fixed lg:sticky top-16 left-0 z-40 h-[calc(100vh-4rem)]
+              fixed lg:sticky top-28 left-0 z-40 h-[calc(100vh-8rem)]
               w-64 flex-shrink-0 overflow-y-auto
               bg-background border-r border-border
               transition-transform duration-300 lg:translate-x-0

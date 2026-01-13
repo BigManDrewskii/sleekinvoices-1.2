@@ -44,7 +44,7 @@ function TriggerFallback({ onClick }: { onClick: () => void }) {
 }
 
 // Pages where AI Assistant should NOT be shown (public pages)
-const PUBLIC_PAGES = ["/landing", "/portal", "/terms", "/privacy", "/refund-policy"];
+const PUBLIC_PAGES = ["/landing", "/portal", "/terms", "/privacy", "/refund-policy", "/docs"];
 
 export function AIAssistantProvider({ children }: AIAssistantProviderProps) {
   const [isOpen, setIsOpen] = useState(false);
