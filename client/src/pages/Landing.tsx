@@ -55,7 +55,7 @@ export default function Landing() {
           </div>
 
           {/* Main headline - BOLD & MASSIVE like Headroom */}
-          <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-black text-foreground leading-[0.95] tracking-tight mb-6 uppercase">
+          <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-7xl font-black text-foreground leading-[0.95] tracking-tight mb-6 uppercase max-w-5xl mx-auto">
             Invoice on
             <br />
             <span className="text-primary">Autopilot</span>
@@ -257,23 +257,23 @@ export default function Landing() {
 
           {/* Desktop Comparison Table */}
           <div className="hidden md:block overflow-x-auto">
-            <table className="w-full border-collapse">
+            <table className="w-full border-collapse" aria-label="Feature comparison between SleekInvoices and competitors">
               <thead>
                 <tr className="border-b border-border">
-                  <th className="text-left py-4 px-4 font-medium text-muted-foreground">Feature</th>
-                  <th className="text-center py-4 px-4">
+                  <th scope="col" className="text-left py-4 px-4 font-medium text-muted-foreground">Feature</th>
+                  <th scope="col" className="text-center py-4 px-4">
                     <div className="font-bold text-primary">SleekInvoices</div>
                     <div className="text-sm text-muted-foreground">$12/mo</div>
                   </th>
-                  <th className="text-center py-4 px-4">
+                  <th scope="col" className="text-center py-4 px-4">
                     <div className="font-medium text-foreground/80">FreshBooks</div>
                     <div className="text-sm text-muted-foreground">$21-65/mo</div>
                   </th>
-                  <th className="text-center py-4 px-4">
+                  <th scope="col" className="text-center py-4 px-4">
                     <div className="font-medium text-foreground/80">QuickBooks</div>
                     <div className="text-sm text-muted-foreground">$38-75/mo</div>
                   </th>
-                  <th className="text-center py-4 px-4">
+                  <th scope="col" className="text-center py-4 px-4">
                     <div className="font-medium text-foreground/80">AND.CO</div>
                     <div className="text-sm text-muted-foreground">$18-24/mo</div>
                   </th>
@@ -514,7 +514,7 @@ export default function Landing() {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-8 lg:gap-12 mb-8">
               <div className="col-span-2 md:col-span-1">
                 <div className="flex items-center gap-2.5 mb-4">
-                  <img src="/monogram-white.svg" alt="SleekInvoices" className="h-7 w-7" />
+                  <img src="/monogram-white.svg" alt="" role="presentation" className="h-7 w-7" />
                   <span className="font-semibold text-foreground">SleekInvoices</span>
                 </div>
                 <p className="text-sm text-muted-foreground leading-relaxed">
@@ -707,14 +707,14 @@ function ComparisonRow({
   highlight?: boolean;
 }) {
   const renderValue = (value: boolean | string) => {
-    if (value === true) return <Check className="h-5 w-5 text-green-500 mx-auto" />;
-    if (value === false) return <X className="h-5 w-5 text-muted-foreground/50 mx-auto" />;
+    if (value === true) return <Check className="h-5 w-5 text-green-500 mx-auto" aria-label="Included" />;
+    if (value === false) return <X className="h-5 w-5 text-muted-foreground/50 mx-auto" aria-label="Not included" />;
     return <span className="text-sm text-muted-foreground">{value}</span>;
   };
 
   return (
     <tr className={`border-b border-border ${highlight ? "bg-primary/5" : ""}`}>
-      <td className="py-4 px-4 text-sm text-foreground/80">{feature}</td>
+      <th scope="row" className="py-4 px-4 text-sm text-foreground/80 font-normal text-left">{feature}</th>
       <td className="py-4 px-4 text-center">{renderValue(sleek)}</td>
       <td className="py-4 px-4 text-center">{renderValue(freshbooks)}</td>
       <td className="py-4 px-4 text-center">{renderValue(quickbooks)}</td>
@@ -740,8 +740,8 @@ function MobileComparisonCard({
   highlight?: boolean;
 }) {
   const renderValue = (value: boolean | string, label: string) => {
-    if (value === true) return <Check className="h-4 w-4 text-green-500" />;
-    if (value === false) return <X className="h-4 w-4 text-muted-foreground/50" />;
+    if (value === true) return <Check className="h-4 w-4 text-green-500" aria-label="Included" />;
+    if (value === false) return <X className="h-4 w-4 text-muted-foreground/50" aria-label="Not included" />;
     return <span className="text-xs text-muted-foreground">{value}</span>;
   };
 

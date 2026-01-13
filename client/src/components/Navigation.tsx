@@ -516,22 +516,24 @@ export function Navigation() {
       <div className="navbar-container">
         <div className="navbar-inner">
           {/* Logo - Dynamic sizing based on breakpoint */}
-          <Link 
-            href="/dashboard" 
+          <Link
+            href="/dashboard"
             className="navbar-logo group relative"
             aria-label="SleekInvoices - Go to Dashboard"
           >
             {/* Wide logo for desktop (lg+) */}
             <img
               src="/logos/wide/SleekInvoices-Logo-Wide.svg"
-              alt="SleekInvoices"
+              alt=""
+              role="presentation"
               className="hidden lg:block navbar-logo-wide transition-all duration-150 ease-out group-hover:scale-[1.03] group-hover:brightness-110 group-active:scale-[0.98]"
               style={{ height: '28px', width: 'auto', maxWidth: '200px' }}
             />
             {/* Monogram icon for mobile and tablet (below lg) */}
             <img
               src="/logos/monogram/SleekInvoices-Monogram-White.svg"
-              alt="SleekInvoices"
+              alt=""
+              role="presentation"
               className="lg:hidden navbar-logo-compact transition-all duration-150 ease-out group-hover:scale-110 group-hover:brightness-110 group-hover:drop-shadow-[0_0_8px_rgba(99,102,241,0.3)] group-active:scale-95"
               style={{ height: '36px', width: '36px', maxWidth: '36px' }}
             />

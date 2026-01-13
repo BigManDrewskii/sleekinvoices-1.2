@@ -62,13 +62,14 @@ export function LandingNavigation() {
       <div className="px-4 sm:px-6 py-3">
         <div className="flex items-center justify-between">
           {/* Logo */}
-          <Link href="/landing" className="flex items-center gap-2.5">
-            <img 
-              src="/monogram-white.svg" 
-              alt="SleekInvoices" 
-              className="h-8 w-8" 
+          <Link href="/landing" className="flex items-center gap-2.5" aria-label="SleekInvoices - Go to home">
+            <img
+              src="/monogram-white.svg"
+              alt=""
+              role="presentation"
+              className="h-8 w-8"
             />
-            <span className="font-semibold text-foreground text-lg hidden sm:block">
+            <span className="font-semibold text-foreground text-lg hidden sm:block" aria-hidden="true">
               SleekInvoices
             </span>
           </Link>
