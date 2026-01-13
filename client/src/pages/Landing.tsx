@@ -44,6 +44,7 @@ export default function Landing() {
               loop
               muted
               playsInline
+              aria-label="Sleeky character animation - the friendly mascot of SleekInvoices"
               className="h-52 sm:h-64 md:h-72 lg:h-80 w-auto mx-auto max-w-full"
               style={{
                 mixBlendMode: 'screen',
@@ -523,19 +524,19 @@ export default function Landing() {
               <div>
                 <h4 className="font-medium text-foreground mb-4">Product</h4>
                 <ul className="space-y-2 text-sm text-muted-foreground">
-                  <li><a href="#features" className="hover:text-foreground transition-colors">Features</a></li>
-                  <li><a href="#pricing" className="hover:text-foreground transition-colors">Pricing</a></li>
-                  <li><a href="#compare" className="hover:text-foreground transition-colors">Compare</a></li>
-                  <li><Link href="/docs" className="hover:text-foreground transition-colors">Docs</Link></li>
-                  <li><a href="#faq" className="hover:text-foreground transition-colors">FAQ</a></li>
+                  <li><a href="#features" className="hover:text-foreground focus-visible:text-foreground focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2 transition-colors rounded-sm">Features</a></li>
+                  <li><a href="#pricing" className="hover:text-foreground focus-visible:text-foreground focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2 transition-colors rounded-sm">Pricing</a></li>
+                  <li><a href="#compare" className="hover:text-foreground focus-visible:text-foreground focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2 transition-colors rounded-sm">Compare</a></li>
+                  <li><Link href="/docs" className="hover:text-foreground focus-visible:text-foreground focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2 transition-colors rounded-sm">Docs</Link></li>
+                  <li><a href="#faq" className="hover:text-foreground focus-visible:text-foreground focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2 transition-colors rounded-sm">FAQ</a></li>
                 </ul>
               </div>
               <div>
                 <h4 className="font-medium text-foreground mb-4">Company</h4>
                 <ul className="space-y-2 text-sm text-muted-foreground">
-                  <li><a href="mailto:support@sleekinvoices.com" className="hover:text-foreground transition-colors">Contact</a></li>
-                  <li><a href="/privacy" className="hover:text-foreground transition-colors">Privacy</a></li>
-                  <li><a href="/terms" className="hover:text-foreground transition-colors">Terms</a></li>
+                  <li><a href="mailto:support@sleekinvoices.com" className="hover:text-foreground focus-visible:text-foreground focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2 transition-colors rounded-sm">Contact</a></li>
+                  <li><a href="/privacy" className="hover:text-foreground focus-visible:text-foreground focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2 transition-colors rounded-sm">Privacy</a></li>
+                  <li><a href="/terms" className="hover:text-foreground focus-visible:text-foreground focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2 transition-colors rounded-sm">Terms</a></li>
                 </ul>
               </div>
               <div>
@@ -553,7 +554,7 @@ export default function Landing() {
                 © {new Date().getFullYear()} SleekInvoices. All rights reserved.
               </p>
               <div className="flex items-center gap-4 text-sm text-muted-foreground/60">
-                <span>Made with ❤️ for freelancers</span>
+                <span>Made with <span aria-label="love">❤️</span> for freelancers</span>
               </div>
             </div>
           </div>
