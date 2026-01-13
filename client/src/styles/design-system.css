@@ -484,13 +484,34 @@
   max-width: var(--max-w-content);
   margin-left: auto;
   margin-right: auto;
-  padding-left: clamp(0.75rem, 2vw + 0.25rem, 2rem);
-  padding-right: clamp(0.75rem, 2vw + 0.25rem, 2rem);
+  padding-left: var(--space-4); /* 16px mobile */
+  padding-right: var(--space-4);
+}
+
+@media (min-width: 640px) {
+  .navbar-container {
+    padding-left: var(--space-5); /* 20px sm */
+    padding-right: var(--space-5);
+  }
+}
+
+@media (min-width: 768px) {
+  .navbar-container {
+    padding-left: var(--space-6); /* 24px md */
+    padding-right: var(--space-6);
+  }
+}
+
+@media (min-width: 1024px) {
+  .navbar-container {
+    padding-left: var(--space-8); /* 32px lg */
+    padding-right: var(--space-8);
+  }
 }
 
 @media (min-width: 1536px) {
   .navbar-container {
-    padding-left: var(--space-10);
+    padding-left: var(--space-10); /* 40px 2xl */
     padding-right: var(--space-10);
   }
 }
@@ -499,8 +520,20 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: clamp(0.5rem, 1.5vw, 1.5rem);
-  height: clamp(56px, 8vh, 72px);
+  gap: var(--space-3); /* 12px mobile */
+  height: 64px; /* Fixed height for consistency */
+}
+
+@media (min-width: 640px) {
+  .navbar-inner {
+    gap: var(--space-4); /* 16px sm+ */
+  }
+}
+
+@media (min-width: 1024px) {
+  .navbar-inner {
+    gap: var(--space-5); /* 20px lg+ */
+  }
 }
 
 /* Logo container with dynamic sizing */
@@ -518,9 +551,9 @@
 /* Wide logo - only on desktop (1024px+) */
 .navbar-logo-wide {
   display: none;
-  height: clamp(32px, 4vh, 40px);
+  height: 28px;
   width: auto;
-  max-width: clamp(180px, 15vw, 220px);
+  max-width: 180px;
   /* Snappy transitions */
   transition: transform 150ms cubic-bezier(0.34, 1.56, 0.64, 1),
               filter 150ms ease-out;
@@ -539,21 +572,40 @@
 @media (min-width: 1024px) {
   .navbar-logo-wide {
     display: block;
+    height: 30px;
+    max-width: 200px;
+  }
+}
+
+@media (min-width: 1536px) {
+  .navbar-logo-wide {
+    height: 32px;
+    max-width: 220px;
   }
 }
 
 /* Compact/Monogram logo - mobile and tablet (< 1024px) */
 .navbar-logo-compact {
   display: block;
-  height: clamp(32px, 8vw, 36px);
-  width: clamp(32px, 8vw, 36px);
-  min-width: clamp(32px, 8vw, 36px);
-  max-width: clamp(32px, 8vw, 36px);
+  height: 36px;
+  width: 36px;
+  min-width: 36px;
+  max-width: 36px;
   /* Snappy transitions with bounce effect */
   transition: transform 150ms cubic-bezier(0.34, 1.56, 0.64, 1),
               filter 150ms ease-out,
               drop-shadow 200ms ease-out;
   will-change: transform;
+}
+
+/* Slightly larger on tablet for better visibility */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .navbar-logo-compact {
+    height: 40px;
+    width: 40px;
+    min-width: 40px;
+    max-width: 40px;
+  }
 }
 
 .navbar-logo:hover .navbar-logo-compact {
@@ -575,8 +627,20 @@
 .navbar-actions {
   display: flex;
   align-items: center;
-  gap: clamp(0.375rem, 1vw, 1rem);
+  gap: var(--space-2); /* 8px mobile */
   flex-shrink: 0;
+}
+
+@media (min-width: 640px) {
+  .navbar-actions {
+    gap: var(--space-3); /* 12px sm+ */
+  }
+}
+
+@media (min-width: 1024px) {
+  .navbar-actions {
+    gap: var(--space-4); /* 16px lg+ */
+  }
 }
 
 /* Ensure all navbar buttons meet 44px touch target on mobile and tablet */
@@ -593,28 +657,22 @@
 .navbar-desktop-tablet-nav {
   display: flex;
   align-items: center;
-  gap: clamp(0.5rem, 1vw + 0.25rem, 1rem);
+  gap: var(--space-1); /* 4px base */
   flex: 1;
   justify-content: center;
-  margin: 0 clamp(0.75rem, 2vw, 2rem);
+  margin: 0 var(--space-4); /* 16px */
 }
 
-/* Ultra-wide condensation (1536px+) */
-@media (min-width: 1536px) {
-  .navbar-inner {
-    height: clamp(60px, 6vh, 68px);
-  }
-
+@media (min-width: 1200px) {
   .navbar-desktop-tablet-nav {
-    gap: clamp(0.75rem, 1.2vw, 1.25rem);
+    gap: var(--space-2); /* 8px */
+    margin: 0 var(--space-6); /* 24px */
   }
 }
 
-/* Ultra-wide enhanced padding (1920px+) */
-@media (min-width: 1920px) {
-  .navbar-container {
-    padding-left: clamp(2rem, 3vw, 3rem);
-    padding-right: clamp(2rem, 3vw, 3rem);
+@media (min-width: 1536px) {
+  .navbar-desktop-tablet-nav {
+    gap: var(--space-3); /* 12px */
   }
 }
 

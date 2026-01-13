@@ -494,3 +494,7 @@
 - [x] Refine GlobalSearch modal UI
 - [x] Fix mini search modal for tablet/mobile
 
+
+## Navbar Responsiveness Fixes (Jan 13, 2026)
+
+- [x] Fix navbar responsiveness issues across all viewport sizes
