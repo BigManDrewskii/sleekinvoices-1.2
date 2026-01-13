@@ -37,15 +37,19 @@ export default function Landing() {
       <section className="pt-32 pb-20 md:pt-40 md:pb-28">
         <div className="container max-w-6xl mx-auto px-6 text-center">
           {/* Sleeky Mascot - Animated hero */}
-          <div className="mb-4">
+          <div className="mb-4 overflow-visible">
             <video
               src="/webm-web-optimized.webm"
               autoPlay
               loop
               muted
               playsInline
-              className="h-60 sm:h-72 md:h-80 lg:h-96 mx-auto"
-              style={{ mixBlendMode: 'screen', filter: 'contrast(1.15)' }}
+              className="h-60 sm:h-72 md:h-80 lg:h-96 w-auto mx-auto"
+              style={{
+                mixBlendMode: 'screen',
+                filter: 'contrast(1.15)',
+                objectFit: 'contain'
+              }}
             />
           </div>
 
