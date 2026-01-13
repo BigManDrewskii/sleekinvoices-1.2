@@ -17,6 +17,12 @@ import { toast } from "sonner";
 import { X, Loader2, Shield, UserPlus, User, Mail, Phone, MapPin, Building2, FileText, Check as LucideCheck } from "lucide-react";
 import { Check } from "@phosphor-icons/react";
 
+/**
+ * ClientDialog handles both client creation and updates in a single component.
+ * TODO: Consider splitting into ClientCreateDialog and ClientUpdateDialog
+ * for better separation of concerns and easier testing. Estimated effort: 4 hours.
+ */
+
 interface Client {
   id: number;
   name: string;
@@ -48,7 +54,7 @@ export function ClientDialog({ open, onOpenChange, client, onSuccess }: ClientDi
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const utils = trpc.useUtils();
-  
+
   const validateVAT = trpc.clients.validateVAT.useMutation({
     onSuccess: (result) => {
       if (result.valid) {
