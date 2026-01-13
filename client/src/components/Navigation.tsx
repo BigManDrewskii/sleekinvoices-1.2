@@ -474,13 +474,14 @@ export function Navigation() {
   };
 
   return (
-    <nav 
+    <nav
       className={cn(
         "navbar-sticky transition-all duration-300",
         scrolled && "scrolled"
       )}
       role="navigation"
       aria-label="Main navigation"
+      data-onboarding="main-nav"
     >
       <div className="navbar-container">
         <div className="navbar-inner">
@@ -518,6 +519,7 @@ export function Navigation() {
               onClick={() => setSearchOpen(true)}
               className="h-11 min-h-[44px] min-w-[44px] gap-2 px-3 text-muted-foreground hover:text-foreground hover:bg-accent/50"
               aria-label="Open search (Cmd+K)"
+              data-onboarding="search-bar"
             >
               <Search className="h-4 w-4" />
               <span className="hidden md:inline">Search</span>

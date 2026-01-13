@@ -10,6 +10,9 @@ import { CommandPalette } from "./components/CommandPalette";
 import { GlobalSearch } from "./components/GlobalSearch";
 import { ConfettiTrigger } from "./components/Confetti";
 import { OnboardingTour } from "./components/OnboardingTour";
+import { OnboardingIntro } from "./components/OnboardingIntro";
+import { OnboardingMobileModal } from "./components/OnboardingMobileModal";
+import { useMediaQuery } from "./hooks/useMediaQuery";
 import { AIAssistantProvider } from "./contexts/AIAssistantContext";
 import { CookieConsentProvider } from "./contexts/CookieConsentContext";
 import { CookieConsentBanner } from "./components/CookieConsentBanner";
@@ -121,6 +124,8 @@ function Router() {
 }
 
 function App() {
+  const isMobile = useMediaQuery('(max-width: 768px)');
+
   return (
     <ErrorBoundary>
       <ThemeProvider defaultTheme="dark">
@@ -134,7 +139,8 @@ function App() {
             <ConfettiTrigger />
             <CookieConsentBanner />
             <AIAssistantProvider>
-              <OnboardingTour />
+              <OnboardingIntro />
+              {isMobile ? <OnboardingMobileModal /> : <OnboardingTour />}
               <Router />
             </AIAssistantProvider>
           </TooltipProvider>

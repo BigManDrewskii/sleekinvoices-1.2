@@ -664,6 +664,19 @@ export default function Settings() {
                   </div>
                 </div>
 
+                {/* Product Tour */}
+                <div className="flex items-center justify-between p-4 border border-border rounded-lg bg-accent/5">
+                  <div>
+                    <h3 className="text-base font-semibold text-foreground mb-1">
+                      Product Tour
+                    </h3>
+                    <p className="text-sm text-muted-foreground">
+                      Replay the onboarding tour to learn about all features
+                    </p>
+                  </div>
+                  <OnboardingRestartButton />
+                </div>
+
                 {/* Support Information */}
                 <div className="rounded-lg bg-muted/50 p-4">
                   <h4 className="text-sm font-semibold text-foreground mb-2">

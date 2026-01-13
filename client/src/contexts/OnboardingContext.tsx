@@ -15,6 +15,8 @@ interface OnboardingContextType {
   totalSteps: number;
   currentStepData: OnboardingStep | null;
   hasCompletedOnboarding: boolean;
+  hasSeenIntro: boolean;
+  neverShowIntro: boolean;
   startOnboarding: () => void;
   nextStep: () => void;
   prevStep: () => void;
@@ -22,12 +24,16 @@ interface OnboardingContextType {
   completeOnboarding: () => void;
   resetOnboarding: () => void;
   goToStep: (step: number) => void;
+  dismissIntro: () => void;
+  dismissIntroForever: () => void;
 }
 
 const OnboardingContext = createContext<OnboardingContextType | undefined>(undefined);
 
 const STORAGE_KEY = 'sleek_onboarding_completed';
 const STEP_KEY = 'sleek_onboarding_step';
+const INTRO_SEEN_KEY = 'sleek_onboarding_intro_seen';
+const NEVER_SHOW_INTRO_KEY = 'sleek_never_show_intro';
 
 // Define the onboarding steps
 export const ONBOARDING_STEPS: OnboardingStep[] = [
@@ -97,18 +103,23 @@ export function OnboardingProvider({ children }: OnboardingProviderProps) {
   const [isOnboardingActive, setIsOnboardingActive] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
   const [hasCompletedOnboarding, setHasCompletedOnboarding] = useState(true);
+  const [hasSeenIntro, setHasSeenIntro] = useState(true);
+  const [neverShowIntro, setNeverShowIntro] = useState(false);
 
   // Check localStorage on mount
   useEffect(() => {
     const completed = localStorage.getItem(STORAGE_KEY);
     const savedStep = localStorage.getItem(STEP_KEY);
-    
-    if (completed === 'true') {
-      setHasCompletedOnboarding(true);
-      setIsOnboardingActive(false);
-    } else {
-      setHasCompletedOnboarding(false);
-      // Auto-start onboarding for new users after a short delay
+    const introSeen = localStorage.getItem(INTRO_SEEN_KEY);
+    const neverShow = localStorage.getItem(NEVER_SHOW_INTRO_KEY);
+
+    setHasCompletedOnboarding(completed === 'true');
+    setHasSeenIntro(introSeen === 'true');
+    setNeverShowIntro(neverShow === 'true');
+
+    // Auto-start onboarding for users who haven't completed AND have seen intro AND clicked "Show me around"
+    // (Intro modal handles initial "show me around" vs "skip" decision)
+    if (completed !== 'true' && introSeen === 'true' && neverShow !== 'true') {
       const timer = setTimeout(() => {
         setIsOnboardingActive(true);
         if (savedStep) {
@@ -175,6 +186,18 @@ export function OnboardingProvider({ children }: OnboardingProviderProps) {
     }
   }, []);
 
+  const dismissIntro = useCallback(() => {
+    localStorage.setItem(INTRO_SEEN_KEY, 'true');
+    setHasSeenIntro(true);
+  }, []);
+
+  const dismissIntroForever = useCallback(() => {
+    localStorage.setItem(NEVER_SHOW_INTRO_KEY, 'true');
+    localStorage.setItem(INTRO_SEEN_KEY, 'true');
+    setNeverShowIntro(true);
+    setHasSeenIntro(true);
+  }, []);
+
   const currentStepData = isOnboardingActive ? ONBOARDING_STEPS[currentStep] : null;
 
   return (
@@ -185,6 +208,8 @@ export function OnboardingProvider({ children }: OnboardingProviderProps) {
         totalSteps: ONBOARDING_STEPS.length,
         currentStepData,
         hasCompletedOnboarding,
+        hasSeenIntro,
+        neverShowIntro,
         startOnboarding,
         nextStep,
         prevStep,
@@ -192,6 +217,8 @@ export function OnboardingProvider({ children }: OnboardingProviderProps) {
         completeOnboarding,
         resetOnboarding,
         goToStep,
+        dismissIntro,
+        dismissIntroForever,
       }}
     >
       {children}

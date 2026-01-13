@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { useOnboarding } from '@/contexts/OnboardingContext';
+import { useMediaQuery } from '@/hooks/useMediaQuery';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { ChevronLeft, ChevronRight, X, Sparkles, CheckCircle2 } from 'lucide-react';
@@ -39,16 +40,10 @@ export function OnboardingTour() {
   const [spotlightPosition, setSpotlightPosition] = useState<SpotlightPosition | null>(null);
   const [tooltipPosition, setTooltipPosition] = useState<TooltipPosition>({ top: 0, left: 0, placement: 'bottom' });
   const [isVisible, setIsVisible] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
   const tooltipRef = useRef<HTMLDivElement>(null);
 
-  // Responsive breakpoint detection
-  useEffect(() => {
-    const checkMobile = () => setIsMobile(window.innerWidth < 640);
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
-  }, []);
+  // Detect mobile - mobile uses OnboardingMobileModal instead
+  const isMobile = useMediaQuery('(max-width: 768px)');
 
   // Calculate tooltip position using FIXED positioning (viewport-relative)
   const calculateTooltipPosition = useCallback((
@@ -142,7 +137,7 @@ export function OnboardingTour() {
       
       if (targetElement) {
         const rect = targetElement.getBoundingClientRect();
-        const padding = isMobile ? 4 : (currentStepData.spotlightPadding || 8);
+        const padding = currentStepData.spotlightPadding || 8;
         const viewportHeight = window.innerHeight;
         
         // Check if we need to scroll to make room for tooltip
@@ -196,7 +191,7 @@ export function OnboardingTour() {
       window.removeEventListener('resize', handleReposition);
       window.removeEventListener('scroll', handleReposition);
     };
-  }, [isOnboardingActive, currentStepData, currentStep, isMobile, calculateTooltipPosition]);
+  }, [isOnboardingActive, currentStepData, currentStep, calculateTooltipPosition]);
 
   // Handle keyboard navigation
   useEffect(() => {
@@ -221,6 +216,11 @@ export function OnboardingTour() {
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isOnboardingActive, nextStep, prevStep, skipOnboarding, completeOnboarding, currentStep, totalSteps]);
+
+  // Mobile uses OnboardingMobileModal instead
+  if (isMobile) {
+    return null;
+  }
 
   if (!isOnboardingActive || !currentStepData || !isVisible) {
     return null;
@@ -250,7 +250,7 @@ export function OnboardingTour() {
                   y={spotlightPosition.top}
                   width={spotlightPosition.width}
                   height={spotlightPosition.height}
-                  rx={isMobile ? 8 : 12}
+                  rx={12}
                   fill="black"
                 />
               )}
@@ -270,10 +270,7 @@ export function OnboardingTour() {
         {/* Spotlight border */}
         {spotlightPosition && (
           <div
-            className={cn(
-              "absolute pointer-events-none transition-all duration-200",
-              isMobile ? "rounded-lg ring-1 ring-primary/40" : "rounded-xl ring-2 ring-primary/30"
-            )}
+            className="absolute pointer-events-none transition-all duration-200 rounded-xl ring-2 ring-primary/30"
             style={{
               top: spotlightPosition.top,
               left: spotlightPosition.left,
@@ -291,7 +288,7 @@ export function OnboardingTour() {
         className={cn(
           "fixed z-[9999] pointer-events-auto",
           "bg-popover/95 backdrop-blur-sm border border-border/60 shadow-xl",
-          isMobile ? "rounded-xl" : "rounded-2xl",
+          "rounded-2xl",
           "animate-in fade-in-0 zoom-in-95 duration-200"
         )}
         style={{
@@ -308,21 +305,21 @@ export function OnboardingTour() {
         {/* Header */}
         <div className={cn(
           "flex items-center justify-between",
-          isMobile ? "px-3 pt-3 pb-1" : "px-4 pt-3 pb-1"
+          "px-4 pt-3 pb-1"
         )}>
           <div className="flex items-center gap-2">
             <div className={cn(
               "rounded-md bg-primary/10 flex items-center justify-center flex-shrink-0",
-              isMobile ? "h-6 w-6" : "h-7 w-7"
+              "h-7 w-7"
             )}>
               <Sparkles className={cn(
                 "text-primary",
-                isMobile ? "h-3 w-3" : "h-3.5 w-3.5"
+                "h-3.5 w-3.5"
               )} />
             </div>
             <span className={cn(
               "font-medium text-muted-foreground",
-              isMobile ? "text-[10px]" : "text-xs"
+              "text-xs"
             )}>
               {currentStep + 1}/{totalSteps}
             </span>
@@ -332,24 +329,24 @@ export function OnboardingTour() {
             size="icon"
             className={cn(
               "rounded-md hover:bg-muted/60 text-muted-foreground hover:text-foreground flex-shrink-0",
-              isMobile ? "h-6 w-6" : "h-7 w-7"
+              "h-7 w-7"
             )}
             onClick={skipOnboarding}
             aria-label="Close tour"
           >
-            <X className={isMobile ? "h-3 w-3" : "h-3.5 w-3.5"} />
+            <X className={"h-3.5 w-3.5"} />
           </Button>
         </div>
 
         {/* Content */}
         <div className={cn(
-          isMobile ? "px-3 py-2" : "px-4 py-2"
+          "px-4 py-2"
         )}>
           <h3 
             id="onboarding-title"
             className={cn(
               "font-semibold text-foreground leading-tight",
-              isMobile ? "text-sm mb-1" : "text-base mb-1.5"
+              "text-base mb-1.5"
             )}
           >
             {currentStepData.title}
@@ -358,7 +355,7 @@ export function OnboardingTour() {
             id="onboarding-description"
             className={cn(
               "text-muted-foreground leading-snug",
-              isMobile ? "text-xs" : "text-sm"
+              "text-sm"
             )}
           >
             {currentStepData.description}
@@ -368,14 +365,14 @@ export function OnboardingTour() {
         {/* Progress Dots */}
         <div className={cn(
           "flex items-center justify-center gap-1",
-          isMobile ? "py-1.5" : "py-2"
+          "py-2"
         )}>
           {Array.from({ length: totalSteps }).map((_, i) => (
             <div
               key={i}
               className={cn(
                 "rounded-full transition-all duration-200",
-                isMobile ? "h-1 w-1" : "h-1.5 w-1.5",
+                "h-1.5 w-1.5",
                 i === currentStep 
                   ? "bg-primary w-4" 
                   : i < currentStep 
@@ -389,13 +386,13 @@ export function OnboardingTour() {
         {/* Footer */}
         <div className={cn(
           "flex items-center justify-between border-t border-border/40",
-          isMobile ? "px-3 py-2" : "px-4 py-2.5"
+          "px-4 py-2.5"
         )}>
           <button
             onClick={skipOnboarding}
             className={cn(
               "text-muted-foreground hover:text-foreground transition-colors",
-              isMobile ? "text-xs" : "text-sm"
+              "text-sm"
             )}
           >
             Skip
@@ -408,11 +405,11 @@ export function OnboardingTour() {
                 onClick={prevStep}
                 className={cn(
                   "text-muted-foreground hover:text-foreground",
-                  isMobile ? "h-7 px-2 text-xs" : "h-8 px-2.5"
+                  "h-8 px-2.5"
                 )}
               >
-                <ChevronLeft className={isMobile ? "h-3 w-3" : "h-4 w-4"} />
-                {!isMobile && "Back"}
+                <ChevronLeft className={"h-4 w-4"} />
+                {"Back"}
               </Button>
             )}
             <Button
@@ -420,13 +417,13 @@ export function OnboardingTour() {
               onClick={isLastStep ? completeOnboarding : nextStep}
               className={cn(
                 "font-medium",
-                isMobile ? "h-7 px-3 text-xs" : "h-8 px-3"
+                "h-8 px-3"
               )}
             >
               {isLastStep ? (
                 <>
                   <CheckCircle2 className={cn(
-                    isMobile ? "h-3 w-3 mr-1" : "h-4 w-4 mr-1"
+                    "h-4 w-4 mr-1"
                   )} />
                   Done
                 </>
@@ -434,7 +431,7 @@ export function OnboardingTour() {
                 <>
                   Next
                   <ChevronRight className={cn(
-                    isMobile ? "h-3 w-3 ml-0.5" : "h-4 w-4 ml-0.5"
+                    "h-4 w-4 ml-0.5"
                   )} />
                 </>
               )}
