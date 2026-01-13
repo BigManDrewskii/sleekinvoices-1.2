@@ -87,12 +87,12 @@ export function LandingNavigation() {
             >
               Pricing
             </button>
-            <Link
-              href="/docs"
-              className="px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-secondary/50 rounded-full transition-all inline-block"
+            <button
+              onClick={() => window.location.href = '/docs'}
+              className="px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-secondary/50 rounded-full transition-all"
             >
               Docs
-            </Link>
+            </button>
             <button
               onClick={() => scrollToSection("faq")}
               className="px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-secondary/50 rounded-full transition-all"
@@ -159,13 +159,15 @@ export function LandingNavigation() {
                 >
                   Pricing
                 </button>
-                <Link
-                  href="/docs"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="px-4 py-3 text-base font-medium text-muted-foreground hover:text-foreground hover:bg-secondary/50 rounded-xl transition-all text-left block"
+                <button
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    window.location.href = '/docs';
+                  }}
+                  className="px-4 py-3 text-base font-medium text-muted-foreground hover:text-foreground hover:bg-secondary/50 rounded-xl transition-all text-left w-full"
                 >
                   Docs
-                </Link>
+                </button>
                 <button
                   onClick={() => scrollToSection("faq")}
                   className="px-4 py-3 text-base font-medium text-muted-foreground hover:text-foreground hover:bg-secondary/50 rounded-xl transition-all text-left"
