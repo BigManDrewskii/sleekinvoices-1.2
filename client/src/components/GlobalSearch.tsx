@@ -117,8 +117,8 @@ export function GlobalSearch() {
       />
       
       {/* Search Modal */}
-      <div className="fixed inset-x-0 top-0 z-50 flex items-start justify-center pt-[10vh] sm:pt-[15vh] px-4">
-        <div 
+      <div className="fixed inset-x-0 top-0 z-50 flex items-start justify-center pt-[10vh] sm:pt-[15vh] px-4 sm:px-6 md:px-8">
+        <div
           className={cn(
             "w-full max-w-lg bg-card border border-border rounded-xl shadow-2xl overflow-hidden",
             "animate-in fade-in-0 slide-in-from-top-4 duration-200"
@@ -129,7 +129,7 @@ export function GlobalSearch() {
         >
           <Command className="bg-transparent">
             {/* Search Input Header */}
-            <div className="flex items-center gap-2.5 px-4 py-3.5 border-b border-border/50">
+            <div className="flex items-center gap-2.5 px-4 sm:px-5 md:px-6 py-3.5 border-b border-border/50">
               <Search className="h-4.5 w-4.5 text-muted-foreground/70 shrink-0" />
               <Input
                 ref={inputRef}
@@ -151,7 +151,7 @@ export function GlobalSearch() {
             {/* Results */}
             <CommandList className="max-h-[60vh] overflow-y-auto">
               {!hasResults && searchQuery && (
-                <CommandEmpty className="py-12 text-center">
+                <CommandEmpty className="px-4 sm:px-6 md:px-8 py-12 text-center">
                   <div className="flex flex-col items-center gap-2">
                     <Search className="h-10 w-10 text-muted-foreground/30" />
                     <p className="text-sm text-muted-foreground">No results found for "{searchQuery}"</p>
@@ -161,7 +161,7 @@ export function GlobalSearch() {
               )}
 
               {results.invoices.length > 0 && (
-                <CommandGroup heading="Invoices" className="p-2">
+                <CommandGroup heading="Invoices" className="p-3 sm:p-4">
                   {results.invoices.map((invoice) => (
                     <CommandItem
                       key={invoice.id}
@@ -189,7 +189,7 @@ export function GlobalSearch() {
               )}
 
               {results.clients.length > 0 && (
-                <CommandGroup heading="Clients" className="p-2">
+                <CommandGroup heading="Clients" className="p-3 sm:p-4">
                   {results.clients.map((client) => (
                     <CommandItem
                       key={client.id}
@@ -213,7 +213,7 @@ export function GlobalSearch() {
 
               {/* Empty state when no search query */}
               {!searchQuery && (
-                <div className="px-4 py-8 text-center">
+                <div className="px-4 sm:px-6 md:px-8 py-8 sm:py-10 text-center">
                   <div className="flex flex-col items-center gap-3">
                     <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted">
                       <Search className="h-5 w-5 text-muted-foreground" />
@@ -228,7 +228,7 @@ export function GlobalSearch() {
             </CommandList>
 
             {/* Footer */}
-            <div className="flex items-center justify-between px-4 py-2.5 border-t border-border/50 bg-muted/30 text-xs text-muted-foreground">
+            <div className="flex items-center justify-between px-4 sm:px-5 md:px-6 py-2.5 border-t border-border/50 bg-muted/30 text-xs text-muted-foreground">
               <div className="flex items-center gap-3">
                 <span className="flex items-center gap-1">
                   <kbd className="px-1.5 py-0.5 rounded bg-muted border border-border font-mono">↑↓</kbd>

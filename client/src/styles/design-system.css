@@ -506,8 +506,20 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: var(--space-4);
+  gap: var(--space-3); /* 12px mobile */
   height: 64px; /* Fixed height for consistency */
+}
+
+@media (min-width: 640px) {
+  .navbar-inner {
+    gap: var(--space-4); /* 16px tablet+ */
+  }
+}
+
+@media (min-width: 1024px) {
+  .navbar-inner {
+    gap: var(--space-5); /* 20px desktop */
+  }
 }
 
 /* Logo container with dynamic sizing */
@@ -588,24 +600,35 @@
   }
 }
 
-/* Navigation actions container */
+/* Navigation actions container - responsive spacing */
 .navbar-actions {
   display: flex;
   align-items: center;
-  gap: var(--space-2);
+  gap: var(--space-2); /* 8px mobile */
   flex-shrink: 0;
 }
 
-/* Better spacing on tablet */
+@media (min-width: 640px) {
+  .navbar-actions {
+    gap: var(--space-2); /* 8px small tablet */
+  }
+}
+
 @media (min-width: 768px) {
   .navbar-actions {
-    gap: var(--space-3);
+    gap: var(--space-3); /* 12px tablet */
   }
 }
 
 @media (min-width: 1024px) {
   .navbar-actions {
-    gap: var(--space-4);
+    gap: var(--space-3); /* 12px desktop */
+  }
+}
+
+@media (min-width: 1200px) {
+  .navbar-actions {
+    gap: var(--space-4); /* 16px large desktop */
   }
 }
 
@@ -638,12 +661,19 @@
   gap: var(--space-1);
   flex: 1;
   justify-content: center;
-  margin: 0 var(--space-4);
+  margin: 0 var(--space-2);
 }
 
 @media (min-width: 1200px) {
   .navbar-desktop-tablet-nav {
     gap: var(--space-2);
+    margin: 0 var(--space-4);
+  }
+}
+
+@media (min-width: 1440px) {
+  .navbar-desktop-tablet-nav {
+    gap: var(--space-3);
     margin: 0 var(--space-6);
   }
 }
