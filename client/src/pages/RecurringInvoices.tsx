@@ -3,7 +3,15 @@ import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Calendar, RefreshCw, Pause, Play, Trash2, Edit } from "lucide-react";
+import {
+  Plus,
+  Calendar,
+  RefreshCw,
+  Pause,
+  Play,
+  Trash2,
+  Edit,
+} from "lucide-react";
 import { toast } from "sonner";
 import { useLocation } from "wouter";
 import { PageLayout } from "@/components/layout/PageLayout";
@@ -14,7 +22,8 @@ import { useUndoableDelete } from "@/hooks/useUndoableDelete";
 
 export default function RecurringInvoices() {
   const [, setLocation] = useLocation();
-  const { data: recurringInvoices, isLoading } = trpc.recurringInvoices.list.useQuery();
+  const { data: recurringInvoices, isLoading } =
+    trpc.recurringInvoices.list.useQuery();
   const toggleMutation = trpc.recurringInvoices.toggle.useMutation();
   const deleteMutation = trpc.recurringInvoices.delete.useMutation();
   const utils = trpc.useUtils();
@@ -22,15 +31,19 @@ export default function RecurringInvoices() {
   const handleToggle = async (id: number, currentStatus: boolean) => {
     // Optimistic update: immediately toggle status in UI
     const previousData = utils.recurringInvoices.list.getData();
-    utils.recurringInvoices.list.setData(undefined, (old) => 
-      old?.map((item: any) => 
+    utils.recurringInvoices.list.setData(undefined, old =>
+      old?.map((item: any) =>
         item.id === id ? { ...item, isActive: !currentStatus } : item
       )
     );
-    
+
     try {
       await toggleMutation.mutateAsync({ id, isActive: !currentStatus });
-      toast.success(currentStatus ? "Recurring invoice paused" : "Recurring invoice activated");
+      toast.success(
+        currentStatus
+          ? "Recurring invoice paused"
+          : "Recurring invoice activated"
+      );
     } catch (error) {
       // Rollback on error
       if (previousData) {
@@ -45,7 +58,8 @@ export default function RecurringInvoices() {
   const { executeDelete } = useUndoableDelete();
 
   const handleDelete = async (id: number, clientName?: string) => {
-    if (!confirm("Are you sure you want to delete this recurring invoice?")) return;
+    if (!confirm("Are you sure you want to delete this recurring invoice?"))
+      return;
 
     const previousData = utils.recurringInvoices.list.getData();
     const item = previousData?.find((item: any) => item.id === id);
@@ -57,7 +71,7 @@ export default function RecurringInvoices() {
       itemName: clientName || "Recurring invoice",
       itemType: "recurring invoice",
       onOptimisticDelete: () => {
-        utils.recurringInvoices.list.setData(undefined, (old) =>
+        utils.recurringInvoices.list.setData(undefined, old =>
           old?.filter((item: any) => item.id !== id)
         );
       },
@@ -94,7 +108,7 @@ export default function RecurringInvoices() {
       subtitle="Automate invoice generation for subscription-based clients"
       headerActions={
         <Button onClick={() => setLocation("/recurring-invoices/create")}>
-          <Plus className="w-4 h-4 mr-2" />
+          <Plus className="w-4 h-4 mr-2" aria-hidden="true" />
           <span className="hidden sm:inline">Create Recurring Invoice</span>
           <span className="sm:hidden">New</span>
         </Button>
@@ -122,32 +136,50 @@ export default function RecurringInvoices() {
                     <div className="flex-1">
                       <div className="flex items-center gap-3 mb-2">
                         <h3 className="text-lg font-semibold">
-                          {recurring.clientName || 'Unknown Client'}
+                          {recurring.clientName || "Unknown Client"}
                         </h3>
-                        <Badge variant={recurring.isActive ? "default" : "secondary"}>
+                        <Badge
+                          variant={recurring.isActive ? "default" : "secondary"}
+                        >
                           {recurring.isActive ? "Active" : "Paused"}
                         </Badge>
                         <Badge variant="outline">
                           {getFrequencyLabel(recurring.frequency)}
                         </Badge>
                       </div>
-                      
+
                       <p className="text-sm text-muted-foreground mb-2">
-                        {recurring.invoiceNumberPrefix} • {recurring.clientEmail || 'No email'}
+                        {recurring.invoiceNumberPrefix} •{" "}
+                        {recurring.clientEmail || "No email"}
                       </p>
-                      
+
                       <div className="grid grid-cols-3 gap-4 mt-4 text-sm">
                         <div>
                           <p className="text-muted-foreground">Start Date</p>
-                          <p className="font-medium"><DateDisplay date={recurring.startDate} format="long" /></p>
+                          <p className="font-medium">
+                            <DateDisplay
+                              date={recurring.startDate}
+                              format="long"
+                            />
+                          </p>
                         </div>
                         <div>
                           <p className="text-muted-foreground">Next Invoice</p>
-                          <p className="font-medium"><DateDisplay date={recurring.nextInvoiceDate} format="long" /></p>
+                          <p className="font-medium">
+                            <DateDisplay
+                              date={recurring.nextInvoiceDate}
+                              format="long"
+                            />
+                          </p>
                         </div>
                         <div>
                           <p className="text-muted-foreground">End Date</p>
-                          <p className="font-medium"><DateDisplay date={recurring.endDate} format="long" /></p>
+                          <p className="font-medium">
+                            <DateDisplay
+                              date={recurring.endDate}
+                              format="long"
+                            />
+                          </p>
                         </div>
                       </div>
 
@@ -162,18 +194,28 @@ export default function RecurringInvoices() {
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => handleToggle(recurring.id, recurring.isActive)}
+                        onClick={() =>
+                          handleToggle(recurring.id, recurring.isActive)
+                        }
                       >
                         {recurring.isActive ? (
-                          <><Pause className="w-4 h-4 mr-1" /> Pause</>
+                          <>
+                            <Pause className="w-4 h-4 mr-1" /> Pause
+                          </>
                         ) : (
-                          <><Play className="w-4 h-4 mr-1" /> Activate</>
+                          <>
+                            <Play className="w-4 h-4 mr-1" /> Activate
+                          </>
                         )}
                       </Button>
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => setLocation(`/recurring-invoices/edit/${recurring.id}`)}
+                        onClick={() =>
+                          setLocation(
+                            `/recurring-invoices/${recurring.id}/edit`
+                          )
+                        }
                       >
                         <Edit className="w-4 h-4" />
                       </Button>
@@ -199,14 +241,17 @@ export default function RecurringInvoices() {
                   <div className="flex items-start justify-between">
                     <div>
                       <h3 className="font-semibold">
-                        {recurring.clientName || 'Unknown Client'}
+                        {recurring.clientName || "Unknown Client"}
                       </h3>
                       <p className="text-sm text-muted-foreground">
                         {recurring.invoiceNumberPrefix}
                       </p>
                     </div>
                     <div className="flex gap-2">
-                      <Badge variant={recurring.isActive ? "default" : "secondary"} className="text-xs">
+                      <Badge
+                        variant={recurring.isActive ? "default" : "secondary"}
+                        className="text-xs"
+                      >
                         {recurring.isActive ? "Active" : "Paused"}
                       </Badge>
                     </div>
@@ -215,11 +260,18 @@ export default function RecurringInvoices() {
                   <div className="grid grid-cols-2 gap-3 text-sm">
                     <div>
                       <p className="text-muted-foreground">Frequency</p>
-                      <p className="font-medium">{getFrequencyLabel(recurring.frequency)}</p>
+                      <p className="font-medium">
+                        {getFrequencyLabel(recurring.frequency)}
+                      </p>
                     </div>
                     <div>
                       <p className="text-muted-foreground">Next Invoice</p>
-                      <p className="font-medium"><DateDisplay date={recurring.nextInvoiceDate} format="long" /></p>
+                      <p className="font-medium">
+                        <DateDisplay
+                          date={recurring.nextInvoiceDate}
+                          format="long"
+                        />
+                      </p>
                     </div>
                   </div>
 
@@ -228,19 +280,27 @@ export default function RecurringInvoices() {
                       variant="outline"
                       size="default"
                       className="flex-1 h-11"
-                      onClick={() => handleToggle(recurring.id, recurring.isActive)}
+                      onClick={() =>
+                        handleToggle(recurring.id, recurring.isActive)
+                      }
                     >
                       {recurring.isActive ? (
-                        <><Pause className="w-4 h-4 mr-2" /> Pause</>
+                        <>
+                          <Pause className="w-4 h-4 mr-2" /> Pause
+                        </>
                       ) : (
-                        <><Play className="w-4 h-4 mr-2" /> Activate</>
+                        <>
+                          <Play className="w-4 h-4 mr-2" /> Activate
+                        </>
                       )}
                     </Button>
                     <Button
                       variant="outline"
                       size="default"
                       className="h-11 px-3"
-                      onClick={() => setLocation(`/recurring-invoices/edit/${recurring.id}`)}
+                      onClick={() =>
+                        setLocation(`/recurring-invoices/${recurring.id}/edit`)
+                      }
                     >
                       <Edit className="w-4 h-4" />
                     </Button>

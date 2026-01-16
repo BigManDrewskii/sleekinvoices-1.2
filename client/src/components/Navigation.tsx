@@ -48,26 +48,64 @@ import { cn } from "@/lib/utils";
 
 // Navigation structure with grouped items and icons
 const navigationConfig = {
-  direct: [
-    { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  ],
+  direct: [{ href: "/dashboard", label: "Dashboard", icon: LayoutDashboard }],
   billing: {
     label: "Billing",
     items: [
-      { href: "/invoices", label: "Invoices", icon: FileText, description: "Create and manage invoices" },
-      { href: "/estimates", label: "Estimates", icon: FileCheck, description: "Quotes and proposals" },
-      { href: "/recurring-invoices", label: "Recurring", icon: RefreshCw, description: "Automated billing" },
-      { href: "/payments", label: "Payments", icon: CreditCard, description: "Track payments received" },
+      {
+        href: "/invoices",
+        label: "Invoices",
+        icon: FileText,
+        description: "Create and manage invoices",
+      },
+      {
+        href: "/estimates",
+        label: "Estimates",
+        icon: FileCheck,
+        description: "Quotes and proposals",
+      },
+      {
+        href: "/recurring-invoices",
+        label: "Recurring",
+        icon: RefreshCw,
+        description: "Automated billing",
+      },
+      {
+        href: "/payments",
+        label: "Payments",
+        icon: CreditCard,
+        description: "Track payments received",
+      },
     ],
   },
   clients: { href: "/clients", label: "Clients", icon: Users },
   finances: {
     label: "Finances",
     items: [
-      { href: "/expenses", label: "Expenses", icon: Receipt, description: "Track business expenses" },
-      { href: "/products", label: "Products", icon: Package, description: "Products & services catalog" },
-      { href: "/analytics", label: "Analytics", icon: BarChart3, description: "Revenue insights" },
-      { href: "/email-history", label: "Email History", icon: Mail, description: "Track sent emails" },
+      {
+        href: "/expenses",
+        label: "Expenses",
+        icon: Receipt,
+        description: "Track business expenses",
+      },
+      {
+        href: "/products",
+        label: "Products",
+        icon: Package,
+        description: "Products & services catalog",
+      },
+      {
+        href: "/analytics",
+        label: "Analytics",
+        icon: BarChart3,
+        description: "Revenue insights",
+      },
+      {
+        href: "/email-history",
+        label: "Email History",
+        icon: Mail,
+        description: "Track sent emails",
+      },
     ],
   },
   templates: { href: "/templates", label: "Templates", icon: LayoutTemplate },
@@ -77,28 +115,28 @@ const navigationConfig = {
 // Custom hook for scroll-based navbar effects
 function useScrollEffect() {
   const [scrolled, setScrolled] = useState(false);
-  const [scrollDirection, setScrollDirection] = useState<'up' | 'down'>('up');
+  const [scrollDirection, setScrollDirection] = useState<"up" | "down">("up");
   const [lastScrollY, setLastScrollY] = useState(0);
 
   useEffect(() => {
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
-      
+
       // Determine if scrolled past threshold
       setScrolled(currentScrollY > 10);
-      
+
       // Determine scroll direction
       if (currentScrollY > lastScrollY && currentScrollY > 50) {
-        setScrollDirection('down');
+        setScrollDirection("down");
       } else {
-        setScrollDirection('up');
+        setScrollDirection("up");
       }
-      
+
       setLastScrollY(currentScrollY);
     };
 
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
   }, [lastScrollY]);
 
   return { scrolled, scrollDirection };
@@ -110,7 +148,7 @@ export function Navigation() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { scrolled, scrollDirection } = useScrollEffect();
   const { setSearchOpen } = useKeyboardShortcuts();
-  
+
   const logout = trpc.auth.logout.useMutation({
     onSuccess: () => {
       toast.success("Logged out successfully");
@@ -118,16 +156,22 @@ export function Navigation() {
     },
   });
 
-  const isActive = useCallback((href: string) => {
-    if (href === "/dashboard") {
-      return location === "/" || location === "/dashboard";
-    }
-    return location.startsWith(href);
-  }, [location]);
+  const isActive = useCallback(
+    (href: string) => {
+      if (href === "/dashboard") {
+        return location === "/" || location === "/dashboard";
+      }
+      return location.startsWith(href);
+    },
+    [location]
+  );
 
-  const isGroupActive = useCallback((items: { href: string }[]) => {
-    return items.some(item => location.startsWith(item.href));
-  }, [location]);
+  const isGroupActive = useCallback(
+    (items: { href: string }[]) => {
+      return items.some(item => location.startsWith(item.href));
+    },
+    [location]
+  );
 
   // Quick Actions Menu with enhanced styling
   const QuickActionsMenu = () => (
@@ -138,17 +182,20 @@ export function Navigation() {
           variant="outline"
           className="navbar-quick-action h-11 min-w-[44px] min-h-[44px] gap-1.5 px-2 sm:px-3 w-11 sm:w-auto group relative overflow-hidden border-primary/50 hover:border-primary hover:bg-primary/10 text-primary transition-all duration-200"
         >
-          <Plus weight="bold" className="h-4 w-4 flex-shrink-0 transition-transform duration-200 group-hover:rotate-90" />
+          <Plus
+            weight="bold"
+            className="h-4 w-4 flex-shrink-0 transition-transform duration-200 group-hover:rotate-90"
+          />
           <span className="hidden md:inline">New</span>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent 
-        align="end" 
+      <DropdownMenuContent
+        align="end"
         className="w-52 animate-in fade-in-0 zoom-in-95 slide-in-from-top-2"
         sideOffset={8}
       >
-        <DropdownMenuItem 
-          onClick={() => setLocation("/invoices/guided")} 
+        <DropdownMenuItem
+          onClick={() => setLocation("/invoices/guided")}
           className="cursor-pointer h-11 gap-3 transition-colors"
         >
           <div className="flex h-8 w-8 items-center justify-center rounded-md bg-purple-500/10 text-purple-500">
@@ -156,11 +203,13 @@ export function Navigation() {
           </div>
           <div className="flex flex-col">
             <span className="font-medium">Guided Creator</span>
-            <span className="text-xs text-muted-foreground">Step-by-step invoice</span>
+            <span className="text-xs text-muted-foreground">
+              Step-by-step invoice
+            </span>
           </div>
         </DropdownMenuItem>
-        <DropdownMenuItem 
-          onClick={() => setLocation("/invoices/create")} 
+        <DropdownMenuItem
+          onClick={() => setLocation("/invoices/create")}
           className="cursor-pointer h-11 gap-3 transition-colors"
         >
           <div className="flex h-8 w-8 items-center justify-center rounded-md bg-primary/10 text-primary">
@@ -171,8 +220,8 @@ export function Navigation() {
             <span className="text-xs text-muted-foreground">Standard form</span>
           </div>
         </DropdownMenuItem>
-        <DropdownMenuItem 
-          onClick={() => setLocation("/estimates/create")} 
+        <DropdownMenuItem
+          onClick={() => setLocation("/estimates/create")}
           className="cursor-pointer h-11 gap-3 transition-colors"
         >
           <div className="flex h-8 w-8 items-center justify-center rounded-md bg-blue-500/10 text-blue-500">
@@ -180,12 +229,14 @@ export function Navigation() {
           </div>
           <div className="flex flex-col">
             <span className="font-medium">New Estimate</span>
-            <span className="text-xs text-muted-foreground">Create a quote</span>
+            <span className="text-xs text-muted-foreground">
+              Create a quote
+            </span>
           </div>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
-        <DropdownMenuItem 
-          onClick={() => setLocation("/clients")} 
+        <DropdownMenuItem
+          onClick={() => setLocation("/clients")}
           className="cursor-pointer h-11 gap-3 transition-colors"
         >
           <div className="flex h-8 w-8 items-center justify-center rounded-md bg-green-500/10 text-green-500">
@@ -196,8 +247,8 @@ export function Navigation() {
             <span className="text-xs text-muted-foreground">Add a client</span>
           </div>
         </DropdownMenuItem>
-        <DropdownMenuItem 
-          onClick={() => setLocation("/expenses")} 
+        <DropdownMenuItem
+          onClick={() => setLocation("/expenses")}
           className="cursor-pointer h-11 gap-3 transition-colors"
         >
           <div className="flex h-8 w-8 items-center justify-center rounded-md bg-orange-500/10 text-orange-500">
@@ -205,7 +256,9 @@ export function Navigation() {
           </div>
           <div className="flex flex-col">
             <span className="font-medium">New Expense</span>
-            <span className="text-xs text-muted-foreground">Track an expense</span>
+            <span className="text-xs text-muted-foreground">
+              Track an expense
+            </span>
           </div>
         </DropdownMenuItem>
       </DropdownMenuContent>
@@ -218,17 +271,21 @@ export function Navigation() {
     <div className="navbar-desktop-tablet-nav">
       <Link
         href="/dashboard"
-          className={cn(
-            "flex items-center gap-1.5 px-2.5 lg:px-3 xl:px-4 py-2 text-sm font-medium rounded-lg transition-all min-h-[40px]",
-            isActive("/dashboard") 
-              ? "bg-accent text-foreground" 
-              : "text-muted-foreground hover:bg-accent/50 hover:text-foreground"
-          )}
-        >
-          <NavigationIcon icon={LayoutDashboard} isActive={isActive("/dashboard")} className="h-4 w-4 flex-shrink-0" />
-          <span className="whitespace-nowrap">Dashboard</span>
-        </Link>
-      
+        className={cn(
+          "flex items-center gap-1.5 px-2.5 lg:px-3 xl:px-4 py-2 text-sm font-medium rounded-lg transition-all min-h-[40px]",
+          isActive("/dashboard")
+            ? "bg-accent text-foreground"
+            : "text-muted-foreground hover:bg-accent/50 hover:text-foreground"
+        )}
+      >
+        <NavigationIcon
+          icon={LayoutDashboard}
+          isActive={isActive("/dashboard")}
+          className="h-4 w-4 flex-shrink-0"
+        />
+        <span className="whitespace-nowrap">Dashboard</span>
+      </Link>
+
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <button
@@ -239,36 +296,48 @@ export function Navigation() {
                 : "text-muted-foreground hover:bg-accent/50 hover:text-foreground"
             )}
           >
-            <NavigationIcon icon={FileText} isActive={isGroupActive(navigationConfig.billing.items)} className="h-4 w-4 flex-shrink-0" />
+            <NavigationIcon
+              icon={FileText}
+              isActive={isGroupActive(navigationConfig.billing.items)}
+              className="h-4 w-4 flex-shrink-0"
+            />
             <span className="whitespace-nowrap">Billing</span>
-            <ChevronDown className="h-3 w-3 opacity-60" />
+            <ChevronDown className="h-3 w-3 opacity-60" aria-hidden="true" />
           </button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="start" className="w-48">
-          {navigationConfig.billing.items.map((item) => (
+          {navigationConfig.billing.items.map(item => (
             <DropdownMenuItem key={item.href} asChild>
               <Link href={item.href} className="flex items-center gap-2">
-                <NavigationIcon icon={item.icon} isActive={isActive(item.href)} className="h-4 w-4" />
+                <NavigationIcon
+                  icon={item.icon}
+                  isActive={isActive(item.href)}
+                  className="h-4 w-4"
+                />
                 {item.label}
               </Link>
             </DropdownMenuItem>
           ))}
         </DropdownMenuContent>
       </DropdownMenu>
-      
-        <Link
-          href="/clients"
-          className={cn(
-            "flex items-center gap-1.5 px-2.5 lg:px-3 xl:px-4 py-2 text-sm font-medium rounded-lg transition-all min-h-[40px]",
-            isActive("/clients")
-              ? "bg-accent text-foreground"
-              : "text-muted-foreground hover:bg-accent/50 hover:text-foreground"
-          )}
-        >
-          <NavigationIcon icon={Users} isActive={isActive("/clients")} className="h-4 w-4 flex-shrink-0" />
-          <span className="whitespace-nowrap">Clients</span>
-        </Link>
-      
+
+      <Link
+        href="/clients"
+        className={cn(
+          "flex items-center gap-1.5 px-2.5 lg:px-3 xl:px-4 py-2 text-sm font-medium rounded-lg transition-all min-h-[40px]",
+          isActive("/clients")
+            ? "bg-accent text-foreground"
+            : "text-muted-foreground hover:bg-accent/50 hover:text-foreground"
+        )}
+      >
+        <NavigationIcon
+          icon={Users}
+          isActive={isActive("/clients")}
+          className="h-4 w-4 flex-shrink-0"
+        />
+        <span className="whitespace-nowrap">Clients</span>
+      </Link>
+
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <button
@@ -279,51 +348,66 @@ export function Navigation() {
                 : "text-muted-foreground hover:bg-accent/50 hover:text-foreground"
             )}
           >
-            <NavigationIcon icon={BarChart3} isActive={isGroupActive(navigationConfig.finances.items)} className="h-4 w-4 flex-shrink-0" />
+            <NavigationIcon
+              icon={BarChart3}
+              isActive={isGroupActive(navigationConfig.finances.items)}
+              className="h-4 w-4 flex-shrink-0"
+            />
             <span className="whitespace-nowrap">Finances</span>
-            <ChevronDown className="h-3 w-3 opacity-60" />
+            <ChevronDown className="h-3 w-3 opacity-60" aria-hidden="true" />
           </button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="start" className="w-48">
-          {navigationConfig.finances.items.map((item) => (
+          {navigationConfig.finances.items.map(item => (
             <DropdownMenuItem key={item.href} asChild>
               <Link href={item.href} className="flex items-center gap-2">
-                <NavigationIcon icon={item.icon} isActive={isActive(item.href)} className="h-4 w-4" />
+                <NavigationIcon
+                  icon={item.icon}
+                  isActive={isActive(item.href)}
+                  className="h-4 w-4"
+                />
                 {item.label}
               </Link>
             </DropdownMenuItem>
           ))}
         </DropdownMenuContent>
       </DropdownMenu>
-      
-        <Link
-          href="/templates"
-          className={cn(
-            "flex items-center gap-1.5 px-2.5 lg:px-3 xl:px-4 py-2 text-sm font-medium rounded-lg transition-all min-h-[40px]",
-            isActive("/templates")
-              ? "bg-accent text-foreground"
-              : "text-muted-foreground hover:bg-accent/50 hover:text-foreground"
-          )}
-        >
-          <NavigationIcon icon={LayoutTemplate} isActive={isActive("/templates")} className="h-4 w-4 flex-shrink-0" />
-          <span className="whitespace-nowrap">Templates</span>
-        </Link>
-        
-        <Link
-          href="/docs"
-          className={cn(
-            "flex items-center gap-1.5 px-2.5 lg:px-3 xl:px-4 py-2 text-sm font-medium rounded-lg transition-all min-h-[40px]",
-            isActive("/docs")
-              ? "bg-accent text-foreground"
-              : "text-muted-foreground hover:bg-accent/50 hover:text-foreground"
-          )}
-        >
-          <NavigationIcon icon={BookOpen} isActive={isActive("/docs")} className="h-4 w-4 flex-shrink-0" />
-          <span className="whitespace-nowrap">Docs</span>
-        </Link>
+
+      <Link
+        href="/templates"
+        className={cn(
+          "flex items-center gap-1.5 px-2.5 lg:px-3 xl:px-4 py-2 text-sm font-medium rounded-lg transition-all min-h-[40px]",
+          isActive("/templates")
+            ? "bg-accent text-foreground"
+            : "text-muted-foreground hover:bg-accent/50 hover:text-foreground"
+        )}
+      >
+        <NavigationIcon
+          icon={LayoutTemplate}
+          isActive={isActive("/templates")}
+          className="h-4 w-4 flex-shrink-0"
+        />
+        <span className="whitespace-nowrap">Templates</span>
+      </Link>
+
+      <Link
+        href="/docs"
+        className={cn(
+          "flex items-center gap-1.5 px-2.5 lg:px-3 xl:px-4 py-2 text-sm font-medium rounded-lg transition-all min-h-[40px]",
+          isActive("/docs")
+            ? "bg-accent text-foreground"
+            : "text-muted-foreground hover:bg-accent/50 hover:text-foreground"
+        )}
+      >
+        <NavigationIcon
+          icon={BookOpen}
+          isActive={isActive("/docs")}
+          className="h-4 w-4 flex-shrink-0"
+        />
+        <span className="whitespace-nowrap">Docs</span>
+      </Link>
     </div>
   );
-
 
   // Mobile Navigation with improved animations
   const MobileNav = () => {
@@ -337,13 +421,17 @@ export function Navigation() {
           href="/dashboard"
           className={cn(
             "flex items-center gap-3 px-4 py-3 text-base font-medium rounded-lg transition-all duration-200 min-h-[48px]",
-            isActive("/dashboard") 
-              ? "bg-accent text-foreground shadow-sm" 
+            isActive("/dashboard")
+              ? "bg-accent text-foreground shadow-sm"
               : "text-muted-foreground hover:text-foreground hover:bg-accent/50"
           )}
           onClick={() => setMobileMenuOpen(false)}
         >
-          <NavigationIcon icon={LayoutDashboard} isActive={isActive("/dashboard")} className="h-5 w-5" />
+          <NavigationIcon
+            icon={LayoutDashboard}
+            isActive={isActive("/dashboard")}
+            className="h-5 w-5"
+          />
           Dashboard
         </Link>
 
@@ -362,15 +450,21 @@ export function Navigation() {
             aria-label="Billing menu"
           >
             <span className="flex items-center gap-3">
-              <NavigationIcon icon={FileText} isActive={isGroupActive(navigationConfig.billing.items)} className="h-5 w-5" />
+              <NavigationIcon
+                icon={FileText}
+                isActive={isGroupActive(navigationConfig.billing.items)}
+                className="h-5 w-5"
+              />
               Billing
             </span>
-            <ChevronDown className={cn(
-              "h-4 w-4 transition-transform duration-300 ease-out",
-              billingOpen && "rotate-180"
-            )} />
+            <ChevronDown
+              className={cn(
+                "h-4 w-4 transition-transform duration-300 ease-out",
+                billingOpen && "rotate-180"
+              )}
+            />
           </button>
-          <div 
+          <div
             id="billing-submenu"
             className={cn(
               "ml-4 space-y-1 overflow-hidden transition-all duration-300 ease-out",
@@ -383,18 +477,22 @@ export function Navigation() {
                 href={item.href}
                 className={cn(
                   "flex items-center gap-3 px-4 py-3 text-sm rounded-lg transition-all duration-200 min-h-[48px]",
-                  isActive(item.href) 
-                    ? "bg-accent text-foreground shadow-sm" 
+                  isActive(item.href)
+                    ? "bg-accent text-foreground shadow-sm"
                     : "text-muted-foreground hover:text-foreground hover:bg-accent/50"
                 )}
-                style={{ 
-                  transitionDelay: billingOpen ? `${index * 50}ms` : '0ms',
-                  transform: billingOpen ? 'translateX(0)' : 'translateX(-8px)',
-                  opacity: billingOpen ? 1 : 0
+                style={{
+                  transitionDelay: billingOpen ? `${index * 50}ms` : "0ms",
+                  transform: billingOpen ? "translateX(0)" : "translateX(-8px)",
+                  opacity: billingOpen ? 1 : 0,
                 }}
                 onClick={() => setMobileMenuOpen(false)}
               >
-                <NavigationIcon icon={item.icon} isActive={isActive(item.href)} className="h-4 w-4" />
+                <NavigationIcon
+                  icon={item.icon}
+                  isActive={isActive(item.href)}
+                  className="h-4 w-4"
+                />
                 {item.label}
               </Link>
             ))}
@@ -406,13 +504,17 @@ export function Navigation() {
           href="/clients"
           className={cn(
             "flex items-center gap-3 px-4 py-3 text-base font-medium rounded-lg transition-all duration-200 min-h-[48px]",
-            isActive("/clients") 
-              ? "bg-accent text-foreground shadow-sm" 
+            isActive("/clients")
+              ? "bg-accent text-foreground shadow-sm"
               : "text-muted-foreground hover:text-foreground hover:bg-accent/50"
           )}
           onClick={() => setMobileMenuOpen(false)}
         >
-          <NavigationIcon icon={Users} isActive={isActive("/clients")} className="h-5 w-5" />
+          <NavigationIcon
+            icon={Users}
+            isActive={isActive("/clients")}
+            className="h-5 w-5"
+          />
           Clients
         </Link>
 
@@ -431,15 +533,21 @@ export function Navigation() {
             aria-label="Finances menu"
           >
             <span className="flex items-center gap-3">
-              <NavigationIcon icon={BarChart3} isActive={isGroupActive(navigationConfig.finances.items)} className="h-5 w-5" />
+              <NavigationIcon
+                icon={BarChart3}
+                isActive={isGroupActive(navigationConfig.finances.items)}
+                className="h-5 w-5"
+              />
               Finances
             </span>
-            <ChevronDown className={cn(
-              "h-4 w-4 transition-transform duration-300 ease-out",
-              financesOpen && "rotate-180"
-            )} />
+            <ChevronDown
+              className={cn(
+                "h-4 w-4 transition-transform duration-300 ease-out",
+                financesOpen && "rotate-180"
+              )}
+            />
           </button>
-          <div 
+          <div
             id="finances-submenu"
             className={cn(
               "ml-4 space-y-1 overflow-hidden transition-all duration-300 ease-out",
@@ -452,18 +560,24 @@ export function Navigation() {
                 href={item.href}
                 className={cn(
                   "flex items-center gap-3 px-4 py-3 text-sm rounded-lg transition-all duration-200 min-h-[48px]",
-                  isActive(item.href) 
-                    ? "bg-accent text-foreground shadow-sm" 
+                  isActive(item.href)
+                    ? "bg-accent text-foreground shadow-sm"
                     : "text-muted-foreground hover:text-foreground hover:bg-accent/50"
                 )}
-                style={{ 
-                  transitionDelay: financesOpen ? `${index * 50}ms` : '0ms',
-                  transform: financesOpen ? 'translateX(0)' : 'translateX(-8px)',
-                  opacity: financesOpen ? 1 : 0
+                style={{
+                  transitionDelay: financesOpen ? `${index * 50}ms` : "0ms",
+                  transform: financesOpen
+                    ? "translateX(0)"
+                    : "translateX(-8px)",
+                  opacity: financesOpen ? 1 : 0,
                 }}
                 onClick={() => setMobileMenuOpen(false)}
               >
-                <NavigationIcon icon={item.icon} isActive={isActive(item.href)} className="h-4 w-4" />
+                <NavigationIcon
+                  icon={item.icon}
+                  isActive={isActive(item.href)}
+                  className="h-4 w-4"
+                />
                 {item.label}
               </Link>
             ))}
@@ -475,28 +589,36 @@ export function Navigation() {
           href="/templates"
           className={cn(
             "flex items-center gap-3 px-4 py-3 text-base font-medium rounded-lg transition-all duration-200 min-h-[48px]",
-            isActive("/templates") 
-              ? "bg-accent text-foreground shadow-sm" 
+            isActive("/templates")
+              ? "bg-accent text-foreground shadow-sm"
               : "text-muted-foreground hover:text-foreground hover:bg-accent/50"
           )}
           onClick={() => setMobileMenuOpen(false)}
         >
-          <NavigationIcon icon={LayoutTemplate} isActive={isActive("/templates")} className="h-5 w-5" />
+          <NavigationIcon
+            icon={LayoutTemplate}
+            isActive={isActive("/templates")}
+            className="h-5 w-5"
+          />
           Templates
         </Link>
-        
+
         {/* Docs */}
         <Link
           href="/docs"
           className={cn(
             "flex items-center gap-3 px-4 py-3 text-base font-medium rounded-lg transition-all duration-200 min-h-[48px]",
-            isActive("/docs") 
-              ? "bg-accent text-foreground shadow-sm" 
+            isActive("/docs")
+              ? "bg-accent text-foreground shadow-sm"
               : "text-muted-foreground hover:text-foreground hover:bg-accent/50"
           )}
           onClick={() => setMobileMenuOpen(false)}
         >
-          <NavigationIcon icon={BookOpen} isActive={isActive("/docs")} className="h-5 w-5" />
+          <NavigationIcon
+            icon={BookOpen}
+            isActive={isActive("/docs")}
+            className="h-5 w-5"
+          />
           Docs
         </Link>
       </div>
@@ -511,7 +633,6 @@ export function Navigation() {
       )}
       role="navigation"
       aria-label="Main navigation"
-
     >
       <div className="navbar-container">
         <div className="navbar-inner">
@@ -527,7 +648,7 @@ export function Navigation() {
               alt=""
               role="presentation"
               className="hidden lg:block navbar-logo-wide transition-all duration-150 ease-out group-hover:scale-[1.03] group-hover:brightness-110 group-active:scale-[0.98]"
-              style={{ height: '28px', width: 'auto', maxWidth: '200px' }}
+              style={{ height: "28px", width: "auto", maxWidth: "200px" }}
             />
             {/* Monogram icon for mobile and tablet (below lg) */}
             <img
@@ -535,7 +656,7 @@ export function Navigation() {
               alt=""
               role="presentation"
               className="lg:hidden navbar-logo-compact transition-all duration-150 ease-out group-hover:scale-110 group-hover:brightness-110 group-hover:drop-shadow-[0_0_8px_rgba(99,102,241,0.3)] group-active:scale-95"
-              style={{ height: '36px', width: '36px', maxWidth: '36px' }}
+              style={{ height: "36px", width: "36px", maxWidth: "36px" }}
             />
           </Link>
 
@@ -551,7 +672,6 @@ export function Navigation() {
               onClick={() => setSearchOpen(true)}
               className="h-11 min-h-[44px] min-w-[44px] gap-2 px-3 sm:px-4 text-muted-foreground hover:text-foreground hover:bg-accent/50"
               aria-label="Open search (Cmd+K)"
-
             >
               <Search className="h-4 w-4 flex-shrink-0" />
               <span className="hidden md:inline">Search</span>
@@ -573,28 +693,34 @@ export function Navigation() {
                   {user && <UserAvatar user={user} size="sm" bordered />}
                 </button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent
-                align="end"
-                className="w-60"
-                sideOffset={8}
-              >
+              <DropdownMenuContent align="end" className="w-60" sideOffset={8}>
                 <div className="px-3 py-3 border-b border-border/50">
                   <div className="flex items-center gap-3">
                     {user && <UserAvatar user={user} size="md" bordered />}
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium truncate">{user?.name}</p>
-                      <p className="text-xs text-muted-foreground truncate">{user?.email}</p>
+                      <p className="text-sm font-medium truncate">
+                        {user?.name}
+                      </p>
+                      <p className="text-xs text-muted-foreground truncate">
+                        {user?.email}
+                      </p>
                     </div>
                   </div>
                 </div>
                 <div className="py-1">
-                  <DropdownMenuItem asChild className="h-11 gap-3 cursor-pointer">
+                  <DropdownMenuItem
+                    asChild
+                    className="h-11 gap-3 cursor-pointer"
+                  >
                     <Link href="/settings">
                       <Settings className="h-4 w-4 text-muted-foreground" />
                       <span>Settings</span>
                     </Link>
                   </DropdownMenuItem>
-                  <DropdownMenuItem asChild className="h-11 gap-3 cursor-pointer">
+                  <DropdownMenuItem
+                    asChild
+                    className="h-11 gap-3 cursor-pointer"
+                  >
                     <Link href="/subscription">
                       <Sparkles className="h-4 w-4 text-muted-foreground" />
                       <span>Subscription</span>
@@ -623,14 +749,16 @@ export function Navigation() {
                   className="h-10 w-10 sm:h-11 sm:w-11 min-w-[40px] min-h-[40px] sm:min-w-[44px] sm:min-h-[44px] transition-all duration-200"
                   aria-label="Open navigation menu"
                 >
-                  <Menu className={cn(
-                    "h-5 w-5 flex-shrink-0 transition-transform duration-300",
-                    mobileMenuOpen && "rotate-90"
-                  )} />
+                  <Menu
+                    className={cn(
+                      "h-5 w-5 flex-shrink-0 transition-transform duration-300",
+                      mobileMenuOpen && "rotate-90"
+                    )}
+                  />
                 </Button>
               </SheetTrigger>
-              <SheetContent 
-                side="right" 
+              <SheetContent
+                side="right"
                 className="navbar-mobile-menu w-80 max-w-[85vw] p-0"
                 hideCloseButton
               >
@@ -638,9 +766,7 @@ export function Navigation() {
                 <div className="flex flex-col h-full">
                   {/* Mobile Menu Header with close button and search */}
                   <div className="flex items-center gap-3 p-4 border-b border-border/50">
-                    <SheetClose
-                      className="flex-shrink-0 rounded-full p-2 bg-accent/50 text-muted-foreground hover:text-foreground hover:bg-accent transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-ring"
-                    >
+                    <SheetClose className="flex-shrink-0 rounded-full p-2 bg-accent/50 text-muted-foreground hover:text-foreground hover:bg-accent transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-ring">
                       <X className="size-4" />
                       <span className="sr-only">Close menu</span>
                     </SheetClose>
@@ -657,12 +783,12 @@ export function Navigation() {
                       <span>Search...</span>
                     </Button>
                   </div>
-                  
+
                   {/* Mobile Navigation */}
                   <div className="flex-1 overflow-y-auto p-4">
                     <MobileNav />
                   </div>
-                  
+
                   {/* Mobile Menu Footer */}
                   <div className="p-4 border-t border-border/50 bg-accent/20 space-y-1">
                     <Link
@@ -694,7 +820,9 @@ export function Navigation() {
                         <Mail className="h-4 w-4" />
                         <div className="flex flex-col">
                           <span className="font-medium">General Inquiries</span>
-                          <span className="text-xs text-muted-foreground">hello@sleekinvoices.com</span>
+                          <span className="text-xs text-muted-foreground">
+                            hello@sleekinvoices.com
+                          </span>
                         </div>
                       </a>
                       <a
@@ -704,7 +832,9 @@ export function Navigation() {
                         <Mail className="h-4 w-4" />
                         <div className="flex flex-col">
                           <span className="font-medium">Technical Support</span>
-                          <span className="text-xs text-muted-foreground">support@sleekinvoices.com</span>
+                          <span className="text-xs text-muted-foreground">
+                            support@sleekinvoices.com
+                          </span>
                         </div>
                       </a>
                     </div>

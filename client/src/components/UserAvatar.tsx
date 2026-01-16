@@ -1,7 +1,7 @@
-import Avatar from 'boring-avatars';
-import { cn } from '@/lib/utils';
+import Avatar from "boring-avatars";
+import { cn } from "@/lib/utils";
 
-const COLORS = ['#5f6fff', '#764ba2', '#667eea', '#10b981', '#f59e0b'];
+const COLORS = ["#5f6fff", "#764ba2", "#667eea", "#10b981", "#f59e0b"];
 
 export type UserAvatarSize = "xs" | "sm" | "md" | "lg" | "xl" | "2xl";
 
@@ -10,7 +10,7 @@ interface UserAvatarProps {
     name?: string | null;
     email?: string | null;
     avatarUrl?: string | null;
-    avatarType?: 'initials' | 'boring' | 'upload' | null;
+    avatarType?: "initials" | "boring" | "upload" | null;
   };
   /** Size variant matching SleekyAvatar sizes, or custom number for pixel size */
   size?: UserAvatarSize | number;
@@ -73,51 +73,58 @@ function getRingSizeForSize(size: number): string {
   return "ring-[3px]";
 }
 
-export function UserAvatar({ user, size = "md", bordered = true, className }: UserAvatarProps) {
+export function UserAvatar({
+  user,
+  size = "md",
+  bordered = true,
+  className,
+}: UserAvatarProps) {
   const getInitials = () => {
     if (user.name) {
-      const nameParts = user.name.split(' ');
+      const nameParts = user.name.split(" ");
       if (nameParts.length >= 2) {
         return `${nameParts[0][0]}${nameParts[1][0]}`.toUpperCase();
       }
       return user.name.substring(0, 2).toUpperCase();
     }
-    return user.email?.substring(0, 2).toUpperCase() || 'U';
+    return user.email?.substring(0, 2).toUpperCase() || "U";
   };
 
   // Determine if using named size or pixel size
-  const isNamedSize = typeof size === 'string';
+  const isNamedSize = typeof size === "string";
   const pixelSize = isNamedSize ? sizePixels[size] : size;
-  const borderRadius = isNamedSize ? borderRadiusClasses[size] : getBorderRadiusForSize(size);
-  const ringSize = isNamedSize ? borderSizeClasses[size] : getRingSizeForSize(size);
+  const borderRadius = isNamedSize
+    ? borderRadiusClasses[size]
+    : getBorderRadiusForSize(size);
+  const ringSize = isNamedSize
+    ? borderSizeClasses[size]
+    : getRingSizeForSize(size);
 
   const baseClasses = cn(
     "overflow-hidden flex items-center justify-center transition-all duration-300",
     borderRadius,
-    bordered && [
-      ringSize,
-      "ring-border/40",
-      "hover:ring-border/60",
-    ],
+    bordered && [ringSize, "ring-border/40", "hover:ring-border/60"],
     isNamedSize && sizeClasses[size],
     className
   );
 
   // Style for custom pixel sizes
-  const customSizeStyle = !isNamedSize ? {
-    width: pixelSize,
-    height: pixelSize,
-    minWidth: pixelSize,
-    minHeight: pixelSize,
-  } : undefined;
+  const customSizeStyle = !isNamedSize
+    ? {
+        width: pixelSize,
+        height: pixelSize,
+        minWidth: pixelSize,
+        minHeight: pixelSize,
+      }
+    : undefined;
 
   // Upload type - show custom uploaded image
-  if (user.avatarType === 'upload' && user.avatarUrl) {
+  if (user.avatarType === "upload" && user.avatarUrl) {
     return (
       <div className={baseClasses} style={customSizeStyle}>
         <img
           src={user.avatarUrl}
-          alt={user.name || 'User avatar'}
+          alt={user.name || "User avatar"}
           className={cn("w-full h-full object-cover", borderRadius)}
         />
       </div>
@@ -125,14 +132,14 @@ export function UserAvatar({ user, size = "md", bordered = true, className }: Us
   }
 
   // Boring type - show generated avatar
-  if (user.avatarType === 'boring' && user.avatarUrl) {
+  if (user.avatarType === "boring" && user.avatarUrl) {
     // Parse avatarUrl format: "style:seed"
-    const [variant, seed] = user.avatarUrl.split(':');
+    const [variant, seed] = user.avatarUrl.split(":");
     return (
       <div className={baseClasses} style={customSizeStyle}>
         <Avatar
           size={pixelSize}
-          name={seed || user.email || user.name || 'User'}
+          name={seed || user.email || user.name || "User"}
           variant={variant as any}
           colors={COLORS}
           square={true} // Use square to match rounded-xl styling
@@ -147,7 +154,9 @@ export function UserAvatar({ user, size = "md", bordered = true, className }: Us
       className={cn(baseClasses, "bg-primary/10 text-primary font-semibold")}
       style={{
         ...customSizeStyle,
-        fontSize: pixelSize * 0.4
+        fontSize: isNamedSize
+          ? undefined
+          : `${Math.max(12, Math.round(((pixelSize * 0.4) / 16) * 10) / 10)}rem`,
       }}
     >
       {getInitials()}

@@ -63,12 +63,12 @@ export function DialogBody({
 }) {
   const spacingClasses = {
     compact: "space-y-3",
-    default: "space-y-4",
+    default: "space-y-5",
     relaxed: "space-y-6",
   };
 
   return (
-    <div className={cn("px-6 py-4", spacingClasses[spacing], className)}>
+    <div className={cn("py-5", spacingClasses[spacing], className)}>
       {children}
     </div>
   );
@@ -96,7 +96,7 @@ export function DialogActions({
   disabled?: boolean;
 }) {
   return (
-    <DialogFooter className="gap-3">
+    <DialogFooter className="gap-3 pt-6 px-0 border-t">
       <Button variant="ghost" onClick={onClose} disabled={isLoading}>
         {cancelText}
       </Button>
@@ -113,4 +113,3 @@ export function DialogActions({
     </DialogFooter>
   );
 }
-

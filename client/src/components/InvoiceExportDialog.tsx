@@ -26,7 +26,7 @@ interface Invoice {
     name: string;
     email: string | null;
   };
-  paymentStatus?: 'unpaid' | 'partial' | 'paid';
+  paymentStatus?: "unpaid" | "partial" | "paid";
   totalPaid?: string;
   amountDue?: string;
   currency?: string;
@@ -45,15 +45,21 @@ export function InvoiceExportDialog({
   invoices,
   onExportPDF,
 }: InvoiceExportDialogProps) {
-  const [exportFormat, setExportFormat] = useState<'csv' | 'pdf'>('csv');
+  const [exportFormat, setExportFormat] = useState<"csv" | "pdf">("csv");
   const [isExporting, setIsExporting] = useState(false);
 
   // Calculate summary stats
-  const totalAmount = invoices.reduce((sum, inv) => sum + parseFloat(inv.total || '0'), 0);
-  const paidAmount = invoices.reduce((sum, inv) => sum + parseFloat(inv.totalPaid || '0'), 0);
+  const totalAmount = invoices.reduce(
+    (sum, inv) => sum + parseFloat(inv.total || "0"),
+    0
+  );
+  const paidAmount = invoices.reduce(
+    (sum, inv) => sum + parseFloat(inv.totalPaid || "0"),
+    0
+  );
   const outstandingAmount = totalAmount - paidAmount;
-  const paidCount = invoices.filter(inv => inv.paymentStatus === 'paid').length;
-  const currency = invoices[0]?.currency || 'USD';
+  const paidCount = invoices.filter(inv => inv.paymentStatus === "paid").length;
+  const currency = invoices[0]?.currency || "USD";
 
   const handleExportCSV = () => {
     if (invoices.length === 0) return;
@@ -73,32 +79,84 @@ export function InvoiceExportDialog({
       "Currency",
     ];
 
-    const rows = invoices.map((invoice) => [
+    const rows = invoices.map(invoice => [
       invoice.invoiceNumber,
       invoice.client.name,
-      invoice.client.email || '',
+      invoice.client.email || "",
       invoice.status,
       invoice.paymentStatus || "unpaid",
       new Date(invoice.issueDate).toLocaleDateString(),
       new Date(invoice.dueDate).toLocaleDateString(),
       parseFloat(invoice.total?.toString() || "0").toFixed(2),
       parseFloat(invoice.totalPaid?.toString() || "0").toFixed(2),
-      parseFloat(invoice.amountDue?.toString() || invoice.total?.toString() || "0").toFixed(2),
+      parseFloat(
+        invoice.amountDue?.toString() || invoice.total?.toString() || "0"
+      ).toFixed(2),
       invoice.currency || "USD",
     ]);
 
     // Add summary row
     rows.push([]);
-    rows.push(['SUMMARY', '', '', '', '', '', '', '', '', '', '']);
-    rows.push(['Total Invoices', invoices.length.toString(), '', '', '', '', '', '', '', '', '']);
-    rows.push(['Total Amount', '', '', '', '', '', '', totalAmount.toFixed(2), '', '', currency]);
-    rows.push(['Total Paid', '', '', '', '', '', '', '', paidAmount.toFixed(2), '', currency]);
-    rows.push(['Outstanding', '', '', '', '', '', '', '', '', outstandingAmount.toFixed(2), currency]);
+    rows.push(["SUMMARY", "", "", "", "", "", "", "", "", "", ""]);
+    rows.push([
+      "Total Invoices",
+      invoices.length.toString(),
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+    ]);
+    rows.push([
+      "Total Amount",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      totalAmount.toFixed(2),
+      "",
+      "",
+      currency,
+    ]);
+    rows.push([
+      "Total Paid",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      paidAmount.toFixed(2),
+      "",
+      currency,
+    ]);
+    rows.push([
+      "Outstanding",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      outstandingAmount.toFixed(2),
+      currency,
+    ]);
 
     // Convert to CSV string
     const csvContent = [
       headers.map(h => `"${h}"`).join(","),
-      ...rows.map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(","))
+      ...rows.map(row =>
+        row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(",")
+      ),
     ].join("\n");
 
     // Download file
@@ -115,7 +173,7 @@ export function InvoiceExportDialog({
 
   const handleExportPDF = async () => {
     if (invoices.length === 0) return;
-    
+
     // Generate PDF report using HTML
     const htmlContent = generatePDFHTML(invoices, {
       totalAmount,
@@ -124,9 +182,9 @@ export function InvoiceExportDialog({
       paidCount,
       currency,
     });
-    
+
     // Open in new window for printing/saving as PDF
-    const printWindow = window.open('', '_blank');
+    const printWindow = window.open("", "_blank");
     if (printWindow) {
       printWindow.document.write(htmlContent);
       printWindow.document.close();
@@ -140,7 +198,7 @@ export function InvoiceExportDialog({
   const handleExport = async () => {
     setIsExporting(true);
     try {
-      if (exportFormat === 'csv') {
+      if (exportFormat === "csv") {
         handleExportCSV();
       } else {
         await handleExportPDF();
@@ -157,7 +215,8 @@ export function InvoiceExportDialog({
         <DialogHeader>
           <DialogTitle>Export Invoices</DialogTitle>
           <DialogDescription>
-            Export {invoices.length} invoice{invoices.length !== 1 ? 's' : ''} with current filters applied.
+            Export {invoices.length} invoice{invoices.length !== 1 ? "s" : ""}{" "}
+            with current filters applied.
           </DialogDescription>
         </DialogHeader>
 
@@ -176,40 +235,56 @@ export function InvoiceExportDialog({
               </div>
               <div>
                 <p className="text-muted-foreground">Total Amount</p>
-                <p className="font-semibold">{formatCurrency(totalAmount, currency)}</p>
+                <p className="font-semibold">
+                  {formatCurrency(totalAmount, currency)}
+                </p>
               </div>
               <div>
                 <p className="text-muted-foreground">Outstanding</p>
-                <p className="font-semibold text-orange-600">{formatCurrency(outstandingAmount, currency)}</p>
+                <p className="font-semibold text-orange-600">
+                  {formatCurrency(outstandingAmount, currency)}
+                </p>
               </div>
             </div>
           </div>
-          
+
           {/* Format Selection */}
           <div className="space-y-3">
             <Label>Export Format</Label>
-            <RadioGroup value={exportFormat} onValueChange={(v: 'csv' | 'pdf') => setExportFormat(v)}>
+            <RadioGroup
+              value={exportFormat}
+              onValueChange={(v: "csv" | "pdf") => setExportFormat(v)}
+              aria-label="Export format selection"
+            >
               <div className="flex items-start space-x-3 p-3 rounded-lg border hover:bg-muted/50 cursor-pointer">
                 <RadioGroupItem value="csv" id="csv" className="mt-1" />
                 <div className="flex-1">
-                  <label htmlFor="csv" className="flex items-center gap-2 cursor-pointer">
+                  <label
+                    htmlFor="csv"
+                    className="flex items-center gap-2 cursor-pointer"
+                  >
                     <FileSpreadsheet className="h-5 w-5 text-green-600" />
                     <span className="font-medium">CSV Spreadsheet</span>
                   </label>
                   <p className="text-sm text-muted-foreground mt-1">
-                    Best for data analysis in Excel, Google Sheets, or other spreadsheet applications.
+                    Best for data analysis in Excel, Google Sheets, or other
+                    spreadsheet applications.
                   </p>
                 </div>
               </div>
               <div className="flex items-start space-x-3 p-3 rounded-lg border hover:bg-muted/50 cursor-pointer">
                 <RadioGroupItem value="pdf" id="pdf" className="mt-1" />
                 <div className="flex-1">
-                  <label htmlFor="pdf" className="flex items-center gap-2 cursor-pointer">
+                  <label
+                    htmlFor="pdf"
+                    className="flex items-center gap-2 cursor-pointer"
+                  >
                     <FileText className="h-5 w-5 text-destructive" />
                     <span className="font-medium">PDF Report</span>
                   </label>
                   <p className="text-sm text-muted-foreground mt-1">
-                    Professional report format with summary statistics, ideal for sharing or archiving.
+                    Professional report format with summary statistics, ideal
+                    for sharing or archiving.
                   </p>
                 </div>
               </div>
@@ -243,25 +318,25 @@ function generatePDFHTML(
 ): string {
   const formatDate = (date: Date) => new Date(date).toLocaleDateString();
   const formatMoney = (amount: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
       currency: summary.currency,
     }).format(amount);
   };
 
   const statusColors: Record<string, string> = {
-    draft: '#6b7280',
-    sent: '#3b82f6',
-    viewed: '#8b5cf6',
-    paid: '#22c55e',
-    overdue: '#ef4444',
-    canceled: '#9ca3af',
+    draft: "#6b7280",
+    sent: "#3b82f6",
+    viewed: "#8b5cf6",
+    paid: "#22c55e",
+    overdue: "#ef4444",
+    canceled: "#9ca3af",
   };
 
   const paymentStatusColors: Record<string, string> = {
-    unpaid: '#ef4444',
-    partial: '#f59e0b',
-    paid: '#22c55e',
+    unpaid: "#ef4444",
+    partial: "#f59e0b",
+    paid: "#22c55e",
   };
 
   return `
@@ -398,30 +473,34 @@ function generatePDFHTML(
       </tr>
     </thead>
     <tbody>
-      ${invoices.map(inv => `
+      ${invoices
+        .map(
+          inv => `
         <tr>
           <td><strong>${inv.invoiceNumber}</strong></td>
           <td>${inv.client.name}</td>
           <td>
-            <span class="status-badge" style="background-color: ${statusColors[inv.status] || '#6b7280'}">
+            <span class="status-badge" style="background-color: ${statusColors[inv.status] || "#6b7280"}">
               ${inv.status}
             </span>
           </td>
           <td>
-            <span class="status-badge" style="background-color: ${paymentStatusColors[inv.paymentStatus || 'unpaid']}">
-              ${inv.paymentStatus || 'unpaid'}
+            <span class="status-badge" style="background-color: ${paymentStatusColors[inv.paymentStatus || "unpaid"]}">
+              ${inv.paymentStatus || "unpaid"}
             </span>
           </td>
           <td>${formatDate(inv.issueDate)}</td>
           <td>${formatDate(inv.dueDate)}</td>
-          <td class="text-right">${formatMoney(parseFloat(inv.total || '0'))}</td>
+          <td class="text-right">${formatMoney(parseFloat(inv.total || "0"))}</td>
         </tr>
-      `).join('')}
+      `
+        )
+        .join("")}
     </tbody>
   </table>
 
   <div class="footer">
-    <p>Generated by SleekInvoices • ${invoices.length} invoice${invoices.length !== 1 ? 's' : ''} exported</p>
+    <p>Generated by SleekInvoices • ${invoices.length} invoice${invoices.length !== 1 ? "s" : ""} exported</p>
   </div>
 </body>
 </html>

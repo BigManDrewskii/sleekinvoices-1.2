@@ -18,9 +18,16 @@ interface LineItemRowProps {
   canDelete: boolean;
 }
 
-export function LineItemRow({ item, onChange, onDelete, canDelete }: LineItemRowProps) {
+export function LineItemRow({
+  item,
+  onChange,
+  onDelete,
+  canDelete,
+}: LineItemRowProps) {
   // Use decimal.js for precise calculation
-  const amount = parseFloat(formatDecimal(multiply(item.quantity, item.rate), 2));
+  const amount = parseFloat(
+    formatDecimal(multiply(item.quantity, item.rate), 2)
+  );
 
   const handleChange = (field: keyof LineItem, value: string | number) => {
     onChange({ ...item, [field]: value });
@@ -33,7 +40,7 @@ export function LineItemRow({ item, onChange, onDelete, canDelete }: LineItemRow
         <Input
           placeholder="Description of service or product"
           value={item.description}
-          onChange={(e) => handleChange('description', e.target.value)}
+          onChange={e => handleChange("description", e.target.value)}
         />
       </div>
 
@@ -44,22 +51,28 @@ export function LineItemRow({ item, onChange, onDelete, canDelete }: LineItemRow
           placeholder="Qty"
           min="0"
           step="0.00000001"
-          value={item.quantity || ''}
-          onChange={(e) => handleChange('quantity', parseFloat(e.target.value) || 0)}
+          value={item.quantity || ""}
+          onChange={e =>
+            handleChange("quantity", parseFloat(e.target.value) || 0)
+          }
         />
       </div>
 
       {/* Rate */}
       <div className="col-span-4 md:col-span-2">
         <div className="relative">
-          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">$</span>
+          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+            $
+          </span>
           <Input
             type="number"
             placeholder="0.00"
             min="0"
             step="0.00000001"
-            value={item.rate || ''}
-            onChange={(e) => handleChange('rate', parseFloat(e.target.value) || 0)}
+            value={item.rate || ""}
+            onChange={e =>
+              handleChange("rate", parseFloat(e.target.value) || 0)
+            }
             className="pl-7"
           />
         </div>
@@ -81,8 +94,9 @@ export function LineItemRow({ item, onChange, onDelete, canDelete }: LineItemRow
           onClick={onDelete}
           disabled={!canDelete}
           className="text-destructive hover:text-destructive hover:bg-destructive/10"
+          aria-label={`Remove line item: ${item.description || "Item"}`}
         >
-          <Trash2 className="h-4 w-4" />
+          <Trash2 className="h-4 w-4" aria-hidden="true" />
         </Button>
       </div>
     </div>

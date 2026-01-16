@@ -1,16 +1,23 @@
 import { GearLoader } from "@/components/ui/gear-loader";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { getLoginUrl } from "@/const";
 import { trpc } from "@/lib/trpc";
-import { 
-  FileText, 
-  Check, 
-  CreditCard, 
-  ExternalLink, 
-  Bitcoin, 
-  Clock, 
+import {
+  FileText,
+  Check,
+  CreditCard,
+  ExternalLink,
+  Bitcoin,
+  Clock,
   AlertTriangle,
   Sparkles,
   Calendar,
@@ -28,37 +35,39 @@ export default function Subscription() {
   const [cryptoDialogOpen, setCryptoDialogOpen] = useState(false);
   const [isExtendMode, setIsExtendMode] = useState(false);
 
-  const { data: subscriptionStatus, isLoading: statusLoading } = trpc.subscription.getStatus.useQuery(
-    undefined,
-    { enabled: isAuthenticated }
-  );
+  const { data: subscriptionStatus, isLoading: statusLoading } =
+    trpc.subscription.getStatus.useQuery(undefined, {
+      enabled: isAuthenticated,
+    });
 
   const createCheckout = trpc.subscription.createCheckout.useMutation({
-    onSuccess: (data) => {
+    onSuccess: data => {
       window.location.href = data.url;
     },
-    onError: (error) => {
+    onError: error => {
       toast.error(error.message || "Failed to create checkout session");
     },
   });
 
-  const createPortalSession = trpc.subscription.createPortalSession.useMutation({
-    onSuccess: (data) => {
-      window.location.href = data.url;
-    },
-    onError: (error) => {
-      toast.error(error.message || "Failed to open billing portal");
-    },
-  });
+  const createPortalSession = trpc.subscription.createPortalSession.useMutation(
+    {
+      onSuccess: data => {
+        window.location.href = data.url;
+      },
+      onError: error => {
+        toast.error(error.message || "Failed to open billing portal");
+      },
+    }
+  );
 
   const utils = trpc.useUtils();
   const syncStatus = trpc.subscription.syncStatus.useMutation({
-    onSuccess: (data) => {
+    onSuccess: data => {
       toast.success(data.message);
       utils.subscription.getStatus.invalidate();
       utils.auth.me.invalidate();
     },
-    onError: (error) => {
+    onError: error => {
       toast.error(error.message || "Failed to sync subscription status");
     },
   });
@@ -83,7 +92,9 @@ export default function Subscription() {
   if (loading || statusLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="opacity-70"><GearLoader size="md" /></div>
+        <div className="opacity-70">
+          <GearLoader size="md" />
+        </div>
       </div>
     );
   }
@@ -97,11 +108,11 @@ export default function Subscription() {
   const currentPeriodEnd = subscriptionStatus?.currentPeriodEnd
     ? new Date(subscriptionStatus.currentPeriodEnd).toLocaleDateString()
     : null;
-  
+
   // Enhanced subscription info from getStatus
   const effectiveEndDate = subscriptionStatus?.effectiveEndDate;
   const daysRemaining = subscriptionStatus?.daysRemaining ?? 0;
-  const timeRemaining = subscriptionStatus?.timeRemaining ?? '';
+  const timeRemaining = subscriptionStatus?.timeRemaining ?? "";
   const isExpiringSoon = subscriptionStatus?.isExpiringSoon ?? false;
   const subscriptionSource = subscriptionStatus?.subscriptionSource;
 
@@ -117,7 +128,9 @@ export default function Subscription() {
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-5xl mx-auto">
           <div className="mb-8 text-center">
-            <h1 className="text-3xl font-bold text-foreground mb-2">Subscription</h1>
+            <h1 className="text-3xl font-bold text-foreground mb-2">
+              Subscription
+            </h1>
             <p className="text-muted-foreground">
               {isActive
                 ? `You're on the ${SUBSCRIPTION_PLANS.PRO.name} plan with unlimited invoices`
@@ -139,23 +152,27 @@ export default function Subscription() {
             <Card className="mb-8 border-primary">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Check className="h-5 w-5 text-green-500" />
+                  <Check
+                    className="h-5 w-5 text-green-500"
+                    aria-hidden="true"
+                  />
                   Active Subscription
                 </CardTitle>
                 <CardDescription>
                   Your Pro subscription is active
-                  {subscriptionSource === 'crypto' && (
-                    <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-amber-500/20 text-amber-500">
-                      <Bitcoin className="h-3 w-3 mr-1" />
+                  {subscriptionSource === "crypto" && (
+                    <Badge variant="warning" className="ml-2">
+                      <Bitcoin className="h-3 w-3 mr-1" aria-hidden="true" />
                       Crypto
-                    </span>
+                    </Badge>
                   )}
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-2">
                   <p className="text-sm text-muted-foreground">
-                    <strong>Plan:</strong> {SUBSCRIPTION_PLANS.PRO.name} (${SUBSCRIPTION_PLANS.PRO.price}/month)
+                    <strong>Plan:</strong> {SUBSCRIPTION_PLANS.PRO.name} ($
+                    {SUBSCRIPTION_PLANS.PRO.price}/month)
                   </p>
                   {currentPeriodEnd && (
                     <p className="text-sm text-muted-foreground flex items-center gap-2">
@@ -163,16 +180,18 @@ export default function Subscription() {
                       <strong>Next billing date:</strong> {currentPeriodEnd}
                     </p>
                   )}
-                  {subscriptionSource === 'crypto' && effectiveEndDate && (
+                  {subscriptionSource === "crypto" && effectiveEndDate && (
                     <p className="text-sm text-muted-foreground flex items-center gap-2">
                       <Clock className="h-4 w-4" />
-                      <strong>Subscription ends:</strong>{' '}
-                      {new Date(effectiveEndDate).toLocaleDateString('en-US', {
-                        month: 'long',
-                        day: 'numeric',
-                        year: 'numeric',
+                      <strong>Subscription ends:</strong>{" "}
+                      {new Date(effectiveEndDate).toLocaleDateString("en-US", {
+                        month: "long",
+                        day: "numeric",
+                        year: "numeric",
                       })}
-                      <span className={`ml-2 ${isExpiringSoon ? 'text-amber-500' : 'text-green-500'}`}>
+                      <span
+                        className={`ml-2 ${isExpiringSoon ? "text-amber-500" : "text-green-500"}`}
+                      >
                         ({timeRemaining})
                       </span>
                     </p>
@@ -236,14 +255,22 @@ export default function Subscription() {
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
-                  {cryptoTiers.map((tier) => (
+                  {cryptoTiers.map(tier => (
                     <div
                       key={tier.months}
                       className="bg-background/50 rounded-lg p-3 text-center border border-border/50"
                     >
                       <div className="text-sm font-medium">{tier.label}</div>
-                      <div className="text-lg font-numeric-bold">${tier.totalPrice}</div>
-                      <div className="text-xs text-green-500">Save <span className="font-numeric">{tier.savingsPercent}</span>%</div>
+                      <div className="text-lg font-numeric-bold">
+                        ${tier.totalPrice}
+                      </div>
+                      <div className="text-xs text-green-500">
+                        Save{" "}
+                        <span className="font-numeric">
+                          {tier.savingsPercent}
+                        </span>
+                        %
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -267,9 +294,13 @@ export default function Subscription() {
             <Card className={!isActive ? "border-primary" : ""}>
               <CardHeader>
                 <CardTitle>Free</CardTitle>
-                <CardDescription>Get started with basic features</CardDescription>
+                <CardDescription>
+                  Get started with basic features
+                </CardDescription>
                 <div className="mt-4">
-                  <span className="text-4xl font-numeric-bold text-foreground">${SUBSCRIPTION_PLANS.FREE.price}</span>
+                  <span className="text-4xl font-numeric-bold text-foreground">
+                    ${SUBSCRIPTION_PLANS.FREE.price}
+                  </span>
                   <span className="text-muted-foreground">/month</span>
                 </div>
               </CardHeader>
@@ -277,7 +308,12 @@ export default function Subscription() {
                 <ul className="space-y-3 mb-6">
                   <li className="flex items-center gap-2">
                     <Check className="h-4 w-4 text-green-500" />
-                    <span className="text-sm"><span className="font-numeric">{SUBSCRIPTION_PLANS.FREE.invoiceLimit}</span> invoices per month</span>
+                    <span className="text-sm">
+                      <span className="font-numeric">
+                        {SUBSCRIPTION_PLANS.FREE.invoiceLimit}
+                      </span>{" "}
+                      invoices per month
+                    </span>
                   </li>
                   <li className="flex items-center gap-2">
                     <Check className="h-4 w-4 text-green-500" />
@@ -301,31 +337,40 @@ export default function Subscription() {
             </Card>
 
             {/* Pro Plan */}
-            <Card className={isActive ? "border-primary" : "border-2 border-primary/50"}>
+            <Card
+              className={
+                isActive ? "border-primary" : "border-2 border-primary/50"
+              }
+            >
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <CardTitle className="flex items-center gap-2">
                     Pro
-                    {isActive && (
-                      <span className="text-xs bg-primary text-primary-foreground px-2 py-1 rounded">
-                        Current
-                      </span>
-                    )}
+                    {isActive && <Badge variant="neutral">Current</Badge>}
                   </CardTitle>
                   {!isActive && (
-                    <span className="text-xs bg-green-500/10 text-green-500 px-2 py-1 rounded flex items-center gap-1">
+                    <Badge
+                      variant="success"
+                      className="flex items-center gap-1"
+                    >
                       <Sparkles className="h-3 w-3" />
                       Save up to 29% with crypto
-                    </span>
+                    </Badge>
                   )}
                 </div>
                 <CardDescription>Everything you need to grow</CardDescription>
                 <div className="mt-4">
-                  <span className="text-4xl font-numeric-bold text-foreground">${SUBSCRIPTION_PLANS.PRO.price}</span>
-                  <span className="text-muted-foreground">/month with card</span>
+                  <span className="text-4xl font-numeric-bold text-foreground">
+                    ${SUBSCRIPTION_PLANS.PRO.price}
+                  </span>
+                  <span className="text-muted-foreground">
+                    /month with card
+                  </span>
                   {!isActive && (
                     <div className="text-sm text-green-500 mt-1">
-                      or from $<span className="font-numeric">{lowestCryptoPrice}</span>/month with crypto
+                      or from $
+                      <span className="font-numeric">{lowestCryptoPrice}</span>
+                      /month with crypto
                     </div>
                   )}
                 </div>
@@ -334,7 +379,9 @@ export default function Subscription() {
                 <ul className="space-y-3 mb-6">
                   <li className="flex items-center gap-2">
                     <Check className="h-4 w-4 text-green-500" />
-                    <span className="text-sm font-semibold">Unlimited invoices</span>
+                    <span className="text-sm font-semibold">
+                      Unlimited invoices
+                    </span>
                   </li>
                   <li className="flex items-center gap-2">
                     <Check className="h-4 w-4 text-green-500" />
@@ -418,18 +465,42 @@ export default function Subscription() {
                   <table className="w-full">
                     <thead>
                       <tr className="border-b">
-                        <th className="text-left py-3 px-2 text-sm font-medium text-muted-foreground">Duration</th>
-                        <th className="text-right py-3 px-2 text-sm font-medium text-muted-foreground">Card Price</th>
-                        <th className="text-right py-3 px-2 text-sm font-medium text-muted-foreground">Crypto Price</th>
-                        <th className="text-right py-3 px-2 text-sm font-medium text-muted-foreground">You Save</th>
+                        <th
+                          scope="col"
+                          className="text-left py-3 px-2 text-sm font-medium text-muted-foreground"
+                        >
+                          Duration
+                        </th>
+                        <th
+                          scope="col"
+                          className="text-right py-3 px-2 text-sm font-medium text-muted-foreground"
+                        >
+                          Card Price
+                        </th>
+                        <th
+                          scope="col"
+                          className="text-right py-3 px-2 text-sm font-medium text-muted-foreground"
+                        >
+                          Crypto Price
+                        </th>
+                        <th
+                          scope="col"
+                          className="text-right py-3 px-2 text-sm font-medium text-muted-foreground"
+                        >
+                          You Save
+                        </th>
                       </tr>
                     </thead>
                     <tbody>
-                      {cryptoTiers.map((tier) => {
-                        const cardPrice = SUBSCRIPTION_PLANS.PRO.price * tier.months;
+                      {cryptoTiers.map(tier => {
+                        const cardPrice =
+                          SUBSCRIPTION_PLANS.PRO.price * tier.months;
                         const savings = cardPrice - tier.totalPrice;
                         return (
-                          <tr key={tier.months} className="border-b last:border-0">
+                          <tr
+                            key={tier.months}
+                            className="border-b last:border-0"
+                          >
                             <td className="py-3 px-2">
                               <span className="font-medium">{tier.label}</span>
                               {tier.recommended && (
@@ -468,8 +539,9 @@ export default function Subscription() {
                   Can I cancel anytime?
                 </h3>
                 <p className="text-sm text-muted-foreground">
-                  Yes, you can cancel your subscription at any time from the billing portal.
-                  You'll retain access until the end of your billing period.
+                  Yes, you can cancel your subscription at any time from the
+                  billing portal. You'll retain access until the end of your
+                  billing period.
                 </p>
               </div>
               <div>
@@ -477,8 +549,9 @@ export default function Subscription() {
                   What payment methods do you accept?
                 </h3>
                 <p className="text-sm text-muted-foreground">
-                  We accept all major credit cards through Stripe, plus 300+ cryptocurrencies
-                  including Bitcoin, Ethereum, USDT, and more via NOWPayments.
+                  We accept all major credit cards through Stripe, plus 300+
+                  cryptocurrencies including Bitcoin, Ethereum, USDT, and more
+                  via NOWPayments.
                 </p>
               </div>
               <div>
@@ -486,8 +559,9 @@ export default function Subscription() {
                   Why is crypto cheaper?
                 </h3>
                 <p className="text-sm text-muted-foreground">
-                  Crypto payments have lower processing fees than credit cards, so we pass those
-                  savings on to you. The longer the duration, the bigger the discount.
+                  Crypto payments have lower processing fees than credit cards,
+                  so we pass those savings on to you. The longer the duration,
+                  the bigger the discount.
                 </p>
               </div>
               <div>
@@ -495,8 +569,10 @@ export default function Subscription() {
                   Is there a free trial?
                 </h3>
                 <p className="text-sm text-muted-foreground">
-                  The free plan allows you to create {SUBSCRIPTION_PLANS.FREE.invoiceLimit} invoices per month with no time limit.
-                  Upgrade to {SUBSCRIPTION_PLANS.PRO.name} when you're ready for unlimited invoices.
+                  The free plan allows you to create{" "}
+                  {SUBSCRIPTION_PLANS.FREE.invoiceLimit} invoices per month with
+                  no time limit. Upgrade to {SUBSCRIPTION_PLANS.PRO.name} when
+                  you're ready for unlimited invoices.
                 </p>
               </div>
             </CardContent>

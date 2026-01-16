@@ -54,7 +54,7 @@ export function Pagination({
           variant={currentPage === pageNum ? "default" : "outline"}
           size="sm"
           onClick={() => onPageChange(pageNum)}
-          className="w-11 h-11 p-0 sm:w-10 sm:h-10 md:w-9 md:h-9 text-sm touch-target sm:min-w-0 sm:min-h-0"
+          className="w-10 h-10 sm:w-11 sm:h-11 text-sm"
           aria-label={`Go to page ${pageNum}`}
           aria-current={currentPage === pageNum ? "page" : undefined}
         >
@@ -73,7 +73,8 @@ export function Pagination({
     >
       {/* Screen reader announcement */}
       <div className="sr-only" aria-live="polite" aria-atomic="true">
-        Page {currentPage} of {totalPages}, showing items {startItem} to {endItem} of {totalItems}
+        Page {currentPage} of {totalPages}, showing items {startItem} to{" "}
+        {endItem} of {totalItems}
       </div>
 
       {/* Mobile View (< 640px) - Simplified */}
@@ -111,13 +112,13 @@ export function Pagination({
         <div className="flex items-center justify-center gap-2 w-full">
           <Select
             value={pageSize.toString()}
-            onValueChange={(val) => onPageSizeChange(parseInt(val))}
+            onValueChange={val => onPageSizeChange(parseInt(val))}
           >
             <SelectTrigger className="w-full max-w-[200px] h-11 touch-target">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              {pageSizeOptions.map((size) => (
+              {pageSizeOptions.map(size => (
                 <SelectItem key={size} value={size.toString()}>
                   {size} per page
                 </SelectItem>
@@ -134,13 +135,13 @@ export function Pagination({
           <div className="flex items-center gap-2">
             <Select
               value={pageSize.toString()}
-              onValueChange={(val) => onPageSizeChange(parseInt(val))}
+              onValueChange={val => onPageSizeChange(parseInt(val))}
             >
               <SelectTrigger className="w-[100px]">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                {pageSizeOptions.map((size) => (
+                {pageSizeOptions.map(size => (
                   <SelectItem key={size} value={size.toString()}>
                     {size}
                   </SelectItem>
@@ -196,13 +197,13 @@ export function Pagination({
           </span>
           <Select
             value={pageSize.toString()}
-            onValueChange={(val) => onPageSizeChange(parseInt(val))}
+            onValueChange={val => onPageSizeChange(parseInt(val))}
           >
             <SelectTrigger className="w-[80px]">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              {pageSizeOptions.map((size) => (
+              {pageSizeOptions.map(size => (
                 <SelectItem key={size} value={size.toString()}>
                   {size}
                 </SelectItem>

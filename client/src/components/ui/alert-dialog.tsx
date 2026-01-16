@@ -84,7 +84,7 @@ function AlertDialogHeader({
       className={cn(
         // Consistent header padding with proper spacing
         "flex flex-col gap-2 text-center sm:text-left",
-        "px-6 pt-6 pb-4",
+        "px-4 md:px-6 pt-4 md:pt-6 pb-3 md:pb-4",
         className
       )}
       {...props}
@@ -102,7 +102,7 @@ function AlertDialogFooter({
       className={cn(
         // Consistent footer padding with border separator
         "flex flex-col-reverse gap-3 sm:flex-row sm:justify-end",
-        "px-6 py-5 border-t border-border bg-muted/30 rounded-b-xl",
+        "px-4 md:px-6 py-3 md:py-5 border-t border-border bg-muted/30 rounded-b-xl",
         className
       )}
       {...props}

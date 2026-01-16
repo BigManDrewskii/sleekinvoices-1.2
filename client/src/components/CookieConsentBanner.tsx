@@ -1,13 +1,27 @@
 import { useState } from "react";
 import { useConsent } from "@/contexts/CookieConsentContext";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { Cookie, Settings as SettingsIcon, X } from "lucide-react";
 import { Link } from "wouter";
 
 export function CookieConsentBanner() {
-  const { showBanner, preferences, acceptAll, rejectAll, setPreferences, closeBanner } = useConsent();
+  const {
+    showBanner,
+    preferences,
+    acceptAll,
+    rejectAll,
+    setPreferences,
+    closeBanner,
+  } = useConsent();
   const [showDetailed, setShowDetailed] = useState(false);
   const [localPrefs, setLocalPrefs] = useState(preferences);
 
@@ -44,13 +58,17 @@ export function CookieConsentBanner() {
                   <SettingsIcon className="h-5 w-5 text-primary" />
                 </div>
                 <div>
-                  <CardTitle id="cookie-preferences-title">Cookie Preferences</CardTitle>
-                  <CardDescription>Choose which cookies you want to allow</CardDescription>
+                  <CardTitle id="cookie-preferences-title">
+                    Cookie Preferences
+                  </CardTitle>
+                  <CardDescription>
+                    Choose which cookies you want to allow
+                  </CardDescription>
                 </div>
               </div>
               <button
                 onClick={handleCancel}
-                className="rounded-lg p-2 hover:bg-accent transition-colors"
+                className="rounded-lg p-2 hover:bg-accent transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                 aria-label="Close preferences"
               >
                 <X className="h-4 w-4 text-muted-foreground" />
@@ -61,34 +79,49 @@ export function CookieConsentBanner() {
           <CardContent className="space-y-6">
             {/* Essential Cookies */}
             <div className="flex items-start gap-4 p-4 rounded-lg border border-border bg-accent/5">
-              <Switch checked={true} disabled className="mt-1" aria-label="Essential cookies (required)" />
+              <Switch
+                checked={true}
+                disabled
+                className="mt-1"
+                aria-label="Essential cookies (required)"
+              />
               <div className="flex-1">
                 <div className="flex items-center gap-2 mb-1">
-                  <h4 className="font-semibold text-sm text-foreground">Essential Cookies</h4>
-                  <span className="text-xs px-2 py-0.5 rounded-full bg-primary/10 text-primary font-medium">
+                  <h4 className="font-semibold text-sm text-foreground">
+                    Essential Cookies
+                  </h4>
+                  <span className="text-xs px-2.5 py-1 rounded-full bg-primary/10 text-primary font-medium">
                     Required
                   </span>
                 </div>
                 <p className="text-sm text-muted-foreground">
-                  These cookies are necessary for the website to function and cannot be disabled.
-                  They include authentication, security, and core functionality.
+                  These cookies are necessary for the website to function and
+                  cannot be disabled. They include authentication, security, and
+                  core functionality.
                 </p>
               </div>
             </div>
 
             {/* Functional Cookies */}
             <div className="flex items-start gap-4 p-4 rounded-lg border border-border bg-accent/5">
-              <Switch checked={true} disabled className="mt-1" aria-label="Functional cookies (required)" />
+              <Switch
+                checked={true}
+                disabled
+                className="mt-1"
+                aria-label="Functional cookies (required)"
+              />
               <div className="flex-1">
                 <div className="flex items-center gap-2 mb-1">
-                  <h4 className="font-semibold text-sm text-foreground">Functional Cookies</h4>
-                  <span className="text-xs px-2 py-0.5 rounded-full bg-primary/10 text-primary font-medium">
+                  <h4 className="font-semibold text-sm text-foreground">
+                    Functional Cookies
+                  </h4>
+                  <span className="text-xs px-2.5 py-1 rounded-full bg-primary/10 text-primary font-medium">
                     Required
                   </span>
                 </div>
                 <p className="text-sm text-muted-foreground">
-                  Remember your preferences like theme choice and onboarding progress.
-                  These improve your experience without tracking you.
+                  Remember your preferences like theme choice and onboarding
+                  progress. These improve your experience without tracking you.
                 </p>
               </div>
             </div>
@@ -97,20 +130,25 @@ export function CookieConsentBanner() {
             <div className="flex items-start gap-4 p-4 rounded-lg border border-border hover:bg-accent/5 transition-colors">
               <Switch
                 checked={localPrefs.analytics}
-                onCheckedChange={(checked) => setLocalPrefs({ ...localPrefs, analytics: checked })}
+                onCheckedChange={checked =>
+                  setLocalPrefs({ ...localPrefs, analytics: checked })
+                }
                 className="mt-1"
                 aria-label="Analytics cookies"
               />
               <div className="flex-1">
                 <div className="flex items-center gap-2 mb-1">
-                  <h4 className="font-semibold text-sm text-foreground">Analytics Cookies</h4>
-                  <span className="text-xs px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-500 font-medium">
+                  <h4 className="font-semibold text-sm text-foreground">
+                    Analytics Cookies
+                  </h4>
+                  <span className="text-xs px-2.5 py-1 rounded-full bg-blue-500/10 text-blue-500 font-medium">
                     Optional
                   </span>
                 </div>
                 <p className="text-sm text-muted-foreground">
-                  Help us understand how you use SleekInvoices with privacy-respecting analytics.
-                  No personal data is collected - only anonymized usage patterns.
+                  Help us understand how you use SleekInvoices with
+                  privacy-respecting analytics. No personal data is collected -
+                  only anonymized usage patterns.
                 </p>
               </div>
             </div>
@@ -119,15 +157,19 @@ export function CookieConsentBanner() {
             <div className="flex items-start gap-4 p-4 rounded-lg border border-border hover:bg-accent/5 transition-colors opacity-50">
               <Switch
                 checked={localPrefs.marketing}
-                onCheckedChange={(checked) => setLocalPrefs({ ...localPrefs, marketing: checked })}
+                onCheckedChange={checked =>
+                  setLocalPrefs({ ...localPrefs, marketing: checked })
+                }
                 disabled
                 className="mt-1"
                 aria-label="Marketing cookies (not used)"
               />
               <div className="flex-1">
                 <div className="flex items-center gap-2 mb-1">
-                  <h4 className="font-semibold text-sm text-foreground">Marketing Cookies</h4>
-                  <span className="text-xs px-2 py-0.5 rounded-full bg-muted text-muted-foreground font-medium">
+                  <h4 className="font-semibold text-sm text-foreground">
+                    Marketing Cookies
+                  </h4>
+                  <span className="text-xs px-2.5 py-1 rounded-full bg-muted text-muted-foreground font-medium">
                     Not Used
                   </span>
                 </div>
@@ -146,10 +188,7 @@ export function CookieConsentBanner() {
             >
               Cancel
             </Button>
-            <Button
-              onClick={handleSaveCustom}
-              className="w-full sm:flex-1"
-            >
+            <Button onClick={handleSaveCustom} className="w-full sm:flex-1">
               Save Preferences
             </Button>
           </CardFooter>
@@ -185,14 +224,16 @@ export function CookieConsentBanner() {
 
         <CardContent className="pb-4">
           <p className="text-sm text-muted-foreground leading-relaxed">
-            We use essential cookies for authentication and optional analytics to improve our service.
-            Analytics cookies are privacy-respecting and don't collect personal data.
+            We use essential cookies for authentication and optional analytics
+            to improve our service. Analytics cookies are privacy-respecting and
+            don't collect personal data.
           </p>
 
-          <Link href="/privacy">
-            <a className="inline-flex items-center gap-1 text-sm text-primary hover:underline mt-3">
-              Learn more in our Privacy Policy
-            </a>
+          <Link
+            href="/privacy"
+            className="inline-flex items-center gap-1 text-sm text-primary hover:underline mt-3"
+          >
+            Learn more in our Privacy Policy
           </Link>
         </CardContent>
 

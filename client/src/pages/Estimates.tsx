@@ -1,7 +1,13 @@
 import { GearLoader } from "@/components/ui/gear-loader";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import {
   Table,
@@ -15,6 +21,8 @@ import { Badge } from "@/components/ui/badge";
 import { DeleteConfirmDialog } from "@/components/shared/DeleteConfirmDialog";
 import { getLoginUrl } from "@/const";
 import { trpc } from "@/lib/trpc";
+import type { LucideIcon } from "lucide-react";
+import type { Estimate, EstimateWithClient } from "@shared/types";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { Currency, DateDisplay } from "@/components/ui/typography";
 import {
@@ -43,14 +51,27 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Pagination } from "@/components/shared/Pagination";
 import { SortableTableHeader } from "@/components/shared/SortableTableHeader";
 import { useTableSort } from "@/hooks/useTableSort";
 import { useUndoableDelete } from "@/hooks/useUndoableDelete";
 import { FilterSection, FilterSelect } from "@/components/ui/filter-section";
 
-const STATUS_CONFIG: Record<string, { label: string; variant: "default" | "secondary" | "destructive" | "outline"; icon: any }> = {
+const STATUS_CONFIG: Record<
+  string,
+  {
+    label: string;
+    variant: "default" | "secondary" | "destructive" | "outline";
+    icon: LucideIcon;
+  }
+> = {
   draft: { label: "Draft", variant: "secondary", icon: FileText },
   sent: { label: "Sent", variant: "default", icon: Send },
   viewed: { label: "Viewed", variant: "outline", icon: Eye },
@@ -67,18 +88,25 @@ export default function Estimates() {
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [dateRange, setDateRange] = useState<string>("all");
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [estimateToDelete, setEstimateToDelete] = useState<any>(null);
+  const [estimateToDelete, setEstimateToDelete] =
+    useState<EstimateWithClient | null>(null);
 
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(25);
 
   // Sorting
-  const { sort, handleSort, sortData } = useTableSort({ defaultKey: "issueDate", defaultDirection: "desc" });
-
-  const { data: estimates, isLoading } = trpc.estimates.list.useQuery(undefined, {
-    enabled: isAuthenticated,
+  const { sort, handleSort, sortData } = useTableSort({
+    defaultKey: "issueDate",
+    defaultDirection: "desc",
   });
+
+  const { data: estimates, isLoading } = trpc.estimates.list.useQuery(
+    undefined,
+    {
+      enabled: isAuthenticated,
+    }
+  );
 
   const utils = trpc.useUtils();
 
@@ -86,15 +114,17 @@ export default function Estimates() {
     onSuccess: () => {
       // Success is silent since the item is already removed from UI
     },
-    onError: (error) => {
+    onError: error => {
       utils.estimates.list.invalidate();
-      toast.error(error.message || "Failed to delete estimate. Item has been restored.");
+      toast.error(
+        error.message || "Failed to delete estimate. Item has been restored."
+      );
     },
   });
 
   const { executeDelete } = useUndoableDelete();
 
-  const handleUndoableDelete = (estimate: any) => {
+  const handleUndoableDelete = (estimate: EstimateWithClient) => {
     const previousEstimates = utils.estimates.list.getData();
 
     executeDelete({
@@ -102,8 +132,8 @@ export default function Estimates() {
       itemName: estimate.estimateNumber,
       itemType: "estimate",
       onOptimisticDelete: () => {
-        utils.estimates.list.setData(undefined, (old) =>
-          old?.filter((e) => e.id !== estimate.id)
+        utils.estimates.list.setData(undefined, old =>
+          old?.filter(e => e.id !== estimate.id)
         );
         setDeleteDialogOpen(false);
         setEstimateToDelete(null);
@@ -122,12 +152,12 @@ export default function Estimates() {
   };
 
   const convertToInvoice = trpc.estimates.convertToInvoice.useMutation({
-    onSuccess: (result) => {
+    onSuccess: result => {
       toast.success(`Converted to invoice ${result.invoiceNumber}`);
       utils.estimates.list.invalidate();
       setLocation(`/invoices/${result.invoiceId}`);
     },
-    onError: (error) => {
+    onError: error => {
       toast.error(error.message || "Failed to convert estimate");
     },
   });
@@ -137,13 +167,13 @@ export default function Estimates() {
     onMutate: async ({ id }) => {
       await utils.estimates.list.cancel();
       const previousEstimates = utils.estimates.list.getData();
-      
-      utils.estimates.list.setData(undefined, (old) => 
-        old?.map((estimate) => 
-          estimate.id === id ? { ...estimate, status: 'sent' } : estimate
+
+      utils.estimates.list.setData(undefined, old =>
+        old?.map(estimate =>
+          estimate.id === id ? { ...estimate, status: "sent" } : estimate
         )
       );
-      
+
       return { previousEstimates };
     },
     onSuccess: () => {
@@ -164,13 +194,13 @@ export default function Estimates() {
     onMutate: async ({ id }) => {
       await utils.estimates.list.cancel();
       const previousEstimates = utils.estimates.list.getData();
-      
-      utils.estimates.list.setData(undefined, (old) => 
-        old?.map((estimate) => 
-          estimate.id === id ? { ...estimate, status: 'accepted' } : estimate
+
+      utils.estimates.list.setData(undefined, old =>
+        old?.map(estimate =>
+          estimate.id === id ? { ...estimate, status: "accepted" } : estimate
         )
       );
-      
+
       return { previousEstimates };
     },
     onSuccess: () => {
@@ -191,13 +221,13 @@ export default function Estimates() {
     onMutate: async ({ id }) => {
       await utils.estimates.list.cancel();
       const previousEstimates = utils.estimates.list.getData();
-      
-      utils.estimates.list.setData(undefined, (old) => 
-        old?.map((estimate) => 
-          estimate.id === id ? { ...estimate, status: 'rejected' } : estimate
+
+      utils.estimates.list.setData(undefined, old =>
+        old?.map(estimate =>
+          estimate.id === id ? { ...estimate, status: "rejected" } : estimate
         )
       );
-      
+
       return { previousEstimates };
     },
     onSuccess: () => {
@@ -216,7 +246,9 @@ export default function Estimates() {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="opacity-70"><GearLoader size="md" /></div>
+        <div className="opacity-70">
+          <GearLoader size="md" />
+        </div>
       </div>
     );
   }
@@ -235,35 +267,45 @@ export default function Estimates() {
     // Search filter
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
-      result = result.filter((estimate) =>
-        estimate.estimateNumber.toLowerCase().includes(query) ||
-        estimate.clientName?.toLowerCase().includes(query) ||
-        estimate.title?.toLowerCase().includes(query)
+      result = result.filter(
+        estimate =>
+          estimate.estimateNumber.toLowerCase().includes(query) ||
+          estimate.clientName?.toLowerCase().includes(query) ||
+          estimate.title?.toLowerCase().includes(query)
       );
     }
 
     // Status filter
     if (statusFilter !== "all") {
-      result = result.filter((estimate) => estimate.status === statusFilter);
+      result = result.filter(estimate => estimate.status === statusFilter);
     }
 
     // Date range filter (by issue date)
     if (dateRange !== "all") {
       const now = new Date();
-      result = result.filter((estimate) => {
+      result = result.filter(estimate => {
         const estimateDate = new Date(estimate.issueDate);
 
         switch (dateRange) {
           case "today":
             return estimateDate.toDateString() === now.toDateString();
           case "7days":
-            return estimateDate >= new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+            return (
+              estimateDate >= new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)
+            );
           case "30days":
-            return estimateDate >= new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+            return (
+              estimateDate >= new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000)
+            );
           case "90days":
-            return estimateDate >= new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000);
+            return (
+              estimateDate >= new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000)
+            );
           case "year":
-            return estimateDate >= new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000);
+            return (
+              estimateDate >=
+              new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000)
+            );
           default:
             return true;
         }
@@ -294,9 +336,13 @@ export default function Estimates() {
     setCurrentPage(1);
   };
 
-  const hasActiveFilters = !!(searchQuery || statusFilter !== "all" || dateRange !== "all");
+  const hasActiveFilters = !!(
+    searchQuery ||
+    statusFilter !== "all" ||
+    dateRange !== "all"
+  );
 
-  const handleDelete = (estimate: any) => {
+  const handleDelete = (estimate: EstimateWithClient) => {
     setEstimateToDelete(estimate);
     setDeleteDialogOpen(true);
   };
@@ -325,7 +371,9 @@ export default function Estimates() {
       <div className="container mx-auto px-4 py-6 md:py-8">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6 md:mb-8">
           <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Estimates</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold text-foreground">
+              Estimates
+            </h1>
             <p className="text-sm sm:text-base text-muted-foreground">
               Create quotes and convert them to invoices
             </p>
@@ -342,17 +390,11 @@ export default function Estimates() {
         <FilterSection
           hasActiveFilters={hasActiveFilters}
           onClearFilters={clearFilters}
+          searchValue={searchQuery}
+          onSearchChange={setSearchQuery}
+          searchPlaceholder="Search estimates by number, client, or title..."
         >
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 w-full">
-            {/* Search */}
-            <div className="relative flex-1">
-              <Input
-                placeholder="Search estimates by number, client, or title..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-            </div>
-
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 w-full">
             {/* Status Filter */}
             <FilterSelect label="Status">
               <Select value={statusFilter} onValueChange={setStatusFilter}>
@@ -396,7 +438,10 @@ export default function Estimates() {
           <CardHeader>
             <CardTitle>All Estimates</CardTitle>
             <CardDescription>
-              <span className="font-numeric">{filteredAndSortedEstimates.length}</span> estimate{filteredAndSortedEstimates.length !== 1 ? "s" : ""} found
+              <span className="font-numeric">
+                {filteredAndSortedEstimates.length}
+              </span>{" "}
+              estimate{filteredAndSortedEstimates.length !== 1 ? "s" : ""} found
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -412,10 +457,7 @@ export default function Estimates() {
                 }}
               />
             ) : filteredAndSortedEstimates.length === 0 ? (
-              <EmptyState
-                {...EmptyStatePresets.search}
-                size="sm"
-              />
+              <EmptyState {...EmptyStatePresets.search} size="sm" />
             ) : (
               <>
                 {/* Desktop Table */}
@@ -459,7 +501,7 @@ export default function Estimates() {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {paginatedEstimates.map((estimate) => (
+                      {paginatedEstimates.map(estimate => (
                         <TableRow key={estimate.id}>
                           <TableCell className="font-medium">
                             <Link href={`/estimates/${estimate.id}`}>
@@ -470,59 +512,110 @@ export default function Estimates() {
                           </TableCell>
                           <TableCell>{estimate.clientName || "—"}</TableCell>
                           <TableCell>{estimate.title || "—"}</TableCell>
-                          <TableCell>{getStatusBadge(estimate.status)}</TableCell>
-                          <TableCell>{formatDate(estimate.validUntil)}</TableCell>
+                          <TableCell>
+                            {getStatusBadge(estimate.status)}
+                          </TableCell>
+                          <TableCell>
+                            {formatDate(estimate.validUntil)}
+                          </TableCell>
                           <TableCell className="text-right font-numeric">
-                            {formatCurrency(Number(estimate.total), estimate.currency)}
+                            {formatCurrency(
+                              Number(estimate.total),
+                              estimate.currency
+                            )}
                           </TableCell>
                           <TableCell>
                             <DropdownMenu>
                               <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" size="icon">
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  aria-label="More actions for this estimate"
+                                >
                                   <MoreHorizontal className="h-4 w-4" />
                                 </Button>
                               </DropdownMenuTrigger>
                               <DropdownMenuContent align="end">
-                                <DropdownMenuItem onClick={() => setLocation(`/estimates/${estimate.id}`)}>
+                                <DropdownMenuItem
+                                  onClick={() =>
+                                    setLocation(`/estimates/${estimate.id}`)
+                                  }
+                                >
                                   <Eye className="h-4 w-4 mr-2" />
                                   View
                                 </DropdownMenuItem>
                                 {estimate.status === "draft" && (
-                                  <DropdownMenuItem onClick={() => setLocation(`/estimates/${estimate.id}/edit`)}>
+                                  <DropdownMenuItem
+                                    onClick={() =>
+                                      setLocation(
+                                        `/estimates/${estimate.id}/edit`
+                                      )
+                                    }
+                                  >
                                     <Edit className="h-4 w-4 mr-2" />
                                     Edit
                                   </DropdownMenuItem>
                                 )}
                                 <DropdownMenuSeparator />
                                 {estimate.status === "draft" && (
-                                  <DropdownMenuItem onClick={() => markAsSent.mutate({ id: estimate.id })}>
+                                  <DropdownMenuItem
+                                    onClick={() =>
+                                      markAsSent.mutate({ id: estimate.id })
+                                    }
+                                  >
                                     <Send className="h-4 w-4 mr-2" />
                                     Mark as Sent
                                   </DropdownMenuItem>
                                 )}
-                                {(estimate.status === "sent" || estimate.status === "viewed") && (
+                                {(estimate.status === "sent" ||
+                                  estimate.status === "viewed") && (
                                   <>
-                                    <DropdownMenuItem onClick={() => markAsAccepted.mutate({ id: estimate.id })}>
+                                    <DropdownMenuItem
+                                      onClick={() =>
+                                        markAsAccepted.mutate({
+                                          id: estimate.id,
+                                        })
+                                      }
+                                    >
                                       <CheckCircle className="h-4 w-4 mr-2" />
                                       Mark as Accepted
                                     </DropdownMenuItem>
-                                    <DropdownMenuItem onClick={() => markAsRejected.mutate({ id: estimate.id })}>
+                                    <DropdownMenuItem
+                                      onClick={() =>
+                                        markAsRejected.mutate({
+                                          id: estimate.id,
+                                        })
+                                      }
+                                    >
                                       <XCircle className="h-4 w-4 mr-2" />
                                       Mark as Rejected
                                     </DropdownMenuItem>
                                   </>
                                 )}
-                                {(estimate.status === "accepted" || estimate.status === "sent" || estimate.status === "viewed") && !estimate.convertedToInvoiceId && (
-                                  <DropdownMenuItem 
-                                    onClick={() => convertToInvoice.mutate({ id: estimate.id })}
-                                    className="text-primary"
-                                  >
-                                    <ArrowRight className="h-4 w-4 mr-2" />
-                                    Convert to Invoice
-                                  </DropdownMenuItem>
-                                )}
+                                {(estimate.status === "accepted" ||
+                                  estimate.status === "sent" ||
+                                  estimate.status === "viewed") &&
+                                  !estimate.convertedToInvoiceId && (
+                                    <DropdownMenuItem
+                                      onClick={() =>
+                                        convertToInvoice.mutate({
+                                          id: estimate.id,
+                                        })
+                                      }
+                                      className="text-primary"
+                                    >
+                                      <ArrowRight className="h-4 w-4 mr-2" />
+                                      Convert to Invoice
+                                    </DropdownMenuItem>
+                                  )}
                                 {estimate.convertedToInvoiceId && (
-                                  <DropdownMenuItem onClick={() => setLocation(`/invoices/${estimate.convertedToInvoiceId}`)}>
+                                  <DropdownMenuItem
+                                    onClick={() =>
+                                      setLocation(
+                                        `/invoices/${estimate.convertedToInvoiceId}`
+                                      )
+                                    }
+                                  >
                                     <FileText className="h-4 w-4 mr-2" />
                                     View Invoice
                                   </DropdownMenuItem>
@@ -546,7 +639,7 @@ export default function Estimates() {
 
                 {/* Mobile Cards */}
                 <div className="md:hidden space-y-4">
-                  {paginatedEstimates.map((estimate) => (
+                  {paginatedEstimates.map(estimate => (
                     <div
                       key={estimate.id}
                       className="p-4 border rounded-lg space-y-3"
@@ -558,7 +651,9 @@ export default function Estimates() {
                               {estimate.estimateNumber}
                             </span>
                           </Link>
-                          <p className="text-sm text-muted-foreground">{estimate.clientName}</p>
+                          <p className="text-sm text-muted-foreground">
+                            {estimate.clientName}
+                          </p>
                         </div>
                         {getStatusBadge(estimate.status)}
                       </div>
@@ -570,30 +665,40 @@ export default function Estimates() {
                           Valid until {formatDate(estimate.validUntil)}
                         </span>
                         <span className="font-numeric">
-                          {formatCurrency(Number(estimate.total), estimate.currency)}
+                          {formatCurrency(
+                            Number(estimate.total),
+                            estimate.currency
+                          )}
                         </span>
                       </div>
                       <div className="flex gap-2 pt-2 border-t">
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => setLocation(`/estimates/${estimate.id}`)}
+                          onClick={() =>
+                            setLocation(`/estimates/${estimate.id}`)
+                          }
                           className="flex-1"
                         >
                           <Eye className="h-4 w-4 mr-1" />
                           View
                         </Button>
-                        {!estimate.convertedToInvoiceId && (estimate.status === "accepted" || estimate.status === "sent" || estimate.status === "viewed") && (
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => convertToInvoice.mutate({ id: estimate.id })}
-                            className="flex-1 text-primary"
-                          >
-                            <ArrowRight className="h-4 w-4 mr-1" />
-                            Convert
-                          </Button>
-                        )}
+                        {!estimate.convertedToInvoiceId &&
+                          (estimate.status === "accepted" ||
+                            estimate.status === "sent" ||
+                            estimate.status === "viewed") && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() =>
+                                convertToInvoice.mutate({ id: estimate.id })
+                              }
+                              className="flex-1 text-primary"
+                            >
+                              <ArrowRight className="h-4 w-4 mr-1" />
+                              Convert
+                            </Button>
+                          )}
                         <Button
                           variant="outline"
                           size="sm"
@@ -616,7 +721,7 @@ export default function Estimates() {
                       pageSize={pageSize}
                       totalItems={totalItems}
                       onPageChange={setCurrentPage}
-                      onPageSizeChange={(size) => {
+                      onPageSizeChange={size => {
                         setPageSize(size);
                         setCurrentPage(1);
                       }}

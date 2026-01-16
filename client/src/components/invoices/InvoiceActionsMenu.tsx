@@ -17,6 +17,7 @@ import {
   RefreshCw,
   Check,
   Copy,
+  FileText,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -27,6 +28,7 @@ interface InvoiceActionsMenuProps {
   onView: () => void;
   onEdit: () => void;
   onDownloadPDF: () => void;
+  onViewPDF?: () => void;
   onSendEmail: () => void;
   onCreatePaymentLink: () => void;
   onDelete: () => void;
@@ -51,6 +53,7 @@ export function InvoiceActionsMenu({
   onView,
   onEdit,
   onDownloadPDF,
+  onViewPDF,
   onSendEmail,
   onCreatePaymentLink,
   onDelete,
@@ -86,7 +89,10 @@ export function InvoiceActionsMenu({
           <Edit className="mr-2 h-4 w-4" />
           <span>Edit Invoice</span>
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={handleCopyInvoiceNumber} className="cursor-pointer">
+        <DropdownMenuItem
+          onClick={handleCopyInvoiceNumber}
+          className="cursor-pointer"
+        >
           <LinkIcon className="mr-2 h-4 w-4" />
           <span>Copy Invoice #</span>
         </DropdownMenuItem>
@@ -109,6 +115,16 @@ export function InvoiceActionsMenu({
           <Download className="mr-2 h-4 w-4" />
           <span>Download PDF</span>
         </DropdownMenuItem>
+        {onViewPDF && (
+          <DropdownMenuItem
+            onClick={onViewPDF}
+            disabled={isLoading.pdf}
+            className="cursor-pointer"
+          >
+            <FileText className="mr-2 h-4 w-4" />
+            <span>View PDF</span>
+          </DropdownMenuItem>
+        )}
         <DropdownMenuItem
           onClick={onSendEmail}
           disabled={isLoading.email}
@@ -140,7 +156,11 @@ export function InvoiceActionsMenu({
             ) : (
               <RefreshCw className="mr-2 h-4 w-4" />
             )}
-            <span>{quickBooksSynced ? 'Re-sync to QuickBooks' : 'Sync to QuickBooks'}</span>
+            <span>
+              {quickBooksSynced
+                ? "Re-sync to QuickBooks"
+                : "Sync to QuickBooks"}
+            </span>
           </DropdownMenuItem>
         )}
 

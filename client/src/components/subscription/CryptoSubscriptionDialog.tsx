@@ -72,37 +72,41 @@ export function CryptoSubscriptionDialog({
   } | null>(null);
   const [copied, setCopied] = useState(false);
 
-  const createCryptoSubscription = trpc.subscription.createCryptoCheckout.useMutation({
-    onSuccess: (data) => {
-      setPaymentData({
-        paymentUrl: data.paymentUrl,
-        paymentId: data.paymentId,
-        cryptoAmount: data.cryptoAmount,
-        cryptoCurrency: data.cryptoCurrency,
-      });
-      setStep("payment");
-      toast.success("Payment created! Complete payment to activate Pro.");
-    },
-    onError: (error) => {
-      toast.error(error.message || "Failed to create crypto payment");
-    },
-  });
+  const createCryptoSubscription =
+    trpc.subscription.createCryptoCheckout.useMutation({
+      onSuccess: data => {
+        setPaymentData({
+          paymentUrl: data.paymentUrl,
+          paymentId: data.paymentId,
+          cryptoAmount: data.cryptoAmount,
+          cryptoCurrency: data.cryptoCurrency,
+        });
+        setStep("payment");
+        toast.success("Payment created! Complete payment to activate Pro.");
+      },
+      onError: error => {
+        toast.error(error.message || "Failed to create crypto payment");
+      },
+    });
 
-  const extendSubscription = trpc.subscription.extendCryptoSubscription.useMutation({
-    onSuccess: (data) => {
-      setPaymentData({
-        paymentUrl: data.paymentUrl,
-        paymentId: data.paymentId,
-        cryptoAmount: data.cryptoAmount,
-        cryptoCurrency: data.cryptoCurrency,
-      });
-      setStep("payment");
-      toast.success("Payment created! Complete payment to extend your subscription.");
-    },
-    onError: (error) => {
-      toast.error(error.message || "Failed to create extension payment");
-    },
-  });
+  const extendSubscription =
+    trpc.subscription.extendCryptoSubscription.useMutation({
+      onSuccess: data => {
+        setPaymentData({
+          paymentUrl: data.paymentUrl,
+          paymentId: data.paymentId,
+          cryptoAmount: data.cryptoAmount,
+          cryptoCurrency: data.cryptoCurrency,
+        });
+        setStep("payment");
+        toast.success(
+          "Payment created! Complete payment to extend your subscription."
+        );
+      },
+      onError: error => {
+        toast.error(error.message || "Failed to create extension payment");
+      },
+    });
 
   const handleCreatePayment = () => {
     if (isExtension) {
@@ -150,30 +154,35 @@ export function CryptoSubscriptionDialog({
   const selectedTier = getCryptoTierByMonths(selectedMonths);
   const savings = getCryptoSavings(selectedMonths);
   const cardTotal = CARD_PRICE_PER_MONTH * selectedMonths;
-  const selectedCryptoInfo = SUPPORTED_CRYPTOS.find((c) => c.code === selectedCrypto);
-  const isPending = createCryptoSubscription.isPending || extendSubscription.isPending;
+  const selectedCryptoInfo = SUPPORTED_CRYPTOS.find(
+    c => c.code === selectedCrypto
+  );
+  const isPending =
+    createCryptoSubscription.isPending || extendSubscription.isPending;
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="sm:max-w-lg">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2.5">
+        <DialogHeader className="pb-4">
+          <DialogTitle className="flex items-center gap-3">
             {step === "crypto" && (
               <Button
                 variant="ghost"
                 size="icon-sm"
-                className="mr-1"
+                className="-ml-2"
                 onClick={handleBack}
               >
                 <ArrowLeft className="size-4" />
               </Button>
             )}
-            <div className="flex size-8 items-center justify-center rounded-lg bg-[hsl(var(--color-bitcoin))]/10">
-              <Bitcoin className="size-4 text-[hsl(var(--color-bitcoin))]" />
+            <div className="p-3 rounded-xl bg-[hsl(var(--color-bitcoin))]/10">
+              <Bitcoin className="size-5 text-[hsl(var(--color-bitcoin))]" />
             </div>
-            {isExtension ? "Extend Subscription" : "Pay with Cryptocurrency"}
+            <span className="text-xl">
+              {isExtension ? "Extend Subscription" : "Pay with Cryptocurrency"}
+            </span>
           </DialogTitle>
-          <DialogDescription>
+          <DialogDescription className="text-base">
             {step === "duration" && "Choose your subscription duration"}
             {step === "crypto" && "Select your preferred cryptocurrency"}
             {step === "payment" && "Complete your payment"}
@@ -212,7 +221,9 @@ export function CryptoSubscriptionDialog({
             {selectedTier && (
               <div className="bg-muted/50 rounded-lg p-4">
                 <div className="flex justify-between items-center mb-2">
-                  <span className="text-sm text-muted-foreground">Your price</span>
+                  <span className="text-sm text-muted-foreground">
+                    Your price
+                  </span>
                   <span className="text-2xl font-bold">
                     ${selectedTier.totalPrice.toFixed(2)}
                   </span>
@@ -223,7 +234,9 @@ export function CryptoSubscriptionDialog({
                 </div>
                 <div className="flex justify-between items-center text-xs text-green-500 font-medium mt-1">
                   <span>You save</span>
-                  <span>${savings.toFixed(2)} ({selectedTier.savingsPercent}% off)</span>
+                  <span>
+                    ${savings.toFixed(2)} ({selectedTier.savingsPercent}% off)
+                  </span>
                 </div>
               </div>
             )}
@@ -246,7 +259,9 @@ export function CryptoSubscriptionDialog({
             {selectedTier && (
               <div className="bg-primary/5 border border-primary/20 rounded-lg p-3 flex justify-between items-center">
                 <div>
-                  <span className="text-sm font-medium">{selectedTier.label}</span>
+                  <span className="text-sm font-medium">
+                    {selectedTier.label}
+                  </span>
                   <span className="text-xs text-muted-foreground ml-2">
                     (${selectedTier.pricePerMonth.toFixed(2)}/mo)
                   </span>
@@ -259,13 +274,15 @@ export function CryptoSubscriptionDialog({
 
             {/* Crypto selector */}
             <div className="space-y-2">
-              <label className="text-sm font-medium">Select Cryptocurrency</label>
+              <label className="text-sm font-medium">
+                Select Cryptocurrency
+              </label>
               <Select value={selectedCrypto} onValueChange={setSelectedCrypto}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select crypto" />
                 </SelectTrigger>
                 <SelectContent>
-                  {SUPPORTED_CRYPTOS.map((crypto) => (
+                  {SUPPORTED_CRYPTOS.map(crypto => (
                     <SelectItem key={crypto.code} value={crypto.code}>
                       <span className="flex items-center gap-2">
                         <span className="font-mono">{crypto.symbol}</span>
@@ -282,15 +299,21 @@ export function CryptoSubscriptionDialog({
 
             {/* Network info for stablecoins */}
             {(selectedCrypto.includes("usdt") || selectedCrypto === "usdc") && (
-              <div className="bg-amber-500/10 border border-amber-500/20 rounded-lg p-3 flex items-start gap-2">
+              <div className="bg-amber-500/10 border border-amber-500/20 rounded-lg p-4 flex items-start gap-2">
                 <Shield className="h-4 w-4 text-amber-500 mt-0.5" />
                 <div className="text-xs">
-                  <p className="font-medium text-amber-600">Network Selection</p>
+                  <p className="font-medium text-amber-600">
+                    Network Selection
+                  </p>
                   <p className="text-muted-foreground mt-0.5">
-                    Make sure to send on the correct network to avoid loss of funds.
-                    {selectedCrypto === "usdtbsc" && " You selected BSC (BEP-20)."}
-                    {selectedCrypto === "usdtmatic" && " You selected Polygon (MATIC)."}
-                    {selectedCrypto === "usdt" && " You selected Ethereum (ERC-20)."}
+                    Make sure to send on the correct network to avoid loss of
+                    funds.
+                    {selectedCrypto === "usdtbsc" &&
+                      " You selected BSC (BEP-20)."}
+                    {selectedCrypto === "usdtmatic" &&
+                      " You selected Polygon (MATIC)."}
+                    {selectedCrypto === "usdt" &&
+                      " You selected Ethereum (ERC-20)."}
                   </p>
                 </div>
               </div>
@@ -312,7 +335,8 @@ export function CryptoSubscriptionDialog({
               ) : (
                 <>
                   <Bitcoin className="size-4" />
-                  Pay ${selectedTier?.totalPrice.toFixed(2)} with {selectedCryptoInfo?.name}
+                  Pay ${selectedTier?.totalPrice.toFixed(2)} with{" "}
+                  {selectedCryptoInfo?.name}
                 </>
               )}
             </Button>
@@ -331,7 +355,8 @@ export function CryptoSubscriptionDialog({
               <Check className="h-8 w-8 text-green-500 mx-auto mb-2" />
               <p className="font-semibold text-green-600">Payment Created!</p>
               <p className="text-sm text-muted-foreground mt-1">
-                Complete the payment to {isExtension ? "extend" : "activate"} your subscription
+                Complete the payment to {isExtension ? "extend" : "activate"}{" "}
+                your subscription
               </p>
             </div>
 
@@ -340,7 +365,8 @@ export function CryptoSubscriptionDialog({
               <div className="flex justify-between items-center p-3 bg-muted/50 rounded-lg">
                 <span className="text-sm text-muted-foreground">Amount</span>
                 <span className="font-mono font-semibold">
-                  {paymentData.cryptoAmount} {paymentData.cryptoCurrency.toUpperCase()}
+                  {paymentData.cryptoAmount}{" "}
+                  {paymentData.cryptoCurrency.toUpperCase()}
                 </span>
               </div>
 
@@ -350,7 +376,9 @@ export function CryptoSubscriptionDialog({
               </div>
 
               <div className="flex justify-between items-center p-3 bg-muted/50 rounded-lg">
-                <span className="text-sm text-muted-foreground">Payment ID</span>
+                <span className="text-sm text-muted-foreground">
+                  Payment ID
+                </span>
                 <div className="flex items-center gap-2">
                   <span className="font-mono text-xs">
                     {paymentData.paymentId.slice(0, 12)}...
@@ -372,15 +400,21 @@ export function CryptoSubscriptionDialog({
             </div>
 
             {/* Timer warning */}
-            <div className="bg-amber-500/10 border border-amber-500/20 rounded-lg p-3 flex items-center gap-2">
+            <div className="bg-amber-500/10 border border-amber-500/20 rounded-lg p-4 flex items-center gap-2">
               <Clock className="h-4 w-4 text-amber-500" />
               <span className="text-xs text-amber-600">
-                Payment expires in 10 minutes. Complete payment before expiration.
+                Payment expires in 10 minutes. Complete payment before
+                expiration.
               </span>
             </div>
 
             {/* Open payment page button */}
-            <Button variant="crypto" size="lg" onClick={handleOpenPaymentPage} className="w-full">
+            <Button
+              variant="crypto"
+              size="lg"
+              onClick={handleOpenPaymentPage}
+              className="w-full"
+            >
               <ExternalLink className="size-4" />
               Open Payment Page
             </Button>

@@ -21,7 +21,7 @@ export function CryptoDurationSelector({
 
   return (
     <div className={cn("grid grid-cols-2 gap-3", className)}>
-      {tiers.map((tier) => (
+      {tiers.map(tier => (
         <DurationCard
           key={tier.months}
           tier={tier}
@@ -58,7 +58,7 @@ function DurationCard({ tier, isSelected, onSelect }: DurationCardProps) {
       {/* Recommended badge */}
       {tier.recommended && (
         <div className="absolute -top-2.5 left-1/2 -translate-x-1/2">
-          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-primary text-primary-foreground text-[10px] font-semibold uppercase tracking-wide">
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-primary text-primary-foreground text-[10px] font-semibold uppercase tracking-wide">
             <Sparkles className="h-3 w-3" />
             Popular
           </span>
@@ -84,7 +84,9 @@ function DurationCard({ tier, isSelected, onSelect }: DurationCardProps) {
 
       {/* Price */}
       <div className="mt-2">
-        <span className="text-2xl font-bold">${tier.totalPrice.toFixed(2)}</span>
+        <span className="text-2xl font-bold">
+          ${tier.totalPrice.toFixed(2)}
+        </span>
         {tier.months > 1 && (
           <span className="text-xs text-muted-foreground ml-1">
             (${tier.pricePerMonth.toFixed(2)}/mo)
@@ -131,7 +133,7 @@ export function CompactDurationSelector({
 
   return (
     <div className={cn("flex gap-2 flex-wrap", className)}>
-      {tiers.map((tier) => (
+      {tiers.map(tier => (
         <button
           key={tier.months}
           type="button"

@@ -129,8 +129,8 @@ function DialogContent({
         className={cn(
           // Positioning
           "fixed top-[50%] left-[50%] z-50 w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%]",
-          // Layout - increased padding for better breathing room
-          "grid gap-0 rounded-xl border border-border bg-card shadow-2xl",
+          // Layout - consistent horizontal padding with bottom breathing room
+          "px-5 md:px-7 pb-6 md:pb-7 grid gap-0 rounded-xl border border-border bg-card shadow-2xl",
           // Animations
           "data-[state=open]:animate-in data-[state=closed]:animate-out",
           "data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
@@ -149,7 +149,7 @@ function DialogContent({
           <DialogPrimitive.Close
             data-slot="dialog-close"
             className={cn(
-              "absolute top-5 right-5 rounded-md p-1.5",
+              "absolute top-4 right-4 md:top-5 md:right-5 rounded-md p-2 md:p-1.5",
               "text-muted-foreground hover:text-foreground",
               "hover:bg-secondary/50 transition-colors duration-150",
               "focus:outline-none focus-visible:ring-2 focus-visible:ring-ring",
@@ -173,7 +173,7 @@ function DialogHeader({ className, ...props }: React.ComponentProps<"div">) {
       className={cn(
         // Consistent header padding with proper spacing
         "flex flex-col gap-2 text-center sm:text-left",
-        "px-6 pt-6 pb-4",
+        "px-4 md:px-6 pt-4 md:pt-6 pb-3 md:pb-4",
         className
       )}
       {...props}
@@ -186,9 +186,8 @@ function DialogFooter({ className, ...props }: React.ComponentProps<"div">) {
     <div
       data-slot="dialog-footer"
       className={cn(
-        // Consistent footer padding with border separator
-        "flex flex-col-reverse gap-3 sm:flex-row sm:justify-end",
-        "px-6 py-5 border-t border-border bg-muted/30 rounded-b-xl",
+        "flex flex-col-reverse gap-3 sm:flex-row sm:justify-end sm:gap-3",
+        "mt-6 pt-0 pb-2",
         className
       )}
       {...props}
@@ -232,5 +231,5 @@ export {
   DialogOverlay,
   DialogPortal,
   DialogTitle,
-  DialogTrigger
+  DialogTrigger,
 };

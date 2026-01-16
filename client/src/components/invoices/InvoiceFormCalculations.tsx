@@ -16,8 +16,8 @@ interface InvoiceFormCalculationsProps {
   subtotal: number;
   taxRate: number;
   onTaxRateChange: (value: number) => void;
-  discountType: 'percentage' | 'fixed';
-  onDiscountTypeChange: (value: 'percentage' | 'fixed') => void;
+  discountType: "percentage" | "fixed";
+  onDiscountTypeChange: (value: "percentage" | "fixed") => void;
   discountValue: number;
   onDiscountValueChange: (value: number) => void;
   discountAmount: number;
@@ -39,9 +39,11 @@ export function InvoiceFormCalculations({
 }: InvoiceFormCalculationsProps) {
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between py-2 border-t">
+      <div className="flex items-center justify-between py-3 border-t">
         <span className="text-sm font-medium">Subtotal</span>
-        <span className="text-sm font-semibold"><Currency amount={subtotal} /></span>
+        <span className="text-sm font-semibold">
+          <Currency amount={subtotal} />
+        </span>
       </div>
 
       {/* Discount */}
@@ -59,19 +61,23 @@ export function InvoiceFormCalculations({
           </Select>
           <Input
             type="number"
-            placeholder={discountType === 'percentage' ? '0%' : '$0.00'}
+            placeholder={discountType === "percentage" ? "0%" : "$0.00"}
             min="0"
-            step={discountType === 'percentage' ? '1' : '0.01'}
-            max={discountType === 'percentage' ? '100' : undefined}
-            value={discountValue || ''}
-            onChange={(e) => onDiscountValueChange(parseFloat(e.target.value) || 0)}
+            step={discountType === "percentage" ? "1" : "0.01"}
+            max={discountType === "percentage" ? "100" : undefined}
+            value={discountValue || ""}
+            onChange={e =>
+              onDiscountValueChange(parseFloat(e.target.value) || 0)
+            }
             className="flex-1"
           />
         </div>
         {discountAmount > 0 && (
           <div className="flex items-center justify-between text-sm text-muted-foreground">
             <span>Discount amount</span>
-            <span>-<Currency amount={discountAmount} /></span>
+            <span>
+              -<Currency amount={discountAmount} />
+            </span>
           </div>
         )}
       </div>
@@ -80,13 +86,15 @@ export function InvoiceFormCalculations({
       <FormField label="Tax Rate (%)">
         <PercentageInput
           placeholder="0"
-          value={taxRate || ''}
-          onValueChange={(value) => onTaxRateChange(parseFloat(value) || 0)}
+          value={taxRate || ""}
+          onValueChange={value => onTaxRateChange(parseFloat(value) || 0)}
         />
         {taxAmount > 0 && (
           <div className="flex items-center justify-between text-sm text-muted-foreground mt-2">
             <span>Tax amount</span>
-            <span>+<Currency amount={taxAmount} /></span>
+            <span>
+              +<Currency amount={taxAmount} />
+            </span>
           </div>
         )}
       </FormField>
@@ -94,7 +102,9 @@ export function InvoiceFormCalculations({
       {/* Total */}
       <div className="flex items-center justify-between py-3 border-t-2 border-primary/20">
         <span className="text-lg font-bold">Total</span>
-        <span className="text-2xl font-bold text-primary"><Currency amount={total} /></span>
+        <span className="text-2xl font-bold text-primary">
+          <Currency amount={total} />
+        </span>
       </div>
     </div>
   );

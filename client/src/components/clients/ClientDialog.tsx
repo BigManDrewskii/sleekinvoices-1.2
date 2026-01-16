@@ -6,7 +6,11 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { DialogIconHeader, DialogBody, DialogActions } from "@/components/shared/DialogPatterns";
+import {
+  DialogIconHeader,
+  DialogBody,
+  DialogActions,
+} from "@/components/shared/DialogPatterns";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -14,7 +18,19 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { trpc } from "@/lib/trpc";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
-import { X, Loader2, Shield, UserPlus, User, Mail, Phone, MapPin, Building2, FileText, Check as LucideCheck } from "lucide-react";
+import {
+  X,
+  Loader2,
+  Shield,
+  UserPlus,
+  User,
+  Mail,
+  Phone,
+  MapPin,
+  Building2,
+  FileText,
+  Check as LucideCheck,
+} from "lucide-react";
 import { Check } from "@phosphor-icons/react";
 
 /**
@@ -40,57 +56,65 @@ interface ClientDialogProps {
   onSuccess?: (clientId?: number) => void;
 }
 
-type VATValidationStatus = 'idle' | 'validating' | 'valid' | 'invalid';
+type VATValidationStatus = "idle" | "validating" | "valid" | "invalid";
 
-export function ClientDialog({ open, onOpenChange, client, onSuccess }: ClientDialogProps) {
+export function ClientDialog({
+  open,
+  onOpenChange,
+  client,
+  onSuccess,
+}: ClientDialogProps) {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [address, setAddress] = useState("");
   const [vatNumber, setVatNumber] = useState("");
   const [taxExempt, setTaxExempt] = useState(false);
-  const [vatValidationStatus, setVatValidationStatus] = useState<VATValidationStatus>('idle');
+  const [vatValidationStatus, setVatValidationStatus] =
+    useState<VATValidationStatus>("idle");
   const [vatValidationMessage, setVatValidationMessage] = useState("");
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const utils = trpc.useUtils();
 
   const validateVAT = trpc.clients.validateVAT.useMutation({
-    onSuccess: (result) => {
+    onSuccess: result => {
       if (result.valid) {
-        setVatValidationStatus('valid');
-        setVatValidationMessage(`Valid VAT number${result.name ? ` - ${result.name}` : ''}`);
-        
+        setVatValidationStatus("valid");
+        setVatValidationMessage(
+          `Valid VAT number${result.name ? ` - ${result.name}` : ""}`
+        );
+
         // Auto-fill company name if returned and name field is empty
         if (result.name && !name.trim()) {
           setName(result.name);
           toast.success("Company name auto-filled from VAT registry");
         }
-        
+
         // Auto-fill address if returned and address field is empty
         if (result.address && !address.trim()) {
           setAddress(result.address);
         }
       } else {
-        setVatValidationStatus('invalid');
-        setVatValidationMessage(result.errorMessage || 'Invalid VAT number');
+        setVatValidationStatus("invalid");
+        setVatValidationMessage(result.errorMessage || "Invalid VAT number");
       }
     },
-    onError: (error) => {
-      setVatValidationStatus('invalid');
-      setVatValidationMessage(error.message || 'Validation failed');
+    onError: error => {
+      setVatValidationStatus("invalid");
+      setVatValidationMessage(error.message || "Validation failed");
     },
   });
-  
+
   const createClient = trpc.clients.create.useMutation({
     // Optimistic update: immediately add to UI
-    onMutate: async (newClient) => {
+    onMutate: async newClient => {
       // Cancel any outgoing refetches
       await utils.clients.list.cancel();
-      
+
       // Snapshot the previous value
       const previousClients = utils.clients.list.getData();
-      
+
       // Optimistically add the new client with a temporary ID
       const optimisticClient = {
         id: -Date.now(), // Temporary negative ID
@@ -106,18 +130,18 @@ export function ClientDialog({ open, onOpenChange, client, onSuccess }: ClientDi
         updatedAt: new Date(),
         userId: 0, // Temporary userId, will be replaced on server response
       };
-      
-      utils.clients.list.setData(undefined, (old) => 
-        old ? [optimisticClient, ...old] : [optimisticClient]
+
+      utils.clients.list.setData(undefined, old =>
+        old ? [optimisticClient as any, ...old] : [optimisticClient as any]
       );
-      
+
       // Close dialog immediately for instant feedback
       onOpenChange(false);
       resetForm();
-      
+
       return { previousClients };
     },
-    onSuccess: (data) => {
+    onSuccess: data => {
       toast.success("Client created successfully");
       onSuccess?.(data.id);
     },
@@ -136,17 +160,17 @@ export function ClientDialog({ open, onOpenChange, client, onSuccess }: ClientDi
 
   const updateClient = trpc.clients.update.useMutation({
     // Optimistic update: immediately update in UI
-    onMutate: async (updatedClient) => {
+    onMutate: async updatedClient => {
       await utils.clients.list.cancel();
-      
+
       const previousClients = utils.clients.list.getData();
-      
+
       // Optimistically update the client in the list
-      utils.clients.list.setData(undefined, (old) => 
-        old?.map((c) => 
-          c.id === updatedClient.id 
-            ? { 
-                ...c, 
+      utils.clients.list.setData(undefined, old =>
+        old?.map(c =>
+          c.id === updatedClient.id
+            ? {
+                ...c,
                 name: updatedClient.name || c.name,
                 email: updatedClient.email || null,
                 phone: updatedClient.phone || null,
@@ -154,14 +178,14 @@ export function ClientDialog({ open, onOpenChange, client, onSuccess }: ClientDi
                 vatNumber: updatedClient.vatNumber || null,
                 taxExempt: updatedClient.taxExempt ?? c.taxExempt,
                 updatedAt: new Date(),
-              } 
+              }
             : c
         )
       );
-      
+
       onOpenChange(false);
       resetForm();
-      
+
       return { previousClients };
     },
     onSuccess: () => {
@@ -188,7 +212,7 @@ export function ClientDialog({ open, onOpenChange, client, onSuccess }: ClientDi
       setVatNumber(client.vatNumber || "");
       setTaxExempt(client.taxExempt || false);
       // Reset VAT validation status when editing
-      setVatValidationStatus('idle');
+      setVatValidationStatus("idle");
       setVatValidationMessage("");
     } else {
       resetForm();
@@ -202,22 +226,22 @@ export function ClientDialog({ open, onOpenChange, client, onSuccess }: ClientDi
     setAddress("");
     setVatNumber("");
     setTaxExempt(false);
-    setVatValidationStatus('idle');
+    setVatValidationStatus("idle");
     setVatValidationMessage("");
     setErrors({});
   };
 
   const validate = () => {
     const newErrors: Record<string, string> = {};
-    
+
     if (!name.trim()) {
       newErrors.name = "Name is required";
     }
-    
+
     if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       newErrors.email = "Invalid email format";
     }
-    
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -227,8 +251,8 @@ export function ClientDialog({ open, onOpenChange, client, onSuccess }: ClientDi
       toast.error("Please enter a VAT number to validate");
       return;
     }
-    
-    setVatValidationStatus('validating');
+
+    setVatValidationStatus("validating");
     setVatValidationMessage("");
     validateVAT.mutate({ vatNumber: vatNumber.trim() });
   };
@@ -236,15 +260,15 @@ export function ClientDialog({ open, onOpenChange, client, onSuccess }: ClientDi
   const handleVatNumberChange = (value: string) => {
     setVatNumber(value);
     // Reset validation status when VAT number changes
-    if (vatValidationStatus !== 'idle') {
-      setVatValidationStatus('idle');
+    if (vatValidationStatus !== "idle") {
+      setVatValidationStatus("idle");
       setVatValidationMessage("");
     }
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!validate()) {
       return;
     }
@@ -269,11 +293,13 @@ export function ClientDialog({ open, onOpenChange, client, onSuccess }: ClientDi
 
   const getVatStatusIcon = () => {
     switch (vatValidationStatus) {
-      case 'validating':
-        return <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />;
-      case 'valid':
+      case "validating":
+        return (
+          <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+        );
+      case "valid":
         return <LucideCheck className="h-4 w-4 text-green-500" />;
-      case 'invalid':
+      case "invalid":
         return <X className="h-4 w-4 text-destructive" />;
       default:
         return null;
@@ -294,7 +320,9 @@ export function ClientDialog({ open, onOpenChange, client, onSuccess }: ClientDi
               />
             </DialogTitle>
             <DialogDescription>
-              {client ? "Update client information" : "Add a new client to your database"}
+              {client
+                ? "Update client information"
+                : "Add a new client to your database"}
             </DialogDescription>
           </DialogHeader>
 
@@ -302,9 +330,11 @@ export function ClientDialog({ open, onOpenChange, client, onSuccess }: ClientDi
             {/* Contact Information Section */}
             <div className="space-y-4">
               <div className="space-y-1">
-                <h3 className="text-sm font-medium text-foreground">Contact Information</h3>
+                <h3 className="text-sm font-medium text-foreground">
+                  Contact Information
+                </h3>
               </div>
-              
+
               <div className="grid gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="name" className="text-sm font-medium">
@@ -315,41 +345,49 @@ export function ClientDialog({ open, onOpenChange, client, onSuccess }: ClientDi
                     <Input
                       id="name"
                       value={name}
-                      onChange={(e) => setName(e.target.value)}
+                      onChange={e => setName(e.target.value)}
                       placeholder="John Doe or Company Name"
                       disabled={isLoading}
                       className="pl-9"
                     />
                   </div>
-                  {errors.name && <p className="text-sm text-destructive">{errors.name}</p>}
+                  {errors.name && (
+                    <p className="text-sm text-destructive">{errors.name}</p>
+                  )}
                 </div>
-                
+
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="email" className="text-sm font-medium">Email</Label>
+                    <Label htmlFor="email" className="text-sm font-medium">
+                      Email
+                    </Label>
                     <div className="relative">
                       <Mail className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
                       <Input
                         id="email"
                         type="email"
                         value={email}
-                        onChange={(e) => setEmail(e.target.value)}
+                        onChange={e => setEmail(e.target.value)}
                         placeholder="john@example.com"
                         disabled={isLoading}
                         className="pl-9"
                       />
                     </div>
-                    {errors.email && <p className="text-sm text-destructive">{errors.email}</p>}
+                    {errors.email && (
+                      <p className="text-sm text-destructive">{errors.email}</p>
+                    )}
                   </div>
-                  
+
                   <div className="space-y-2">
-                    <Label htmlFor="phone" className="text-sm font-medium">Phone</Label>
+                    <Label htmlFor="phone" className="text-sm font-medium">
+                      Phone
+                    </Label>
                     <div className="relative">
                       <Phone className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
                       <Input
                         id="phone"
                         value={phone}
-                        onChange={(e) => setPhone(e.target.value)}
+                        onChange={e => setPhone(e.target.value)}
                         placeholder="+1 (555) 123-4567"
                         disabled={isLoading}
                         className="pl-9"
@@ -357,15 +395,17 @@ export function ClientDialog({ open, onOpenChange, client, onSuccess }: ClientDi
                     </div>
                   </div>
                 </div>
-                
+
                 <div className="space-y-2">
-                  <Label htmlFor="address" className="text-sm font-medium">Address</Label>
+                  <Label htmlFor="address" className="text-sm font-medium">
+                    Address
+                  </Label>
                   <div className="relative">
                     <MapPin className="absolute left-3 top-3 size-4 text-muted-foreground" />
                     <Textarea
                       id="address"
                       value={address}
-                      onChange={(e) => setAddress(e.target.value)}
+                      onChange={e => setAddress(e.target.value)}
                       placeholder="123 Main St, City, State, ZIP"
                       rows={2}
                       disabled={isLoading}
@@ -375,26 +415,32 @@ export function ClientDialog({ open, onOpenChange, client, onSuccess }: ClientDi
                 </div>
               </div>
             </div>
-            
+
             <div className="h-px bg-border" />
-            
+
             {/* Tax Information Section */}
             <div className="space-y-4">
               <div className="flex items-center gap-2">
                 <Shield className="h-4 w-4 text-muted-foreground" />
-                <span className="text-sm font-medium text-foreground">Tax Information</span>
+                <span className="text-sm font-medium text-foreground">
+                  Tax Information
+                </span>
               </div>
-              
+
               <div className="grid gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="vatNumber" className="text-sm font-medium">VAT / Tax ID</Label>
+                  <Label htmlFor="vatNumber" className="text-sm font-medium">
+                    VAT / Tax ID
+                  </Label>
                   <div className="flex gap-2">
                     <div className="relative flex-1">
                       <FileText className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
                       <Input
                         id="vatNumber"
                         value={vatNumber}
-                        onChange={(e) => handleVatNumberChange(e.target.value.toUpperCase())}
+                        onChange={e =>
+                          handleVatNumberChange(e.target.value.toUpperCase())
+                        }
                         placeholder="e.g., DE123456789"
                         disabled={isLoading}
                         className="pl-9 pr-8"
@@ -408,7 +454,9 @@ export function ClientDialog({ open, onOpenChange, client, onSuccess }: ClientDi
                       variant="outline"
                       size="sm"
                       onClick={handleValidateVAT}
-                      disabled={isLoading || validateVAT.isPending || !vatNumber.trim()}
+                      disabled={
+                        isLoading || validateVAT.isPending || !vatNumber.trim()
+                      }
                       className="whitespace-nowrap"
                     >
                       {validateVAT.isPending ? (
@@ -422,31 +470,35 @@ export function ClientDialog({ open, onOpenChange, client, onSuccess }: ClientDi
                     </Button>
                   </div>
                   {vatValidationMessage && (
-                    <p className={`text-sm ${vatValidationStatus === 'valid' ? 'text-green-600' : 'text-destructive'}`}>
+                    <p
+                      className={`text-sm ${vatValidationStatus === "valid" ? "text-green-600" : "text-destructive"}`}
+                    >
                       {vatValidationMessage}
                     </p>
                   )}
                   <p className="text-xs text-muted-foreground">
-                    For EU clients, enter the full VAT number including country code
+                    For EU clients, enter the full VAT number including country
+                    code
                   </p>
                 </div>
-                
+
                 <div className="flex items-center space-x-2">
                   <Checkbox
                     id="taxExempt"
                     checked={taxExempt}
-                    onCheckedChange={(checked) => setTaxExempt(checked === true)}
+                    onCheckedChange={checked => setTaxExempt(checked === true)}
                     disabled={isLoading}
                   />
-                  <Label 
-                    htmlFor="taxExempt" 
+                  <Label
+                    htmlFor="taxExempt"
                     className="text-sm font-normal cursor-pointer"
                   >
                     Tax Exempt
                   </Label>
                 </div>
                 <p className="text-xs text-muted-foreground -mt-2 ml-6">
-                  Check this if the client is exempt from tax (e.g., reverse charge for B2B EU transactions)
+                  Check this if the client is exempt from tax (e.g., reverse
+                  charge for B2B EU transactions)
                 </p>
               </div>
             </div>

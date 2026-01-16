@@ -51,10 +51,11 @@ export default function EditEstimate() {
   const [lineItems, setLineItems] = useState<LineItem[]>([]);
   const [initialized, setInitialized] = useState(false);
 
-  const { data: estimate, isLoading: estimateLoading } = trpc.estimates.get.useQuery(
-    { id: estimateId },
-    { enabled: isAuthenticated && estimateId > 0 }
-  );
+  const { data: estimate, isLoading: estimateLoading } =
+    trpc.estimates.get.useQuery(
+      { id: estimateId },
+      { enabled: isAuthenticated && estimateId > 0 }
+    );
 
   const { data: clients } = trpc.clients.list.useQuery(undefined, {
     enabled: isAuthenticated,
@@ -69,7 +70,7 @@ export default function EditEstimate() {
       toast.success("Estimate updated successfully");
       setLocation(`/estimates/${estimateId}`);
     },
-    onError: (error) => {
+    onError: error => {
       toast.error(error.message || "Failed to update estimate");
     },
   });
@@ -87,7 +88,10 @@ export default function EditEstimate() {
         notes: estimate.estimate.notes || "",
         terms: estimate.estimate.terms || "",
         issueDate: format(new Date(estimate.estimate.issueDate), "yyyy-MM-dd"),
-        validUntil: format(new Date(estimate.estimate.validUntil), "yyyy-MM-dd"),
+        validUntil: format(
+          new Date(estimate.estimate.validUntil),
+          "yyyy-MM-dd"
+        ),
       });
 
       setLineItems(
@@ -112,21 +116,28 @@ export default function EditEstimate() {
 
     let discountAmount = 0;
     if (formData.discountType === "percentage") {
-      discountAmount = subtotal * (parseFloat(formData.discountValue) || 0) / 100;
+      discountAmount =
+        (subtotal * (parseFloat(formData.discountValue) || 0)) / 100;
     } else {
       discountAmount = parseFloat(formData.discountValue) || 0;
     }
 
     const afterDiscount = subtotal - discountAmount;
-    const taxAmount = afterDiscount * (parseFloat(formData.taxRate) || 0) / 100;
+    const taxAmount =
+      (afterDiscount * (parseFloat(formData.taxRate) || 0)) / 100;
     const total = afterDiscount + taxAmount;
 
     return { subtotal, discountAmount, taxAmount, total };
-  }, [lineItems, formData.discountType, formData.discountValue, formData.taxRate]);
+  }, [
+    lineItems,
+    formData.discountType,
+    formData.discountValue,
+    formData.taxRate,
+  ]);
 
   const updateLineItem = (id: string, field: keyof LineItem, value: string) => {
-    setLineItems((items) =>
-      items.map((item) => {
+    setLineItems(items =>
+      items.map(item => {
         if (item.id !== id) return item;
         const updated = { ...item, [field]: value };
         if (field === "quantity" || field === "rate") {
@@ -140,22 +151,28 @@ export default function EditEstimate() {
   };
 
   const addLineItem = () => {
-    setLineItems((items) => [
+    setLineItems(items => [
       ...items,
-      { id: `new-${Date.now()}`, description: "", quantity: "1", rate: "", amount: "0" },
+      {
+        id: `new-${Date.now()}`,
+        description: "",
+        quantity: "1",
+        rate: "",
+        amount: "0",
+      },
     ]);
   };
 
   const removeLineItem = (id: string) => {
     if (lineItems.length === 1) return;
-    setLineItems((items) => items.filter((item) => item.id !== id));
+    setLineItems(items => items.filter(item => item.id !== id));
   };
 
   const addProductToLineItems = (productId: string) => {
-    const product = products?.find((p) => p.id === parseInt(productId));
+    const product = products?.find(p => p.id === parseInt(productId));
     if (!product) return;
 
-    setLineItems((items) => [
+    setLineItems(items => [
       ...items,
       {
         id: `new-${Date.now()}`,
@@ -174,7 +191,7 @@ export default function EditEstimate() {
     }
 
     const validLineItems = lineItems.filter(
-      (item) => item.description && parseFloat(item.amount) > 0
+      item => item.description && parseFloat(item.amount) > 0
     );
 
     if (validLineItems.length === 0) {
@@ -198,7 +215,7 @@ export default function EditEstimate() {
       terms: formData.terms || null,
       issueDate: new Date(formData.issueDate),
       validUntil: new Date(formData.validUntil),
-      lineItems: validLineItems.map((item) => ({
+      lineItems: validLineItems.map(item => ({
         description: item.description,
         quantity: item.quantity,
         rate: item.rate,
@@ -210,7 +227,9 @@ export default function EditEstimate() {
   if (loading || estimateLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="opacity-70"><GearLoader size="md" /></div>
+        <div className="opacity-70">
+          <GearLoader size="md" />
+        </div>
       </div>
     );
   }
@@ -224,8 +243,10 @@ export default function EditEstimate() {
     return (
       <div className="min-h-screen bg-background">
         <Navigation />
-        <div className="container mx-auto px-4 py-16 text-center">
-          <h1 className="text-2xl font-bold text-foreground mb-4">Estimate Not Found</h1>
+        <div className="container mx-auto px-4 md:px-6 py-12 md:py-16 text-center">
+          <h1 className="text-2xl font-bold text-foreground mb-4">
+            Estimate Not Found
+          </h1>
           <Link href="/estimates">
             <Button>
               <ArrowLeft className="h-4 w-4 mr-2" />
@@ -252,7 +273,9 @@ export default function EditEstimate() {
               </Button>
             </Link>
             <div>
-              <h1 className="text-3xl font-bold text-foreground">Edit Estimate</h1>
+              <h1 className="text-3xl font-bold text-foreground">
+                Edit Estimate
+              </h1>
               <p className="text-muted-foreground">
                 {estimate.estimate.estimateNumber}
               </p>
@@ -271,16 +294,19 @@ export default function EditEstimate() {
                     <Label htmlFor="client">Client *</Label>
                     <Select
                       value={formData.clientId}
-                      onValueChange={(value) =>
-                        setFormData((prev) => ({ ...prev, clientId: value }))
+                      onValueChange={value =>
+                        setFormData(prev => ({ ...prev, clientId: value }))
                       }
                     >
                       <SelectTrigger>
                         <SelectValue placeholder="Select a client" />
                       </SelectTrigger>
                       <SelectContent>
-                        {clients?.map((client) => (
-                          <SelectItem key={client.id} value={client.id.toString()}>
+                        {clients?.map(client => (
+                          <SelectItem
+                            key={client.id}
+                            value={client.id.toString()}
+                          >
                             {client.name}
                             {client.companyName && ` (${client.companyName})`}
                           </SelectItem>
@@ -293,8 +319,8 @@ export default function EditEstimate() {
                     <Label htmlFor="currency">Currency</Label>
                     <Select
                       value={formData.currency}
-                      onValueChange={(value) =>
-                        setFormData((prev) => ({ ...prev, currency: value }))
+                      onValueChange={value =>
+                        setFormData(prev => ({ ...prev, currency: value }))
                       }
                     >
                       <SelectTrigger>
@@ -304,8 +330,12 @@ export default function EditEstimate() {
                         <SelectItem value="USD">USD - US Dollar</SelectItem>
                         <SelectItem value="EUR">EUR - Euro</SelectItem>
                         <SelectItem value="GBP">GBP - British Pound</SelectItem>
-                        <SelectItem value="CAD">CAD - Canadian Dollar</SelectItem>
-                        <SelectItem value="AUD">AUD - Australian Dollar</SelectItem>
+                        <SelectItem value="CAD">
+                          CAD - Canadian Dollar
+                        </SelectItem>
+                        <SelectItem value="AUD">
+                          AUD - Australian Dollar
+                        </SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -317,8 +347,8 @@ export default function EditEstimate() {
                     id="title"
                     placeholder="e.g., Website Redesign Proposal"
                     value={formData.title}
-                    onChange={(e) =>
-                      setFormData((prev) => ({ ...prev, title: e.target.value }))
+                    onChange={e =>
+                      setFormData(prev => ({ ...prev, title: e.target.value }))
                     }
                   />
                 </div>
@@ -330,8 +360,11 @@ export default function EditEstimate() {
                       id="issueDate"
                       type="date"
                       value={formData.issueDate}
-                      onChange={(e) =>
-                        setFormData((prev) => ({ ...prev, issueDate: e.target.value }))
+                      onChange={e =>
+                        setFormData(prev => ({
+                          ...prev,
+                          issueDate: e.target.value,
+                        }))
                       }
                     />
                   </div>
@@ -342,8 +375,11 @@ export default function EditEstimate() {
                       id="validUntil"
                       type="date"
                       value={formData.validUntil}
-                      onChange={(e) =>
-                        setFormData((prev) => ({ ...prev, validUntil: e.target.value }))
+                      onChange={e =>
+                        setFormData(prev => ({
+                          ...prev,
+                          validUntil: e.target.value,
+                        }))
                       }
                     />
                   </div>
@@ -362,8 +398,11 @@ export default function EditEstimate() {
                         <SelectValue placeholder="Add from products" />
                       </SelectTrigger>
                       <SelectContent>
-                        {products.map((product) => (
-                          <SelectItem key={product.id} value={product.id.toString()}>
+                        {products.map(product => (
+                          <SelectItem
+                            key={product.id}
+                            value={product.id.toString()}
+                          >
                             {product.name}
                           </SelectItem>
                         ))}
@@ -374,7 +413,7 @@ export default function EditEstimate() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {lineItems.map((item) => (
+                  {lineItems.map(item => (
                     <div
                       key={item.id}
                       className="grid grid-cols-12 gap-2 items-start"
@@ -383,8 +422,12 @@ export default function EditEstimate() {
                         <Input
                           placeholder="Description"
                           value={item.description}
-                          onChange={(e) =>
-                            updateLineItem(item.id, "description", e.target.value)
+                          onChange={e =>
+                            updateLineItem(
+                              item.id,
+                              "description",
+                              e.target.value
+                            )
                           }
                         />
                       </div>
@@ -393,7 +436,7 @@ export default function EditEstimate() {
                           type="number"
                           placeholder="Qty"
                           value={item.quantity}
-                          onChange={(e) =>
+                          onChange={e =>
                             updateLineItem(item.id, "quantity", e.target.value)
                           }
                         />
@@ -404,7 +447,7 @@ export default function EditEstimate() {
                           step="0.01"
                           placeholder="Rate"
                           value={item.rate}
-                          onChange={(e) =>
+                          onChange={e =>
                             updateLineItem(item.id, "rate", e.target.value)
                           }
                         />
@@ -429,7 +472,11 @@ export default function EditEstimate() {
                     </div>
                   ))}
 
-                  <Button variant="outline" onClick={addLineItem} className="w-full">
+                  <Button
+                    variant="outline"
+                    onClick={addLineItem}
+                    className="w-full"
+                  >
                     <Plus className="h-4 w-4 mr-2" />
                     Add Line Item
                   </Button>
@@ -458,7 +505,10 @@ export default function EditEstimate() {
                         <Select
                           value={formData.discountType}
                           onValueChange={(value: "percentage" | "fixed") =>
-                            setFormData((prev) => ({ ...prev, discountType: value }))
+                            setFormData(prev => ({
+                              ...prev,
+                              discountType: value,
+                            }))
                           }
                         >
                           <SelectTrigger className="w-[100px]">
@@ -466,15 +516,17 @@ export default function EditEstimate() {
                           </SelectTrigger>
                           <SelectContent>
                             <SelectItem value="percentage">%</SelectItem>
-                            <SelectItem value="fixed">{formData.currency}</SelectItem>
+                            <SelectItem value="fixed">
+                              {formData.currency}
+                            </SelectItem>
                           </SelectContent>
                         </Select>
                         <Input
                           type="number"
                           step="0.01"
                           value={formData.discountValue}
-                          onChange={(e) =>
-                            setFormData((prev) => ({
+                          onChange={e =>
+                            setFormData(prev => ({
                               ...prev,
                               discountValue: e.target.value,
                             }))
@@ -489,8 +541,11 @@ export default function EditEstimate() {
                         type="number"
                         step="0.01"
                         value={formData.taxRate}
-                        onChange={(e) =>
-                          setFormData((prev) => ({ ...prev, taxRate: e.target.value }))
+                        onChange={e =>
+                          setFormData(prev => ({
+                            ...prev,
+                            taxRate: e.target.value,
+                          }))
                         }
                       />
                     </div>
@@ -500,7 +555,8 @@ export default function EditEstimate() {
                     <div className="flex justify-between text-sm">
                       <span className="text-muted-foreground">Discount</span>
                       <span className="text-destructive">
-                        -{formData.currency} {calculations.discountAmount.toFixed(2)}
+                        -{formData.currency}{" "}
+                        {calculations.discountAmount.toFixed(2)}
                       </span>
                     </div>
                   )}
@@ -538,8 +594,8 @@ export default function EditEstimate() {
                     id="notes"
                     placeholder="Additional notes for the client..."
                     value={formData.notes}
-                    onChange={(e) =>
-                      setFormData((prev) => ({ ...prev, notes: e.target.value }))
+                    onChange={e =>
+                      setFormData(prev => ({ ...prev, notes: e.target.value }))
                     }
                     rows={3}
                   />
@@ -551,8 +607,8 @@ export default function EditEstimate() {
                     id="terms"
                     placeholder="Payment terms, conditions, etc..."
                     value={formData.terms}
-                    onChange={(e) =>
-                      setFormData((prev) => ({ ...prev, terms: e.target.value }))
+                    onChange={e =>
+                      setFormData(prev => ({ ...prev, terms: e.target.value }))
                     }
                     rows={3}
                   />

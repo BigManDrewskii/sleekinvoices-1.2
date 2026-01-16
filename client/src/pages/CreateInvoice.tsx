@@ -1,96 +1,68 @@
 import { GearLoader } from "@/components/ui/gear-loader";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { ClientSelector } from "@/components/invoices/ClientSelector";
-import { TemplateSelector } from "@/components/invoices/TemplateSelector";
-import { LineItemRow, LineItem } from "@/components/invoices/LineItemRow";
-import { BillableExpenseDialog } from "@/components/invoices/BillableExpenseDialog";
-import { ProductSelector } from "@/components/invoices/ProductSelector";
-import { InvoiceFormCalculations } from "@/components/invoices/InvoiceFormCalculations";
-import { InvoicePreviewModal } from "@/components/invoices/InvoicePreviewModal";
-import { getLoginUrl } from "@/const";
-import { trpc } from "@/lib/trpc";
-import { FileText, Plus, Save, Send, Eye } from "lucide-react";
-import { useState, useMemo, useEffect } from "react";
 import { Link, useLocation, useSearch } from "wouter";
 import { toast } from "sonner";
-import { nanoid } from "nanoid";
 import { PageLayout } from "@/components/layout/PageLayout";
-import { CurrencySelector } from "@/components/CurrencySelector";
-import { getCurrencyDecimals, getCurrencySymbol, isCryptoCurrency } from "../../../shared/currencies";
-import { 
-  toDecimal, 
-  add, 
-  subtract, 
-  multiply, 
-  divide, 
-  percentage as calcPercentage,
-  formatDecimal 
-} from "@/lib/decimal";
+import { getLoginUrl } from "@/const";
+import { trpc } from "@/lib/trpc";
+import { useState, useEffect } from "react";
+import {
+  InvoiceForm,
+  type InvoiceFormData,
+} from "@/components/invoices/InvoiceForm";
+import { InvoicePreviewModal } from "@/components/invoices/InvoicePreviewModal";
+import { UpgradeDialog } from "@/components/UpgradeDialog";
+import { getEmptyLineItem } from "@/components/invoices/InvoiceForm/hooks/useInvoiceFormState";
 
 export default function CreateInvoice() {
   const { user, loading, isAuthenticated } = useAuth();
   const [, setLocation] = useLocation();
   const searchString = useSearch();
 
-  // Form state
-  const [clientId, setClientId] = useState<number | null>(null);
-  const [prefillClientName, setPrefillClientName] = useState<string | null>(null);
-  const [issueDate, setIssueDate] = useState<string>(
-    new Date().toISOString().split('T')[0]
-  );
-  const [dueDate, setDueDate] = useState<string>(
-    new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
-  );
-  const [lineItems, setLineItems] = useState<LineItem[]>([
-    { id: nanoid(), description: '', quantity: 1, rate: 0 },
-  ]);
-  const [taxRate, setTaxRate] = useState<number>(0);
-  const [discountType, setDiscountType] = useState<'percentage' | 'fixed'>('percentage');
-  const [discountValue, setDiscountValue] = useState<number>(0);
-  const [notes, setNotes] = useState<string>('');
-  const [paymentTerms, setPaymentTerms] = useState<string>('Net 30');
-  const [templateId, setTemplateId] = useState<number | null>(null);
-  const [currency, setCurrency] = useState<string>('USD');
+  const [showUpgradeDialog, setShowUpgradeDialog] = useState(false);
+  const [showPreview, setShowPreview] = useState(false);
 
-  // Parse URL parameters from Magic Invoice AI
+  const [prefillClientName, setPrefillClientName] = useState<string | null>(
+    null
+  );
+  const [prefillCurrency, setPrefillCurrency] = useState<string>("USD");
+  const [prefillDueDate, setPrefillDueDate] = useState<string | null>(null);
+  const [prefillNotes, setPrefillNotes] = useState<string>("");
+  const [prefillLineItems, setPrefillLineItems] = useState<
+    Array<{ description: string; quantity: number; rate: number }>
+  >([]);
+
   useEffect(() => {
     if (!searchString) return;
-    
+
     const params = new URLSearchParams(searchString);
-    
-    // Pre-fill client name (for display, will need to match or create)
-    const clientName = params.get('clientName');
-    if (clientName && clientName !== 'null') {
+
+    const clientName = params.get("clientName");
+    if (clientName && clientName !== "null") {
       setPrefillClientName(clientName);
     }
-    
-    // Pre-fill currency
-    const urlCurrency = params.get('currency');
-    if (urlCurrency && urlCurrency !== 'null') {
-      setCurrency(urlCurrency);
+
+    const urlCurrency = params.get("currency");
+    if (urlCurrency && urlCurrency !== "null") {
+      setPrefillCurrency(urlCurrency);
     }
-    
-    // Pre-fill due date
-    const urlDueDate = params.get('dueDate');
-    if (urlDueDate && urlDueDate !== 'null' && urlDueDate.match(/^\d{4}-\d{2}-\d{2}$/)) {
-      setDueDate(urlDueDate);
+
+    const urlDueDate = params.get("dueDate");
+    if (
+      urlDueDate &&
+      urlDueDate !== "null" &&
+      urlDueDate.match(/^\d{4}-\d{2}-\d{2}$/)
+    ) {
+      setPrefillDueDate(urlDueDate);
     }
-    
-    // Pre-fill notes
-    const urlNotes = params.get('notes');
-    if (urlNotes && urlNotes !== 'null') {
-      setNotes(urlNotes);
+
+    const urlNotes = params.get("notes");
+    if (urlNotes && urlNotes !== "null") {
+      setPrefillNotes(urlNotes);
     }
-    
-    // Pre-fill line items
-    const lineItemsParam = params.get('lineItems');
+
+    const lineItemsParam = params.get("lineItems");
     if (lineItemsParam) {
       try {
         const parsedItems = JSON.parse(lineItemsParam) as Array<{
@@ -99,216 +71,61 @@ export default function CreateInvoice() {
           rate: number;
         }>;
         if (Array.isArray(parsedItems) && parsedItems.length > 0) {
-          setLineItems(parsedItems.map(item => ({
-            id: nanoid(),
-            description: item.description || '',
-            quantity: item.quantity || 1,
-            rate: item.rate || 0,
-          })));
+          setPrefillLineItems(
+            parsedItems.map(item => ({
+              description: item.description || "",
+              quantity: item.quantity || 1,
+              rate: item.rate || 0,
+            }))
+          );
         }
       } catch (e) {
         if (import.meta.env.DEV) {
-          console.error('Failed to parse line items from URL:', e);
+          console.error("Failed to parse line items from URL:", e);
         }
       }
     }
   }, [searchString]);
 
-  // Validation errors
-  const [errors, setErrors] = useState<Record<string, string>>({});
-  
-  // Billable expenses dialog
-  const [showExpenseDialog, setShowExpenseDialog] = useState(false);
-  const [linkedExpenseIds, setLinkedExpenseIds] = useState<number[]>([]);
-  
-  // Preview modal
-  const [showPreview, setShowPreview] = useState(false);
-
-  // Fetch next invoice number
-  const { data: nextNumber } = trpc.invoices.getNextNumber.useQuery(undefined, {
-    enabled: isAuthenticated,
-  });
-
   const utils = trpc.useUtils();
   const createInvoice = trpc.invoices.create.useMutation({
-    onSuccess: (data) => {
+    onSuccess: data => {
       toast.success("Invoice created successfully");
       utils.invoices.list.invalidate();
       setLocation(`/invoices/${data.id}`);
     },
-    onError: (error) => {
-      toast.error(error.message || "Failed to create invoice");
+    onError: error => {
+      if (
+        error.message?.includes("Monthly invoice limit reached") ||
+        error.message?.includes("invoice limit")
+      ) {
+        setShowUpgradeDialog(true);
+      } else {
+        toast.error(error.message || "Failed to create invoice");
+      }
     },
   });
 
-  // Calculations using decimal.js for precision
-  const calculations = useMemo(() => {
-    // Calculate subtotal with precise decimal arithmetic
-    const subtotal = lineItems.reduce((sum, item) => {
-      const itemAmount = multiply(item.quantity, item.rate);
-      return add(sum, itemAmount);
-    }, toDecimal(0));
+  const { data: nextNumber } = trpc.invoices.getNextNumber.useQuery(undefined, {
+    enabled: isAuthenticated,
+  });
 
-    // Calculate discount amount
-    let discountAmount = toDecimal(0);
-    if (discountValue > 0) {
-      if (discountType === 'percentage') {
-        discountAmount = calcPercentage(subtotal, discountValue);
-      } else {
-        discountAmount = toDecimal(discountValue);
-      }
-    }
-
-    // Calculate tax on amount after discount
-    const afterDiscount = subtract(subtotal, discountAmount);
-    const taxAmount = calcPercentage(afterDiscount, taxRate);
-    const total = add(afterDiscount, taxAmount);
-
-    return {
-      subtotal: parseFloat(formatDecimal(subtotal, 2)),
-      discountAmount: parseFloat(formatDecimal(discountAmount, 2)),
-      taxAmount: parseFloat(formatDecimal(taxAmount, 2)),
-      total: parseFloat(formatDecimal(total, 2)),
-    };
-  }, [lineItems, taxRate, discountType, discountValue]);
-
-  // Line item operations
-  const addLineItem = () => {
-    setLineItems([...lineItems, { id: nanoid(), description: '', quantity: 1, rate: 0 }]);
-  };
-
-  const updateLineItem = (id: string, updated: LineItem) => {
-    setLineItems(lineItems.map(item => item.id === id ? updated : item));
-  };
-
-  const deleteLineItem = (id: string) => {
-    if (lineItems.length > 1) {
-      setLineItems(lineItems.filter(item => item.id !== id));
-    }
-  };
-
-  // Add product from library as line item
-  const addProductAsLineItem = (product: { name: string; description: string | null; rate: string; unit: string | null }) => {
-    const description = product.description 
-      ? `${product.name} - ${product.description}`
-      : product.name;
-    setLineItems([...lineItems, { 
-      id: nanoid(), 
-      description, 
-      quantity: 1, 
-      rate: parseFloat(product.rate) 
-    }]);
-  };
-
-  // Validation
-  const validate = (): boolean => {
-    const newErrors: Record<string, string> = {};
-
-    if (!clientId) {
-      newErrors.clientId = "Please select a client";
-    }
-
-    if (!issueDate) {
-      newErrors.issueDate = "Issue date is required";
-    }
-
-    if (!dueDate) {
-      newErrors.dueDate = "Due date is required";
-    }
-
-    if (issueDate && dueDate && new Date(dueDate) < new Date(issueDate)) {
-      newErrors.dueDate = "Due date must be after issue date";
-    }
-
-    if (lineItems.length === 0) {
-      newErrors.lineItems = "At least one line item is required";
-    }
-
-    lineItems.forEach((item, index) => {
-      if (!item.description.trim()) {
-        newErrors[`lineItem_${index}_description`] = "Description is required";
-      }
-      if (item.quantity <= 0) {
-        newErrors[`lineItem_${index}_quantity`] = "Quantity must be greater than 0";
-      }
-      if (item.rate < 0) {
-        newErrors[`lineItem_${index}_rate`] = "Rate cannot be negative";
-      }
-    });
-
-    if (taxRate < 0 || taxRate > 100) {
-      newErrors.taxRate = "Tax rate must be between 0 and 100";
-    }
-
-    if (discountValue < 0) {
-      newErrors.discountValue = "Discount cannot be negative";
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  // Submit handlers
-  const handleSaveDraft = () => {
-    if (!validate()) {
-      toast.error("Please fix the errors before saving");
-      return;
-    }
-
+  const handleSubmit = async (
+    data: InvoiceFormData,
+    status: "draft" | "sent"
+  ) => {
     createInvoice.mutate({
-      clientId: clientId!,
-      invoiceNumber: nextNumber || 'INV-0001',
-      status: 'draft',
-      issueDate: new Date(issueDate),
-      dueDate: new Date(dueDate),
-      lineItems: lineItems.map(item => ({
-        description: item.description,
-        quantity: item.quantity,
-        rate: item.rate,
-      })),
-      taxRate,
-      discountType,
-      discountValue,
-      notes,
-      paymentTerms,
-      expenseIds: linkedExpenseIds.length > 0 ? linkedExpenseIds : undefined,
-      templateId: templateId || undefined,
-      currency,
-    });
-  };
-
-  const handleSaveAndSend = () => {
-    if (!validate()) {
-      toast.error("Please fix the errors before sending");
-      return;
-    }
-
-    createInvoice.mutate({
-      clientId: clientId!,
-      invoiceNumber: nextNumber || 'INV-0001',
-      status: 'sent',
-      issueDate: new Date(issueDate),
-      dueDate: new Date(dueDate),
-      lineItems: lineItems.map(item => ({
-        description: item.description,
-        quantity: item.quantity,
-        rate: item.rate,
-      })),
-      taxRate,
-      discountType,
-      discountValue,
-      notes,
-      paymentTerms,
-      expenseIds: linkedExpenseIds.length > 0 ? linkedExpenseIds : undefined,
-      templateId: templateId || undefined,
-      currency,
+      ...data,
+      status,
     });
   };
 
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="opacity-70"><GearLoader size="md" /></div>
+        <div className="opacity-70">
+          <GearLoader size="md" />
+        </div>
       </div>
     );
   }
@@ -318,6 +135,21 @@ export default function CreateInvoice() {
     return null;
   }
 
+  const initialData = {
+    currency: prefillCurrency,
+    dueDate: prefillDueDate || undefined,
+    notes: prefillNotes || undefined,
+    lineItems:
+      prefillLineItems.length > 0
+        ? prefillLineItems.map(item => ({
+            ...getEmptyLineItem(),
+            description: item.description,
+            quantity: item.quantity,
+            rate: item.rate,
+          }))
+        : undefined,
+  };
+
   return (
     <>
       <PageLayout
@@ -325,286 +157,54 @@ export default function CreateInvoice() {
         title="Create Invoice"
         subtitle="Fill in the details to create a new invoice"
       >
-            {/* Client and Invoice Info */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Invoice Details</CardTitle>
-                <CardDescription>Basic information about the invoice</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <ClientSelector
-                  value={clientId}
-                  onChange={setClientId}
-                  error={errors.clientId}
-                />
-
-                <TemplateSelector
-                  value={templateId}
-                  onChange={setTemplateId}
-                />
-
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="invoice-number">Invoice Number</Label>
-                    <Input 
-                      id="invoice-number"
-                      value={nextNumber || 'Loading...'} 
-                      disabled 
-                      aria-label="Invoice number (auto-generated)"
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label>Currency</Label>
-                    <CurrencySelector
-                      value={currency}
-                      onChange={setCurrency}
-                      className="w-full"
-                    />
-                    {isCryptoCurrency(currency) && (
-                      <p className="text-xs text-amber-500">Crypto invoice - amounts in {currency}</p>
-                    )}
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="issue-date">
-                      Issue Date <span className="text-destructive">*</span>
-                    </Label>
-                    <Input
-                      id="issue-date"
-                      type="date"
-                      value={issueDate}
-                      onChange={(e) => setIssueDate(e.target.value)}
-                      className={errors.issueDate ? "border-destructive" : ""}
-                      aria-label="Invoice issue date"
-                      aria-required="true"
-                      aria-invalid={!!errors.issueDate}
-                      aria-describedby={errors.issueDate ? "issue-date-error" : undefined}
-                    />
-                    {errors.issueDate && (
-                      <p id="issue-date-error" className="text-sm text-destructive" role="alert">{errors.issueDate}</p>
-                    )}
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="due-date">
-                      Due Date <span className="text-destructive">*</span>
-                    </Label>
-                    <Input
-                      id="due-date"
-                      type="date"
-                      value={dueDate}
-                      onChange={(e) => setDueDate(e.target.value)}
-                      className={errors.dueDate ? "border-destructive" : ""}
-                      aria-label="Invoice due date"
-                      aria-required="true"
-                      aria-invalid={!!errors.dueDate}
-                      aria-describedby={errors.dueDate ? "due-date-error" : undefined}
-                    />
-                    {errors.dueDate && (
-                      <p id="due-date-error" className="text-sm text-destructive" role="alert">{errors.dueDate}</p>
-                    )}
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Line Items */}
-            <Card>
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <CardTitle>Line Items</CardTitle>
-                    <CardDescription>Add products or services to the invoice</CardDescription>
-                  </div>
-                  <div className="flex gap-2">
-                    <ProductSelector onSelect={addProductAsLineItem} />
-                    <Button 
-                      type="button" 
-                      variant="outline" 
-                      size="sm" 
-                      onClick={() => setShowExpenseDialog(true)}
-                      disabled={!clientId}
-                    >
-                      <FileText className="h-4 w-4 mr-2" />
-                      Add Billable Expenses
-                    </Button>
-                    <Button type="button" variant="outline" size="sm" onClick={addLineItem}>
-                      <Plus className="h-4 w-4 mr-2" />
-                      Add Item
-                    </Button>
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {/* Header Row */}
-                <div className="hidden md:grid grid-cols-12 gap-4 text-sm font-medium text-muted-foreground pb-2 border-b">
-                  <div className="col-span-5">Description</div>
-                  <div className="col-span-2">Quantity</div>
-                  <div className="col-span-2">Rate</div>
-                  <div className="col-span-2 text-right">Amount</div>
-                  <div className="col-span-1"></div>
-                </div>
-
-                {/* Line Items */}
-                {lineItems.map((item) => (
-                  <LineItemRow
-                    key={item.id}
-                    item={item}
-                    onChange={(updated) => updateLineItem(item.id, updated)}
-                    onDelete={() => deleteLineItem(item.id)}
-                    canDelete={lineItems.length > 1}
-                  />
-                ))}
-
-                {errors.lineItems && (
-                  <p className="text-sm text-destructive">{errors.lineItems}</p>
-                )}
-              </CardContent>
-            </Card>
-
-            {/* Calculations */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Totals</CardTitle>
-                <CardDescription>Tax, discounts, and final total</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <InvoiceFormCalculations
-                  subtotal={calculations.subtotal}
-                  taxRate={taxRate}
-                  onTaxRateChange={setTaxRate}
-                  discountType={discountType}
-                  onDiscountTypeChange={setDiscountType}
-                  discountValue={discountValue}
-                  onDiscountValueChange={setDiscountValue}
-                  discountAmount={calculations.discountAmount}
-                  taxAmount={calculations.taxAmount}
-                  total={calculations.total}
-                />
-              </CardContent>
-            </Card>
-
-            {/* Notes and Payment Terms */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Additional Information</CardTitle>
-                <CardDescription>Notes and payment terms for the client</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="notes">Notes</Label>
-                  <Textarea
-                    id="notes"
-                    placeholder="Add any additional notes or comments..."
-                    value={notes}
-                    onChange={(e) => setNotes(e.target.value)}
-                    rows={3}
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="paymentTerms">Payment Terms</Label>
-                  <Input
-                    id="paymentTerms"
-                    placeholder="e.g., Net 30, Due on receipt"
-                    value={paymentTerms}
-                    onChange={(e) => setPaymentTerms(e.target.value)}
-                  />
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Action Buttons */}
-            <div className="flex items-center justify-end gap-4">
-              <Link href="/invoices">
-                <Button variant="outline">Cancel</Button>
-              </Link>
-              <Button
-                variant="outline"
-                onClick={() => setShowPreview(true)}
-                type="button"
-              >
-                <Eye className="h-4 w-4 mr-2" />
-                Preview
-              </Button>
-              <Button
-                variant="outline"
-                onClick={handleSaveDraft}
-                disabled={createInvoice.isPending}
-              >
-                {createInvoice.isPending ? (
-                  <>
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current mr-2"></div>
-                    Saving...
-                  </>
-                ) : (
-                  <>
-                    <Save className="h-4 w-4 mr-2" />
-                    Save as Draft
-                  </>
-                )}
-              </Button>
-              <Button
-                onClick={handleSaveAndSend}
-                disabled={createInvoice.isPending}
-              >
-                {createInvoice.isPending ? (
-                  <>
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current mr-2"></div>
-                    Saving...
-                  </>
-                ) : (
-                  <>
-                    <Send className="h-4 w-4 mr-2" />
-                    Save & Send
-                  </>
-                )}
-              </Button>
-            </div>
+        <InvoiceForm
+          mode="create"
+          initialData={initialData}
+          invoiceNumber={nextNumber || undefined}
+          onSubmit={handleSubmit}
+          onCancel={() => setLocation("/invoices")}
+          isLoading={createInvoice.isPending}
+          showPreview={showPreview}
+          onPreviewChange={setShowPreview}
+          previewData={
+            user
+              ? {
+                  clientName: "Client Name",
+                  companyName: user.companyName ?? undefined,
+                  companyAddress: user.companyAddress ?? undefined,
+                }
+              : undefined
+          }
+        />
       </PageLayout>
 
-      {/* Billable Expenses Dialog */}
-      <BillableExpenseDialog
-        open={showExpenseDialog}
-        onOpenChange={setShowExpenseDialog}
-        clientId={clientId}
-        onAddExpenses={(expenses) => {
-          const newItems = expenses.map(exp => ({
-            id: nanoid(),
-            description: `${exp.description} (${exp.vendor || 'Expense'})`,
-            quantity: 1,
-            rate: Number(exp.amount) + (Number(exp.taxAmount) || 0),
-          }));
-          setLineItems([...lineItems, ...newItems]);
-          setLinkedExpenseIds([...linkedExpenseIds, ...expenses.map(e => e.id)]);
-          setShowExpenseDialog(false);
-          toast.success(`Added ${expenses.length} expense(s) to invoice`);
-        }}
+      <InvoicePreviewModal
+        open={showPreview}
+        onClose={() => setShowPreview(false)}
+        invoiceNumber={nextNumber || "INV-0001"}
+        clientName={"Client Name"}
+        issueDate={new Date()}
+        dueDate={
+          new Date(prefillDueDate || Date.now() + 30 * 24 * 60 * 60 * 1000)
+        }
+        lineItems={initialData.lineItems || [getEmptyLineItem()]}
+        subtotal={0}
+        discountAmount={0}
+        taxAmount={0}
+        total={0}
+        notes={prefillNotes}
+        paymentTerms="Net 30"
+        companyName={user?.companyName ?? undefined}
+        companyAddress={user?.companyAddress ?? undefined}
+        templateId={undefined}
+        onTemplateChange={() => {}}
       />
-      
-      {/* Invoice Preview Modal */}
-      {clientId && (
-        <InvoicePreviewModal
-          open={showPreview}
-          onClose={() => setShowPreview(false)}
-          invoiceNumber={nextNumber || 'INV-0001'}
-          clientName={"Client Name"}
-          issueDate={new Date(issueDate)}
-          dueDate={new Date(dueDate)}
-          lineItems={lineItems}
-          subtotal={calculations.subtotal}
-          discountAmount={calculations.discountAmount}
-          taxAmount={calculations.taxAmount}
-          total={calculations.total}
-          notes={notes}
-          paymentTerms={paymentTerms}
-          companyName={user?.companyName || undefined}
-          companyAddress={user?.companyAddress || undefined}
-          templateId={templateId}
-          onTemplateChange={setTemplateId}
-        />
-      )}
+
+      <UpgradeDialog
+        open={showUpgradeDialog}
+        onOpenChange={setShowUpgradeDialog}
+        reason="invoice_limit"
+      />
     </>
   );
 }

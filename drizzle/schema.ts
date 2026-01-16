@@ -1,4 +1,14 @@
-import { int, mysqlEnum, mysqlTable, text, timestamp, varchar, decimal, boolean, uniqueIndex } from "drizzle-orm/mysql-core";
+import {
+  int,
+  mysqlEnum,
+  mysqlTable,
+  text,
+  timestamp,
+  varchar,
+  decimal,
+  boolean,
+  uniqueIndex,
+} from "drizzle-orm/mysql-core";
 
 /**
  * Core user table backing auth flow.
@@ -10,10 +20,12 @@ export const users = mysqlTable("users", {
   email: varchar("email", { length: 320 }),
   loginMethod: varchar("loginMethod", { length: 64 }),
   role: mysqlEnum("role", ["user", "admin"]).default("user").notNull(),
-  
+
   // Profile
   avatarUrl: text("avatarUrl"), // Custom uploaded avatar URL
-  avatarType: mysqlEnum("avatarType", ["initials", "boring", "upload"]).default("initials"), // Avatar display type
+  avatarType: mysqlEnum("avatarType", ["initials", "boring", "upload"]).default(
+    "initials"
+  ), // Avatar display type
 
   // Company/branding info
   companyName: text("companyName"),
@@ -22,13 +34,23 @@ export const users = mysqlTable("users", {
   companyPhone: varchar("companyPhone", { length: 50 }),
   logoUrl: text("logoUrl"),
   taxId: varchar("taxId", { length: 50 }), // VAT/Tax ID for invoices
-  
+
   // Invoice preferences
-  defaultInvoiceStyle: mysqlEnum("defaultInvoiceStyle", ["receipt", "classic"]).default("receipt"), // Default invoice style
-  
+  defaultInvoiceStyle: mysqlEnum("defaultInvoiceStyle", [
+    "receipt",
+    "classic",
+  ]).default("receipt"), // Default invoice style
+
   // Subscription info
   stripeCustomerId: varchar("stripeCustomerId", { length: 255 }),
-  subscriptionStatus: mysqlEnum("subscriptionStatus", ["free", "active", "canceled", "past_due"]).default("free").notNull(),
+  subscriptionStatus: mysqlEnum("subscriptionStatus", [
+    "free",
+    "active",
+    "canceled",
+    "past_due",
+  ])
+    .default("free")
+    .notNull(),
   subscriptionId: varchar("subscriptionId", { length: 255 }),
   currentPeriodEnd: timestamp("currentPeriodEnd"),
   subscriptionEndDate: timestamp("subscriptionEndDate"), // End date for crypto subscriptions
@@ -48,17 +70,21 @@ export type InsertUser = typeof users.$inferInsert;
  * Month format: YYYY-MM (e.g., "2026-01")
  * Counter resets automatically when new month is detected
  */
-export const usageTracking = mysqlTable("usageTracking", {
-  id: int("id").autoincrement().primaryKey(),
-  userId: int("userId").notNull(),
-  month: varchar("month", { length: 7 }).notNull(), // Format: YYYY-MM
-  invoicesCreated: int("invoicesCreated").default(0).notNull(),
-  createdAt: timestamp("createdAt").defaultNow().notNull(),
-  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
-}, (table) => ({
-  // Unique constraint: one record per user per month
-  userMonthIdx: uniqueIndex("user_month_idx").on(table.userId, table.month),
-}));
+export const usageTracking = mysqlTable(
+  "usageTracking",
+  {
+    id: int("id").autoincrement().primaryKey(),
+    userId: int("userId").notNull(),
+    month: varchar("month", { length: 7 }).notNull(), // Format: YYYY-MM
+    invoicesCreated: int("invoicesCreated").default(0).notNull(),
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+    updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+  },
+  table => ({
+    // Unique constraint: one record per user per month
+    userMonthIdx: uniqueIndex("user_month_idx").on(table.userId, table.month),
+  })
+);
 
 export type UsageTracking = typeof usageTracking.$inferSelect;
 export type InsertUsageTracking = typeof usageTracking.$inferInsert;
@@ -75,11 +101,11 @@ export const clients = mysqlTable("clients", {
   address: text("address"),
   phone: varchar("phone", { length: 50 }),
   notes: text("notes"),
-  
+
   // VAT/Tax compliance fields
   vatNumber: varchar("vatNumber", { length: 50 }), // EU VAT number (e.g., DE123456789)
   taxExempt: boolean("taxExempt").default(false).notNull(), // Tax exempt status
-  
+
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });
@@ -88,57 +114,97 @@ export type Client = typeof clients.$inferSelect;
 export type InsertClient = typeof clients.$inferInsert;
 
 /**
+ * Client Contacts - contacts/team members associated with a client company
+ * A client company can have multiple contacts (e.g., accounts payable, manager)
+ */
+export const clientContacts = mysqlTable("clientContacts", {
+  id: int("id").autoincrement().primaryKey(),
+  clientId: int("clientId").notNull(),
+  firstName: varchar("firstName", { length: 100 }).notNull(),
+  lastName: varchar("lastName", { length: 100 }),
+  email: varchar("email", { length: 320 }),
+  role: varchar("role", { length: 100 }), // e.g., "Accounts Payable", "Manager"
+  isPrimary: boolean("isPrimary").default(false).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type ClientContact = typeof clientContacts.$inferSelect;
+export type InsertClientContact = typeof clientContacts.$inferInsert;
+
+/**
  * Invoices table
  */
 export const invoices = mysqlTable("invoices", {
   id: int("id").autoincrement().primaryKey(),
   userId: int("userId").notNull(),
   clientId: int("clientId").notNull(),
-  
+
   // Invoice identification
   invoiceNumber: varchar("invoiceNumber", { length: 50 }).notNull(),
-  
+
   // Status tracking - includes 'viewed' for when client first opens invoice
-  status: mysqlEnum("status", ["draft", "sent", "viewed", "paid", "overdue", "canceled"]).default("draft").notNull(),
-  
+  status: mysqlEnum("status", [
+    "draft",
+    "sent",
+    "viewed",
+    "paid",
+    "overdue",
+    "canceled",
+  ])
+    .default("draft")
+    .notNull(),
+
   // Financial details - DECIMAL(24,8) for crypto precision
   currency: varchar("currency", { length: 10 }).default("USD").notNull(),
   subtotal: decimal("subtotal", { precision: 24, scale: 8 }).notNull(),
-  taxRate: decimal("taxRate", { precision: 5, scale: 2 }).default("0").notNull(),
-  taxAmount: decimal("taxAmount", { precision: 24, scale: 8 }).default("0").notNull(),
-  discountType: mysqlEnum("discountType", ["percentage", "fixed"]).default("percentage"),
-  discountValue: decimal("discountValue", { precision: 24, scale: 8 }).default("0").notNull(),
-  discountAmount: decimal("discountAmount", { precision: 24, scale: 8 }).default("0").notNull(),
+  taxRate: decimal("taxRate", { precision: 5, scale: 2 })
+    .default("0")
+    .notNull(),
+  taxAmount: decimal("taxAmount", { precision: 24, scale: 8 })
+    .default("0")
+    .notNull(),
+  discountType: mysqlEnum("discountType", ["percentage", "fixed"]).default(
+    "percentage"
+  ),
+  discountValue: decimal("discountValue", { precision: 24, scale: 8 })
+    .default("0")
+    .notNull(),
+  discountAmount: decimal("discountAmount", { precision: 24, scale: 8 })
+    .default("0")
+    .notNull(),
   total: decimal("total", { precision: 24, scale: 8 }).notNull(),
-  
+
   // Payment tracking - DECIMAL(24,8) for crypto precision
-  amountPaid: decimal("amountPaid", { precision: 24, scale: 8 }).default("0").notNull(),
-  
+  amountPaid: decimal("amountPaid", { precision: 24, scale: 8 })
+    .default("0")
+    .notNull(),
+
   // Crypto payment fields
   cryptoAmount: decimal("cryptoAmount", { precision: 24, scale: 18 }), // Wei-level precision
   cryptoCurrency: varchar("cryptoCurrency", { length: 10 }), // BTC, ETH, USDC, etc.
   cryptoPaymentId: varchar("cryptoPaymentId", { length: 100 }), // NOWPayments payment ID
   cryptoPaymentUrl: text("cryptoPaymentUrl"), // NOWPayments invoice URL
-  
+
   // Stripe payment integration
   stripePaymentLinkId: varchar("stripePaymentLinkId", { length: 255 }),
   stripePaymentLinkUrl: text("stripePaymentLinkUrl"),
   stripeSessionId: varchar("stripeSessionId", { length: 255 }),
-  
+
   // Invoice details
   notes: text("notes"),
   paymentTerms: text("paymentTerms"),
-  
+
   // Template reference (optional - uses default if not specified)
   templateId: int("templateId"),
-  
+
   // Dates
   issueDate: timestamp("issueDate").notNull(),
   dueDate: timestamp("dueDate").notNull(),
   sentAt: timestamp("sentAt"),
   paidAt: timestamp("paidAt"),
   firstViewedAt: timestamp("firstViewedAt"), // When invoice was first viewed by client
-  
+
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });
@@ -172,13 +238,25 @@ export const emailLog = mysqlTable("emailLog", {
   invoiceId: int("invoiceId").notNull(),
   recipientEmail: varchar("recipientEmail", { length: 320 }).notNull(),
   subject: text("subject").notNull(),
-  emailType: mysqlEnum("emailType", ["invoice", "reminder", "receipt"]).notNull(),
+  emailType: mysqlEnum("emailType", [
+    "invoice",
+    "reminder",
+    "receipt",
+  ]).notNull(),
   sentAt: timestamp("sentAt").defaultNow().notNull(),
   success: boolean("success").default(true).notNull(),
   errorMessage: text("errorMessage"),
   // Email delivery tracking (Resend webhooks)
   messageId: varchar("messageId", { length: 100 }), // Resend message ID
-  deliveryStatus: mysqlEnum("deliveryStatus", ["sent", "delivered", "opened", "clicked", "bounced", "complained", "failed"]).default("sent"),
+  deliveryStatus: mysqlEnum("deliveryStatus", [
+    "sent",
+    "delivered",
+    "opened",
+    "clicked",
+    "bounced",
+    "complained",
+    "failed",
+  ]).default("sent"),
   deliveredAt: timestamp("deliveredAt"),
   openedAt: timestamp("openedAt"),
   openCount: int("openCount").default(0),
@@ -202,25 +280,31 @@ export const recurringInvoices = mysqlTable("recurringInvoices", {
   id: int("id").autoincrement().primaryKey(),
   userId: int("userId").notNull(),
   clientId: int("clientId").notNull(),
-  
+
   // Recurrence settings
   frequency: mysqlEnum("frequency", ["weekly", "monthly", "yearly"]).notNull(),
   startDate: timestamp("startDate").notNull(),
   endDate: timestamp("endDate"), // nullable - null means no end date
   nextInvoiceDate: timestamp("nextInvoiceDate").notNull(),
-  
+
   // Invoice template data
   invoiceNumberPrefix: varchar("invoiceNumberPrefix", { length: 50 }).notNull(),
-  taxRate: decimal("taxRate", { precision: 5, scale: 2 }).default("0").notNull(),
-  discountType: mysqlEnum("discountType", ["percentage", "fixed"]).default("percentage"),
-  discountValue: decimal("discountValue", { precision: 24, scale: 8 }).default("0").notNull(), // DECIMAL(24,8) for crypto precision
+  taxRate: decimal("taxRate", { precision: 5, scale: 2 })
+    .default("0")
+    .notNull(),
+  discountType: mysqlEnum("discountType", ["percentage", "fixed"]).default(
+    "percentage"
+  ),
+  discountValue: decimal("discountValue", { precision: 24, scale: 8 })
+    .default("0")
+    .notNull(), // DECIMAL(24,8) for crypto precision
   notes: text("notes"),
   paymentTerms: text("paymentTerms"),
-  
+
   // Status
   isActive: boolean("isActive").default(true).notNull(),
   lastGeneratedAt: timestamp("lastGeneratedAt"),
-  
+
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });
@@ -231,18 +315,23 @@ export type InsertRecurringInvoice = typeof recurringInvoices.$inferInsert;
 /**
  * Line items template for recurring invoices
  */
-export const recurringInvoiceLineItems = mysqlTable("recurringInvoiceLineItems", {
-  id: int("id").autoincrement().primaryKey(),
-  recurringInvoiceId: int("recurringInvoiceId").notNull(),
-  description: text("description").notNull(),
-  quantity: decimal("quantity", { precision: 24, scale: 8 }).notNull(), // DECIMAL(24,8) for crypto precision
-  rate: decimal("rate", { precision: 24, scale: 8 }).notNull(), // DECIMAL(24,8) for crypto precision
-  sortOrder: int("sortOrder").default(0).notNull(),
-  createdAt: timestamp("createdAt").defaultNow().notNull(),
-});
+export const recurringInvoiceLineItems = mysqlTable(
+  "recurringInvoiceLineItems",
+  {
+    id: int("id").autoincrement().primaryKey(),
+    recurringInvoiceId: int("recurringInvoiceId").notNull(),
+    description: text("description").notNull(),
+    quantity: decimal("quantity", { precision: 24, scale: 8 }).notNull(), // DECIMAL(24,8) for crypto precision
+    rate: decimal("rate", { precision: 24, scale: 8 }).notNull(), // DECIMAL(24,8) for crypto precision
+    sortOrder: int("sortOrder").default(0).notNull(),
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+  }
+);
 
-export type RecurringInvoiceLineItem = typeof recurringInvoiceLineItems.$inferSelect;
-export type InsertRecurringInvoiceLineItem = typeof recurringInvoiceLineItems.$inferInsert;
+export type RecurringInvoiceLineItem =
+  typeof recurringInvoiceLineItems.$inferSelect;
+export type InsertRecurringInvoiceLineItem =
+  typeof recurringInvoiceLineItems.$inferInsert;
 
 /**
  * Custom invoice templates for branding
@@ -252,43 +341,69 @@ export const invoiceTemplates = mysqlTable("invoiceTemplates", {
   userId: int("userId").notNull(),
   name: varchar("name", { length: 100 }).notNull(),
   isDefault: boolean("isDefault").default(false).notNull(),
-  
+
   // Template layout type
-  templateType: mysqlEnum("templateType", ["sleek", "modern", "classic", "minimal", "bold", "professional", "creative"]).default("sleek").notNull(),
-  
+  templateType: mysqlEnum("templateType", [
+    "sleek",
+    "modern",
+    "classic",
+    "minimal",
+    "bold",
+    "professional",
+    "creative",
+  ])
+    .default("sleek")
+    .notNull(),
+
   // Color scheme
-  primaryColor: varchar("primaryColor", { length: 7 }).default("#5f6fff").notNull(), // hex color
-  secondaryColor: varchar("secondaryColor", { length: 7 }).default("#252f33").notNull(),
-  accentColor: varchar("accentColor", { length: 7 }).default("#10b981").notNull(),
-  
+  primaryColor: varchar("primaryColor", { length: 7 })
+    .default("#5f6fff")
+    .notNull(), // hex color
+  secondaryColor: varchar("secondaryColor", { length: 7 })
+    .default("#252f33")
+    .notNull(),
+  accentColor: varchar("accentColor", { length: 7 })
+    .default("#10b981")
+    .notNull(),
+
   // Typography - separate fonts for headings and body
-  headingFont: varchar("headingFont", { length: 50 }).default("Inter").notNull(),
+  headingFont: varchar("headingFont", { length: 50 })
+    .default("Inter")
+    .notNull(),
   bodyFont: varchar("bodyFont", { length: 50 }).default("Inter").notNull(),
   fontSize: int("fontSize").default(14).notNull(),
-  
+
   // Logo customization
   logoUrl: text("logoUrl"),
-  logoPosition: mysqlEnum("logoPosition", ["left", "center", "right"]).default("left").notNull(),
+  logoPosition: mysqlEnum("logoPosition", ["left", "center", "right"])
+    .default("left")
+    .notNull(),
   logoWidth: int("logoWidth").default(150).notNull(), // pixels
-  
+
   // Layout structure
-  headerLayout: mysqlEnum("headerLayout", ["standard", "centered", "split"]).default("standard").notNull(),
-  footerLayout: mysqlEnum("footerLayout", ["simple", "detailed", "minimal"]).default("simple").notNull(),
-  
+  headerLayout: mysqlEnum("headerLayout", ["standard", "centered", "split"])
+    .default("standard")
+    .notNull(),
+  footerLayout: mysqlEnum("footerLayout", ["simple", "detailed", "minimal"])
+    .default("simple")
+    .notNull(),
+
   // Field visibility controls
   showCompanyAddress: boolean("showCompanyAddress").default(true).notNull(),
   showPaymentTerms: boolean("showPaymentTerms").default(true).notNull(),
   showTaxField: boolean("showTaxField").default(true).notNull(),
   showDiscountField: boolean("showDiscountField").default(true).notNull(),
   showNotesField: boolean("showNotesField").default(true).notNull(),
-  
+
   // Footer customization
   footerText: text("footerText"),
-  
+
   // Language and currency
   language: varchar("language", { length: 10 }).default("en").notNull(),
-  dateFormat: varchar("dateFormat", { length: 20 }).default("MM/DD/YYYY").notNull(),
-  
+  dateFormat: varchar("dateFormat", { length: 20 })
+    .default("MM/DD/YYYY")
+    .notNull(),
+
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });
@@ -303,15 +418,17 @@ export const customFields = mysqlTable("customFields", {
   id: int("id").autoincrement().primaryKey(),
   userId: int("userId").notNull(),
   templateId: int("templateId"), // nullable - if null, applies to all templates
-  
+
   fieldName: varchar("fieldName", { length: 100 }).notNull(),
   fieldLabel: varchar("fieldLabel", { length: 100 }).notNull(),
-  fieldType: mysqlEnum("fieldType", ["text", "number", "date", "select"]).default("text").notNull(),
+  fieldType: mysqlEnum("fieldType", ["text", "number", "date", "select"])
+    .default("text")
+    .notNull(),
   isRequired: boolean("isRequired").default(false).notNull(),
   defaultValue: text("defaultValue"),
   selectOptions: text("selectOptions"), // JSON array for select type
   sortOrder: int("sortOrder").default(0).notNull(),
-  
+
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });
@@ -330,8 +447,10 @@ export const invoiceCustomFieldValues = mysqlTable("invoiceCustomFieldValues", {
   createdAt: timestamp("createdAt").defaultNow().notNull(),
 });
 
-export type InvoiceCustomFieldValue = typeof invoiceCustomFieldValues.$inferSelect;
-export type InsertInvoiceCustomFieldValue = typeof invoiceCustomFieldValues.$inferInsert;
+export type InvoiceCustomFieldValue =
+  typeof invoiceCustomFieldValues.$inferSelect;
+export type InsertInvoiceCustomFieldValue =
+  typeof invoiceCustomFieldValues.$inferInsert;
 
 /**
  * Expense categories for organization
@@ -355,17 +474,17 @@ export const expenses = mysqlTable("expenses", {
   id: int("id").autoincrement().primaryKey(),
   userId: int("userId").notNull(),
   categoryId: int("categoryId").notNull(),
-  
+
   // Financial details - DECIMAL(24,8) for crypto precision
   amount: decimal("amount", { precision: 24, scale: 8 }).notNull(),
   currency: varchar("currency", { length: 10 }).default("USD").notNull(),
   date: timestamp("date").notNull(),
-  
+
   // Expense details
   vendor: varchar("vendor", { length: 255 }),
   description: text("description").notNull(),
   notes: text("notes"),
-  
+
   // Receipt and payment
   receiptUrl: text("receiptUrl"),
   receiptKey: text("receiptKey"), // S3 key for deletion
@@ -377,20 +496,22 @@ export const expenses = mysqlTable("expenses", {
     "check",
     "other",
   ]),
-  
+
   // Tax and billable - DECIMAL(24,8) for crypto precision
-  taxAmount: decimal("taxAmount", { precision: 24, scale: 8 }).default("0").notNull(),
+  taxAmount: decimal("taxAmount", { precision: 24, scale: 8 })
+    .default("0")
+    .notNull(),
   isBillable: boolean("isBillable").default(false).notNull(),
   clientId: int("clientId"), // If billable, which client
   invoiceId: int("invoiceId"), // If billed, which invoice
   billedAt: timestamp("billedAt"), // When expense was added to invoice
-  
+
   // Recurring flag
   isRecurring: boolean("isRecurring").default(false).notNull(),
-  
+
   // Tax deduction tracking
   isTaxDeductible: boolean("isTaxDeductible").default(true).notNull(),
-  
+
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });
@@ -412,7 +533,8 @@ export const invoiceGenerationLogs = mysqlTable("invoiceGenerationLogs", {
 });
 
 export type InvoiceGenerationLog = typeof invoiceGenerationLogs.$inferSelect;
-export type InsertInvoiceGenerationLog = typeof invoiceGenerationLogs.$inferInsert;
+export type InsertInvoiceGenerationLog =
+  typeof invoiceGenerationLogs.$inferInsert;
 
 /**
  * Currencies table for multi-currency support
@@ -453,32 +575,41 @@ export const payments = mysqlTable("payments", {
   id: int("id").autoincrement().primaryKey(),
   invoiceId: int("invoiceId").notNull(),
   userId: int("userId").notNull(),
-  
+
   // Payment details - DECIMAL(24,8) for crypto precision
   amount: decimal("amount", { precision: 24, scale: 8 }).notNull(),
   currency: varchar("currency", { length: 10 }).default("USD").notNull(),
-  paymentMethod: mysqlEnum("paymentMethod", ["stripe", "manual", "bank_transfer", "check", "cash", "crypto"]).notNull(),
-  
+  paymentMethod: mysqlEnum("paymentMethod", [
+    "stripe",
+    "manual",
+    "bank_transfer",
+    "check",
+    "cash",
+    "crypto",
+  ]).notNull(),
+
   // Stripe integration
   stripePaymentIntentId: varchar("stripePaymentIntentId", { length: 255 }),
-  
+
   // Crypto payment details
   cryptoAmount: decimal("cryptoAmount", { precision: 24, scale: 18 }), // 18 decimals for ETH precision
   cryptoCurrency: varchar("cryptoCurrency", { length: 10 }), // BTC, ETH, USDT, etc.
   cryptoNetwork: varchar("cryptoNetwork", { length: 20 }), // mainnet, polygon, arbitrum, etc.
   cryptoTxHash: varchar("cryptoTxHash", { length: 100 }), // Transaction hash for verification
   cryptoWalletAddress: varchar("cryptoWalletAddress", { length: 100 }), // Receiving wallet address
-  
+
   // Dates
   paymentDate: timestamp("paymentDate").notNull(), // When payment was made
   receivedDate: timestamp("receivedDate"), // When payment was received (for checks, bank transfers)
-  
+
   // Status
-  status: mysqlEnum("status", ["pending", "completed", "failed", "refunded"]).default("completed").notNull(),
-  
+  status: mysqlEnum("status", ["pending", "completed", "failed", "refunded"])
+    .default("completed")
+    .notNull(),
+
   // Additional info
   notes: text("notes"),
-  
+
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });
@@ -537,36 +668,45 @@ export const reminderLogs = mysqlTable("reminderLogs", {
 export type ReminderLog = typeof reminderLogs.$inferSelect;
 export type InsertReminderLog = typeof reminderLogs.$inferInsert;
 
-
 /**
  * Payment gateways configuration for user-connected payment providers
  * Supports Stripe Connect, Coinbase Commerce, and manual wallets
  */
-export const paymentGateways = mysqlTable("paymentGateways", {
-  id: int("id").autoincrement().primaryKey(),
-  userId: int("userId").notNull(),
-  
-  // Provider type
-  provider: mysqlEnum("provider", ["stripe_connect", "coinbase_commerce"]).notNull(),
-  
-  // Encrypted configuration (JSON string with provider-specific data)
-  // For stripe_connect: { accountId, accessToken, refreshToken }
-  // For coinbase_commerce: { apiKey }
-  config: text("config").notNull(),
-  
-  // Status
-  isEnabled: boolean("isEnabled").default(true).notNull(),
-  
-  // Metadata
-  displayName: varchar("displayName", { length: 100 }), // User-friendly name
-  lastTestedAt: timestamp("lastTestedAt"), // Last successful connection test
-  
-  createdAt: timestamp("createdAt").defaultNow().notNull(),
-  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
-}, (table) => ({
-  // One provider per user (can have both Stripe and Coinbase, but not two Stripes)
-  userProviderIdx: uniqueIndex("user_provider_idx").on(table.userId, table.provider),
-}));
+export const paymentGateways = mysqlTable(
+  "paymentGateways",
+  {
+    id: int("id").autoincrement().primaryKey(),
+    userId: int("userId").notNull(),
+
+    // Provider type
+    provider: mysqlEnum("provider", [
+      "stripe_connect",
+      "coinbase_commerce",
+    ]).notNull(),
+
+    // Encrypted configuration (JSON string with provider-specific data)
+    // For stripe_connect: { accountId, accessToken, refreshToken }
+    // For coinbase_commerce: { apiKey }
+    config: text("config").notNull(),
+
+    // Status
+    isEnabled: boolean("isEnabled").default(true).notNull(),
+
+    // Metadata
+    displayName: varchar("displayName", { length: 100 }), // User-friendly name
+    lastTestedAt: timestamp("lastTestedAt"), // Last successful connection test
+
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+    updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+  },
+  table => ({
+    // One provider per user (can have both Stripe and Coinbase, but not two Stripes)
+    userProviderIdx: uniqueIndex("user_provider_idx").on(
+      table.userId,
+      table.provider
+    ),
+  })
+);
 
 export type PaymentGateway = typeof paymentGateways.$inferSelect;
 export type InsertPaymentGateway = typeof paymentGateways.$inferInsert;
@@ -578,24 +718,30 @@ export type InsertPaymentGateway = typeof paymentGateways.$inferInsert;
 export const userWallets = mysqlTable("userWallets", {
   id: int("id").autoincrement().primaryKey(),
   userId: int("userId").notNull(),
-  
+
   // Wallet identification
   label: varchar("label", { length: 100 }).notNull(), // e.g., "My ETH Wallet", "BTC Address"
   address: varchar("address", { length: 255 }).notNull(), // Wallet address
-  
+
   // Network/blockchain
-  network: mysqlEnum("network", ["ethereum", "polygon", "bitcoin", "bsc", "arbitrum", "optimism"]).notNull(),
-  
+  network: mysqlEnum("network", [
+    "ethereum",
+    "polygon",
+    "bitcoin",
+    "bsc",
+    "arbitrum",
+    "optimism",
+  ]).notNull(),
+
   // Display order
   sortOrder: int("sortOrder").default(0).notNull(),
-  
+
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });
 
 export type UserWallet = typeof userWallets.$inferSelect;
 export type InsertUserWallet = typeof userWallets.$inferInsert;
-
 
 /**
  * Invoice view tracking for analytics and notifications
@@ -604,53 +750,56 @@ export type InsertUserWallet = typeof userWallets.$inferInsert;
 export const invoiceViews = mysqlTable("invoiceViews", {
   id: int("id").autoincrement().primaryKey(),
   invoiceId: int("invoiceId").notNull(),
-  
+
   // View metadata
   viewedAt: timestamp("viewedAt").defaultNow().notNull(),
   ipAddress: varchar("ipAddress", { length: 45 }), // IPv6 compatible
   userAgent: text("userAgent"),
-  
+
   // First view tracking
   isFirstView: boolean("isFirstView").default(false).notNull(),
-  
+
   createdAt: timestamp("createdAt").defaultNow().notNull(),
 });
 
 export type InvoiceView = typeof invoiceViews.$inferSelect;
 export type InsertInvoiceView = typeof invoiceViews.$inferInsert;
 
-
 /**
  * Crypto subscription payments table
  * Tracks NOWPayments payments for Pro subscription upgrades
  */
-export const cryptoSubscriptionPayments = mysqlTable("cryptoSubscriptionPayments", {
-  id: int("id").autoincrement().primaryKey(),
-  userId: int("userId").notNull(),
-  
-  // NOWPayments payment info
-  paymentId: varchar("paymentId", { length: 255 }).notNull().unique(),
-  paymentStatus: varchar("paymentStatus", { length: 50 }).notNull(),
-  
-  // Amount info
-  priceAmount: decimal("priceAmount", { precision: 10, scale: 2 }).notNull(),
-  priceCurrency: varchar("priceCurrency", { length: 10 }).notNull(),
-  payCurrency: varchar("payCurrency", { length: 10 }).notNull(),
-  payAmount: decimal("payAmount", { precision: 24, scale: 8 }).notNull(),
-  
-  // Duration info
-  months: int("months").notNull().default(1),
-  isExtension: boolean("isExtension").notNull().default(false),
-  
-  // Tracking
-  confirmedAt: timestamp("confirmedAt"),
-  createdAt: timestamp("createdAt").defaultNow().notNull(),
-  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow(),
-});
+export const cryptoSubscriptionPayments = mysqlTable(
+  "cryptoSubscriptionPayments",
+  {
+    id: int("id").autoincrement().primaryKey(),
+    userId: int("userId").notNull(),
 
-export type CryptoSubscriptionPayment = typeof cryptoSubscriptionPayments.$inferSelect;
-export type InsertCryptoSubscriptionPayment = typeof cryptoSubscriptionPayments.$inferInsert;
+    // NOWPayments payment info
+    paymentId: varchar("paymentId", { length: 255 }).notNull().unique(),
+    paymentStatus: varchar("paymentStatus", { length: 50 }).notNull(),
 
+    // Amount info
+    priceAmount: decimal("priceAmount", { precision: 10, scale: 2 }).notNull(),
+    priceCurrency: varchar("priceCurrency", { length: 10 }).notNull(),
+    payCurrency: varchar("payCurrency", { length: 10 }).notNull(),
+    payAmount: decimal("payAmount", { precision: 24, scale: 8 }).notNull(),
+
+    // Duration info
+    months: int("months").notNull().default(1),
+    isExtension: boolean("isExtension").notNull().default(false),
+
+    // Tracking
+    confirmedAt: timestamp("confirmedAt"),
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+    updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow(),
+  }
+);
+
+export type CryptoSubscriptionPayment =
+  typeof cryptoSubscriptionPayments.$inferSelect;
+export type InsertCryptoSubscriptionPayment =
+  typeof cryptoSubscriptionPayments.$inferInsert;
 
 /**
  * Products/Services library for quick invoice line item entry
@@ -659,35 +808,34 @@ export type InsertCryptoSubscriptionPayment = typeof cryptoSubscriptionPayments.
 export const products = mysqlTable("products", {
   id: int("id").autoincrement().primaryKey(),
   userId: int("userId").notNull(),
-  
+
   // Product info
   name: varchar("name", { length: 255 }).notNull(),
   description: text("description"),
-  
+
   // Pricing
   rate: decimal("rate", { precision: 24, scale: 8 }).notNull(), // DECIMAL(24,8) for crypto precision
   unit: varchar("unit", { length: 50 }).default("unit"), // e.g., "hour", "item", "project", "month"
-  
+
   // Categorization
   category: varchar("category", { length: 100 }), // Optional category for organization
   sku: varchar("sku", { length: 100 }), // Optional SKU/product code
-  
+
   // Tax settings
   taxable: boolean("taxable").default(true).notNull(),
-  
+
   // Status
   isActive: boolean("isActive").default(true).notNull(),
-  
+
   // Usage tracking
   usageCount: int("usageCount").default(0).notNull(), // Track how often this product is used
-  
+
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });
 
 export type Product = typeof products.$inferSelect;
 export type InsertProduct = typeof products.$inferInsert;
-
 
 /**
  * Estimates/Quotes table for pre-invoice proposals
@@ -697,31 +845,51 @@ export const estimates = mysqlTable("estimates", {
   id: int("id").autoincrement().primaryKey(),
   userId: int("userId").notNull(),
   clientId: int("clientId").notNull(),
-  
+
   // Estimate identification
   estimateNumber: varchar("estimateNumber", { length: 50 }).notNull(),
-  
+
   // Status tracking
-  status: mysqlEnum("status", ["draft", "sent", "viewed", "accepted", "rejected", "expired", "converted"]).default("draft").notNull(),
-  
+  status: mysqlEnum("status", [
+    "draft",
+    "sent",
+    "viewed",
+    "accepted",
+    "rejected",
+    "expired",
+    "converted",
+  ])
+    .default("draft")
+    .notNull(),
+
   // Financial details - DECIMAL(24,8) for crypto precision
   currency: varchar("currency", { length: 10 }).default("USD").notNull(),
   subtotal: decimal("subtotal", { precision: 24, scale: 8 }).notNull(),
-  taxRate: decimal("taxRate", { precision: 5, scale: 2 }).default("0").notNull(),
-  taxAmount: decimal("taxAmount", { precision: 24, scale: 8 }).default("0").notNull(),
-  discountType: mysqlEnum("discountType", ["percentage", "fixed"]).default("percentage"),
-  discountValue: decimal("discountValue", { precision: 24, scale: 8 }).default("0").notNull(),
-  discountAmount: decimal("discountAmount", { precision: 24, scale: 8 }).default("0").notNull(),
+  taxRate: decimal("taxRate", { precision: 5, scale: 2 })
+    .default("0")
+    .notNull(),
+  taxAmount: decimal("taxAmount", { precision: 24, scale: 8 })
+    .default("0")
+    .notNull(),
+  discountType: mysqlEnum("discountType", ["percentage", "fixed"]).default(
+    "percentage"
+  ),
+  discountValue: decimal("discountValue", { precision: 24, scale: 8 })
+    .default("0")
+    .notNull(),
+  discountAmount: decimal("discountAmount", { precision: 24, scale: 8 })
+    .default("0")
+    .notNull(),
   total: decimal("total", { precision: 24, scale: 8 }).notNull(),
-  
+
   // Estimate details
   title: varchar("title", { length: 255 }), // Optional title/subject
   notes: text("notes"),
   terms: text("terms"), // Terms and conditions
-  
+
   // Template reference (optional - uses default if not specified)
   templateId: int("templateId"),
-  
+
   // Dates
   issueDate: timestamp("issueDate").notNull(),
   validUntil: timestamp("validUntil").notNull(), // Expiration date
@@ -729,11 +897,11 @@ export const estimates = mysqlTable("estimates", {
   viewedAt: timestamp("viewedAt"),
   acceptedAt: timestamp("acceptedAt"),
   rejectedAt: timestamp("rejectedAt"),
-  
+
   // Conversion tracking
   convertedToInvoiceId: int("convertedToInvoiceId"), // Reference to created invoice
   convertedAt: timestamp("convertedAt"),
-  
+
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });
@@ -758,26 +926,32 @@ export const estimateLineItems = mysqlTable("estimateLineItems", {
 export type EstimateLineItem = typeof estimateLineItems.$inferSelect;
 export type InsertEstimateLineItem = typeof estimateLineItems.$inferInsert;
 
-
 /**
  * AI Credits tracking for Smart Compose and other AI features
  * Free tier: 5 credits/month
  * Pro tier: 50 credits/month
  * Each Smart Compose = 1 credit
  */
-export const aiCredits = mysqlTable("aiCredits", {
-  id: int("id").autoincrement().primaryKey(),
-  userId: int("userId").notNull(),
-  month: varchar("month", { length: 7 }).notNull(), // Format: YYYY-MM
-  creditsUsed: int("creditsUsed").default(0).notNull(),
-  creditsLimit: int("creditsLimit").default(5).notNull(), // 5 for free, 50 for pro
-  purchasedCredits: int("purchasedCredits").default(0).notNull(), // Additional purchased credits
-  createdAt: timestamp("createdAt").defaultNow().notNull(),
-  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
-}, (table) => ({
-  // Unique constraint: one record per user per month
-  userMonthIdx: uniqueIndex("ai_credits_user_month_idx").on(table.userId, table.month),
-}));
+export const aiCredits = mysqlTable(
+  "aiCredits",
+  {
+    id: int("id").autoincrement().primaryKey(),
+    userId: int("userId").notNull(),
+    month: varchar("month", { length: 7 }).notNull(), // Format: YYYY-MM
+    creditsUsed: int("creditsUsed").default(0).notNull(),
+    creditsLimit: int("creditsLimit").default(5).notNull(), // 5 for free, 50 for pro
+    purchasedCredits: int("purchasedCredits").default(0).notNull(), // Additional purchased credits
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+    updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+  },
+  table => ({
+    // Unique constraint: one record per user per month
+    userMonthIdx: uniqueIndex("ai_credits_user_month_idx").on(
+      table.userId,
+      table.month
+    ),
+  })
+);
 
 export type AiCredits = typeof aiCredits.$inferSelect;
 export type InsertAiCredits = typeof aiCredits.$inferInsert;
@@ -792,13 +966,21 @@ export type InsertAiCredits = typeof aiCredits.$inferInsert;
 export const aiCreditPurchases = mysqlTable("aiCreditPurchases", {
   id: int("id").autoincrement().primaryKey(),
   userId: int("userId").notNull(),
-  stripeSessionId: varchar("stripeSessionId", { length: 255 }).notNull().unique(),
+  stripeSessionId: varchar("stripeSessionId", { length: 255 })
+    .notNull()
+    .unique(),
   stripePaymentIntentId: varchar("stripePaymentIntentId", { length: 255 }),
-  packType: mysqlEnum("packType", ["starter", "standard", "pro_pack"]).notNull(),
+  packType: mysqlEnum("packType", [
+    "starter",
+    "standard",
+    "pro_pack",
+  ]).notNull(),
   creditsAmount: int("creditsAmount").notNull(), // 25, 100, or 500
   amountPaid: int("amountPaid").notNull(), // Amount in cents (299, 999, 3999)
   currency: varchar("currency", { length: 3 }).default("usd").notNull(),
-  status: mysqlEnum("status", ["pending", "completed", "failed", "refunded"]).default("pending").notNull(),
+  status: mysqlEnum("status", ["pending", "completed", "failed", "refunded"])
+    .default("pending")
+    .notNull(),
   appliedToMonth: varchar("appliedToMonth", { length: 7 }), // Format: YYYY-MM, when credits were applied
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   completedAt: timestamp("completedAt"),
@@ -813,7 +995,12 @@ export type InsertAiCreditPurchase = typeof aiCreditPurchases.$inferInsert;
 export const aiUsageLogs = mysqlTable("aiUsageLogs", {
   id: int("id").autoincrement().primaryKey(),
   userId: int("userId").notNull(),
-  feature: mysqlEnum("feature", ["smart_compose", "categorization", "prediction", "ai_assistant"]).notNull(),
+  feature: mysqlEnum("feature", [
+    "smart_compose",
+    "categorization",
+    "prediction",
+    "ai_assistant",
+  ]).notNull(),
   inputTokens: int("inputTokens").default(0).notNull(),
   outputTokens: int("outputTokens").default(0).notNull(),
   model: varchar("model", { length: 100 }).notNull(),
@@ -825,7 +1012,6 @@ export const aiUsageLogs = mysqlTable("aiUsageLogs", {
 
 export type AiUsageLog = typeof aiUsageLogs.$inferSelect;
 export type InsertAiUsageLog = typeof aiUsageLogs.$inferInsert;
-
 
 /**
  * QuickBooks Integration Tables
@@ -840,48 +1026,70 @@ export const quickbooksConnections = mysqlTable("quickbooksConnections", {
   tokenExpiresAt: timestamp("tokenExpiresAt").notNull(),
   refreshTokenExpiresAt: timestamp("refreshTokenExpiresAt").notNull(),
   isActive: boolean("isActive").default(true).notNull(),
-  environment: mysqlEnum("environment", ["sandbox", "production"]).default("sandbox").notNull(),
+  environment: mysqlEnum("environment", ["sandbox", "production"])
+    .default("sandbox")
+    .notNull(),
   lastSyncAt: timestamp("lastSyncAt"),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });
 export type QuickBooksConnection = typeof quickbooksConnections.$inferSelect;
-export type InsertQuickBooksConnection = typeof quickbooksConnections.$inferInsert;
+export type InsertQuickBooksConnection =
+  typeof quickbooksConnections.$inferInsert;
 
-export const quickbooksCustomerMapping = mysqlTable("quickbooksCustomerMapping", {
-  id: int("id").autoincrement().primaryKey(),
-  userId: int("userId").notNull(),
-  clientId: int("clientId").notNull(),
-  qbCustomerId: varchar("qbCustomerId", { length: 50 }).notNull(),
-  qbDisplayName: varchar("qbDisplayName", { length: 255 }),
-  syncVersion: int("syncVersion").default(1).notNull(),
-  lastSyncedAt: timestamp("lastSyncedAt").defaultNow().notNull(),
-  createdAt: timestamp("createdAt").defaultNow().notNull(),
-}, (table) => ({
-  clientIdx: uniqueIndex("qb_customer_client_idx").on(table.userId, table.clientId),
-}));
-export type QuickBooksCustomerMapping = typeof quickbooksCustomerMapping.$inferSelect;
-export type InsertQuickBooksCustomerMapping = typeof quickbooksCustomerMapping.$inferInsert;
+export const quickbooksCustomerMapping = mysqlTable(
+  "quickbooksCustomerMapping",
+  {
+    id: int("id").autoincrement().primaryKey(),
+    userId: int("userId").notNull(),
+    clientId: int("clientId").notNull(),
+    qbCustomerId: varchar("qbCustomerId", { length: 50 }).notNull(),
+    qbDisplayName: varchar("qbDisplayName", { length: 255 }),
+    syncVersion: int("syncVersion").default(1).notNull(),
+    lastSyncedAt: timestamp("lastSyncedAt").defaultNow().notNull(),
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+  },
+  table => ({
+    clientIdx: uniqueIndex("qb_customer_client_idx").on(
+      table.userId,
+      table.clientId
+    ),
+  })
+);
+export type QuickBooksCustomerMapping =
+  typeof quickbooksCustomerMapping.$inferSelect;
+export type InsertQuickBooksCustomerMapping =
+  typeof quickbooksCustomerMapping.$inferInsert;
 
-export const quickbooksInvoiceMapping = mysqlTable("quickbooksInvoiceMapping", {
-  id: int("id").autoincrement().primaryKey(),
-  userId: int("userId").notNull(),
-  invoiceId: int("invoiceId").notNull(),
-  qbInvoiceId: varchar("qbInvoiceId", { length: 50 }).notNull(),
-  qbDocNumber: varchar("qbDocNumber", { length: 50 }),
-  syncVersion: int("syncVersion").default(1).notNull(),
-  lastSyncedAt: timestamp("lastSyncedAt").defaultNow().notNull(),
-  createdAt: timestamp("createdAt").defaultNow().notNull(),
-}, (table) => ({
-  invoiceIdx: uniqueIndex("qb_invoice_idx").on(table.userId, table.invoiceId),
-}));
-export type QuickBooksInvoiceMapping = typeof quickbooksInvoiceMapping.$inferSelect;
-export type InsertQuickBooksInvoiceMapping = typeof quickbooksInvoiceMapping.$inferInsert;
+export const quickbooksInvoiceMapping = mysqlTable(
+  "quickbooksInvoiceMapping",
+  {
+    id: int("id").autoincrement().primaryKey(),
+    userId: int("userId").notNull(),
+    invoiceId: int("invoiceId").notNull(),
+    qbInvoiceId: varchar("qbInvoiceId", { length: 50 }).notNull(),
+    qbDocNumber: varchar("qbDocNumber", { length: 50 }),
+    syncVersion: int("syncVersion").default(1).notNull(),
+    lastSyncedAt: timestamp("lastSyncedAt").defaultNow().notNull(),
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+  },
+  table => ({
+    invoiceIdx: uniqueIndex("qb_invoice_idx").on(table.userId, table.invoiceId),
+  })
+);
+export type QuickBooksInvoiceMapping =
+  typeof quickbooksInvoiceMapping.$inferSelect;
+export type InsertQuickBooksInvoiceMapping =
+  typeof quickbooksInvoiceMapping.$inferInsert;
 
 export const quickbooksSyncLog = mysqlTable("quickbooksSyncLog", {
   id: int("id").autoincrement().primaryKey(),
   userId: int("userId").notNull(),
-  entityType: mysqlEnum("entityType", ["customer", "invoice", "payment"]).notNull(),
+  entityType: mysqlEnum("entityType", [
+    "customer",
+    "invoice",
+    "payment",
+  ]).notNull(),
   entityId: int("entityId").notNull(),
   qbEntityId: varchar("qbEntityId", { length: 50 }),
   action: mysqlEnum("action", ["create", "update", "delete"]).notNull(),
@@ -894,26 +1102,34 @@ export const quickbooksSyncLog = mysqlTable("quickbooksSyncLog", {
 export type QuickBooksSyncLog = typeof quickbooksSyncLog.$inferSelect;
 export type InsertQuickBooksSyncLog = typeof quickbooksSyncLog.$inferInsert;
 
-
 /**
  * QuickBooks Payment Mapping - tracks payments synced from QuickBooks
  */
-export const quickbooksPaymentMapping = mysqlTable("quickbooksPaymentMapping", {
-  id: int("id").autoincrement().primaryKey(),
-  userId: int("userId").notNull(),
-  paymentId: int("paymentId").notNull(),
-  qbPaymentId: varchar("qbPaymentId", { length: 50 }).notNull(),
-  qbInvoiceId: varchar("qbInvoiceId", { length: 50 }), // The QB invoice this payment is linked to
-  syncDirection: mysqlEnum("syncDirection", ["to_qb", "from_qb"]).notNull(), // Direction of sync
-  syncVersion: int("syncVersion").default(1).notNull(),
-  lastSyncedAt: timestamp("lastSyncedAt").defaultNow().notNull(),
-  createdAt: timestamp("createdAt").defaultNow().notNull(),
-}, (table) => ({
-  paymentIdx: uniqueIndex("qb_payment_idx").on(table.userId, table.paymentId),
-  qbPaymentIdx: uniqueIndex("qb_payment_qb_idx").on(table.userId, table.qbPaymentId),
-}));
-export type QuickBooksPaymentMapping = typeof quickbooksPaymentMapping.$inferSelect;
-export type InsertQuickBooksPaymentMapping = typeof quickbooksPaymentMapping.$inferInsert;
+export const quickbooksPaymentMapping = mysqlTable(
+  "quickbooksPaymentMapping",
+  {
+    id: int("id").autoincrement().primaryKey(),
+    userId: int("userId").notNull(),
+    paymentId: int("paymentId").notNull(),
+    qbPaymentId: varchar("qbPaymentId", { length: 50 }).notNull(),
+    qbInvoiceId: varchar("qbInvoiceId", { length: 50 }), // The QB invoice this payment is linked to
+    syncDirection: mysqlEnum("syncDirection", ["to_qb", "from_qb"]).notNull(), // Direction of sync
+    syncVersion: int("syncVersion").default(1).notNull(),
+    lastSyncedAt: timestamp("lastSyncedAt").defaultNow().notNull(),
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+  },
+  table => ({
+    paymentIdx: uniqueIndex("qb_payment_idx").on(table.userId, table.paymentId),
+    qbPaymentIdx: uniqueIndex("qb_payment_qb_idx").on(
+      table.userId,
+      table.qbPaymentId
+    ),
+  })
+);
+export type QuickBooksPaymentMapping =
+  typeof quickbooksPaymentMapping.$inferSelect;
+export type InsertQuickBooksPaymentMapping =
+  typeof quickbooksPaymentMapping.$inferInsert;
 
 /**
  * QuickBooks Sync Settings - user preferences for auto-sync behavior
@@ -921,43 +1137,47 @@ export type InsertQuickBooksPaymentMapping = typeof quickbooksPaymentMapping.$in
 export const quickbooksSyncSettings = mysqlTable("quickbooksSyncSettings", {
   id: int("id").autoincrement().primaryKey(),
   userId: int("userId").notNull().unique(),
-  
+
   // Auto-sync toggles
   autoSyncInvoices: boolean("autoSyncInvoices").default(true).notNull(), // Sync invoices when sent
   autoSyncPayments: boolean("autoSyncPayments").default(true).notNull(), // Sync payments when recorded
   syncPaymentsFromQB: boolean("syncPaymentsFromQB").default(true).notNull(), // Pull payments from QB
-  
+
   // Sync filters
   minInvoiceAmount: decimal("minInvoiceAmount", { precision: 24, scale: 8 }), // Only sync invoices above this amount
   syncDraftInvoices: boolean("syncDraftInvoices").default(false).notNull(), // Sync draft invoices (not recommended)
-  
+
   // Polling settings for two-way sync
   lastPaymentPollAt: timestamp("lastPaymentPollAt"), // Last time we polled QB for payments
   pollIntervalMinutes: int("pollIntervalMinutes").default(60).notNull(), // How often to poll (default 1 hour)
-  
+
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });
 export type QuickBooksSyncSettings = typeof quickbooksSyncSettings.$inferSelect;
-export type InsertQuickBooksSyncSettings = typeof quickbooksSyncSettings.$inferInsert;
-
+export type InsertQuickBooksSyncSettings =
+  typeof quickbooksSyncSettings.$inferInsert;
 
 /**
  * Client Tags - user-defined tags for organizing clients
  * Examples: "VIP", "Recurring", "New", "Enterprise", "Small Business"
  */
-export const clientTags = mysqlTable("clientTags", {
-  id: int("id").autoincrement().primaryKey(),
-  userId: int("userId").notNull(),
-  name: varchar("name", { length: 50 }).notNull(),
-  color: varchar("color", { length: 7 }).default("#6366f1").notNull(), // Hex color code
-  description: text("description"),
-  createdAt: timestamp("createdAt").defaultNow().notNull(),
-  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
-}, (table) => ({
-  // Unique tag name per user
-  userTagIdx: uniqueIndex("client_tag_user_idx").on(table.userId, table.name),
-}));
+export const clientTags = mysqlTable(
+  "clientTags",
+  {
+    id: int("id").autoincrement().primaryKey(),
+    userId: int("userId").notNull(),
+    name: varchar("name", { length: 50 }).notNull(),
+    color: varchar("color", { length: 7 }).default("#6366f1").notNull(), // Hex color code
+    description: text("description"),
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+    updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+  },
+  table => ({
+    // Unique tag name per user
+    userTagIdx: uniqueIndex("client_tag_user_idx").on(table.userId, table.name),
+  })
+);
 
 export type ClientTag = typeof clientTags.$inferSelect;
 export type InsertClientTag = typeof clientTags.$inferInsert;
@@ -965,19 +1185,26 @@ export type InsertClientTag = typeof clientTags.$inferInsert;
 /**
  * Client-Tag assignments - many-to-many relationship
  */
-export const clientTagAssignments = mysqlTable("clientTagAssignments", {
-  id: int("id").autoincrement().primaryKey(),
-  clientId: int("clientId").notNull(),
-  tagId: int("tagId").notNull(),
-  assignedAt: timestamp("assignedAt").defaultNow().notNull(),
-}, (table) => ({
-  // Unique assignment per client-tag pair
-  clientTagIdx: uniqueIndex("client_tag_assignment_idx").on(table.clientId, table.tagId),
-}));
+export const clientTagAssignments = mysqlTable(
+  "clientTagAssignments",
+  {
+    id: int("id").autoincrement().primaryKey(),
+    clientId: int("clientId").notNull(),
+    tagId: int("tagId").notNull(),
+    assignedAt: timestamp("assignedAt").defaultNow().notNull(),
+  },
+  table => ({
+    // Unique assignment per client-tag pair
+    clientTagIdx: uniqueIndex("client_tag_assignment_idx").on(
+      table.clientId,
+      table.tagId
+    ),
+  })
+);
 
 export type ClientTagAssignment = typeof clientTagAssignments.$inferSelect;
-export type InsertClientTagAssignment = typeof clientTagAssignments.$inferInsert;
-
+export type InsertClientTagAssignment =
+  typeof clientTagAssignments.$inferInsert;
 
 /**
  * Batch Invoice Templates - saved configurations for creating invoices for multiple clients
@@ -986,53 +1213,68 @@ export type InsertClientTagAssignment = typeof clientTagAssignments.$inferInsert
 export const batchInvoiceTemplates = mysqlTable("batchInvoiceTemplates", {
   id: int("id").autoincrement().primaryKey(),
   userId: int("userId").notNull(),
-  
+
   // Template identification
   name: varchar("name", { length: 100 }).notNull(),
   description: text("description"),
-  
+
   // Invoice settings
   dueInDays: int("dueInDays").default(30).notNull(), // Days until due date
   currency: varchar("currency", { length: 10 }).default("USD").notNull(),
-  taxRate: decimal("taxRate", { precision: 5, scale: 2 }).default("0").notNull(),
-  
+  taxRate: decimal("taxRate", { precision: 5, scale: 2 })
+    .default("0")
+    .notNull(),
+
   // Invoice template reference (optional)
   invoiceTemplateId: int("invoiceTemplateId"),
-  
+
   // Notes and terms
   notes: text("notes"),
   paymentTerms: text("paymentTerms"),
-  
+
   // Frequency hint for recurring use
-  frequency: mysqlEnum("frequency", ["one-time", "weekly", "monthly", "quarterly", "yearly"]).default("monthly").notNull(),
-  
+  frequency: mysqlEnum("frequency", [
+    "one-time",
+    "weekly",
+    "monthly",
+    "quarterly",
+    "yearly",
+  ])
+    .default("monthly")
+    .notNull(),
+
   // Usage tracking
   usageCount: int("usageCount").default(0).notNull(),
   lastUsedAt: timestamp("lastUsedAt"),
-  
+
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });
 
 export type BatchInvoiceTemplate = typeof batchInvoiceTemplates.$inferSelect;
-export type InsertBatchInvoiceTemplate = typeof batchInvoiceTemplates.$inferInsert;
+export type InsertBatchInvoiceTemplate =
+  typeof batchInvoiceTemplates.$inferInsert;
 
 /**
  * Batch Invoice Template Line Items - line items for batch invoice templates
  */
-export const batchInvoiceTemplateLineItems = mysqlTable("batchInvoiceTemplateLineItems", {
-  id: int("id").autoincrement().primaryKey(),
-  templateId: int("templateId").notNull(),
-  description: text("description").notNull(),
-  quantity: decimal("quantity", { precision: 24, scale: 8 }).notNull(),
-  rate: decimal("rate", { precision: 24, scale: 8 }).notNull(),
-  sortOrder: int("sortOrder").default(0).notNull(),
-  createdAt: timestamp("createdAt").defaultNow().notNull(),
-});
+export const batchInvoiceTemplateLineItems = mysqlTable(
+  "batchInvoiceTemplateLineItems",
+  {
+    id: int("id").autoincrement().primaryKey(),
+    templateId: int("templateId").notNull(),
+    description: text("description").notNull(),
+    quantity: decimal("quantity", { precision: 24, scale: 8 }).notNull(),
+    rate: decimal("rate", { precision: 24, scale: 8 }).notNull(),
+    sortOrder: int("sortOrder").default(0).notNull(),
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+  }
+);
 
-export type BatchInvoiceTemplateLineItem = typeof batchInvoiceTemplateLineItems.$inferSelect;
-export type InsertBatchInvoiceTemplateLineItem = typeof batchInvoiceTemplateLineItems.$inferInsert;
-
+export type BatchInvoiceTemplateLineItem =
+  typeof batchInvoiceTemplateLineItems.$inferSelect;
+export type InsertBatchInvoiceTemplateLineItem =
+  typeof batchInvoiceTemplateLineItems.$inferInsert;
 
 /**
  * Audit Log - Track all user actions for compliance and debugging

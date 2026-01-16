@@ -1,4 +1,11 @@
-import { TrendingUp, Clock, FileText, Users, DollarSign, CheckCircle2 } from "lucide-react";
+import {
+  TrendingUp,
+  Clock,
+  FileText,
+  Users,
+  DollarSign,
+  CheckCircle2,
+} from "lucide-react";
 
 export function DashboardMockup() {
   return (
@@ -25,7 +32,10 @@ export function DashboardMockup() {
             <h3 className="text-lg font-bold text-foreground">Dashboard</h3>
             <p className="text-xs text-muted-foreground">Welcome back!</p>
           </div>
-          <button className="px-3 py-1.5 rounded-lg bg-primary text-primary-foreground text-xs font-medium">
+          <button
+            aria-label="Create new invoice"
+            className="px-3 py-1.5 rounded-lg bg-primary text-primary-foreground text-xs font-medium"
+          >
             + New Invoice
           </button>
         </div>
@@ -39,30 +49,22 @@ export function DashboardMockup() {
             trend="+12%"
             trendUp
           />
-          <StatCard
-            icon={Clock}
-            label="Pending"
-            value="$3,200"
-            count={5}
-          />
+          <StatCard icon={Clock} label="Pending" value="$3,200" count={5} />
           <StatCard
             icon={FileText}
             label="Invoices"
             value="47"
             sublabel="this month"
           />
-          <StatCard
-            icon={Users}
-            label="Clients"
-            value="23"
-            sublabel="active"
-          />
+          <StatCard icon={Users} label="Clients" value="23" sublabel="active" />
         </div>
 
         {/* Recent Invoices */}
         <div className="rounded-xl border border-border/50 bg-card/50 overflow-hidden">
           <div className="px-4 py-3 border-b border-border/50">
-            <h4 className="text-sm font-semibold text-foreground">Recent Invoices</h4>
+            <h4 className="text-sm font-semibold text-foreground">
+              Recent Invoices
+            </h4>
           </div>
           <div className="divide-y divide-border/50">
             <InvoiceRow
@@ -121,7 +123,9 @@ function StatCard({
       <div className="flex items-baseline gap-2">
         <span className="text-xl font-bold text-foreground">{value}</span>
         {trend && (
-          <span className={`text-xs font-medium ${trendUp ? "text-green-500" : "text-red-500"}`}>
+          <span
+            className={`text-xs font-medium ${trendUp ? "text-green-500" : "text-red-500"}`}
+          >
             {trendUp && <TrendingUp className="inline h-3 w-3 mr-0.5" />}
             {trend}
           </span>
@@ -150,7 +154,10 @@ function InvoiceRow({
 }) {
   const statusConfig = {
     paid: { label: "Paid", className: "bg-green-500/10 text-green-500" },
-    pending: { label: "Pending", className: "bg-yellow-500/10 text-yellow-500" },
+    pending: {
+      label: "Pending",
+      className: "bg-yellow-500/10 text-yellow-500",
+    },
     sent: { label: "Sent", className: "bg-blue-500/10 text-blue-500" },
   };
 
@@ -169,7 +176,9 @@ function InvoiceRow({
       </div>
       <div className="flex items-center gap-3">
         <span className="text-sm font-semibold text-foreground">{amount}</span>
-        <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${config.className}`}>
+        <span
+          className={`px-2 py-0.5 rounded-full text-xs font-medium ${config.className}`}
+        >
           {config.label}
         </span>
       </div>

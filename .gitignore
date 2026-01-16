@@ -105,3 +105,15 @@ temp/
 *.db
 *.sqlite
 *.sqlite3
+
+# Archive folders (cleanup from audit)
+ARCHIVE/
+ARCHIVE_*/
+docs/ARCHIVE/
+research/ARCHIVE/
+
+# Manus/agent artifacts
+.manus/
+
+# Local notes
+notes/

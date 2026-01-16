@@ -18,12 +18,11 @@ export async function createContext(
     if (process.env.NODE_ENV === "production") {
       throw new Error(
         "CRITICAL SECURITY ERROR: SKIP_AUTH is enabled in production. " +
-        "This is a severe security vulnerability. Deployment blocked."
+          "This is a severe security vulnerability. Deployment blocked."
       );
     }
-    
+
     // Development mode only: Auto-authenticate with dev user
-    console.warn("⚠️  AUTH BYPASS ENABLED - Development mode only");
     const { getUserByOpenId, upsertUser } = await import("../db");
 
     let devUser = await getUserByOpenId("dev-user-local");

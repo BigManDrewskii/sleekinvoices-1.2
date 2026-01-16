@@ -2,7 +2,12 @@ import { getDb } from "../db";
 import * as db from "../db";
 import { sendInvoiceEmail } from "../email";
 import { generateInvoicePDF } from "../pdf";
-import { invoiceGenerationLogs, invoices, invoiceLineItems, recurringInvoices } from "../../drizzle/schema";
+import {
+  invoiceGenerationLogs,
+  invoices,
+  invoiceLineItems,
+  recurringInvoices,
+} from "../../drizzle/schema";
 import { eq } from "drizzle-orm";
 
 /**
@@ -11,7 +16,7 @@ import { eq } from "drizzle-orm";
  */
 export async function generateRecurringInvoices() {
   console.log("[Recurring Invoices] Starting generation job...");
-  
+
   const database = await getDb();
   if (!database) {
     console.error("[Recurring Invoices] Database not available");
@@ -20,45 +25,78 @@ export async function generateRecurringInvoices() {
 
   try {
     // Get all recurring invoices due for generation
-    const dueRecurringInvoices = await db.getRecurringInvoicesDueForGeneration();
-    
-    console.log(`[Recurring Invoices] Found ${dueRecurringInvoices.length} invoices to generate`);
-    
+    const dueRecurringInvoices =
+      await db.getRecurringInvoicesDueForGeneration();
+
+    console.log(
+      `[Recurring Invoices] Found ${dueRecurringInvoices.length} invoices to generate`
+    );
+
     for (const recurring of dueRecurringInvoices) {
       try {
+        // ============================================================================
+        // FREE TIER LIMIT ENFORCEMENT
+        // Check if user can create invoice based on subscription status
+        // ============================================================================
+        const user = await db.getUserById(recurring.userId);
+        if (!user) {
+          throw new Error(`User not found: ${recurring.userId}`);
+        }
+
+        const canCreate = await db.canUserCreateInvoice(
+          recurring.userId,
+          user.subscriptionStatus
+        );
+
+        if (!canCreate) {
+          console.log(
+            `[Recurring Invoices] Skipping recurring invoice ${recurring.id} - user ${recurring.userId} has reached monthly limit`
+          );
+          await database.insert(invoiceGenerationLogs).values({
+            recurringInvoiceId: recurring.id,
+            status: "failed",
+            errorMessage:
+              "Monthly invoice limit reached. Please upgrade to Pro.",
+          });
+          continue; // Skip this recurring invoice cycle
+        }
+
         // Get line items for this recurring invoice
         const lineItems = await db.getRecurringInvoiceLineItems(recurring.id);
-        
+
         // Get client info
-        const client = await db.getClientById(recurring.clientId, recurring.userId);
+        const client = await db.getClientById(
+          recurring.clientId,
+          recurring.userId
+        );
         if (!client) {
           throw new Error(`Client not found: ${recurring.clientId}`);
         }
-        
+
         // Get next invoice number
         const nextNumber = await db.getNextInvoiceNumber(recurring.userId);
         const invoiceNumber = `${recurring.invoiceNumberPrefix}-${String(nextNumber).padStart(3, "0")}`;
-        
+
         // Calculate dates
         const issueDate = new Date();
         const dueDate = new Date();
         dueDate.setDate(dueDate.getDate() + 30); // 30 days payment terms
-        
+
         // Calculate totals
         const subtotal = lineItems.reduce((sum, item) => {
           return sum + parseFloat(item.quantity) * parseFloat(item.rate);
         }, 0);
-        
+
         const taxRate = parseFloat(recurring.taxRate);
         const discountValue = parseFloat(recurring.discountValue);
-        
+
         let discountAmount = 0;
         if (recurring.discountType === "percentage") {
           discountAmount = (subtotal * discountValue) / 100;
         } else {
           discountAmount = discountValue;
         }
-        
+
         const amountAfterDiscount = subtotal - discountAmount;
         const taxAmount = (amountAfterDiscount * taxRate) / 100;
         const total = amountAfterDiscount + taxAmount;
@@ -74,7 +112,7 @@ export async function generateRecurringInvoices() {
         }
 
         // Use transaction to ensure atomicity of invoice creation, line items, and recurring invoice update
-        const newInvoice = await database.transaction(async (tx) => {
+        const newInvoice = await database.transaction(async tx => {
           // Create the invoice
           const [createdInvoice] = await tx.insert(invoices).values({
             userId: recurring.userId,
@@ -106,7 +144,9 @@ export async function generateRecurringInvoices() {
               description: item.description,
               quantity: item.quantity,
               rate: item.rate,
-              amount: (parseFloat(item.quantity) * parseFloat(item.rate)).toString(),
+              amount: (
+                parseFloat(item.quantity) * parseFloat(item.rate)
+              ).toString(),
               sortOrder: 0,
               createdAt: new Date(),
             });
@@ -153,21 +193,28 @@ export async function generateRecurringInvoices() {
             updatedAt: new Date(),
           };
         });
-        
+
+        // ============================================================================
+        // INCREMENT USAGE COUNTER
+        // Track invoice creation for free tier limit enforcement
+        // This runs AFTER successful creation to ensure accurate counting
+        // ============================================================================
+        await db.incrementInvoiceCount(recurring.userId);
+
         // Log successful generation
         await database.insert(invoiceGenerationLogs).values({
           recurringInvoiceId: recurring.id,
           generatedInvoiceId: newInvoice.id,
           status: "success",
         });
-        
+
         // Send email to client
         if (client.email) {
           try {
             // Get user info for PDF generation
             const user = await db.getUserByOpenId(recurring.userId.toString());
             if (!user) throw new Error("User not found");
-            
+
             // Prepare PDF data
             const pdfData = {
               invoice: newInvoice,
@@ -179,12 +226,14 @@ export async function generateRecurringInvoices() {
                 description: item.description,
                 quantity: item.quantity,
                 rate: item.rate,
-                amount: (parseFloat(item.quantity) * parseFloat(item.rate)).toString(),
+                amount: (
+                  parseFloat(item.quantity) * parseFloat(item.rate)
+                ).toString(),
                 sortOrder: index,
                 createdAt: new Date(),
               })),
             };
-            
+
             const pdfBuffer = await generateInvoicePDF(pdfData);
             await sendInvoiceEmail({
               invoice: newInvoice,
@@ -192,17 +241,26 @@ export async function generateRecurringInvoices() {
               user,
               pdfBuffer,
             });
-            console.log(`[Recurring Invoices] Email sent for invoice ${invoiceNumber}`);
+            console.log(
+              `[Recurring Invoices] Email sent for invoice ${invoiceNumber}`
+            );
           } catch (emailError) {
-            console.error(`[Recurring Invoices] Failed to send email for ${invoiceNumber}:`, emailError);
+            console.error(
+              `[Recurring Invoices] Failed to send email for ${invoiceNumber}:`,
+              emailError
+            );
           }
         }
-        
-        console.log(`[Recurring Invoices] Generated invoice ${invoiceNumber} from recurring ${recurring.id}`);
-        
+
+        console.log(
+          `[Recurring Invoices] Generated invoice ${invoiceNumber} from recurring ${recurring.id}`
+        );
       } catch (error) {
-        console.error(`[Recurring Invoices] Failed to generate from recurring ${recurring.id}:`, error);
-        
+        console.error(
+          `[Recurring Invoices] Failed to generate from recurring ${recurring.id}:`,
+          error
+        );
+
         // Log failed generation
         await database.insert(invoiceGenerationLogs).values({
           recurringInvoiceId: recurring.id,
@@ -211,9 +269,8 @@ export async function generateRecurringInvoices() {
         });
       }
     }
-    
+
     console.log("[Recurring Invoices] Generation job completed");
-    
   } catch (error) {
     console.error("[Recurring Invoices] Job failed:", error);
   }

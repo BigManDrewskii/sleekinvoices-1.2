@@ -1,6 +1,12 @@
 import { useState, useMemo, useEffect } from "react";
 import { trpc } from "@/lib/trpc";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -63,7 +69,15 @@ type EmailLog = {
   success: boolean;
   errorMessage?: string | null;
   messageId?: string | null;
-  deliveryStatus?: "sent" | "delivered" | "opened" | "clicked" | "bounced" | "complained" | "failed" | null;
+  deliveryStatus?:
+    | "sent"
+    | "delivered"
+    | "opened"
+    | "clicked"
+    | "bounced"
+    | "complained"
+    | "failed"
+    | null;
   deliveredAt?: Date | string | null;
   openedAt?: Date | string | null;
   openCount?: number | null;
@@ -77,7 +91,13 @@ type EmailLog = {
 };
 
 // Status badge component
-function StatusBadge({ status, success }: { status?: string | null; success: boolean }) {
+function StatusBadge({
+  status,
+  success,
+}: {
+  status?: string | null;
+  success: boolean;
+}) {
   if (!success) {
     return (
       <Badge variant="destructive" className="gap-1">
@@ -90,21 +110,30 @@ function StatusBadge({ status, success }: { status?: string | null; success: boo
   switch (status) {
     case "delivered":
       return (
-        <Badge variant="default" className="gap-1 bg-green-500/20 text-green-400 border-green-500/30">
+        <Badge
+          variant="default"
+          className="gap-1 bg-green-500/20 text-green-400 border-green-500/30"
+        >
           <CheckCircle2 className="h-3 w-3" />
           Delivered
         </Badge>
       );
     case "opened":
       return (
-        <Badge variant="default" className="gap-1 bg-blue-500/20 text-blue-400 border-blue-500/30">
+        <Badge
+          variant="default"
+          className="gap-1 bg-blue-500/20 text-blue-400 border-blue-500/30"
+        >
           <Eye className="h-3 w-3" />
           Opened
         </Badge>
       );
     case "clicked":
       return (
-        <Badge variant="default" className="gap-1 bg-purple-500/20 text-purple-400 border-purple-500/30">
+        <Badge
+          variant="default"
+          className="gap-1 bg-purple-500/20 text-purple-400 border-purple-500/30"
+        >
           <MousePointerClick className="h-3 w-3" />
           Clicked
         </Badge>
@@ -146,14 +175,20 @@ function TypeBadge({ type }: { type: string }) {
       );
     case "reminder":
       return (
-        <Badge variant="outline" className="gap-1 border-yellow-500/30 text-yellow-400">
+        <Badge
+          variant="outline"
+          className="gap-1 border-yellow-500/30 text-yellow-400"
+        >
           <Bell className="h-3 w-3" />
           Reminder
         </Badge>
       );
     case "receipt":
       return (
-        <Badge variant="outline" className="gap-1 border-green-500/30 text-green-400">
+        <Badge
+          variant="outline"
+          className="gap-1 border-green-500/30 text-green-400"
+        >
           <Receipt className="h-3 w-3" />
           Receipt
         </Badge>
@@ -175,10 +210,17 @@ export default function EmailHistory() {
   const [detailsOpen, setDetailsOpen] = useState(false);
 
   // Sorting
-  const { sort, handleSort, sortData } = useTableSort({ defaultKey: "sentAt", defaultDirection: "desc" });
+  const { sort, handleSort, sortData } = useTableSort({
+    defaultKey: "sentAt",
+    defaultDirection: "desc",
+  });
 
   // Fetch all email logs (client-side pagination)
-  const { data: emails, isLoading, refetch } = trpc.emailHistory.list.useQuery({});
+  const {
+    data: emails,
+    isLoading,
+    refetch,
+  } = trpc.emailHistory.list.useQuery({});
 
   // Fetch stats
   const { data: stats } = trpc.emailHistory.stats.useQuery();
@@ -189,7 +231,7 @@ export default function EmailHistory() {
       toast.success("Email retry initiated");
       refetch();
     },
-    onError: (error) => {
+    onError: error => {
       toast.error(error.message || "Failed to retry email");
     },
   });
@@ -204,40 +246,49 @@ export default function EmailHistory() {
     // Search filter
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
-      result = result.filter((email) =>
-        email.recipientEmail?.toLowerCase().includes(query) ||
-        email.subject?.toLowerCase().includes(query) ||
-        email.invoiceId?.toString().includes(query)
+      result = result.filter(
+        email =>
+          email.recipientEmail?.toLowerCase().includes(query) ||
+          email.subject?.toLowerCase().includes(query) ||
+          email.invoiceId?.toString().includes(query)
       );
     }
 
     // Email type filter
     if (emailTypeFilter !== "all") {
-      result = result.filter((email) => email.emailType === emailTypeFilter);
+      result = result.filter(email => email.emailType === emailTypeFilter);
     }
 
     // Status filter
     if (statusFilter !== "all") {
-      result = result.filter((email) => email.deliveryStatus === statusFilter);
+      result = result.filter(email => email.deliveryStatus === statusFilter);
     }
 
     // Date range filter
     if (dateRange !== "all") {
       const now = new Date();
-      result = result.filter((email) => {
+      result = result.filter(email => {
         const emailDate = new Date(email.sentAt);
 
         switch (dateRange) {
           case "today":
             return emailDate.toDateString() === now.toDateString();
           case "7days":
-            return emailDate >= new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+            return (
+              emailDate >= new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)
+            );
           case "30days":
-            return emailDate >= new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+            return (
+              emailDate >= new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000)
+            );
           case "90days":
-            return emailDate >= new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000);
+            return (
+              emailDate >= new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000)
+            );
           case "year":
-            return emailDate >= new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000);
+            return (
+              emailDate >= new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000)
+            );
           default:
             return true;
         }
@@ -278,7 +329,12 @@ export default function EmailHistory() {
     setCurrentPage(1);
   };
 
-  const hasActiveFilters = !!(searchQuery || emailTypeFilter !== "all" || statusFilter !== "all" || dateRange !== "all");
+  const hasActiveFilters = !!(
+    searchQuery ||
+    emailTypeFilter !== "all" ||
+    statusFilter !== "all" ||
+    dateRange !== "all"
+  );
 
   return (
     <PageLayout
@@ -297,19 +353,25 @@ export default function EmailHistory() {
           <Card className="bg-card/50">
             <CardHeader className="pb-2">
               <CardDescription>Delivered</CardDescription>
-              <CardTitle className="text-2xl text-green-400">{stats.delivered}</CardTitle>
+              <CardTitle className="text-2xl text-green-400">
+                {stats.delivered}
+              </CardTitle>
             </CardHeader>
           </Card>
           <Card className="bg-card/50">
             <CardHeader className="pb-2">
               <CardDescription>Opened</CardDescription>
-              <CardTitle className="text-2xl text-blue-400">{stats.opened}</CardTitle>
+              <CardTitle className="text-2xl text-blue-400">
+                {stats.opened}
+              </CardTitle>
             </CardHeader>
           </Card>
           <Card className="bg-card/50">
             <CardHeader className="pb-2">
               <CardDescription>Failed</CardDescription>
-              <CardTitle className="text-2xl text-destructive">{stats.failed}</CardTitle>
+              <CardTitle className="text-2xl text-destructive">
+                {stats.failed}
+              </CardTitle>
             </CardHeader>
           </Card>
         </div>
@@ -319,17 +381,11 @@ export default function EmailHistory() {
       <FilterSection
         hasActiveFilters={hasActiveFilters}
         onClearFilters={clearFilters}
+        searchValue={searchQuery}
+        onSearchChange={setSearchQuery}
+        searchPlaceholder="Search by email or subject..."
       >
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 w-full">
-          {/* Search */}
-          <div className="relative flex-1">
-            <Input
-              placeholder="Search by email or subject..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-          </div>
-
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 w-full">
           {/* Email Type Filter */}
           <FilterSelect label="Email Type">
             <Select value={emailTypeFilter} onValueChange={setEmailTypeFilter}>
@@ -387,7 +443,8 @@ export default function EmailHistory() {
         <CardHeader>
           <CardTitle>Email History</CardTitle>
           <CardDescription>
-            {filteredAndSortedEmails.length} email{filteredAndSortedEmails.length !== 1 ? 's' : ''} found
+            {filteredAndSortedEmails.length} email
+            {filteredAndSortedEmails.length !== 1 ? "s" : ""} found
           </CardDescription>
         </CardHeader>
         <CardContent className="p-0">
@@ -424,20 +481,34 @@ export default function EmailHistory() {
               ) : !emails || filteredAndSortedEmails.length === 0 ? (
                 <tr>
                   <td colSpan={7}>
-                    <EmptyState
-                      {...EmptyStatePresets.emailHistory}
-                      size="sm"
-                    />
+                    <EmptyState {...EmptyStatePresets.emailHistory} size="sm" />
                   </td>
                 </tr>
               ) : (
-                paginatedEmails.map((email) => (
-                  <TableRow key={email.id} className="cursor-pointer hover:bg-muted/50" onClick={() => openDetails(email)}>
-                    <TableCell className="font-medium">{email.recipientEmail}</TableCell>
-                    <TableCell className="max-w-[300px] truncate">{email.subject}</TableCell>
-                    <TableCell><TypeBadge type={email.emailType} /></TableCell>
-                    <TableCell><StatusBadge status={email.deliveryStatus} success={email.success} /></TableCell>
-                    <TableCell><DateDisplay date={email.sentAt} /></TableCell>
+                paginatedEmails.map(email => (
+                  <TableRow
+                    key={email.id}
+                    className="cursor-pointer hover:bg-muted/50"
+                    onClick={() => openDetails(email)}
+                  >
+                    <TableCell className="font-medium">
+                      {email.recipientEmail}
+                    </TableCell>
+                    <TableCell className="max-w-[300px] truncate">
+                      {email.subject}
+                    </TableCell>
+                    <TableCell>
+                      <TypeBadge type={email.emailType} />
+                    </TableCell>
+                    <TableCell>
+                      <StatusBadge
+                        status={email.deliveryStatus}
+                        success={email.success}
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <DateDisplay date={email.sentAt} />
+                    </TableCell>
                     <TableCell>
                       {email.openCount ? (
                         <span className="text-blue-400">{email.openCount}</span>
@@ -450,7 +521,7 @@ export default function EmailHistory() {
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={(e) => {
+                          onClick={e => {
                             e.stopPropagation();
                             handleRetry(email.id);
                           }}
@@ -469,14 +540,14 @@ export default function EmailHistory() {
 
         {/* Pagination */}
         {totalPages > 1 && (
-          <div className="px-5 pb-4 border-t border-border/20 pt-4">
+          <div className="px-4 md:px-6 pb-4 md:pb-6 border-t border-border/50 pt-4">
             <Pagination
               currentPage={currentPage}
               totalPages={totalPages}
               pageSize={pageSize}
               totalItems={totalItems}
               onPageChange={setCurrentPage}
-              onPageSizeChange={(size) => {
+              onPageSizeChange={size => {
                 setPageSize(size);
                 setCurrentPage(1);
               }}
@@ -489,58 +560,71 @@ export default function EmailHistory() {
       {/* Email Details Dialog */}
       <Dialog open={detailsOpen} onOpenChange={setDetailsOpen}>
         <DialogContent className="max-w-lg">
-          <DialogHeader>
-            <DialogTitle>Email Details</DialogTitle>
-            <DialogDescription>
+          <DialogHeader className="pb-4">
+            <DialogTitle className="text-xl">Email Details</DialogTitle>
+            <DialogDescription className="text-base">
               Detailed tracking information for this email
             </DialogDescription>
           </DialogHeader>
 
           {selectedEmail && (
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
+            <div className="space-y-5 px-0">
+              <div className="grid grid-cols-2 gap-6">
+                <div className="space-y-2">
                   <p className="text-sm text-muted-foreground">Recipient</p>
                   <p className="font-medium">{selectedEmail.recipientEmail}</p>
                 </div>
-                <div>
+                <div className="space-y-2">
                   <p className="text-sm text-muted-foreground">Type</p>
                   <TypeBadge type={selectedEmail.emailType} />
                 </div>
               </div>
 
-              <div>
+              <div className="space-y-2">
                 <p className="text-sm text-muted-foreground">Subject</p>
                 <p className="font-medium">{selectedEmail.subject}</p>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 gap-6">
                 <div>
                   <p className="text-sm text-muted-foreground">Status</p>
-                  <StatusBadge status={selectedEmail.deliveryStatus} success={selectedEmail.success} />
+                  <StatusBadge
+                    status={selectedEmail.deliveryStatus}
+                    success={selectedEmail.success}
+                  />
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Sent At</p>
-                  <p className="font-medium"><DateDisplay date={selectedEmail.sentAt} /></p>
+                  <p className="font-medium">
+                    <DateDisplay date={selectedEmail.sentAt} />
+                  </p>
                 </div>
               </div>
 
               {selectedEmail.deliveredAt && (
                 <div>
                   <p className="text-sm text-muted-foreground">Delivered At</p>
-                  <p className="font-medium"><DateDisplay date={selectedEmail.deliveredAt} /></p>
+                  <p className="font-medium">
+                    <DateDisplay date={selectedEmail.deliveredAt} />
+                  </p>
                 </div>
               )}
 
               {selectedEmail.openedAt && (
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <p className="text-sm text-muted-foreground">First Opened</p>
-                    <p className="font-medium"><DateDisplay date={selectedEmail.openedAt} /></p>
+                    <p className="text-sm text-muted-foreground">
+                      First Opened
+                    </p>
+                    <p className="font-medium">
+                      <DateDisplay date={selectedEmail.openedAt} />
+                    </p>
                   </div>
                   <div>
                     <p className="text-sm text-muted-foreground">Open Count</p>
-                    <p className="font-medium text-blue-400">{selectedEmail.openCount || 0}</p>
+                    <p className="font-medium text-blue-400">
+                      {selectedEmail.openCount || 0}
+                    </p>
                   </div>
                 </div>
               )}
@@ -548,12 +632,18 @@ export default function EmailHistory() {
               {selectedEmail.clickedAt && (
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <p className="text-sm text-muted-foreground">First Clicked</p>
-                    <p className="font-medium"><DateDisplay date={selectedEmail.clickedAt} /></p>
+                    <p className="text-sm text-muted-foreground">
+                      First Clicked
+                    </p>
+                    <p className="font-medium">
+                      <DateDisplay date={selectedEmail.clickedAt} />
+                    </p>
                   </div>
                   <div>
                     <p className="text-sm text-muted-foreground">Click Count</p>
-                    <p className="font-medium text-purple-400">{selectedEmail.clickCount || 0}</p>
+                    <p className="font-medium text-purple-400">
+                      {selectedEmail.clickCount || 0}
+                    </p>
                   </div>
                 </div>
               )}
@@ -562,11 +652,15 @@ export default function EmailHistory() {
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <p className="text-sm text-muted-foreground">Bounced At</p>
-                    <p className="font-medium"><DateDisplay date={selectedEmail.bouncedAt} /></p>
+                    <p className="font-medium">
+                      <DateDisplay date={selectedEmail.bouncedAt} />
+                    </p>
                   </div>
                   <div>
                     <p className="text-sm text-muted-foreground">Bounce Type</p>
-                    <p className="font-medium text-destructive">{selectedEmail.bounceType || 'Unknown'}</p>
+                    <p className="font-medium text-destructive">
+                      {selectedEmail.bounceType || "Unknown"}
+                    </p>
                   </div>
                 </div>
               )}
@@ -574,51 +668,63 @@ export default function EmailHistory() {
               {selectedEmail.errorMessage && (
                 <div>
                   <p className="text-sm text-muted-foreground">Error Message</p>
-                  <p className="font-medium text-destructive">{selectedEmail.errorMessage}</p>
+                  <p className="font-medium text-destructive">
+                    {selectedEmail.errorMessage}
+                  </p>
                 </div>
               )}
 
-              {selectedEmail.retryCount != null && selectedEmail.retryCount > 0 && (
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <p className="text-sm text-muted-foreground">Retry Attempts</p>
-                    <p className="font-medium">{selectedEmail.retryCount} / 3</p>
-                  </div>
-                  {selectedEmail.nextRetryAt && (
+              {selectedEmail.retryCount != null &&
+                selectedEmail.retryCount > 0 && (
+                  <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <p className="text-sm text-muted-foreground">Next Retry</p>
-                      <p className="font-medium"><DateDisplay date={selectedEmail.nextRetryAt} /></p>
+                      <p className="text-sm text-muted-foreground">
+                        Retry Attempts
+                      </p>
+                      <p className="font-medium">
+                        {selectedEmail.retryCount} / 3
+                      </p>
                     </div>
-                  )}
-                </div>
-              )}
+                    {selectedEmail.nextRetryAt && (
+                      <div>
+                        <p className="text-sm text-muted-foreground">
+                          Next Retry
+                        </p>
+                        <p className="font-medium">
+                          <DateDisplay date={selectedEmail.nextRetryAt} />
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                )}
 
               {selectedEmail.messageId && (
                 <div>
                   <p className="text-sm text-muted-foreground">Message ID</p>
-                  <p className="font-mono text-xs text-muted-foreground truncate">{selectedEmail.messageId}</p>
+                  <p className="font-mono text-xs text-muted-foreground truncate">
+                    {selectedEmail.messageId}
+                  </p>
                 </div>
               )}
             </div>
           )}
 
           <DialogFooter>
-            {selectedEmail && !selectedEmail.success && ((selectedEmail.retryCount ?? 0) < 3) && (
-              <Button
-                variant="outline"
-                onClick={() => {
-                  handleRetry(selectedEmail.id);
-                  setDetailsOpen(false);
-                }}
-                disabled={retryMutation.isPending}
-              >
-                <RotateCcw className="h-4 w-4 mr-2" />
-                Retry Email
-              </Button>
-            )}
-            <Button variant="default" onClick={() => setDetailsOpen(false)}>
-              Close
-            </Button>
+            {selectedEmail &&
+              !selectedEmail.success &&
+              (selectedEmail.retryCount ?? 0) < 3 && (
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    handleRetry(selectedEmail.id);
+                    setDetailsOpen(false);
+                  }}
+                  disabled={retryMutation.isPending}
+                >
+                  <RotateCcw className="h-4 w-4 mr-2" />
+                  Retry Email
+                </Button>
+              )}
           </DialogFooter>
         </DialogContent>
       </Dialog>

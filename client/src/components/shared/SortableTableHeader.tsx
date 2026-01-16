@@ -39,9 +39,10 @@ export function SortableTableHeader({
         type="button"
         onClick={() => onSort(sortKey)}
         className={cn(
-          "w-full text-left px-0 bg-transparent border-0",
+          "w-full text-left bg-transparent border-0",
           "cursor-pointer select-none hover:bg-muted/50 transition-colors",
-          "flex items-center gap-2"
+          "flex items-center gap-2",
+          "-mx-3 px-3 md:-mx-4 md:px-4"
         )}
         aria-label={`Sort by ${label}${isActive ? (isAscending ? ', currently ascending' : ', currently descending') : ''}`}
       >

@@ -11,10 +11,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { 
-  Mail, 
-  Eye, 
-  Edit3, 
+import {
+  Mail,
+  Eye,
+  Edit3,
   Sparkles,
   User,
   FileText,
@@ -22,19 +22,61 @@ import {
   Calendar,
   Link,
   Building2,
-  RotateCcw
+  RotateCcw,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 // Variable definitions with icons and categories
 const EMAIL_VARIABLES = [
-  { key: "clientName", label: "Client Name", icon: User, category: "client", sampleValue: "John Smith" },
-  { key: "invoiceNumber", label: "Invoice Number", icon: FileText, category: "invoice", sampleValue: "INV-2026-001" },
-  { key: "invoiceAmount", label: "Invoice Amount", icon: DollarSign, category: "invoice", sampleValue: "$1,250.00" },
-  { key: "dueDate", label: "Due Date", icon: Calendar, category: "invoice", sampleValue: "January 15, 2026" },
-  { key: "daysOverdue", label: "Days Overdue", icon: Calendar, category: "invoice", sampleValue: "7" },
-  { key: "invoiceUrl", label: "Invoice Link", icon: Link, category: "invoice", sampleValue: "https://pay.sleekinvoices.com/inv/abc123" },
-  { key: "companyName", label: "Your Company", icon: Building2, category: "company", sampleValue: "Acme Inc." },
+  {
+    key: "clientName",
+    label: "Client Name",
+    icon: User,
+    category: "client",
+    sampleValue: "John Smith",
+  },
+  {
+    key: "invoiceNumber",
+    label: "Invoice Number",
+    icon: FileText,
+    category: "invoice",
+    sampleValue: "INV-2026-001",
+  },
+  {
+    key: "invoiceAmount",
+    label: "Invoice Amount",
+    icon: DollarSign,
+    category: "invoice",
+    sampleValue: "$1,250.00",
+  },
+  {
+    key: "dueDate",
+    label: "Due Date",
+    icon: Calendar,
+    category: "invoice",
+    sampleValue: "January 15, 2026",
+  },
+  {
+    key: "daysOverdue",
+    label: "Days Overdue",
+    icon: Calendar,
+    category: "invoice",
+    sampleValue: "7",
+  },
+  {
+    key: "invoiceUrl",
+    label: "Invoice Link",
+    icon: Link,
+    category: "invoice",
+    sampleValue: "https://pay.sleekinvoices.com/inv/abc123",
+  },
+  {
+    key: "companyName",
+    label: "Your Company",
+    icon: Building2,
+    category: "company",
+    sampleValue: "Acme Inc.",
+  },
 ];
 
 // Pre-built email templates
@@ -59,7 +101,7 @@ You can view and pay your invoice here:
 If you have any questions, please don't hesitate to reach out.
 
 Best regards,
-{{companyName}}`
+{{companyName}}`,
   },
   friendly_reminder: {
     id: "friendly_reminder",
@@ -77,7 +119,7 @@ I know things can get busy, so no worries if it slipped through the cracks. You 
 Let me know if you have any questions!
 
 Best,
-{{companyName}}`
+{{companyName}}`,
   },
   professional_notice: {
     id: "professional_notice",
@@ -99,7 +141,7 @@ If you have already sent payment, please disregard this notice.
 Thank you for your prompt attention to this matter.
 
 Sincerely,
-{{companyName}}`
+{{companyName}}`,
   },
   urgent_notice: {
     id: "urgent_notice",
@@ -120,7 +162,7 @@ Please submit payment immediately using this link:
 
 If you are experiencing difficulties, please contact us immediately to discuss payment arrangements.
 
-{{companyName}}`
+{{companyName}}`,
   },
   thank_you: {
     id: "thank_you",
@@ -135,7 +177,7 @@ Thank you for your payment of {{invoiceAmount}} for invoice {{invoiceNumber}}. W
 We truly appreciate your business and look forward to working with you again!
 
 Best regards,
-{{companyName}}`
+{{companyName}}`,
   },
   custom: {
     id: "custom",
@@ -143,8 +185,8 @@ Best regards,
     description: "Start from scratch",
     icon: "✏️",
     subject: "",
-    body: ""
-  }
+    body: "",
+  },
 };
 
 interface EmailTemplateEditorProps {
@@ -177,7 +219,11 @@ export function EmailTemplateEditor({
   // Check if the template is HTML
   const isHtmlTemplate = useMemo(() => {
     if (!value) return false;
-    return value.includes("<!DOCTYPE") || value.includes("<html") || value.includes("<body");
+    return (
+      value.includes("<!DOCTYPE") ||
+      value.includes("<html") ||
+      value.includes("<body")
+    );
   }, [value]);
 
   // Replace variables with sample values
@@ -198,28 +244,32 @@ export function EmailTemplateEditor({
 
   // Generate preview content for plain text templates
   const previewContent = useMemo(() => {
-    if (!value) return "<p class='text-muted-foreground italic'>No content yet. Select a template or start typing.</p>";
-    
+    if (!value)
+      return "<p class='text-muted-foreground italic'>No content yet. Select a template or start typing.</p>";
+
     if (isHtmlTemplate) {
       // For HTML templates, we'll use an iframe
       return "";
     }
-    
+
     let preview = value;
-    
+
     // Replace variables with highlighted sample values
     for (const variable of EMAIL_VARIABLES) {
       const regex = new RegExp(`\\{\\{${variable.key}\\}\\}`, "g");
-      preview = preview.replace(regex, `<span class="font-semibold text-primary">${variable.sampleValue}</span>`);
+      preview = preview.replace(
+        regex,
+        `<span class="font-semibold text-primary">${variable.sampleValue}</span>`
+      );
     }
-    
+
     // Escape HTML but preserve our spans
     preview = preview
       .replace(/&/g, "&amp;")
       .replace(/<(?!span|\/span|br)/g, "&lt;")
       .replace(/(?<!span)>/g, "&gt;")
       .replace(/\n/g, "<br>");
-    
+
     return preview;
   }, [value, isHtmlTemplate]);
 
@@ -232,40 +282,43 @@ export function EmailTemplateEditor({
   // Insert variable at cursor position
   const insertVariable = (variableKey: string) => {
     if (disabled) return;
-    
+
     const text = `{{${variableKey}}}`;
-    
+
     if (activeField === "subject" && onSubjectChange) {
       const input = subjectInputRef.current;
       if (!input) {
         onSubjectChange(subject + text);
         return;
       }
-      
+
       const start = input.selectionStart || 0;
       const end = input.selectionEnd || 0;
-      
-      const newValue = subject.substring(0, start) + text + subject.substring(end);
+
+      const newValue =
+        subject.substring(0, start) + text + subject.substring(end);
       onSubjectChange(newValue);
-      
+
       // Restore focus and cursor position
       setTimeout(() => {
         input.focus();
         input.setSelectionRange(start + text.length, start + text.length);
       }, 0);
     } else {
-      const textarea = document.getElementById("email-template-textarea") as HTMLTextAreaElement;
+      const textarea = document.getElementById(
+        "email-template-textarea"
+      ) as HTMLTextAreaElement;
       if (!textarea) {
         onChange(value + text);
         return;
       }
-      
+
       const start = textarea.selectionStart;
       const end = textarea.selectionEnd;
-      
+
       const newValue = value.substring(0, start) + text + value.substring(end);
       onChange(newValue);
-      
+
       // Restore focus and cursor position
       setTimeout(() => {
         textarea.focus();
@@ -277,7 +330,8 @@ export function EmailTemplateEditor({
   // Load a preset template
   const loadTemplate = (templateId: string) => {
     setSelectedTemplate(templateId);
-    const template = EMAIL_TEMPLATES[templateId as keyof typeof EMAIL_TEMPLATES];
+    const template =
+      EMAIL_TEMPLATES[templateId as keyof typeof EMAIL_TEMPLATES];
     if (template) {
       if (template.body) {
         onChange(template.body);
@@ -312,7 +366,7 @@ export function EmailTemplateEditor({
   const categoryLabels: Record<string, string> = {
     client: "Client",
     invoice: "Invoice",
-    company: "Company"
+    company: "Company",
   };
 
   return (
@@ -332,12 +386,16 @@ export function EmailTemplateEditor({
           <Sparkles className="h-4 w-4 text-muted-foreground" />
           <Label className="text-sm font-medium">Start with a template:</Label>
         </div>
-        <Select value={selectedTemplate} onValueChange={loadTemplate} disabled={disabled}>
+        <Select
+          value={selectedTemplate}
+          onValueChange={loadTemplate}
+          disabled={disabled}
+        >
           <SelectTrigger className="w-[220px]">
             <SelectValue placeholder="Choose a template..." />
           </SelectTrigger>
           <SelectContent>
-            {Object.values(EMAIL_TEMPLATES).map((template) => (
+            {Object.values(EMAIL_TEMPLATES).map(template => (
               <SelectItem key={template.id} value={template.id}>
                 <div className="flex items-center gap-2">
                   <span>{template.icon}</span>
@@ -368,42 +426,53 @@ export function EmailTemplateEditor({
         <CardContent className="p-4">
           <div className="flex items-center gap-2 mb-3">
             <Mail className="h-4 w-4 text-muted-foreground" />
-            <span className="text-sm font-medium">Click to insert variables:</span>
+            <span className="text-sm font-medium">
+              Click to insert variables:
+            </span>
             {onSubjectChange && (
               <span className="text-xs text-muted-foreground ml-auto">
-                Inserting into: <span className="font-medium text-foreground">{activeField === "subject" ? "Subject" : "Body"}</span>
+                Inserting into:{" "}
+                <span className="font-medium text-foreground">
+                  {activeField === "subject" ? "Subject" : "Body"}
+                </span>
               </span>
             )}
           </div>
           <div className="space-y-3">
-            {Object.entries(variablesByCategory).map(([category, variables]) => (
-              <div key={category} className="flex flex-wrap items-center gap-2">
-                <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide w-16">
-                  {categoryLabels[category]}
-                </span>
-                {variables.map((variable) => {
-                  const Icon = variable.icon;
-                  return (
-                    <button
-                      key={variable.key}
-                      type="button"
-                      onClick={() => insertVariable(variable.key)}
-                      disabled={disabled}
-                      className={cn(
-                        "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm",
-                        "bg-secondary hover:bg-secondary/80 text-secondary-foreground",
-                        "transition-all duration-200 hover:scale-105",
-                        "disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100",
-                        "border border-transparent hover:border-primary/30"
-                      )}
-                    >
-                      <Icon className="h-3.5 w-3.5" />
-                      {variable.label}
-                    </button>
-                  );
-                })}
-              </div>
-            ))}
+            {Object.entries(variablesByCategory).map(
+              ([category, variables]) => (
+                <div
+                  key={category}
+                  className="flex flex-wrap items-center gap-2"
+                >
+                  <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide w-16">
+                    {categoryLabels[category]}
+                  </span>
+                  {variables.map(variable => {
+                    const Icon = variable.icon;
+                    return (
+                      <button
+                        key={variable.key}
+                        type="button"
+                        onClick={() => insertVariable(variable.key)}
+                        disabled={disabled}
+                        className={cn(
+                          "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm",
+                          "bg-secondary hover:bg-secondary/80 text-secondary-foreground",
+                          "transition-all duration-200 hover:scale-105",
+                          "disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100",
+                          "border border-transparent hover:border-primary/30"
+                        )}
+                        aria-label={`Insert ${variable.label} variable`}
+                      >
+                        <Icon className="h-3.5 w-3.5" aria-hidden="true" />
+                        {variable.label}
+                      </button>
+                    );
+                  })}
+                </div>
+              )
+            )}
           </div>
         </CardContent>
       </Card>
@@ -425,12 +494,14 @@ export function EmailTemplateEditor({
           {/* Subject Line Input */}
           {onSubjectChange && (
             <div className="space-y-2">
-              <Label htmlFor="email-subject" className="text-sm font-medium">Subject Line</Label>
+              <Label htmlFor="email-subject" className="text-sm font-medium">
+                Subject Line
+              </Label>
               <Input
                 ref={subjectInputRef}
                 id="email-subject"
                 value={subject}
-                onChange={(e) => onSubjectChange(e.target.value)}
+                onChange={e => onSubjectChange(e.target.value)}
                 onFocus={() => setActiveField("subject")}
                 disabled={disabled}
                 placeholder="Enter email subject... e.g., Payment Reminder: Invoice {{invoiceNumber}}"
@@ -438,14 +509,19 @@ export function EmailTemplateEditor({
               />
             </div>
           )}
-          
+
           {/* Body Textarea */}
           <div className="relative">
-            <Label htmlFor="email-template-textarea" className="text-sm font-medium mb-2 block">Email Body</Label>
+            <Label
+              htmlFor="email-template-textarea"
+              className="text-sm font-medium mb-2 block"
+            >
+              Email Body
+            </Label>
             <textarea
               id="email-template-textarea"
               value={value}
-              onChange={(e) => onChange(e.target.value)}
+              onChange={e => onChange(e.target.value)}
               onFocus={() => setActiveField("body")}
               disabled={disabled}
               rows={12}
@@ -477,7 +553,9 @@ export function EmailTemplateEditor({
                   </div>
                   <div>
                     <p className="font-semibold text-sm">Acme Inc.</p>
-                    <p className="text-xs text-muted-foreground">to: john.smith@example.com</p>
+                    <p className="text-xs text-muted-foreground">
+                      to: john.smith@example.com
+                    </p>
                   </div>
                 </div>
                 <div className="bg-background/50 rounded-md p-3 border border-border/50">
@@ -485,7 +563,7 @@ export function EmailTemplateEditor({
                   <p className="text-sm font-medium">{previewSubject}</p>
                 </div>
               </div>
-              
+
               {/* Email Body Preview */}
               {isHtmlTemplate ? (
                 <div className="min-h-[300px] bg-white rounded-b-lg">
@@ -499,7 +577,7 @@ export function EmailTemplateEditor({
                   />
                 </div>
               ) : (
-                <div 
+                <div
                   className="p-6 min-h-[250px] text-sm leading-relaxed"
                   dangerouslySetInnerHTML={{ __html: previewContent }}
                 />
@@ -517,7 +595,9 @@ export function EmailTemplateEditor({
         <Sparkles className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
         <p className="text-muted-foreground">
           <strong className="text-foreground">Tip:</strong> Variables like{" "}
-          <code className="px-1 py-0.5 rounded bg-primary/10 text-primary text-xs">{"{{clientName}}"}</code>{" "}
+          <code className="px-1 py-0.5 rounded bg-primary/10 text-primary text-xs">
+            {"{{clientName}}"}
+          </code>{" "}
           will be automatically replaced with real data when the email is sent.
         </p>
       </div>

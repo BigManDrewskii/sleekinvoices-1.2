@@ -1,14 +1,40 @@
 import { GearLoader } from "@/components/ui/gear-loader";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { getLoginUrl } from "@/const";
 import { trpc } from "@/lib/trpc";
-import { Save, Upload, User, Building2, LogOut, Mail, Bell, Link2, HelpCircle, Cookie, Download, FileJson, Users, FileText, Package, Receipt, Shield, FileArchive } from "lucide-react";
+import {
+  Save,
+  Upload,
+  User,
+  Building2,
+  LogOut,
+  Mail,
+  Bell,
+  Link2,
+  HelpCircle,
+  Cookie,
+  Download,
+  FileJson,
+  Users,
+  FileText,
+  Package,
+  Receipt,
+  Shield,
+  FileArchive,
+} from "lucide-react";
 import { useState, useEffect } from "react";
 import { Switch } from "@/components/ui/switch";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -24,28 +50,33 @@ import { Link } from "wouter";
 
 export default function Settings() {
   const { user, loading, isAuthenticated, logout } = useAuth();
-  const { preferences: cookiePrefs, setPreferences: setCookiePrefs, resetConsent } = useConsent();
-  
+  const {
+    preferences: cookiePrefs,
+    setPreferences: setCookiePrefs,
+    resetConsent,
+  } = useConsent();
+
   // Export format state
-  const [exportFormat, setExportFormat] = useState<'json' | 'csv'>('json');
-  
+  const [exportFormat, setExportFormat] = useState<"json" | "csv">("json");
+
   // Data export mutation
   const exportAllData = trpc.user.exportAllData.useMutation({
-    onSuccess: (data) => {
+    onSuccess: data => {
       // Trigger download
-      const link = document.createElement('a');
+      const link = document.createElement("a");
       link.href = data.url;
-      const ext = data.format === 'csv' ? 'zip' : 'json';
-      link.download = `sleek-invoices-data-export-${new Date().toISOString().split('T')[0]}.${ext}`;
+      const ext = data.format === "csv" ? "zip" : "json";
+      link.download = `sleek-invoices-data-export-${new Date().toISOString().split("T")[0]}.${ext}`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-      toast.success(data.format === 'csv' 
-        ? "Your CSV export (ZIP) is ready and downloading!" 
-        : "Your JSON export is ready and downloading!"
+      toast.success(
+        data.format === "csv"
+          ? "Your CSV export (ZIP) is ready and downloading!"
+          : "Your JSON export is ready and downloading!"
       );
     },
-    onError: (error) => {
+    onError: error => {
       toast.error(error.message || "Failed to export data. Please try again.");
     },
   });
@@ -56,18 +87,20 @@ export default function Settings() {
   const [companyAddress, setCompanyAddress] = useState("");
   const [companyPhone, setCompanyPhone] = useState("");
   const [taxId, setTaxId] = useState("");
-  
+
   // Logo state
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
   const [logoFile, setLogoFile] = useState<File | null>(null);
-  
+
   // Reminder settings state
   const [reminderEnabled, setReminderEnabled] = useState(true);
-  const [reminderIntervals, setReminderIntervals] = useState<number[]>([3, 7, 14]);
+  const [reminderIntervals, setReminderIntervals] = useState<number[]>([
+    3, 7, 14,
+  ]);
   const [reminderSubject, setReminderSubject] = useState("");
   const [reminderTemplate, setReminderTemplate] = useState("");
   const [reminderCcEmail, setReminderCcEmail] = useState("");
-  
+
   // Fetch reminder settings
   const { data: reminderSettings } = trpc.reminders.getSettings.useQuery();
   const updateReminderSettings = trpc.reminders.updateSettings.useMutation({
@@ -75,7 +108,7 @@ export default function Settings() {
       toast.success("Reminder settings saved successfully");
       utils.reminders.getSettings.invalidate();
     },
-    onError: (error) => {
+    onError: error => {
       toast.error(error.message || "Failed to save reminder settings");
     },
   });
@@ -91,7 +124,7 @@ export default function Settings() {
       setLogoPreview(user.logoUrl || null);
     }
   }, [user]);
-  
+
   // Populate reminder settings when they load
   useEffect(() => {
     if (reminderSettings) {
@@ -104,13 +137,13 @@ export default function Settings() {
   }, [reminderSettings]);
 
   const utils = trpc.useUtils();
-  
+
   const updateProfile = trpc.user.updateProfile.useMutation({
     onSuccess: () => {
       toast.success("Profile updated successfully");
       utils.auth.me.invalidate();
     },
-    onError: (error) => {
+    onError: error => {
       toast.error(error.message || "Failed to update profile");
     },
   });
@@ -121,7 +154,7 @@ export default function Settings() {
       utils.auth.me.invalidate();
       setLogoFile(null);
     },
-    onError: (error) => {
+    onError: error => {
       toast.error(error.message || "Failed to upload logo");
     },
   });
@@ -133,7 +166,7 @@ export default function Settings() {
       setReminderIntervals([...reminderIntervals, day].sort((a, b) => a - b));
     }
   };
-  
+
   const handleSaveReminderSettings = () => {
     updateReminderSettings.mutate({
       enabled: reminderEnabled,
@@ -143,7 +176,7 @@ export default function Settings() {
       ccEmail: reminderCcEmail || null,
     });
   };
-  
+
   const handleSaveProfile = () => {
     updateProfile.mutate({
       name,
@@ -161,14 +194,14 @@ export default function Settings() {
         toast.error("Logo must be less than 5MB");
         return;
       }
-      
+
       if (!file.type.startsWith("image/")) {
         toast.error("Please upload an image file");
         return;
       }
 
       setLogoFile(file);
-      
+
       // Create preview
       const reader = new FileReader();
       reader.onloadend = () => {
@@ -199,7 +232,9 @@ export default function Settings() {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="opacity-70"><GearLoader size="md" /></div>
+        <div className="opacity-70">
+          <GearLoader size="md" />
+        </div>
       </div>
     );
   }
@@ -217,7 +252,9 @@ export default function Settings() {
       <div className="page-content page-transition">
         <div className="page-header">
           <h1 className="page-header-title">Settings</h1>
-          <p className="page-header-subtitle">Manage your account, company, and integrations</p>
+          <p className="page-header-subtitle">
+            Manage your account, company, and integrations
+          </p>
         </div>
 
         <Tabs defaultValue="profile" className="space-y-6">
@@ -250,26 +287,30 @@ export default function Settings() {
             <Card>
               <CardHeader>
                 <CardTitle>Profile Avatar</CardTitle>
-                <CardDescription>Choose how you want to be represented in the app</CardDescription>
+                <CardDescription>
+                  Choose how you want to be represented in the app
+                </CardDescription>
               </CardHeader>
               <CardContent>
                 <AvatarSelector
                   currentAvatarUrl={user?.avatarUrl}
-                  currentAvatarType={user?.avatarType || 'initials'}
-                  userName={user?.name || ''}
-                  userEmail={user?.email || ''}
+                  currentAvatarType={user?.avatarType || "initials"}
+                  userName={user?.name || ""}
+                  userEmail={user?.email || ""}
                   onSelect={async (avatarUrl, avatarType) => {
                     await updateProfile.mutateAsync({ avatarUrl, avatarType });
                   }}
-                  onUpload={async (file) => {
+                  onUpload={async file => {
                     const reader = new FileReader();
                     return new Promise((resolve, reject) => {
                       reader.onloadend = async () => {
                         try {
-                          const base64Data = (reader.result as string).split(",")[1];
-                          const response = await fetch('/api/upload/avatar', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
+                          const base64Data = (reader.result as string).split(
+                            ","
+                          )[1];
+                          const response = await fetch("/api/upload/avatar", {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
                             body: JSON.stringify({
                               file: base64Data,
                               userId: user?.id,
@@ -294,7 +335,9 @@ export default function Settings() {
             <Card>
               <CardHeader>
                 <CardTitle>Personal Information</CardTitle>
-                <CardDescription>Your personal details and account information</CardDescription>
+                <CardDescription>
+                  Your personal details and account information
+                </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
@@ -302,7 +345,7 @@ export default function Settings() {
                   <Input
                     id="name"
                     value={name}
-                    onChange={(e) => setName(e.target.value)}
+                    onChange={e => setName(e.target.value)}
                     placeholder="John Doe"
                   />
                 </div>
@@ -360,7 +403,8 @@ export default function Settings() {
               <CardHeader>
                 <CardTitle className="text-destructive">Danger Zone</CardTitle>
                 <CardDescription>
-                  Permanently delete your account and all associated data. This action cannot be undone.
+                  Permanently delete your account and all associated data. This
+                  action cannot be undone.
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -374,7 +418,9 @@ export default function Settings() {
             <Card>
               <CardHeader>
                 <CardTitle>Company Information</CardTitle>
-                <CardDescription>Details that appear on your invoices</CardDescription>
+                <CardDescription>
+                  Details that appear on your invoices
+                </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
@@ -382,7 +428,7 @@ export default function Settings() {
                   <Input
                     id="companyName"
                     value={companyName}
-                    onChange={(e) => setCompanyName(e.target.value)}
+                    onChange={e => setCompanyName(e.target.value)}
                     placeholder="Acme Inc."
                   />
                 </div>
@@ -392,7 +438,7 @@ export default function Settings() {
                   <Textarea
                     id="companyAddress"
                     value={companyAddress}
-                    onChange={(e) => setCompanyAddress(e.target.value)}
+                    onChange={e => setCompanyAddress(e.target.value)}
                     placeholder="123 Main St, City, State, ZIP"
                     rows={3}
                   />
@@ -403,7 +449,7 @@ export default function Settings() {
                   <Input
                     id="companyPhone"
                     value={companyPhone}
-                    onChange={(e) => setCompanyPhone(e.target.value)}
+                    onChange={e => setCompanyPhone(e.target.value)}
                     placeholder="+1 (555) 123-4567"
                   />
                 </div>
@@ -413,7 +459,7 @@ export default function Settings() {
                   <Input
                     id="taxId"
                     value={taxId}
-                    onChange={(e) => setTaxId(e.target.value)}
+                    onChange={e => setTaxId(e.target.value)}
                     placeholder="e.g., DE123456789 or EIN: 12-3456789"
                   />
                   <p className="text-sm text-muted-foreground">
@@ -446,7 +492,9 @@ export default function Settings() {
             <Card>
               <CardHeader>
                 <CardTitle>Company Logo</CardTitle>
-                <CardDescription>Upload your company logo to appear on invoices</CardDescription>
+                <CardDescription>
+                  Upload your company logo to appear on invoices
+                </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex items-center gap-6">
@@ -507,13 +555,18 @@ export default function Settings() {
             <Card>
               <CardHeader>
                 <CardTitle>Email Reminder Settings</CardTitle>
-                <CardDescription>Automatically send payment reminders to clients with overdue invoices</CardDescription>
+                <CardDescription>
+                  Automatically send payment reminders to clients with overdue
+                  invoices
+                </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
                 {/* Enable/Disable */}
                 <div className="flex items-center justify-between">
                   <div className="space-y-0.5">
-                    <Label htmlFor="reminderEnabled">Enable Automated Reminders</Label>
+                    <Label htmlFor="reminderEnabled">
+                      Enable Automated Reminders
+                    </Label>
                     <p className="text-sm text-muted-foreground">
                       Send automatic email reminders for overdue invoices
                     </p>
@@ -524,7 +577,7 @@ export default function Settings() {
                     onCheckedChange={setReminderEnabled}
                   />
                 </div>
-                
+
                 {/* Reminder Intervals */}
                 <div className="space-y-3">
                   <Label>Reminder Intervals</Label>
@@ -537,7 +590,9 @@ export default function Settings() {
                         <Checkbox
                           id={`interval-${day}`}
                           checked={reminderIntervals.includes(day)}
-                          onCheckedChange={() => handleReminderIntervalToggle(day)}
+                          onCheckedChange={() =>
+                            handleReminderIntervalToggle(day)
+                          }
                           disabled={!reminderEnabled}
                         />
                         <label
@@ -555,23 +610,25 @@ export default function Settings() {
                     </p>
                   )}
                 </div>
-                
+
                 {/* CC Email */}
                 <div className="space-y-2">
-                  <Label htmlFor="reminderCcEmail">CC Email Address (Optional)</Label>
+                  <Label htmlFor="reminderCcEmail">
+                    CC Email Address (Optional)
+                  </Label>
                   <Input
                     id="reminderCcEmail"
                     type="email"
                     placeholder="accounting@yourcompany.com"
                     value={reminderCcEmail}
-                    onChange={(e) => setReminderCcEmail(e.target.value)}
+                    onChange={e => setReminderCcEmail(e.target.value)}
                     disabled={!reminderEnabled}
                   />
                   <p className="text-sm text-muted-foreground">
                     Receive a copy of all reminder emails sent to clients
                   </p>
                 </div>
-                
+
                 {/* Email Template - New Visual Editor */}
                 <EmailTemplateEditor
                   label="Email Template"
@@ -582,12 +639,15 @@ export default function Settings() {
                   disabled={!reminderEnabled}
                   description="Customize the reminder email sent to clients. Choose a template to get started, then personalize it."
                 />
-                
+
                 {/* Save Button */}
                 <div className="flex justify-end pt-4">
                   <Button
                     onClick={handleSaveReminderSettings}
-                    disabled={updateReminderSettings.isPending || (reminderEnabled && reminderIntervals.length === 0)}
+                    disabled={
+                      updateReminderSettings.isPending ||
+                      (reminderEnabled && reminderIntervals.length === 0)
+                    }
                   >
                     {updateReminderSettings.isPending ? (
                       <>
@@ -617,7 +677,8 @@ export default function Settings() {
               <CardHeader>
                 <CardTitle>Contact Support</CardTitle>
                 <CardDescription>
-                  Need help? Our support team is here to assist you with any questions or issues.
+                  Need help? Our support team is here to assist you with any
+                  questions or issues.
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
@@ -669,8 +730,9 @@ export default function Settings() {
                     Response Time
                   </h4>
                   <p className="text-sm text-muted-foreground">
-                    We typically respond to support requests within 24 hours during business days.
-                    For urgent issues, please mark your email as "URGENT" in the subject line.
+                    We typically respond to support requests within 24 hours
+                    during business days. For urgent issues, please mark your
+                    email as "URGENT" in the subject line.
                   </p>
                 </div>
               </CardContent>
@@ -693,98 +755,146 @@ export default function Settings() {
               </CardHeader>
               <CardContent className="space-y-4">
                 <p className="text-sm text-muted-foreground">
-                  Under GDPR and other privacy regulations, you have the right to receive a copy of all your personal data. 
-                  Choose your preferred format and download a complete export of your data.
+                  Under GDPR and other privacy regulations, you have the right
+                  to receive a copy of all your personal data. Choose your
+                  preferred format and download a complete export of your data.
                 </p>
-                
+
                 {/* Format Selector */}
                 <div className="space-y-2">
                   <Label className="text-sm font-medium">Export Format</Label>
                   <div className="grid grid-cols-2 gap-3">
                     <button
                       type="button"
-                      onClick={() => setExportFormat('json')}
+                      onClick={() => setExportFormat("json")}
                       className={`flex items-center gap-3 p-4 rounded-lg border-2 transition-all ${
-                        exportFormat === 'json'
-                          ? 'border-emerald-500 bg-emerald-500/10'
-                          : 'border-border bg-accent/5 hover:border-muted-foreground/30'
+                        exportFormat === "json"
+                          ? "border-emerald-500 bg-emerald-500/10"
+                          : "border-border bg-accent/5 hover:border-muted-foreground/30"
                       }`}
                     >
-                      <FileJson className={`h-5 w-5 ${exportFormat === 'json' ? 'text-emerald-500' : 'text-muted-foreground'}`} />
+                      <FileJson
+                        className={`h-5 w-5 ${exportFormat === "json" ? "text-emerald-500" : "text-muted-foreground"}`}
+                      />
                       <div className="text-left">
-                        <p className={`text-sm font-medium ${exportFormat === 'json' ? 'text-emerald-500' : 'text-foreground'}`}>JSON</p>
-                        <p className="text-xs text-muted-foreground">Single file, nested data</p>
+                        <p
+                          className={`text-sm font-medium ${exportFormat === "json" ? "text-emerald-500" : "text-foreground"}`}
+                        >
+                          JSON
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          Single file, nested data
+                        </p>
                       </div>
                     </button>
                     <button
                       type="button"
-                      onClick={() => setExportFormat('csv')}
+                      onClick={() => setExportFormat("csv")}
                       className={`flex items-center gap-3 p-4 rounded-lg border-2 transition-all ${
-                        exportFormat === 'csv'
-                          ? 'border-emerald-500 bg-emerald-500/10'
-                          : 'border-border bg-accent/5 hover:border-muted-foreground/30'
+                        exportFormat === "csv"
+                          ? "border-emerald-500 bg-emerald-500/10"
+                          : "border-border bg-accent/5 hover:border-muted-foreground/30"
                       }`}
                     >
-                      <FileArchive className={`h-5 w-5 ${exportFormat === 'csv' ? 'text-emerald-500' : 'text-muted-foreground'}`} />
+                      <FileArchive
+                        className={`h-5 w-5 ${exportFormat === "csv" ? "text-emerald-500" : "text-muted-foreground"}`}
+                      />
                       <div className="text-left">
-                        <p className={`text-sm font-medium ${exportFormat === 'csv' ? 'text-emerald-500' : 'text-foreground'}`}>CSV (ZIP)</p>
-                        <p className="text-xs text-muted-foreground">Spreadsheet-ready</p>
+                        <p
+                          className={`text-sm font-medium ${exportFormat === "csv" ? "text-emerald-500" : "text-foreground"}`}
+                        >
+                          CSV (ZIP)
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          Spreadsheet-ready
+                        </p>
                       </div>
                     </button>
                   </div>
                 </div>
-                
+
                 {/* Data Categories */}
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                  <div className="flex items-center gap-2 p-3 rounded-lg border border-border bg-accent/5">
-                    <User className="h-4 w-4 text-muted-foreground" />
-                    <span className="text-sm">Profile</span>
+                  <div className="flex items-center gap-3 p-4 rounded-lg border border-border bg-accent/5">
+                    <div className="p-1.5 rounded-md bg-muted/60">
+                      <User className="h-4 w-4 text-muted-foreground" />
+                    </div>
+                    <span className="text-sm font-medium">Profile</span>
                   </div>
-                  <div className="flex items-center gap-2 p-3 rounded-lg border border-border bg-accent/5">
-                    <FileText className="h-4 w-4 text-muted-foreground" />
-                    <span className="text-sm">Invoices</span>
+                  <div className="flex items-center gap-3 p-4 rounded-lg border border-border bg-accent/5">
+                    <div className="p-1.5 rounded-md bg-muted/60">
+                      <FileText className="h-4 w-4 text-muted-foreground" />
+                    </div>
+                    <span className="text-sm font-medium">Invoices</span>
                   </div>
-                  <div className="flex items-center gap-2 p-3 rounded-lg border border-border bg-accent/5">
-                    <Users className="h-4 w-4 text-muted-foreground" />
-                    <span className="text-sm">Clients</span>
+                  <div className="flex items-center gap-3 p-4 rounded-lg border border-border bg-accent/5">
+                    <div className="p-1.5 rounded-md bg-muted/60">
+                      <Users className="h-4 w-4 text-muted-foreground" />
+                    </div>
+                    <span className="text-sm font-medium">Clients</span>
                   </div>
-                  <div className="flex items-center gap-2 p-3 rounded-lg border border-border bg-accent/5">
-                    <Receipt className="h-4 w-4 text-muted-foreground" />
-                    <span className="text-sm">Expenses</span>
+                  <div className="flex items-center gap-3 p-4 rounded-lg border border-border bg-accent/5">
+                    <div className="p-1.5 rounded-md bg-muted/60">
+                      <Receipt className="h-4 w-4 text-muted-foreground" />
+                    </div>
+                    <span className="text-sm font-medium">Expenses</span>
                   </div>
-                  <div className="flex items-center gap-2 p-3 rounded-lg border border-border bg-accent/5">
-                    <Package className="h-4 w-4 text-muted-foreground" />
-                    <span className="text-sm">Products</span>
+                  <div className="flex items-center gap-3 p-4 rounded-lg border border-border bg-accent/5">
+                    <div className="p-1.5 rounded-md bg-muted/60">
+                      <Package className="h-4 w-4 text-muted-foreground" />
+                    </div>
+                    <span className="text-sm font-medium">Products</span>
                   </div>
-                  <div className="flex items-center gap-2 p-3 rounded-lg border border-border bg-accent/5">
-                    <Mail className="h-4 w-4 text-muted-foreground" />
-                    <span className="text-sm">Email Logs</span>
+                  <div className="flex items-center gap-3 p-4 rounded-lg border border-border bg-accent/5">
+                    <div className="p-1.5 rounded-md bg-muted/60">
+                      <Mail className="h-4 w-4 text-muted-foreground" />
+                    </div>
+                    <span className="text-sm font-medium">Email Logs</span>
                   </div>
                 </div>
 
                 {/* Download Button */}
                 <div className="pt-2">
                   <Button
-                    onClick={() => exportAllData.mutate({ format: exportFormat })}
+                    onClick={() =>
+                      exportAllData.mutate({ format: exportFormat })
+                    }
                     disabled={exportAllData.isPending}
                     className="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700"
                   >
                     {exportAllData.isPending ? (
                       <>
-                        <svg className="animate-spin -ml-1 mr-2 h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        <svg
+                          className="animate-spin -ml-1 mr-2 h-4 w-4"
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                        >
+                          <circle
+                            className="opacity-25"
+                            cx="12"
+                            cy="12"
+                            r="10"
+                            stroke="currentColor"
+                            strokeWidth="4"
+                          ></circle>
+                          <path
+                            className="opacity-75"
+                            fill="currentColor"
+                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                          ></path>
                         </svg>
                         Preparing Export...
                       </>
                     ) : (
                       <>
-                        {exportFormat === 'csv' ? (
+                        {exportFormat === "csv" ? (
                           <FileArchive className="h-4 w-4 mr-2" />
                         ) : (
                           <FileJson className="h-4 w-4 mr-2" />
                         )}
-                        Download My Data ({exportFormat === 'csv' ? 'CSV ZIP' : 'JSON'})
+                        Download My Data (
+                        {exportFormat === "csv" ? "CSV ZIP" : "JSON"})
                       </>
                     )}
                   </Button>
@@ -794,12 +904,13 @@ export default function Settings() {
                 <div className="rounded-lg bg-muted/50 p-4 flex items-start gap-3">
                   <Shield className="h-5 w-5 text-muted-foreground flex-shrink-0 mt-0.5" />
                   <div className="text-sm text-muted-foreground">
-                    <p className="font-medium text-foreground mb-1">Your data, your rights</p>
+                    <p className="font-medium text-foreground mb-1">
+                      Your data, your rights
+                    </p>
                     <p>
-                      {exportFormat === 'csv' 
-                        ? 'CSV export creates a ZIP file with separate spreadsheets for each data category (profile, invoices, clients, etc.). Perfect for Excel or Google Sheets.'
-                        : 'JSON export creates a single file with all your data in a structured format. Ideal for developers or data portability.'
-                      }
+                      {exportFormat === "csv"
+                        ? "CSV export creates a ZIP file with separate spreadsheets for each data category (profile, invoices, clients, etc.). Perfect for Excel or Google Sheets."
+                        : "JSON export creates a single file with all your data in a structured format. Ideal for developers or data portability."}
                     </p>
                   </div>
                 </div>
@@ -824,32 +935,48 @@ export default function Settings() {
               <CardContent className="space-y-4">
                 {/* Essential Cookies */}
                 <div className="flex items-start gap-4 p-4 rounded-lg border border-border bg-accent/5">
-                  <Switch checked={true} disabled className="mt-1" aria-label="Essential cookies (required)" />
+                  <Switch
+                    checked={true}
+                    disabled
+                    className="mt-1"
+                    aria-label="Essential cookies (required)"
+                  />
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-1">
-                      <h4 className="font-semibold text-sm text-foreground">Essential Cookies</h4>
-                      <span className="text-xs px-2 py-0.5 rounded-full bg-primary/10 text-primary font-medium">
+                      <h4 className="font-semibold text-sm text-foreground">
+                        Essential Cookies
+                      </h4>
+                      <span className="text-xs px-2.5 py-1 rounded-full bg-primary/10 text-primary font-medium">
                         Required
                       </span>
                     </div>
                     <p className="text-sm text-muted-foreground">
-                      Required for authentication, security, and core functionality. These cannot be disabled.
+                      Required for authentication, security, and core
+                      functionality. These cannot be disabled.
                     </p>
                   </div>
                 </div>
 
                 {/* Functional Cookies */}
                 <div className="flex items-start gap-4 p-4 rounded-lg border border-border bg-accent/5">
-                  <Switch checked={true} disabled className="mt-1" aria-label="Functional cookies (required)" />
+                  <Switch
+                    checked={true}
+                    disabled
+                    className="mt-1"
+                    aria-label="Functional cookies (required)"
+                  />
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-1">
-                      <h4 className="font-semibold text-sm text-foreground">Functional Cookies</h4>
-                      <span className="text-xs px-2 py-0.5 rounded-full bg-primary/10 text-primary font-medium">
+                      <h4 className="font-semibold text-sm text-foreground">
+                        Functional Cookies
+                      </h4>
+                      <span className="text-xs px-2.5 py-1 rounded-full bg-primary/10 text-primary font-medium">
                         Required
                       </span>
                     </div>
                     <p className="text-sm text-muted-foreground">
-                      Remember your preferences like theme and onboarding progress. These improve your experience.
+                      Remember your preferences like theme and onboarding
+                      progress. These improve your experience.
                     </p>
                   </div>
                 </div>
@@ -858,7 +985,7 @@ export default function Settings() {
                 <div className="flex items-start gap-4 p-4 rounded-lg border border-border hover:bg-accent/5 transition-colors">
                   <Switch
                     checked={cookiePrefs.analytics}
-                    onCheckedChange={(checked) => {
+                    onCheckedChange={checked => {
                       setCookiePrefs({ analytics: checked });
                       toast.success(
                         checked
@@ -871,14 +998,15 @@ export default function Settings() {
                   />
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-1">
-                      <h4 className="font-semibold text-sm text-foreground">Analytics Cookies</h4>
-                      <span className="text-xs px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-500 font-medium">
-                        Optional
-                      </span>
+                      <h4 className="font-semibold text-sm text-foreground">
+                        Analytics Cookies
+                      </h4>
+                      <Badge variant="info">Optional</Badge>
                     </div>
                     <p className="text-sm text-muted-foreground">
-                      Help us understand how you use SleekInvoices with privacy-respecting analytics.
-                      Only anonymized usage patterns - no personal data.
+                      Help us understand how you use SleekInvoices with
+                      privacy-respecting analytics. Only anonymized usage
+                      patterns - no personal data.
                     </p>
                   </div>
                 </div>
@@ -893,10 +1021,10 @@ export default function Settings() {
                   />
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-1">
-                      <h4 className="font-semibold text-sm text-foreground">Marketing Cookies</h4>
-                      <span className="text-xs px-2 py-0.5 rounded-full bg-muted text-muted-foreground font-medium">
-                        Not Used
-                      </span>
+                      <h4 className="font-semibold text-sm text-foreground">
+                        Marketing Cookies
+                      </h4>
+                      <Badge variant="neutral">Not Used</Badge>
                     </div>
                     <p className="text-sm text-muted-foreground">
                       We don't use any marketing or advertising cookies.
@@ -910,7 +1038,9 @@ export default function Settings() {
                     variant="outline"
                     onClick={() => {
                       resetConsent();
-                      toast.info("Cookie preferences reset. The consent banner will appear on next page load.");
+                      toast.info(
+                        "Cookie preferences reset. The consent banner will appear on next page load."
+                      );
                     }}
                     className="w-full sm:w-auto"
                   >

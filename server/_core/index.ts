@@ -1,5 +1,8 @@
-import "dotenv/config";
+import dotenv from "dotenv";
 import express from "express";
+
+// Load .env.local for local development
+dotenv.config({ path: ".env.local" });
 import { createServer } from "http";
 import net from "net";
 import { createExpressMiddleware } from "@trpc/server/adapters/express";

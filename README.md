@@ -1,26 +1,30 @@
 # SleekInvoices - Professional Invoice Generator
 
-A modern, elegant invoice generator built to compete with FreshBooks, offering 80% cost savings with superior UX.
+A modern, elegant invoice generator built to compete with FreshBooks, offering superior UX with a focus on simplicity and value.
 
 ## 🎯 Project Vision
 
 **Goal:** Create a cheaper, faster, more elegant alternative to FreshBooks for freelancers and small businesses.
 
 **Target Pricing:**
+
 - Free: 3 invoices/month
 - Pro: $12/month (vs. FreshBooks $15-65/month)
 
 **Competitive Advantages:**
+
 - 80% cheaper than FreshBooks
 - Native Stripe integration (no separate accounts)
 - Modern, fast, elegant UI
 - Simple and focused (no bloat)
 - Easy cancellation (no lock-in)
+- AI-powered invoice creation and categorization
 
 ## 🏗️ Architecture
 
 ### Tech Stack
-- **Frontend:** React 19 + TypeScript + TailwindCSS 4
+
+- **Frontend:** React 19 + TypeScript + TailwindCSS 4 + Vite
 - **Backend:** Express + tRPC 11 + Drizzle ORM
 - **Database:** MySQL/TiDB
 - **Payments:** Stripe (payment links + subscriptions)
@@ -28,151 +32,114 @@ A modern, elegant invoice generator built to compete with FreshBooks, offering 8
 - **Email:** Resend
 - **Storage:** S3 (for PDFs and logos)
 - **Auth:** Manus OAuth
+- **AI:** OpenAI integration for smart invoice creation
 
-### Database Schema
+### Database Schema (43 tables)
 
-**Tables:**
+**Core Tables:**
+
 - `users` - User accounts with company info and subscription status
 - `clients` - Client database for invoice recipients
 - `invoices` - Invoice records with financial calculations
 - `invoiceLineItems` - Line items for each invoice
-- `emailLog` - Email sending history
+- `estimates` - Quote and proposal records
+- `recurringInvoices` - Automated recurring billing
+- `expenses` - Business expense tracking
+- `products` - Products & services catalog
 
-**Key Features:**
-- Auto-incrementing invoice numbers
-- Tax and discount calculations
-- Status tracking (draft, sent, paid, overdue, canceled)
-- Stripe payment link integration
-- Email tracking
+**Supporting Tables:**
+
+- `emailLog` - Email sending history with delivery tracking
+- `reminderLogs` - Payment reminder history
+- `auditLogs` - User action audit trail
+- `aiCredits` - AI feature usage credits
+- `aiUsageLogs` - AI feature usage tracking
+- `invoiceTemplates` - PDF template designs
+- `clientPortalAccess` - Client portal access tokens
+
+**Integration Tables:**
+
+- `stripeCustomers` - Stripe customer records
+- `stripeSubscriptions` - Subscription records
+- `stripeInvoices` - Stripe invoice references
+- `quickbooksTokens` - QuickBooks sync tokens
 
 ## ✅ What's Implemented
 
-### Backend (100% Complete)
+### Backend (90% Complete)
 
 **Database Layer (`server/db.ts`):**
+
 - ✅ User management (upsert, get by ID/OpenID)
-- ✅ Client CRUD operations
-- ✅ Invoice CRUD operations
-- ✅ Line item management
-- ✅ Analytics queries (stats, monthly revenue)
-- ✅ Email logging
+- ✅ Client CRUD operations with existence validation
+- ✅ Invoice CRUD operations with existence checks
+- ✅ Estimate CRUD operations
+- ✅ Recurring invoice CRUD operations
+- ✅ Expense CRUD operations with tax deductibility tracking
+- ✅ Product/service catalog management
+- ✅ Analytics queries (stats, monthly revenue, top clients)
+- ✅ Email logging with delivery tracking
+- ✅ Reminder system with automated schedules
+- ✅ AI credits and usage tracking
+- ✅ Audit logging for all actions
 
 **API Layer (`server/routers.ts`):**
+
 - ✅ Auth routes (me, logout)
-- ✅ User routes (profile, update, logo upload)
+- ✅ User routes (profile, update, logo upload, subscription)
 - ✅ Client routes (list, get, create, update, delete)
 - ✅ Invoice routes (list, get, create, update, delete, generate PDF, create payment link, send email, send reminder)
-- ✅ Analytics routes (stats, monthly revenue)
+- ✅ Estimate routes (list, get, create, update, delete, convert to invoice)
+- ✅ Recurring invoice routes (list, get, create, update, delete, pause/resume)
+- ✅ Expense routes (list, get, create, update, delete, categorize)
+- ✅ Product routes (list, get, create, update, delete)
+- ✅ Email history routes (list with filters)
+- ✅ Reminder routes (get logs, create, update, delete)
+- ✅ Analytics routes (stats, monthly revenue, dashboard metrics)
 - ✅ Subscription routes (status, create checkout, customer portal)
 
 **Utilities:**
-- ✅ Stripe integration (`server/stripe.ts`) - Payment links, subscriptions, customer portal
-- ✅ PDF generation (`server/pdf.ts`) - Professional invoice templates
-- ✅ Email sending (`server/email.ts`) - Invoice emails and payment reminders
 
-### Frontend (30% Complete)
+- ✅ Stripe integration - Payment links, subscriptions, customer portal
+- ✅ PDF generation - Professional invoice templates with custom branding
+- ✅ Email sending - Invoice emails, payment reminders via Resend
+- ✅ AI integration - Smart invoice creation and expense categorization
+- ✅ QuickBooks sync - OAuth-based accounting integration
 
-**Completed:**
-- ✅ Landing page with pricing
-- ✅ Dashboard with stats and recent invoices
-- ✅ Navigation structure
-- ✅ Routing setup
+### Frontend (75% Complete)
+
+**Completed Pages:**
+
+- ✅ Dashboard with stats, monthly usage, quick actions
+- ✅ Invoices list with filters, search, and bulk actions
+- ✅ Create Invoice with guided wizard and standard form
+- ✅ Edit Invoice with all fields
+- ✅ View Invoice with PDF, email, payment link actions
+- ✅ Estimates list with status tracking
+- ✅ Create Estimate and Edit Estimate
+- ✅ Recurring Invoices management with pause/resume
+- ✅ Payments tracking with Stripe integration
+- ✅ Clients list with quick actions
+- ✅ Client detail view with invoice history
+- ✅ Expenses tracking with categorization
+- ✅ Products catalog management
+- ✅ Analytics with revenue charts
+- ✅ Email History with delivery status
+- ✅ Templates gallery
+- ✅ Settings (profile, company, branding)
+- ✅ Subscription management
+- ✅ Docs and FAQ pages
+
+**Components:**
+
+- ✅ Navigation with responsive design
+- ✅ Data tables with sorting and filtering
+- ✅ Form components with validation
+- ✅ Modal dialogs
+- ✅ Toast notifications
 - ✅ Theme system (light/dark)
-- ✅ Status badge styles
-
-**Stub Pages (Need Implementation):**
-- ⏳ Clients page (list, create, edit, delete)
-- ⏳ Invoices page (list with filters)
-- ⏳ Create Invoice page (form with line items)
-- ⏳ Edit Invoice page
-- ⏳ View Invoice page (with actions: PDF, email, payment link)
-- ⏳ Analytics page (charts and metrics)
-- ⏳ Settings page (profile, company info, logo)
-- ⏳ Subscription page (upgrade, manage)
-
-## 📋 Next Steps
-
-### Phase 1: Core Invoice Management (4-6 hours)
-
-**1. Clients Page**
-- List all clients with search
-- Create/edit client modal
-- Delete confirmation
-- Link to client's invoices
-
-**2. Invoices List Page**
-- Table view with filters (status, date range)
-- Search by invoice number or client
-- Quick actions (view, edit, delete, send)
-- Status badges
-
-**3. Create Invoice Page**
-- Client selection (with "Create New" option)
-- Dynamic line items (add/remove rows)
-- Tax rate input (percentage)
-- Discount input (percentage or fixed)
-- Auto-calculation of totals
-- Notes and payment terms
-- Save as draft or send immediately
-
-**4. View Invoice Page**
-- Display invoice details
-- Actions: Download PDF, Send Email, Create Payment Link, Send Reminder
-- Show payment status
-- Display email history
-- Edit and delete options
-
-**5. Edit Invoice Page**
-- Reuse create invoice form
-- Pre-populate with existing data
-- Update calculations on change
-
-### Phase 2: Analytics & Settings (2-3 hours)
-
-**6. Analytics Page**
-- Revenue overview cards
-- Monthly revenue chart (using Recharts)
-- Invoice status breakdown
-- Top clients by revenue
-- Overdue invoices list
-
-**7. Settings Page**
-- Profile section (name, email)
-- Company info (name, address, phone)
-- Logo upload (with preview)
-- Branding customization
-- Account deletion
-
-**8. Subscription Page**
-- Current plan display
-- Usage stats (invoices this month)
-- Upgrade to Pro button
-- Manage subscription (customer portal link)
-- Billing history
-
-### Phase 3: Polish & Testing (2-3 hours)
-
-**9. Error Handling**
-- Toast notifications for all actions
-- Form validation with error messages
-- Loading states for all async operations
-- Empty states with helpful CTAs
-
-**10. Responsive Design**
-- Mobile navigation (hamburger menu)
-- Responsive tables (card view on mobile)
-- Touch-friendly buttons and forms
-
-**11. Testing**
-- Unit tests for critical backend functions
-- Integration tests for invoice creation flow
-- Manual testing of all features
-- Cross-browser testing
-
-**12. Documentation**
-- User guide
-- API documentation
-- Deployment instructions
+- ✅ Status badges
+- ✅ User avatar and menu
 
 ## 🚀 Quick Start
 
@@ -185,76 +152,94 @@ pnpm install
 # Run database migrations
 pnpm db:push
 
+# Seed database with test data (optional)
+node scripts/seed-complete.mjs
+
 # Start dev server
 pnpm dev
 ```
 
+### Commands
+
+```bash
+pnpm dev          # Start development server
+pnpm build        # Build for production
+pnpm start        # Start production server
+pnpm check        # Type checking
+pnpm format       # Format code with Prettier
+pnpm db:push      # Sync schema changes
+pnpm db:audit     # Audit database schema
+pnpm db:sync      # Sync schema (development)
+pnpm db:reset     # Reset user data
+pnpm seed         # Seed database
+pnpm test         # Run tests
+```
+
 ### Environment Variables
 
-Required secrets (already configured):
+Required secrets:
+
 - `STRIPE_SECRET_KEY` - Stripe API key
 - `STRIPE_PUBLISHABLE_KEY` - Stripe publishable key
 - `STRIPE_WEBHOOK_SECRET` - Stripe webhook secret
-- `RESEND_API_KEY` - Resend email API key (optional, for email sending)
+- `RESEND_API_KEY` - Resend email API key
+- `OPENAI_API_KEY` - OpenAI API key for AI features
 
 System-provided:
+
 - `DATABASE_URL` - MySQL connection string
 - `JWT_SECRET` - Session signing secret
 - `VITE_APP_ID` - OAuth app ID
 - `OAUTH_SERVER_URL` - OAuth backend URL
 
-### Testing
-
-```bash
-# Run tests
-pnpm test
-
-# Type checking
-pnpm check
-```
-
 ## 📁 Project Structure
 
 ```
-invoice-generator/
-├── client/
-│   ├── src/
-│   │   ├── pages/           # Page components
-│   │   ├── components/      # Reusable UI components
-│   │   ├── lib/            # Utilities (tRPC client)
-│   │   ├── App.tsx         # Routes
-│   │   └── index.css       # Global styles
-│   └── public/             # Static assets
+sleekinvoices/
+├── client/src/
+│   ├── pages/              # Page components (Dashboard, Invoices, etc.)
+│   ├── components/         # Reusable UI components
+│   ├── lib/                # Utilities (tRPC client, utils)
+│   ├── contexts/           # React contexts
+│   ├── _core/              # Core hooks and utilities
+│   └── styles/             # CSS styles and design system
 ├── server/
 │   ├── routers.ts          # tRPC API routes
-│   ├── db.ts               # Database queries
+│   ├── db.ts               # Database queries and utilities
 │   ├── stripe.ts           # Stripe integration
 │   ├── pdf.ts              # PDF generation
 │   ├── email.ts            # Email sending
-│   └── _core/              # Framework code
+│   ├── _core/              # Framework code (tRPC, auth)
+│   └── routers/            # Route handlers
 ├── drizzle/
 │   └── schema.ts           # Database schema
 ├── shared/                 # Shared types
-└── todo.md                 # Feature tracking
+├── scripts/
+│   └── seed-complete.mjs   # Database seeding script
+└── AGENTS.md               # AI agent guidelines
 ```
 
 ## 🎨 Design System
 
+**Spacing System:**
+
+- Consistent spacing tokens (px-2 through px-7, py-1 through py-6)
+- gap-1 through gap-5 for component gaps
+- space-y-1.5 through space-y-6 for vertical rhythm
+
+**Component Standards:**
+
+- Cards: `p-5 md:p-6` with `px-0` for header/content
+- Modals: `px-5 md:px-7` for content, `py-5` for body
+- Forms: `space-y-5` for vertical spacing
+- Buttons: minimum 44px touch targets
+- Tables: responsive with card view on mobile
+
 **Colors:**
-- Primary: Professional blue (`oklch(50% 0.15 250)`)
+
+- Primary: Professional indigo
 - Background: Clean white/dark gray
-- Accent: Subtle blues and grays
-
-**Typography:**
-- Font: System font stack
-- Headings: Bold, tight tracking
-- Body: Regular, comfortable line height
-
-**Components:**
-- Cards with subtle shadows
-- Rounded corners (0.5rem)
-- Status badges with semantic colors
-- Smooth transitions and animations
+- Status: Semantic colors (success, warning, error, info)
 
 ## 🔐 Security
 
@@ -264,58 +249,48 @@ invoice-generator/
 - XSS protection (React escaping)
 - CSRF protection (SameSite cookies)
 - Stripe webhook signature verification
+- Input validation with Zod schemas
+- Protected procedures for authenticated routes
 
 ## 📊 Business Model
 
 **Free Tier:**
+
 - 3 invoices per month
 - All core features
-- Lead generation funnel
+- AI invoice creation (limited)
+- Basic templates
 
 **Pro Tier ($12/month):**
+
 - Unlimited invoices
 - Unlimited clients
 - Stripe payment links
 - Auto reminders
 - Custom branding
+- Full AI features
 - Priority support
-
-**Revenue Projections:**
-- Month 1: 50 users × $12 = $600 MRR
-- Month 3: 200 users × $12 = $2,400 MRR
-- Month 6: 500 users × $12 = $6,000 MRR
-- Month 12: 1,000 users × $12 = $12,000 MRR
+- QuickBooks sync
 
 ## 🎯 Success Metrics
 
 **Product Metrics:**
+
 - Time to first invoice: < 5 minutes
 - Invoice send success rate: > 95%
 - Payment link conversion: > 30%
 - User retention (30-day): > 60%
 
 **Business Metrics:**
+
 - Free to paid conversion: > 10%
 - Churn rate: < 5% monthly
 - Customer acquisition cost: < $50
 - Lifetime value: > $500
 
-## 🚢 Deployment
-
-The app is deployed on Manus platform with:
-- Automatic SSL certificates
-- Custom domain support
-- Zero-downtime deployments
-- Automatic backups
-- Built-in analytics
-
-## 📝 License
-
-Proprietary - All rights reserved
-
 ## 🤝 Contributing
 
-This is a solo project built to compete in the invoice generator market. Not accepting contributions at this time.
+This is a solo project. Not accepting contributions at this time.
 
 ---
 

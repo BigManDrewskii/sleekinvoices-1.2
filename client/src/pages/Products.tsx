@@ -40,7 +40,13 @@ import {
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 
 import { toast } from "sonner";
 import {
@@ -51,7 +57,7 @@ import {
   Package,
   DollarSign,
   Tag,
-  BarChart3
+  BarChart3,
 } from "lucide-react";
 import { PageLayout } from "@/components/layout/PageLayout";
 import { ProductsPageSkeleton, Skeleton } from "@/components/skeletons";
@@ -103,7 +109,10 @@ export default function Products() {
   const [pageSize, setPageSize] = useState(25);
 
   // Sorting
-  const { sort, handleSort, sortData } = useTableSort({ defaultKey: "name", defaultDirection: "asc" });
+  const { sort, handleSort, sortData } = useTableSort({
+    defaultKey: "name",
+    defaultDirection: "asc",
+  });
 
   // Form state
   const [formData, setFormData] = useState({
@@ -116,7 +125,11 @@ export default function Products() {
     taxable: true,
   });
 
-  const { data: products, isLoading, refetch } = trpc.products.list.useQuery(
+  const {
+    data: products,
+    isLoading,
+    refetch,
+  } = trpc.products.list.useQuery(
     { includeInactive: showInactive },
     { enabled: !!user }
   );
@@ -128,7 +141,7 @@ export default function Products() {
       resetForm();
       refetch();
     },
-    onError: (error) => {
+    onError: error => {
       toast.error(error.message || "Failed to create product");
     },
   });
@@ -140,7 +153,7 @@ export default function Products() {
       setSelectedProduct(null);
       refetch();
     },
-    onError: (error) => {
+    onError: error => {
       toast.error(error.message || "Failed to update product");
     },
   });
@@ -151,31 +164,38 @@ export default function Products() {
     onSuccess: () => {
       // Success is silent since the item is already removed from UI
     },
-    onError: (error) => {
+    onError: error => {
       refetch();
-      toast.error(error.message || "Failed to archive product. Item has been restored.");
+      toast.error(
+        error.message || "Failed to archive product. Item has been restored."
+      );
     },
   });
 
   const { executeDelete } = useUndoableDelete();
 
   const handleUndoableDelete = (product: Product) => {
-    const previousProducts = utils.products.list.getData({ includeInactive: showInactive });
+    const previousProducts = utils.products.list.getData({
+      includeInactive: showInactive,
+    });
 
     executeDelete({
       item: product,
       itemName: product.name,
       itemType: "product",
       onOptimisticDelete: () => {
-        utils.products.list.setData({ includeInactive: showInactive }, (old) =>
-          old?.filter((p) => p.id !== product.id)
+        utils.products.list.setData({ includeInactive: showInactive }, old =>
+          old?.filter(p => p.id !== product.id)
         );
         setIsDeleteDialogOpen(false);
         setSelectedProduct(null);
       },
       onRestore: () => {
         if (previousProducts) {
-          utils.products.list.setData({ includeInactive: showInactive }, previousProducts);
+          utils.products.list.setData(
+            { includeInactive: showInactive },
+            previousProducts
+          );
         } else {
           refetch();
         }
@@ -261,11 +281,12 @@ export default function Products() {
     // Search filter
     if (searchQuery) {
       const searchLower = searchQuery.toLowerCase();
-      result = result.filter((product) =>
-        product.name.toLowerCase().includes(searchLower) ||
-        product.description?.toLowerCase().includes(searchLower) ||
-        product.sku?.toLowerCase().includes(searchLower) ||
-        product.category?.toLowerCase().includes(searchLower)
+      result = result.filter(
+        product =>
+          product.name.toLowerCase().includes(searchLower) ||
+          product.description?.toLowerCase().includes(searchLower) ||
+          product.sku?.toLowerCase().includes(searchLower) ||
+          product.category?.toLowerCase().includes(searchLower)
       );
     }
 
@@ -282,20 +303,28 @@ export default function Products() {
     // Date range filter (by createdAt)
     if (dateRange !== "all") {
       const now = new Date();
-      result = result.filter((product) => {
+      result = result.filter(product => {
         const productDate = new Date(product.createdAt);
 
         switch (dateRange) {
           case "today":
             return productDate.toDateString() === now.toDateString();
           case "7days":
-            return productDate >= new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+            return (
+              productDate >= new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)
+            );
           case "30days":
-            return productDate >= new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+            return (
+              productDate >= new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000)
+            );
           case "90days":
-            return productDate >= new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000);
+            return (
+              productDate >= new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000)
+            );
           case "year":
-            return productDate >= new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000);
+            return (
+              productDate >= new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000)
+            );
           default:
             return true;
         }
@@ -304,7 +333,14 @@ export default function Products() {
 
     // Apply sorting
     return sortData(result);
-  }, [products, searchQuery, showInactive, categoryFilter, dateRange, sortData]);
+  }, [
+    products,
+    searchQuery,
+    showInactive,
+    categoryFilter,
+    dateRange,
+    sortData,
+  ]);
 
   // Pagination
   const totalItems = filteredAndSortedProducts.length;
@@ -322,7 +358,9 @@ export default function Products() {
   // Get unique categories for filter
   const categories = useMemo(() => {
     if (!products) return [];
-    const uniqueCategories = new Set(products.map(p => p.category).filter(Boolean));
+    const uniqueCategories = new Set(
+      products.map(p => p.category).filter(Boolean)
+    );
     return Array.from(uniqueCategories).sort();
   }, [products]);
 
@@ -339,7 +377,12 @@ export default function Products() {
     setCurrentPage(1);
   };
 
-  const hasActiveFilters = !!(searchQuery || showInactive || categoryFilter !== "all" || dateRange !== "all");
+  const hasActiveFilters = !!(
+    searchQuery ||
+    showInactive ||
+    categoryFilter !== "all" ||
+    dateRange !== "all"
+  );
 
   if (loading) {
     return <ProductsPageSkeleton />;
@@ -350,19 +393,25 @@ export default function Products() {
       title="Products & Services"
       subtitle="Manage your product catalog for quick invoice creation"
       headerActions={
-        <Button onClick={() => { resetForm(); setIsCreateDialogOpen(true); }}>
+        <Button
+          onClick={() => {
+            resetForm();
+            setIsCreateDialogOpen(true);
+          }}
+        >
           <Plus className="mr-2 h-4 w-4" />
           <span className="hidden sm:inline">Add Product</span>
           <span className="sm:hidden">Add</span>
         </Button>
       }
     >
-
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Products</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              Total Products
+            </CardTitle>
             <Package className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -379,9 +428,7 @@ export default function Products() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{totalUsage}</div>
-            <p className="text-xs text-muted-foreground">
-              Across all invoices
-            </p>
+            <p className="text-xs text-muted-foreground">Across all invoices</p>
           </CardContent>
         </Card>
         <Card>
@@ -401,17 +448,11 @@ export default function Products() {
       <FilterSection
         hasActiveFilters={hasActiveFilters}
         onClearFilters={clearFilters}
+        searchValue={searchQuery}
+        onSearchChange={setSearchQuery}
+        searchPlaceholder="Search products..."
       >
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 w-full">
-          {/* Search */}
-          <div className="relative flex-1">
-            <Input
-              placeholder="Search products..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-          </div>
-
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 w-full">
           {/* Category Filter */}
           <FilterSelect label="Category">
             <Select value={categoryFilter} onValueChange={setCategoryFilter}>
@@ -420,9 +461,9 @@ export default function Products() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Categories</SelectItem>
-                {categories.map((cat) => (
-                  <SelectItem key={cat || 'uncategorized'} value={cat || ''}>
-                    {cat || 'Uncategorized'}
+                {categories.map(cat => (
+                  <SelectItem key={cat || "uncategorized"} value={cat || ""}>
+                    {cat || "Uncategorized"}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -465,13 +506,14 @@ export default function Products() {
         <CardHeader>
           <CardTitle>All Products</CardTitle>
           <CardDescription>
-            {filteredAndSortedProducts.length} product{filteredAndSortedProducts.length !== 1 ? 's' : ''} found
+            {filteredAndSortedProducts.length} product
+            {filteredAndSortedProducts.length !== 1 ? "s" : ""} found
           </CardDescription>
         </CardHeader>
         <CardContent>
           {isLoading ? (
             <div className="space-y-4">
-              {[1, 2, 3].map((i) => (
+              {[1, 2, 3].map(i => (
                 <Skeleton key={i} className="h-16 w-full" />
               ))}
             </div>
@@ -481,7 +523,10 @@ export default function Products() {
               size="sm"
               action={{
                 label: "Add Product",
-                onClick: () => { resetForm(); setIsCreateDialogOpen(true); },
+                onClick: () => {
+                  resetForm();
+                  setIsCreateDialogOpen(true);
+                },
                 icon: Plus,
               }}
             />
@@ -515,91 +560,107 @@ export default function Products() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {paginatedProducts.map((product) => (
-                  <TableRow key={product.id} className={!product.isActive ? "opacity-50" : ""}>
-                    <TableCell>
-                      <div>
-                        <div className="font-medium">{product.name}</div>
-                        {product.description && (
-                          <div className="text-sm text-muted-foreground line-clamp-1">
-                            {product.description}
-                          </div>
+                  {paginatedProducts.map(product => (
+                    <TableRow
+                      key={product.id}
+                      className={!product.isActive ? "opacity-50" : ""}
+                    >
+                      <TableCell>
+                        <div>
+                          <div className="font-medium">{product.name}</div>
+                          {product.description && (
+                            <div className="text-sm text-muted-foreground line-clamp-1">
+                              {product.description}
+                            </div>
+                          )}
+                          {product.sku && (
+                            <div className="text-xs text-muted-foreground">
+                              SKU: {product.sku}
+                            </div>
+                          )}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-1">
+                          <DollarSign className="h-3 w-3 text-muted-foreground" />
+                          <Currency amount={parseFloat(product.rate)} bold />
+                        </div>
+                      </TableCell>
+                      <TableCell className="capitalize">
+                        {product.unit || "unit"}
+                      </TableCell>
+                      <TableCell>
+                        {product.category ? (
+                          <Badge variant="outline">{product.category}</Badge>
+                        ) : (
+                          <span className="text-muted-foreground">—</span>
                         )}
-                        {product.sku && (
-                          <div className="text-xs text-muted-foreground">
-                            SKU: {product.sku}
-                          </div>
-                        )}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-1">
-                        <DollarSign className="h-3 w-3 text-muted-foreground" />
-                        <Currency amount={parseFloat(product.rate)} bold />
-                      </div>
-                    </TableCell>
-                    <TableCell className="capitalize">{product.unit || "unit"}</TableCell>
-                    <TableCell>
-                      {product.category ? (
-                        <Badge variant="outline">{product.category}</Badge>
-                      ) : (
-                        <span className="text-muted-foreground">—</span>
-                      )}
-                    </TableCell>
-                    <TableCell className="text-center">{product.usageCount}</TableCell>
-                    <TableCell>
-                      {product.isActive ? (
-                        <Badge variant="default" className="bg-green-500/10 text-green-500 hover:bg-green-500/20">
-                          Active
-                        </Badge>
-                      ) : (
-                        <Badge variant="secondary">Archived</Badge>
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon">
-                            <MoreHorizontal className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={() => openEditDialog(product)}>
-                            <Pencil className="mr-2 h-4 w-4" />
-                            Edit
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            onClick={() => openDeleteDialog(product)}
-                            className="text-destructive"
+                      </TableCell>
+                      <TableCell className="text-center">
+                        {product.usageCount}
+                      </TableCell>
+                      <TableCell>
+                        {product.isActive ? (
+                          <Badge
+                            variant="default"
+                            className="bg-green-500/10 text-green-500 hover:bg-green-500/20"
                           >
-                            <Trash2 className="mr-2 h-4 w-4" />
-                            Archive
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                            Active
+                          </Badge>
+                        ) : (
+                          <Badge variant="secondary">Archived</Badge>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              aria-label="More actions for this product"
+                            >
+                              <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem
+                              onClick={() => openEditDialog(product)}
+                            >
+                              <Pencil className="mr-2 h-4 w-4" />
+                              Edit
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={() => openDeleteDialog(product)}
+                              className="text-destructive"
+                            >
+                              <Trash2 className="mr-2 h-4 w-4" />
+                              Archive
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
 
-            {/* Pagination */}
-            {totalPages > 1 && (
-              <div className="mt-4 pt-4 border-t border-border/20">
-                <Pagination
-                  currentPage={currentPage}
-                  totalPages={totalPages}
-                  pageSize={pageSize}
-                  totalItems={totalItems}
-                  onPageChange={setCurrentPage}
-                  onPageSizeChange={(size) => {
-                    setPageSize(size);
-                    setCurrentPage(1);
-                  }}
-                  pageSizeOptions={[10, 25, 50, 100]}
-                />
-              </div>
-            )}
+              {/* Pagination */}
+              {totalPages > 1 && (
+                <div className="mt-4 pt-4 border-t border-border/20">
+                  <Pagination
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    pageSize={pageSize}
+                    totalItems={totalItems}
+                    onPageChange={setCurrentPage}
+                    onPageSizeChange={size => {
+                      setPageSize(size);
+                      setCurrentPage(1);
+                    }}
+                    pageSizeOptions={[10, 25, 50, 100]}
+                  />
+                </div>
+              )}
             </>
           )}
         </CardContent>
@@ -608,20 +669,22 @@ export default function Products() {
       {/* Create Dialog */}
       <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
         <DialogContent className="sm:max-w-[500px]">
-          <DialogHeader>
-            <DialogTitle>Add New Product</DialogTitle>
-            <DialogDescription>
+          <DialogHeader className="pb-4">
+            <DialogTitle className="text-xl">Add New Product</DialogTitle>
+            <DialogDescription className="text-base">
               Create a product or service to quickly add to invoices
             </DialogDescription>
           </DialogHeader>
-          <div className="grid gap-4 py-4">
+          <div className="grid gap-5 py-2">
             <div className="grid gap-2">
               <Label htmlFor="name">Name *</Label>
               <Input
                 id="name"
                 placeholder="e.g., Web Development"
                 value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                onChange={e =>
+                  setFormData({ ...formData, name: e.target.value })
+                }
               />
             </div>
             <div className="grid gap-2">
@@ -630,11 +693,13 @@ export default function Products() {
                 id="description"
                 placeholder="Brief description of the product or service"
                 value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                rows={2}
+                onChange={e =>
+                  setFormData({ ...formData, description: e.target.value })
+                }
+                rows={3}
               />
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 gap-6">
               <div className="grid gap-2">
                 <Label htmlFor="rate">Rate *</Label>
                 <div className="relative">
@@ -646,7 +711,9 @@ export default function Products() {
                     min="0"
                     placeholder="0.00"
                     value={formData.rate}
-                    onChange={(e) => setFormData({ ...formData, rate: e.target.value })}
+                    onChange={e =>
+                      setFormData({ ...formData, rate: e.target.value })
+                    }
                     className="pl-9"
                   />
                 </div>
@@ -655,13 +722,15 @@ export default function Products() {
                 <Label htmlFor="unit">Unit</Label>
                 <Select
                   value={formData.unit}
-                  onValueChange={(value) => setFormData({ ...formData, unit: value })}
+                  onValueChange={value =>
+                    setFormData({ ...formData, unit: value })
+                  }
                 >
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    {UNIT_OPTIONS.map((option) => (
+                    {UNIT_OPTIONS.map(option => (
                       <SelectItem key={option.value} value={option.value}>
                         {option.label}
                       </SelectItem>
@@ -677,7 +746,9 @@ export default function Products() {
                   id="category"
                   placeholder="e.g., Development"
                   value={formData.category}
-                  onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                  onChange={e =>
+                    setFormData({ ...formData, category: e.target.value })
+                  }
                 />
               </div>
               <div className="grid gap-2">
@@ -686,7 +757,9 @@ export default function Products() {
                   id="sku"
                   placeholder="e.g., WEB-001"
                   value={formData.sku}
-                  onChange={(e) => setFormData({ ...formData, sku: e.target.value })}
+                  onChange={e =>
+                    setFormData({ ...formData, sku: e.target.value })
+                  }
                 />
               </div>
             </div>
@@ -694,13 +767,18 @@ export default function Products() {
               <Switch
                 id="taxable"
                 checked={formData.taxable}
-                onCheckedChange={(checked) => setFormData({ ...formData, taxable: checked })}
+                onCheckedChange={checked =>
+                  setFormData({ ...formData, taxable: checked })
+                }
               />
               <Label htmlFor="taxable">Taxable</Label>
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsCreateDialogOpen(false)}>
+            <Button
+              variant="outline"
+              onClick={() => setIsCreateDialogOpen(false)}
+            >
               Cancel
             </Button>
             <Button onClick={handleCreate} disabled={createMutation.isPending}>
@@ -713,19 +791,21 @@ export default function Products() {
       {/* Edit Dialog */}
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
         <DialogContent className="sm:max-w-[500px]">
-          <DialogHeader>
-            <DialogTitle>Edit Product</DialogTitle>
-            <DialogDescription>
+          <DialogHeader className="pb-4">
+            <DialogTitle className="text-xl">Edit Product</DialogTitle>
+            <DialogDescription className="text-base">
               Update the product details
             </DialogDescription>
           </DialogHeader>
-          <div className="grid gap-4 py-4">
+          <div className="grid gap-5 py-2">
             <div className="grid gap-2">
               <Label htmlFor="edit-name">Name *</Label>
               <Input
                 id="edit-name"
                 value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                onChange={e =>
+                  setFormData({ ...formData, name: e.target.value })
+                }
               />
             </div>
             <div className="grid gap-2">
@@ -733,7 +813,9 @@ export default function Products() {
               <Textarea
                 id="edit-description"
                 value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                onChange={e =>
+                  setFormData({ ...formData, description: e.target.value })
+                }
                 rows={2}
               />
             </div>
@@ -748,7 +830,9 @@ export default function Products() {
                     step="0.01"
                     min="0"
                     value={formData.rate}
-                    onChange={(e) => setFormData({ ...formData, rate: e.target.value })}
+                    onChange={e =>
+                      setFormData({ ...formData, rate: e.target.value })
+                    }
                     className="pl-9"
                   />
                 </div>
@@ -757,13 +841,15 @@ export default function Products() {
                 <Label htmlFor="edit-unit">Unit</Label>
                 <Select
                   value={formData.unit}
-                  onValueChange={(value) => setFormData({ ...formData, unit: value })}
+                  onValueChange={value =>
+                    setFormData({ ...formData, unit: value })
+                  }
                 >
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    {UNIT_OPTIONS.map((option) => (
+                    {UNIT_OPTIONS.map(option => (
                       <SelectItem key={option.value} value={option.value}>
                         {option.label}
                       </SelectItem>
@@ -778,7 +864,9 @@ export default function Products() {
                 <Input
                   id="edit-category"
                   value={formData.category}
-                  onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                  onChange={e =>
+                    setFormData({ ...formData, category: e.target.value })
+                  }
                 />
               </div>
               <div className="grid gap-2">
@@ -786,7 +874,9 @@ export default function Products() {
                 <Input
                   id="edit-sku"
                   value={formData.sku}
-                  onChange={(e) => setFormData({ ...formData, sku: e.target.value })}
+                  onChange={e =>
+                    setFormData({ ...formData, sku: e.target.value })
+                  }
                 />
               </div>
             </div>
@@ -794,13 +884,18 @@ export default function Products() {
               <Switch
                 id="edit-taxable"
                 checked={formData.taxable}
-                onCheckedChange={(checked) => setFormData({ ...formData, taxable: checked })}
+                onCheckedChange={checked =>
+                  setFormData({ ...formData, taxable: checked })
+                }
               />
               <Label htmlFor="edit-taxable">Taxable</Label>
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>
+            <Button
+              variant="outline"
+              onClick={() => setIsEditDialogOpen(false)}
+            >
               Cancel
             </Button>
             <Button onClick={handleEdit} disabled={updateMutation.isPending}>
@@ -812,16 +907,20 @@ export default function Products() {
 
       {/* Delete Confirmation Dialog */}
       <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Archive Product</DialogTitle>
-            <DialogDescription>
-              Are you sure you want to archive "{selectedProduct?.name}"? 
-              This product will no longer appear in the product selector, but existing invoices will not be affected.
+        <DialogContent className="sm:max-w-[450px]">
+          <DialogHeader className="pb-4">
+            <DialogTitle className="text-xl">Archive Product</DialogTitle>
+            <DialogDescription className="text-base">
+              Are you sure you want to archive "{selectedProduct?.name}"? This
+              product will no longer appear in the product selector, but
+              existing invoices will not be affected.
             </DialogDescription>
           </DialogHeader>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsDeleteDialogOpen(false)}>
+          <DialogFooter className="gap-3">
+            <Button
+              variant="outline"
+              onClick={() => setIsDeleteDialogOpen(false)}
+            >
               Cancel
             </Button>
             <Button

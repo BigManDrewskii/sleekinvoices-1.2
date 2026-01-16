@@ -31,9 +31,9 @@ export function MagicInput({ onExtract, onClose, className }: MagicInputProps) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const { data: credits } = trpc.ai.getCredits.useQuery();
-  
+
   const smartCompose = trpc.ai.smartCompose.useMutation({
-    onSuccess: (result) => {
+    onSuccess: result => {
       if (result.success && result.data) {
         onExtract(result.data);
         setInput("");
@@ -83,14 +83,16 @@ export function MagicInput({ onExtract, onClose, className }: MagicInputProps) {
           className
         )}
       >
-        <SleekyAvatar 
-          size="sm" 
+        <SleekyAvatar
+          size="sm"
           bordered={true}
           className="group-hover:scale-105 transition-transform"
         />
         <div className="flex-1 text-left">
           <div className="flex items-center gap-2">
-            <span className="text-sm font-medium text-foreground">Sleeky's Magic Invoice</span>
+            <span className="text-sm font-medium text-foreground">
+              Sleeky's Magic Invoice
+            </span>
             {credits && (
               <span className="text-xs text-muted-foreground tabular-nums">
                 {credits.remaining}/{credits.limit}
@@ -108,7 +110,7 @@ export function MagicInput({ onExtract, onClose, className }: MagicInputProps) {
 
   // Expanded state - full input experience
   return (
-    <div 
+    <div
       data-magic-invoice
       className={cn(
         "relative overflow-hidden rounded-xl",
@@ -121,14 +123,16 @@ export function MagicInput({ onExtract, onClose, className }: MagicInputProps) {
     >
       {/* Decorative gradient overlay */}
       <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-emerald-500/5 pointer-events-none" />
-      
+
       <div className="relative p-4">
         {/* Header */}
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
             <SleekyAvatar size="sm" bordered={true} glow={true} />
             <div>
-              <h3 className="font-semibold text-foreground">Sleeky's Magic Invoice</h3>
+              <h3 className="font-semibold text-foreground">
+                Sleeky's Magic Invoice
+              </h3>
               <p className="text-xs text-muted-foreground">
                 AI-powered invoice creation
               </p>
@@ -136,12 +140,14 @@ export function MagicInput({ onExtract, onClose, className }: MagicInputProps) {
           </div>
           <div className="flex items-center gap-2">
             {credits && (
-              <div className={cn(
-                "flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium",
-                credits.remaining > 0 
-                  ? "bg-emerald-500/10 text-emerald-500" 
-                  : "bg-destructive/10 text-destructive"
-              )}>
+              <div
+                className={cn(
+                  "flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium",
+                  credits.remaining > 0
+                    ? "bg-emerald-500/10 text-emerald-500"
+                    : "bg-destructive/10 text-destructive"
+                )}
+              >
                 <Zap className="h-3 w-3" />
                 {credits.remaining} credits
               </div>
@@ -166,7 +172,7 @@ export function MagicInput({ onExtract, onClose, className }: MagicInputProps) {
           <Textarea
             ref={textareaRef}
             value={input}
-            onChange={(e) => setInput(e.target.value)}
+            onChange={e => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder='Try: "Invoice Acme Corp for website redesign, $5000, due in 2 weeks"'
             className={cn(
@@ -179,7 +185,7 @@ export function MagicInput({ onExtract, onClose, className }: MagicInputProps) {
             )}
             disabled={isLoading}
           />
-          
+
           {/* Character hint */}
           {input.length > 0 && (
             <div className="absolute bottom-3 right-3 text-xs text-muted-foreground/50">
@@ -190,14 +196,14 @@ export function MagicInput({ onExtract, onClose, className }: MagicInputProps) {
 
         {/* Error Messages */}
         {smartCompose.error && (
-          <div className="mt-3 flex items-center gap-2 p-3 rounded-lg bg-destructive/10 border border-destructive/20 text-sm text-destructive">
+          <div className="mt-3 flex items-center gap-2 p-4 rounded-lg bg-destructive/10 border border-destructive/20 text-sm text-destructive">
             <AlertCircle className="h-4 w-4 shrink-0" />
             <span>{smartCompose.error.message}</span>
           </div>
         )}
 
         {smartCompose.data && !smartCompose.data.success && (
-          <div className="mt-3 flex items-center gap-2 p-3 rounded-lg bg-destructive/10 border border-destructive/20 text-sm text-destructive">
+          <div className="mt-3 flex items-center gap-2 p-4 rounded-lg bg-destructive/10 border border-destructive/20 text-sm text-destructive">
             <AlertCircle className="h-4 w-4 shrink-0" />
             <span>{smartCompose.data.error}</span>
           </div>
@@ -205,10 +211,14 @@ export function MagicInput({ onExtract, onClose, className }: MagicInputProps) {
 
         {/* Footer */}
         <div className="flex items-center justify-between mt-4">
-          <div className="flex items-center gap-1 text-xs text-muted-foreground">
-            <kbd className="px-1.5 py-0.5 rounded bg-muted/80 text-[10px] font-mono">⌘</kbd>
+          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+            <kbd className="px-2 py-1 rounded bg-muted/80 text-[10px] font-mono">
+              ⌘
+            </kbd>
             <span>+</span>
-            <kbd className="px-1.5 py-0.5 rounded bg-muted/80 text-[10px] font-mono">Enter</kbd>
+            <kbd className="px-2 py-1 rounded bg-muted/80 text-[10px] font-mono">
+              Enter
+            </kbd>
             <span className="ml-1">to generate</span>
           </div>
           <Button
@@ -233,7 +243,9 @@ export function MagicInput({ onExtract, onClose, className }: MagicInputProps) {
 
         {/* Quick Examples */}
         <div className="mt-4 pt-4 border-t border-border/30">
-          <p className="text-xs text-muted-foreground mb-2.5 font-medium">Quick examples</p>
+          <p className="text-xs text-muted-foreground mb-2.5 font-medium">
+            Quick examples
+          </p>
           <div className="flex flex-wrap gap-2">
             {[
               "Invoice John for 10 hours consulting at $150/hr",

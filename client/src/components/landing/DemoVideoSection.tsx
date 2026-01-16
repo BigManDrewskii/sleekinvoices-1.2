@@ -16,7 +16,7 @@ export function DemoVideoSection() {
               <div className="mb-6">
                 <img
                   src="/sleeky.svg"
-                  alt="Sleeky"
+                  alt="Sleeky the otter mascot, your AI invoicing assistant"
                   className="h-32 sm:h-40 md:h-48 mx-auto opacity-95 sleeky-float"
                   loading="lazy"
                 />
@@ -41,9 +41,7 @@ export function DemoVideoSection() {
 
                 {/* CTA Button */}
                 <Button size="lg" asChild className="rounded-full">
-                  <Link href="/docs">
-                    See How It Works
-                  </Link>
+                  <Link href="/docs">See How It Works</Link>
                 </Button>
               </div>
             </div>

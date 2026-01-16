@@ -11,7 +11,7 @@ import {
   RotateCcw,
   ArrowRight,
   MessageCircle,
-  Download
+  Download,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -48,28 +48,28 @@ const QUICK_ACTIONS: QuickAction[] = [
     label: "Create Invoice",
     icon: FileText,
     prompt: "Help me create a new invoice",
-    description: "AI-assisted invoice creation"
+    description: "AI-assisted invoice creation",
   },
   {
     id: "analyze-revenue",
     label: "Revenue Insights",
     icon: TrendingUp,
     prompt: "Analyze my revenue trends and provide insights",
-    description: "Get AI-powered business insights"
+    description: "Get AI-powered business insights",
   },
   {
     id: "overdue-follow-up",
     label: "Follow-up Drafts",
     icon: Clock,
     prompt: "Help me draft follow-up emails for overdue invoices",
-    description: "Generate professional reminders"
+    description: "Generate professional reminders",
   },
   {
     id: "client-summary",
     label: "Client Summary",
     icon: Users,
     prompt: "Give me a summary of my top clients by revenue",
-    description: "Understand your client base"
+    description: "Understand your client base",
   },
 ];
 
@@ -77,22 +77,22 @@ const CONTEXTUAL_SUGGESTIONS: Record<string, string[]> = {
   "/dashboard": [
     "What's my revenue this month?",
     "Which invoices are overdue?",
-    "Create a quick invoice"
+    "Create a quick invoice",
   ],
   "/invoices": [
     "Help me create a new invoice",
     "Which invoices need follow-up?",
-    "Export my invoices"
+    "Export my invoices",
   ],
   "/clients": [
     "Who are my top clients?",
     "Add a new client",
-    "Which clients have unpaid invoices?"
+    "Which clients have unpaid invoices?",
   ],
   "/analytics": [
     "Explain my revenue trends",
     "Compare this month to last month",
-    "What's my average invoice value?"
+    "What's my average invoice value?",
   ],
 };
 
@@ -119,13 +119,16 @@ export function AIAssistant({ isOpen, onClose }: AIAssistantProps) {
     enabled: isAuthenticated,
     retry: false,
   });
-  
+
   const chatMutation = trpc.ai.chat.useMutation({
-    onSuccess: (response) => {
+    onSuccess: response => {
       setMessages(prev => {
         const updated = [...prev];
         const lastIndex = updated.length - 1;
-        if (updated[lastIndex]?.role === "assistant" && updated[lastIndex]?.isStreaming) {
+        if (
+          updated[lastIndex]?.role === "assistant" &&
+          updated[lastIndex]?.isStreaming
+        ) {
           updated[lastIndex] = {
             ...updated[lastIndex],
             content: response.content,
@@ -136,17 +139,22 @@ export function AIAssistant({ isOpen, onClose }: AIAssistantProps) {
       });
       setIsTyping(false);
     },
-    onError: (error) => {
+    onError: error => {
       // Check if this is an authentication error
-      const isAuthError = error.data?.code === 'UNAUTHORIZED' || error.message.includes('UNAUTHORIZED');
-      const errorMessage = isAuthError 
+      const isAuthError =
+        error.data?.code === "UNAUTHORIZED" ||
+        error.message.includes("UNAUTHORIZED");
+      const errorMessage = isAuthError
         ? "Your session has expired. Please refresh the page to continue."
         : `Sorry, I encountered an error: ${error.message}. Please try again.`;
-      
+
       setMessages(prev => {
         const updated = [...prev];
         const lastIndex = updated.length - 1;
-        if (updated[lastIndex]?.role === "assistant" && updated[lastIndex]?.isStreaming) {
+        if (
+          updated[lastIndex]?.role === "assistant" &&
+          updated[lastIndex]?.isStreaming
+        ) {
           updated[lastIndex] = {
             ...updated[lastIndex],
             content: errorMessage,
@@ -162,7 +170,9 @@ export function AIAssistant({ isOpen, onClose }: AIAssistantProps) {
   // Scroll to bottom when messages change
   useEffect(() => {
     if (scrollRef.current) {
-      const viewport = scrollRef.current.querySelector('[data-radix-scroll-area-viewport]');
+      const viewport = scrollRef.current.querySelector(
+        "[data-radix-scroll-area-viewport]"
+      );
       if (viewport) {
         viewport.scrollTop = viewport.scrollHeight;
       }
@@ -176,48 +186,53 @@ export function AIAssistant({ isOpen, onClose }: AIAssistantProps) {
     }
   }, [isOpen]);
 
-  const handleSend = useCallback((content: string) => {
-    if (!content.trim() || isTyping) return;
+  const handleSend = useCallback(
+    (content: string) => {
+      if (!content.trim() || isTyping) return;
 
-    const userMessage: Message = {
-      id: `user-${Date.now()}`,
-      role: "user",
-      content: content.trim(),
-      timestamp: new Date(),
-    };
+      const userMessage: Message = {
+        id: `user-${Date.now()}`,
+        role: "user",
+        content: content.trim(),
+        timestamp: new Date(),
+      };
 
-    const assistantMessage: Message = {
-      id: `assistant-${Date.now()}`,
-      role: "assistant",
-      content: "",
-      timestamp: new Date(),
-      isStreaming: true,
-    };
+      const assistantMessage: Message = {
+        id: `assistant-${Date.now()}`,
+        role: "assistant",
+        content: "",
+        timestamp: new Date(),
+        isStreaming: true,
+      };
 
-    setMessages(prev => [...prev, userMessage, assistantMessage]);
-    setInput("");
-    setIsTyping(true);
+      setMessages(prev => [...prev, userMessage, assistantMessage]);
+      setInput("");
+      setIsTyping(true);
 
-    // Build context from conversation history
-    const conversationHistory = messages.map(m => ({
-      role: m.role as "user" | "assistant",
-      content: m.content,
-    }));
+      // Build context from conversation history
+      const conversationHistory = messages.map(m => ({
+        role: m.role as "user" | "assistant",
+        content: m.content,
+      }));
 
-    chatMutation.mutate({
-      message: content.trim(),
-      context: {
-        currentPage: location,
-        conversationHistory,
-        stats: stats ? {
-          totalRevenue: stats.totalRevenue,
-          outstandingBalance: stats.outstandingBalance,
-          totalInvoices: stats.totalInvoices,
-          paidInvoices: stats.paidInvoices,
-        } : undefined,
-      },
-    });
-  }, [isTyping, messages, location, stats, chatMutation]);
+      chatMutation.mutate({
+        message: content.trim(),
+        context: {
+          currentPage: location,
+          conversationHistory,
+          stats: stats
+            ? {
+                totalRevenue: stats.totalRevenue,
+                outstandingBalance: stats.outstandingBalance,
+                totalInvoices: stats.totalInvoices,
+                paidInvoices: stats.paidInvoices,
+              }
+            : undefined,
+        },
+      });
+    },
+    [isTyping, messages, location, stats, chatMutation]
+  );
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -239,25 +254,28 @@ export function AIAssistant({ isOpen, onClose }: AIAssistantProps) {
 
     // Format the conversation as text
     const header = `SleekInvoices AI Assistant - Conversation Export\n`;
-    const divider = `${'='.repeat(50)}\n`;
+    const divider = `${"=".repeat(50)}\n`;
     const exportDate = `Exported on: ${new Date().toLocaleString()}\n\n`;
-    
-    const conversationText = messages.map((msg) => {
-      const role = msg.role === 'user' ? 'You' : 'AI Assistant';
-      const timestamp = msg.timestamp.toLocaleTimeString();
-      // Strip any action buttons from assistant messages
-      const content = msg.role === 'assistant' 
-        ? msg.content.replace(/\[ACTION:.*?\]/g, '').trim()
-        : msg.content;
-      return `[${timestamp}] ${role}:\n${content}\n`;
-    }).join('\n' + '-'.repeat(40) + '\n\n');
+
+    const conversationText = messages
+      .map(msg => {
+        const role = msg.role === "user" ? "You" : "AI Assistant";
+        const timestamp = msg.timestamp.toLocaleTimeString();
+        // Strip any action buttons from assistant messages
+        const content =
+          msg.role === "assistant"
+            ? msg.content.replace(/\[ACTION:.*?\]/g, "").trim()
+            : msg.content;
+        return `[${timestamp}] ${role}:\n${content}\n`;
+      })
+      .join("\n" + "-".repeat(40) + "\n\n");
 
     const fullText = header + divider + exportDate + conversationText;
 
     // Create and download the file
-    const blob = new Blob([fullText], { type: 'text/plain;charset=utf-8' });
+    const blob = new Blob([fullText], { type: "text/plain;charset=utf-8" });
     const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
+    const link = document.createElement("a");
     link.href = url;
     link.download = `sleek-ai-chat-${new Date().toISOString().slice(0, 10)}.txt`;
     document.body.appendChild(link);
@@ -266,7 +284,8 @@ export function AIAssistant({ isOpen, onClose }: AIAssistantProps) {
     URL.revokeObjectURL(url);
   };
 
-  const contextualSuggestions = CONTEXTUAL_SUGGESTIONS[location] || CONTEXTUAL_SUGGESTIONS["/dashboard"];
+  const contextualSuggestions =
+    CONTEXTUAL_SUGGESTIONS[location] || CONTEXTUAL_SUGGESTIONS["/dashboard"];
 
   const hasCredits = credits && credits.remaining > 0;
 
@@ -275,30 +294,37 @@ export function AIAssistant({ isOpen, onClose }: AIAssistantProps) {
   return (
     <>
       {/* Backdrop overlay */}
-      <div 
+      <div
         className="fixed inset-0 bg-black/20 backdrop-blur-sm z-40 animate-in fade-in duration-200"
         onClick={onClose}
       />
-      
+
       {/* Sidebar Panel */}
       <div className="fixed inset-y-0 right-0 w-full sm:w-[440px] bg-gradient-to-b from-background via-background to-background/95 border-l border-border/50 shadow-2xl z-50 flex flex-col animate-in slide-in-from-right duration-300 ease-out">
-        
         {/* Header - Manus-inspired minimal design */}
         <div className="relative flex items-center justify-between px-5 py-4 border-b border-border/40">
           {/* Subtle gradient accent */}
           <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
-          
+
           <div className="flex items-center gap-3">
-<SleekyAvatar size="md" bordered glow />
+            <SleekyAvatar size="md" bordered glow />
             <div>
-              <h2 className="font-semibold text-[15px] tracking-tight">Sleeky AI Assistant</h2>
+              <h2 className="font-semibold text-[15px] tracking-tight">
+                Sleeky AI Assistant
+              </h2>
               <p className="text-xs text-muted-foreground/80">
                 {credits ? (
                   <span className="flex items-center gap-1.5">
-                    <span className={cn(
-                      "inline-block h-1.5 w-1.5 rounded-full",
-                      credits.remaining > 10 ? "bg-emerald-500" : credits.remaining > 0 ? "bg-amber-500" : "bg-destructive/100"
-                    )} />
+                    <span
+                      className={cn(
+                        "inline-block h-1.5 w-1.5 rounded-full",
+                        credits.remaining > 10
+                          ? "bg-emerald-500"
+                          : credits.remaining > 0
+                            ? "bg-amber-500"
+                            : "bg-destructive/100"
+                      )}
+                    />
                     {credits.remaining} credits
                   </span>
                 ) : (
@@ -307,18 +333,22 @@ export function AIAssistant({ isOpen, onClose }: AIAssistantProps) {
               </p>
             </div>
           </div>
-          
+
           {/* Top-up button when low on credits */}
           {credits && credits.remaining <= 5 && (
             <CreditTopUp
               trigger={
-                <Button variant="ghost" size="sm" className="text-xs text-amber-500 hover:text-amber-400">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-xs text-amber-500 hover:text-amber-400"
+                >
                   + Get Credits
                 </Button>
               }
             />
           )}
-          
+
           <div className="flex items-center gap-1">
             {messages.length > 0 && (
               <>
@@ -364,17 +394,22 @@ export function AIAssistant({ isOpen, onClose }: AIAssistantProps) {
                   {/* Animated glow */}
                   <div className="absolute inset-0 rounded-2xl bg-primary/20 blur-xl animate-pulse" />
                 </div>
-                <h3 className="text-xl font-semibold tracking-tight mb-2">What can Sleeky help with?</h3>
+                <h3 className="text-xl font-semibold tracking-tight mb-2">
+                  What can Sleeky help with?
+                </h3>
                 <p className="text-sm text-muted-foreground/80 max-w-[280px] mx-auto leading-relaxed">
-                  Create invoices, analyze your business, draft emails, and more.
+                  Create invoices, analyze your business, draft emails, and
+                  more.
                 </p>
               </div>
 
               {/* Quick Actions - Pill-style buttons like Manus */}
               <div className="space-y-3">
-                <p className="text-xs font-medium text-muted-foreground/70 uppercase tracking-wider px-1">Quick Actions</p>
+                <p className="text-xs font-medium text-muted-foreground/70 uppercase tracking-wider px-1">
+                  Quick Actions
+                </p>
                 <div className="flex flex-wrap gap-2">
-                  {QUICK_ACTIONS.map((action) => (
+                  {QUICK_ACTIONS.map(action => (
                     <button
                       key={action.id}
                       onClick={() => handleQuickAction(action)}
@@ -397,7 +432,9 @@ export function AIAssistant({ isOpen, onClose }: AIAssistantProps) {
 
               {/* Contextual Suggestions - Clean list */}
               <div className="space-y-3">
-                <p className="text-xs font-medium text-muted-foreground/70 uppercase tracking-wider px-1">Suggestions</p>
+                <p className="text-xs font-medium text-muted-foreground/70 uppercase tracking-wider px-1">
+                  Suggestions
+                </p>
                 <div className="space-y-1.5">
                   {contextualSuggestions.map((suggestion, i) => (
                     <button
@@ -422,7 +459,7 @@ export function AIAssistant({ isOpen, onClose }: AIAssistantProps) {
             </div>
           ) : (
             <div className="p-5 space-y-5">
-              {messages.map((message) => (
+              {messages.map(message => (
                 <div
                   key={message.id}
                   className={cn(
@@ -451,15 +488,19 @@ export function AIAssistant({ isOpen, onClose }: AIAssistantProps) {
                             <span className="h-2 w-2 rounded-full bg-primary/60 animate-bounce [animation-delay:-0.15s]" />
                             <span className="h-2 w-2 rounded-full bg-primary/60 animate-bounce" />
                           </div>
-                          <span className="text-sm text-muted-foreground">Thinking...</span>
+                          <span className="text-sm text-muted-foreground">
+                            Thinking...
+                          </span>
                         </div>
                       ) : (
                         (() => {
-                          const { text, actions } = parseAIResponse(message.content);
+                          const { text, actions } = parseAIResponse(
+                            message.content
+                          );
                           return (
                             <div>
-                              <MarkdownRenderer 
-                                content={text} 
+                              <MarkdownRenderer
+                                content={text}
                                 isStreaming={message.isStreaming}
                                 className="max-w-none"
                               />
@@ -473,7 +514,9 @@ export function AIAssistant({ isOpen, onClose }: AIAssistantProps) {
                         })()
                       )
                     ) : (
-                      <p className="text-sm whitespace-pre-wrap leading-relaxed">{message.content}</p>
+                      <p className="text-sm whitespace-pre-wrap leading-relaxed">
+                        {message.content}
+                      </p>
                     )}
                   </div>
                   {message.role === "user" && user && (
@@ -489,17 +532,25 @@ export function AIAssistant({ isOpen, onClose }: AIAssistantProps) {
         <div className="relative p-4 border-t border-border/40 bg-gradient-to-t from-muted/30 to-transparent">
           {/* Top accent line */}
           <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-border/50 to-transparent" />
-          
+
           {!hasCredits && (
-            <div className="mb-3 p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 text-sm">
+            <div className="mb-3 p-4 rounded-xl bg-amber-500/10 border border-amber-500/30 text-sm">
               <div className="flex items-center justify-between">
                 <div>
-                  <span className="font-medium text-amber-600 dark:text-amber-400">No credits remaining.</span>
-                  <span className="text-muted-foreground ml-1">Get more to continue.</span>
+                  <span className="font-medium text-amber-600 dark:text-amber-400">
+                    No credits remaining.
+                  </span>
+                  <span className="text-muted-foreground ml-1">
+                    Get more to continue.
+                  </span>
                 </div>
                 <CreditTopUp
                   trigger={
-                    <Button size="sm" variant="outline" className="gap-1.5 border-amber-500/50 hover:bg-amber-500/10 text-amber-600 dark:text-amber-400">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="gap-1.5 border-amber-500/50 hover:bg-amber-500/10 text-amber-600 dark:text-amber-400"
+                    >
                       Top Up Credits
                     </Button>
                   }
@@ -507,20 +558,24 @@ export function AIAssistant({ isOpen, onClose }: AIAssistantProps) {
               </div>
             </div>
           )}
-          
+
           <div className="relative flex items-end gap-2">
             <div className="flex-1 relative">
               <textarea
                 ref={inputRef}
                 value={input}
-                onChange={(e) => {
+                onChange={e => {
                   setInput(e.target.value);
                   // Auto-resize
-                  e.target.style.height = 'auto';
-                  e.target.style.height = Math.min(e.target.scrollHeight, 120) + 'px';
+                  e.target.style.height = "auto";
+                  e.target.style.height =
+                    Math.min(e.target.scrollHeight, 120) + "px";
                 }}
                 onKeyDown={handleKeyDown}
-                placeholder={hasCredits ? "Ask me anything..." : "No credits remaining"}
+                placeholder={
+                  hasCredits ? "Ask me anything..." : "No credits remaining"
+                }
+                aria-label="Chat with AI assistant"
                 className={cn(
                   "w-full min-h-[48px] max-h-[120px] px-4 py-3 pr-12",
                   "bg-background border border-border/60 rounded-2xl",
@@ -558,9 +613,17 @@ export function AIAssistant({ isOpen, onClose }: AIAssistantProps) {
               )}
             </Button>
           </div>
-          
+
           <p className="text-[11px] text-muted-foreground/60 mt-2.5 text-center">
-            Press <kbd className="px-1.5 py-0.5 rounded bg-muted text-[10px] font-mono">Enter</kbd> to send · <kbd className="px-1.5 py-0.5 rounded bg-muted text-[10px] font-mono">Shift+Enter</kbd> for new line
+            Press{" "}
+            <kbd className="px-2 py-1 rounded bg-muted text-[10px] font-mono">
+              Enter
+            </kbd>{" "}
+            to send ·{" "}
+            <kbd className="px-2 py-1 rounded bg-muted text-[10px] font-mono">
+              Shift+Enter
+            </kbd>{" "}
+            for new line
           </p>
         </div>
       </div>
@@ -572,15 +635,21 @@ export function AIAssistant({ isOpen, onClose }: AIAssistantProps) {
  * Floating AI Assistant trigger button with animated orb
  * Only renders when user is authenticated (handled by AIAssistantProvider)
  */
-export function AIAssistantTrigger({ onClick, className }: { onClick: () => void; className?: string }) {
+export function AIAssistantTrigger({
+  onClick,
+  className,
+}: {
+  onClick: () => void;
+  className?: string;
+}) {
   const { isAuthenticated } = useAuth();
-  
+
   // Only query credits if authenticated to prevent unauthorized errors
   const { data: credits } = trpc.ai.getCredits.useQuery(undefined, {
     enabled: isAuthenticated,
     retry: false,
   });
-  
+
   return (
     <div className={cn("fixed bottom-6 right-6 z-40", className)}>
       <Orb

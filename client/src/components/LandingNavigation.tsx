@@ -1,23 +1,18 @@
 import { Button } from "@/components/ui/button";
-import {
-  Sheet,
-  SheetContent,
-  SheetTrigger,
-  SheetTitle,
-} from "@/components/ui/sheet";
 import { Menu, ArrowRight, LayoutDashboard, Loader2 } from "lucide-react";
 import { Link } from "wouter";
 import { useState, useEffect } from "react";
 import { getLoginUrl } from "@/const";
 import { useAuth } from "@/_core/hooks/useAuth";
+import { LandingSidebar } from "./landing/LandingSidebar";
 
 export function LandingNavigation() {
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [scrollAnnouncement, setScrollAnnouncement] = useState("");
-  
-  // Get auth state - don't redirect on unauthenticated since this is a public page
-  const { isAuthenticated, loading } = useAuth({ redirectOnUnauthenticated: false });
+
+  const { isAuthenticated, loading } = useAuth({
+    redirectOnUnauthenticated: false,
+  });
 
   useEffect(() => {
     const handleScroll = () => {
@@ -31,14 +26,11 @@ export function LandingNavigation() {
     const element = document.getElementById(id);
     if (element) {
       element.scrollIntoView({ behavior: "smooth", block: "start" });
-      setMobileMenuOpen(false);
-      // Announce to screen readers
       setScrollAnnouncement(`Navigating to ${id} section`);
       setTimeout(() => setScrollAnnouncement(""), 1000);
     }
   };
 
-  // Generate sign up URL (same as login but with signUp type)
   const getSignUpUrl = () => {
     const loginUrl = getLoginUrl();
     if (loginUrl === "/") return "/";
@@ -59,42 +51,48 @@ export function LandingNavigation() {
           : "bg-transparent"
       } rounded-full`}
     >
-      <div className="px-4 sm:px-6 py-3">
-        <div className="flex items-center justify-between">
+      <div className="px-3 sm:px-6 py-2.5">
+        <div className="flex items-center justify-between gap-2">
           {/* Logo */}
-          <Link href="/landing" className="flex items-center gap-2.5" aria-label="SleekInvoices - Go to home">
+          <Link
+            href="/landing"
+            className="flex items-center group flex-shrink-0"
+            aria-label="SleekInvoices - Go to home"
+          >
             <img
-              src="/monogram-white.svg"
+              src="/logos/wide/SleekInvoices-Logo-Wide.svg"
               alt=""
               role="presentation"
-              className="h-8 w-8"
+              className="h-5 sm:h-6 w-auto max-w-[120px] sm:max-w-none transition-transform duration-150 ease-out group-hover:scale-[1.03]"
+              style={{ filter: "brightness(1.1)" }}
             />
-            <span className="font-semibold text-foreground text-lg hidden sm:block" aria-hidden="true">
-              SleekInvoices
-            </span>
           </Link>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center gap-1">
+          <div className="hidden lg:flex items-center gap-1">
             <button
+              type="button"
               onClick={() => scrollToSection("features")}
               className="px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-secondary/50 rounded-full transition-all"
             >
               Features
             </button>
             <button
+              type="button"
               onClick={() => scrollToSection("pricing")}
               className="px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-secondary/50 rounded-full transition-all"
             >
               Pricing
             </button>
             <button
-              onClick={() => window.location.href = '/docs'}
+              type="button"
+              onClick={() => (window.location.href = "/docs")}
               className="px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-secondary/50 rounded-full transition-all"
             >
               Docs
             </button>
             <button
+              type="button"
               onClick={() => scrollToSection("faq")}
               className="px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-secondary/50 rounded-full transition-all"
             >
@@ -103,14 +101,12 @@ export function LandingNavigation() {
           </div>
 
           {/* Auth CTAs - Desktop */}
-          <div className="hidden md:flex items-center gap-2">
+          <div className="hidden lg:flex items-center gap-2">
             {loading ? (
-              // Loading state
               <div className="flex items-center gap-2 px-4 py-2">
                 <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
               </div>
             ) : isAuthenticated ? (
-              // Authenticated: Show Dashboard button
               <Button size="sm" asChild className="rounded-full">
                 <Link href="/dashboard">
                   <LayoutDashboard className="mr-1.5 h-4 w-4" />
@@ -118,9 +114,13 @@ export function LandingNavigation() {
                 </Link>
               </Button>
             ) : (
-              // Unauthenticated: Show Sign In and Sign Up
               <>
-                <Button variant="ghost" size="sm" asChild className="rounded-full">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  asChild
+                  className="rounded-full"
+                >
                   <a href={getLoginUrl()}>Sign In</a>
                 </Button>
                 <Button size="sm" asChild className="rounded-full">
@@ -134,80 +134,16 @@ export function LandingNavigation() {
           </div>
 
           {/* Mobile Menu */}
-          <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
-            <SheetTrigger asChild className="md:hidden">
-              <Button
-                variant="ghost"
-                size="icon"
-                aria-label="Open navigation menu"
-                className="rounded-full"
-              >
-                <Menu className="h-5 w-5" />
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="right" className="w-72 bg-background/95 backdrop-blur-xl border-l border-border">
-              <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
-              <div className="flex flex-col gap-2 mt-8">
-                <button
-                  onClick={() => scrollToSection("features")}
-                  className="px-4 py-3 text-base font-medium text-muted-foreground hover:text-foreground hover:bg-secondary/50 rounded-xl transition-all text-left"
-                >
-                  Features
-                </button>
-                <button
-                  onClick={() => scrollToSection("pricing")}
-                  className="px-4 py-3 text-base font-medium text-muted-foreground hover:text-foreground hover:bg-secondary/50 rounded-xl transition-all text-left"
-                >
-                  Pricing
-                </button>
-                <button
-                  onClick={() => {
-                    setMobileMenuOpen(false);
-                    window.location.href = '/docs';
-                  }}
-                  className="px-4 py-3 text-base font-medium text-muted-foreground hover:text-foreground hover:bg-secondary/50 rounded-xl transition-all text-left w-full"
-                >
-                  Docs
-                </button>
-                <button
-                  onClick={() => scrollToSection("faq")}
-                  className="px-4 py-3 text-base font-medium text-muted-foreground hover:text-foreground hover:bg-secondary/50 rounded-xl transition-all text-left"
-                >
-                  FAQ
-                </button>
-
-                <div className="border-t border-border pt-4 mt-4 space-y-3">
-                  {loading ? (
-                    // Loading state
-                    <div className="flex items-center justify-center py-4">
-                      <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
-                    </div>
-                  ) : isAuthenticated ? (
-                    // Authenticated: Show Dashboard button
-                    <Button className="w-full rounded-xl" asChild>
-                      <Link href="/dashboard" onClick={() => setMobileMenuOpen(false)}>
-                        <LayoutDashboard className="mr-1.5 h-4 w-4" />
-                        Dashboard
-                      </Link>
-                    </Button>
-                  ) : (
-                    // Unauthenticated: Show Sign In and Sign Up
-                    <>
-                      <Button variant="outline" className="w-full rounded-xl" asChild>
-                        <a href={getLoginUrl()}>Sign In</a>
-                      </Button>
-                      <Button className="w-full rounded-xl" asChild>
-                        <a href={getSignUpUrl()}>
-                          Get Started
-                          <ArrowRight className="ml-1.5 h-4 w-4" />
-                        </a>
-                      </Button>
-                    </>
-                  )}
-                </div>
-              </div>
-            </SheetContent>
-          </Sheet>
+          <LandingSidebar onNavigate={scrollToSection}>
+            <Button
+              variant="ghost"
+              size="icon"
+              aria-label="Open navigation menu"
+              className="lg:hidden rounded-full -mr-2"
+            >
+              <Menu className="h-5 w-5" />
+            </Button>
+          </LandingSidebar>
         </div>
       </div>
       {/* ARIA live region for scroll announcements */}

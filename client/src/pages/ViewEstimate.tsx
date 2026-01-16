@@ -33,7 +33,14 @@ import { toast } from "sonner";
 import { Navigation } from "@/components/Navigation";
 import { ViewInvoicePageSkeleton } from "@/components/skeletons";
 
-const STATUS_CONFIG: Record<string, { label: string; variant: "default" | "secondary" | "destructive" | "outline"; icon: any }> = {
+const STATUS_CONFIG: Record<
+  string,
+  {
+    label: string;
+    variant: "default" | "secondary" | "destructive" | "outline";
+    icon: any;
+  }
+> = {
   draft: { label: "Draft", variant: "secondary", icon: FileText },
   sent: { label: "Sent", variant: "default", icon: Send },
   viewed: { label: "Viewed", variant: "outline", icon: Eye },
@@ -63,17 +70,17 @@ export default function ViewEstimate() {
       toast.success("Estimate deleted successfully");
       setLocation("/estimates");
     },
-    onError: (error) => {
+    onError: error => {
       toast.error(error.message || "Failed to delete estimate");
     },
   });
 
   const convertToInvoice = trpc.estimates.convertToInvoice.useMutation({
-    onSuccess: (result) => {
+    onSuccess: result => {
       toast.success(`Converted to invoice ${result.invoiceNumber}`);
       setLocation(`/invoices/${result.invoiceId}`);
     },
-    onError: (error) => {
+    onError: error => {
       toast.error(error.message || "Failed to convert estimate");
     },
   });
@@ -112,10 +119,13 @@ export default function ViewEstimate() {
     return (
       <div className="min-h-screen bg-background">
         <Navigation />
-        <div className="container mx-auto px-4 py-16 text-center">
-          <h1 className="text-2xl font-bold text-foreground mb-4">Estimate Not Found</h1>
+        <div className="container mx-auto px-4 md:px-6 py-12 md:py-16 text-center">
+          <h1 className="text-2xl font-bold text-foreground mb-4">
+            Estimate Not Found
+          </h1>
           <p className="text-muted-foreground mb-8">
-            The estimate you're looking for doesn't exist or you don't have permission to view it.
+            The estimate you're looking for doesn't exist or you don't have
+            permission to view it.
           </p>
           <Link href="/estimates">
             <Button>
@@ -141,7 +151,8 @@ export default function ViewEstimate() {
     );
   };
 
-  const isExpired = new Date(estimate.validUntil) < new Date() && 
+  const isExpired =
+    new Date(estimate.validUntil) < new Date() &&
     !["accepted", "rejected", "converted", "expired"].includes(estimate.status);
 
   return (
@@ -160,7 +171,9 @@ export default function ViewEstimate() {
                 </Button>
               </Link>
               <div>
-                <h1 className="text-3xl font-bold text-foreground">{estimate.estimateNumber}</h1>
+                <h1 className="text-3xl font-bold text-foreground">
+                  {estimate.estimateNumber}
+                </h1>
                 <p className="text-muted-foreground">
                   {estimate.title || "Estimate Details"}
                 </p>
@@ -173,7 +186,8 @@ export default function ViewEstimate() {
           {isExpired && (
             <div className="mb-6 p-4 bg-yellow-500/10 border border-yellow-500/20 rounded-lg">
               <p className="text-yellow-600 dark:text-yellow-400">
-                This estimate has expired. Consider creating a new one or extending the validity date.
+                This estimate has expired. Consider creating a new one or
+                extending the validity date.
               </p>
             </div>
           )}
@@ -201,7 +215,7 @@ export default function ViewEstimate() {
                 </Button>
               </>
             )}
-            
+
             {(estimate.status === "sent" || estimate.status === "viewed") && (
               <>
                 <Button
@@ -227,17 +241,19 @@ export default function ViewEstimate() {
               </>
             )}
 
-            {!estimate.convertedToInvoiceId && 
-              (estimate.status === "accepted" || estimate.status === "sent" || estimate.status === "viewed") && (
-              <Button
-                size="sm"
-                onClick={() => convertToInvoice.mutate({ id: estimateId })}
-                disabled={convertToInvoice.isPending}
-              >
-                <ArrowRight className="h-4 w-4 mr-2" />
-                Convert to Invoice
-              </Button>
-            )}
+            {!estimate.convertedToInvoiceId &&
+              (estimate.status === "accepted" ||
+                estimate.status === "sent" ||
+                estimate.status === "viewed") && (
+                <Button
+                  size="sm"
+                  onClick={() => convertToInvoice.mutate({ id: estimateId })}
+                  disabled={convertToInvoice.isPending}
+                >
+                  <ArrowRight className="h-4 w-4 mr-2" />
+                  Convert to Invoice
+                </Button>
+              )}
 
             {estimate.convertedToInvoiceId && (
               <Link href={`/invoices/${estimate.convertedToInvoiceId}`}>
@@ -269,10 +285,16 @@ export default function ViewEstimate() {
               <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <h3 className="font-semibold text-foreground mb-2">Client</h3>
-                    <p className="text-foreground">{client?.name || "Unknown"}</p>
+                    <h3 className="font-semibold text-foreground mb-2">
+                      Client
+                    </h3>
+                    <p className="text-foreground">
+                      {client?.name || "Unknown"}
+                    </p>
                     {client?.companyName && (
-                      <p className="text-muted-foreground">{client.companyName}</p>
+                      <p className="text-muted-foreground">
+                        {client.companyName}
+                      </p>
                     )}
                     {client?.email && (
                       <p className="text-muted-foreground">{client.email}</p>
@@ -286,11 +308,15 @@ export default function ViewEstimate() {
                   <div className="space-y-2">
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Issue Date</span>
-                      <span className="font-medium">{formatDate(estimate.issueDate)}</span>
+                      <span className="font-medium">
+                        {formatDate(estimate.issueDate)}
+                      </span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Valid Until</span>
-                      <span className={`font-medium ${isExpired ? "text-destructive" : ""}`}>
+                      <span
+                        className={`font-medium ${isExpired ? "text-destructive" : ""}`}
+                      >
                         {formatDate(estimate.validUntil)}
                       </span>
                     </div>
@@ -319,15 +345,24 @@ export default function ViewEstimate() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {lineItems.map((item) => (
+                    {lineItems.map(item => (
                       <TableRow key={item.id}>
                         <TableCell>{item.description}</TableCell>
-                        <TableCell className="text-right">{item.quantity}</TableCell>
                         <TableCell className="text-right">
-                          <Currency amount={Number(item.rate)} currency={estimate.currency} />
+                          {item.quantity}
                         </TableCell>
                         <TableCell className="text-right">
-                          <Currency amount={Number(item.amount)} currency={estimate.currency} bold />
+                          <Currency
+                            amount={Number(item.rate)}
+                            currency={estimate.currency}
+                          />
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <Currency
+                            amount={Number(item.amount)}
+                            currency={estimate.currency}
+                            bold
+                          />
                         </TableCell>
                       </TableRow>
                     ))}
@@ -338,26 +373,45 @@ export default function ViewEstimate() {
                 <div className="mt-6 space-y-2 border-t pt-4">
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Subtotal</span>
-                    <Currency amount={Number(estimate.subtotal)} currency={estimate.currency} />
+                    <Currency
+                      amount={Number(estimate.subtotal)}
+                      currency={estimate.currency}
+                    />
                   </div>
                   {Number(estimate.discountAmount) > 0 && (
                     <div className="flex justify-between text-destructive">
                       <span>
                         Discount
-                        {estimate.discountType === "percentage" && ` (${estimate.discountValue}%)`}
+                        {estimate.discountType === "percentage" &&
+                          ` (${estimate.discountValue}%)`}
                       </span>
-                      <span>-<Currency amount={Number(estimate.discountAmount)} currency={estimate.currency} /></span>
+                      <span>
+                        -
+                        <Currency
+                          amount={Number(estimate.discountAmount)}
+                          currency={estimate.currency}
+                        />
+                      </span>
                     </div>
                   )}
                   {Number(estimate.taxAmount) > 0 && (
                     <div className="flex justify-between">
-                      <span className="text-muted-foreground">Tax ({estimate.taxRate}%)</span>
-                      <Currency amount={Number(estimate.taxAmount)} currency={estimate.currency} />
+                      <span className="text-muted-foreground">
+                        Tax ({estimate.taxRate}%)
+                      </span>
+                      <Currency
+                        amount={Number(estimate.taxAmount)}
+                        currency={estimate.currency}
+                      />
                     </div>
                   )}
                   <div className="flex justify-between text-lg pt-2 border-t">
                     <span className="font-bold">Total</span>
-                    <Currency amount={Number(estimate.total)} currency={estimate.currency} bold />
+                    <Currency
+                      amount={Number(estimate.total)}
+                      currency={estimate.currency}
+                      bold
+                    />
                   </div>
                 </div>
               </CardContent>
@@ -372,7 +426,9 @@ export default function ViewEstimate() {
                 <CardContent className="space-y-4">
                   {estimate.notes && (
                     <div>
-                      <h4 className="font-medium text-foreground mb-1">Notes</h4>
+                      <h4 className="font-medium text-foreground mb-1">
+                        Notes
+                      </h4>
                       <p className="text-muted-foreground whitespace-pre-line">
                         {estimate.notes}
                       </p>
@@ -380,7 +436,9 @@ export default function ViewEstimate() {
                   )}
                   {estimate.terms && (
                     <div>
-                      <h4 className="font-medium text-foreground mb-1">Terms & Conditions</h4>
+                      <h4 className="font-medium text-foreground mb-1">
+                        Terms & Conditions
+                      </h4>
                       <p className="text-muted-foreground whitespace-pre-line">
                         {estimate.terms}
                       </p>

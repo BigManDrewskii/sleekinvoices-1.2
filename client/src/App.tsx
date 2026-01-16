@@ -39,7 +39,10 @@ const Subscription = lazy(() => import("./pages/Subscription"));
 const SubscriptionSuccess = lazy(() => import("./pages/SubscriptionSuccess"));
 const SubscriptionHistory = lazy(() => import("./pages/SubscriptionHistory"));
 const RecurringInvoices = lazy(() => import("./pages/RecurringInvoices"));
-const CreateRecurringInvoice = lazy(() => import("./pages/CreateRecurringInvoice"));
+const CreateRecurringInvoice = lazy(
+  () => import("./pages/CreateRecurringInvoice")
+);
+const EditRecurringInvoice = lazy(() => import("./pages/EditRecurringInvoice"));
 const Templates = lazy(() => import("./pages/Templates"));
 const Expenses = lazy(() => import("./pages/Expenses"));
 const Payments = lazy(() => import("./pages/Payments"));
@@ -61,7 +64,9 @@ function LoadingFallback() {
     <div className="min-h-screen flex items-center justify-center bg-background">
       <div className="flex flex-col items-center gap-6 opacity-70">
         <GearLoader size="lg" />
-        <p className="text-sm text-muted-foreground animate-pulse">Loading...</p>
+        <p className="text-sm text-muted-foreground animate-pulse">
+          Loading...
+        </p>
       </div>
     </div>
   );
@@ -87,37 +92,50 @@ function Router() {
           <Route path="/refund-policy" component={RefundPolicy} />
 
           {/* Authenticated routes - lazy loaded */}
-        <Route path={"/dashboard"} component={Dashboard} />
-        <Route path={"/clients"} component={Clients} />
-        <Route path={"/invoices"} component={Invoices} />
-        <Route path={"/invoices/create"} component={CreateInvoice} />
-        <Route path={"/invoices/guided"} component={GuidedInvoiceCreator} />
-        <Route path={"/invoices/:id/edit"} component={EditInvoice} />
-        <Route path={"/invoices/:id"} component={ViewInvoice} />
-        <Route path={"/analytics"} component={Analytics} />
-        <Route path={"/settings"} component={Settings} />
-        <Route path={"/subscription"} component={Subscription} />
-        <Route path={"/subscription/success"} component={SubscriptionSuccess} />
-        <Route path={"/subscription/history"} component={SubscriptionHistory} />
-        <Route path={"/recurring-invoices"} component={RecurringInvoices} />
-        <Route path={"/recurring-invoices/create"} component={CreateRecurringInvoice} />
-        <Route path={"/templates"} component={Templates} />
-        <Route path={"/expenses"} component={Expenses} />
-        <Route path={"/payments"} component={Payments} />
-        <Route path={"/products"} component={Products} />
-        <Route path={"/estimates"} component={Estimates} />
-        <Route path={"/estimates/create"} component={CreateEstimate} />
-        <Route path={"/estimates/:id/edit"} component={EditEstimate} />
-        <Route path={"/estimates/:id"} component={ViewEstimate} />
-        <Route path={"/quickbooks/callback"} component={QuickBooksCallback} />
-        <Route path={"/invoices/batch"} component={BatchInvoice} />
-        <Route path={"/email-history"} component={EmailHistory} />
-        
-        {/* 404 - eager loaded */}
-        <Route path={"/404"} component={NotFound} />
-        <Route component={NotFound} />
-      </Switch>
-    </Suspense>
+          <Route path={"/dashboard"} component={Dashboard} />
+          <Route path={"/clients"} component={Clients} />
+          <Route path={"/invoices"} component={Invoices} />
+          <Route path={"/invoices/create"} component={CreateInvoice} />
+          <Route path={"/invoices/guided"} component={GuidedInvoiceCreator} />
+          <Route path={"/invoices/:id/edit"} component={EditInvoice} />
+          <Route path={"/invoices/:id"} component={ViewInvoice} />
+          <Route path={"/analytics"} component={Analytics} />
+          <Route path={"/settings"} component={Settings} />
+          <Route path={"/subscription"} component={Subscription} />
+          <Route
+            path={"/subscription/success"}
+            component={SubscriptionSuccess}
+          />
+          <Route
+            path={"/subscription/history"}
+            component={SubscriptionHistory}
+          />
+          <Route path={"/recurring-invoices"} component={RecurringInvoices} />
+          <Route
+            path={"/recurring-invoices/create"}
+            component={CreateRecurringInvoice}
+          />
+          <Route
+            path={"/recurring-invoices/:id/edit"}
+            component={EditRecurringInvoice}
+          />
+          <Route path={"/templates"} component={Templates} />
+          <Route path={"/expenses"} component={Expenses} />
+          <Route path={"/payments"} component={Payments} />
+          <Route path={"/products"} component={Products} />
+          <Route path={"/estimates"} component={Estimates} />
+          <Route path={"/estimates/create"} component={CreateEstimate} />
+          <Route path={"/estimates/:id/edit"} component={EditEstimate} />
+          <Route path={"/estimates/:id"} component={ViewEstimate} />
+          <Route path={"/quickbooks/callback"} component={QuickBooksCallback} />
+          <Route path={"/invoices/batch"} component={BatchInvoice} />
+          <Route path={"/email-history"} component={EmailHistory} />
+
+          {/* 404 - eager loaded */}
+          <Route path={"/404"} component={NotFound} />
+          <Route component={NotFound} />
+        </Switch>
+      </Suspense>
     </>
   );
 }

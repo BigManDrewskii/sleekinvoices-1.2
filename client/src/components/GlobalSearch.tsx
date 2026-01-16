@@ -53,7 +53,7 @@ export function GlobalSearch() {
 
     const filteredInvoices = (invoices || [])
       .filter(
-        (inv) =>
+        inv =>
           inv.invoiceNumber.toLowerCase().includes(query) ||
           inv.client.name.toLowerCase().includes(query) ||
           inv.total.toString().includes(query)
@@ -62,10 +62,11 @@ export function GlobalSearch() {
 
     const filteredClients = (clients || [])
       .filter(
-        (client) =>
+        client =>
           client.name.toLowerCase().includes(query) ||
           (client.email && client.email.toLowerCase().includes(query)) ||
-          (client.companyName && client.companyName.toLowerCase().includes(query))
+          (client.companyName &&
+            client.companyName.toLowerCase().includes(query))
       )
       .slice(0, 5);
 
@@ -110,12 +111,12 @@ export function GlobalSearch() {
   return (
     <>
       {/* Backdrop */}
-      <div 
+      <div
         className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm animate-in fade-in-0 duration-200"
         onClick={handleClose}
         aria-hidden="true"
       />
-      
+
       {/* Search Modal */}
       <div className="fixed inset-x-0 top-0 z-50 flex items-start justify-center pt-[10vh] sm:pt-[15vh] px-4 sm:px-6 md:px-8">
         <div
@@ -136,7 +137,7 @@ export function GlobalSearch() {
                 aria-label="Search invoices and clients"
                 placeholder="Search invoices, clients..."
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={e => setSearchQuery(e.target.value)}
                 className="flex-1 border-0 bg-transparent px-2 py-1 text-[15px] placeholder:text-muted-foreground/60 focus-visible:ring-0 focus-visible:ring-offset-0 h-8"
               />
               <button
@@ -154,15 +155,19 @@ export function GlobalSearch() {
                 <CommandEmpty className="px-4 sm:px-6 md:px-8 py-12 text-center">
                   <div className="flex flex-col items-center gap-2">
                     <Search className="h-10 w-10 text-muted-foreground/30" />
-                    <p className="text-sm text-muted-foreground">No results found for "{searchQuery}"</p>
-                    <p className="text-xs text-muted-foreground/70">Try a different search term</p>
+                    <p className="text-sm text-muted-foreground">
+                      No results found for "{searchQuery}"
+                    </p>
+                    <p className="text-xs text-muted-foreground/70">
+                      Try a different search term
+                    </p>
                   </div>
                 </CommandEmpty>
               )}
 
               {results.invoices.length > 0 && (
                 <CommandGroup heading="Invoices" className="p-3 sm:p-4">
-                  {results.invoices.map((invoice) => (
+                  {results.invoices.map(invoice => (
                     <CommandItem
                       key={invoice.id}
                       onSelect={() => handleSelectInvoice(invoice.id)}
@@ -173,7 +178,9 @@ export function GlobalSearch() {
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center justify-between gap-2">
-                          <span className="font-medium truncate">{invoice.invoiceNumber}</span>
+                          <span className="font-medium truncate">
+                            {invoice.invoiceNumber}
+                          </span>
                           <span className="text-sm font-medium text-primary">
                             {formatCurrency(invoice.total)}
                           </span>
@@ -190,7 +197,7 @@ export function GlobalSearch() {
 
               {results.clients.length > 0 && (
                 <CommandGroup heading="Clients" className="p-3 sm:p-4">
-                  {results.clients.map((client) => (
+                  {results.clients.map(client => (
                     <CommandItem
                       key={client.id}
                       onSelect={() => handleSelectClient(client.id)}
@@ -200,9 +207,13 @@ export function GlobalSearch() {
                         <Users className="h-4 w-4" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <span className="font-medium truncate block">{client.name}</span>
+                        <span className="font-medium truncate block">
+                          {client.name}
+                        </span>
                         {client.email && (
-                          <p className="text-xs text-muted-foreground truncate">{client.email}</p>
+                          <p className="text-xs text-muted-foreground truncate">
+                            {client.email}
+                          </p>
                         )}
                       </div>
                       <ArrowRight className="h-4 w-4 text-muted-foreground/50 opacity-0 group-hover:opacity-100 group-data-[selected=true]:opacity-100 transition-opacity shrink-0" />
@@ -219,8 +230,12 @@ export function GlobalSearch() {
                       <Search className="h-5 w-5 text-muted-foreground" />
                     </div>
                     <div>
-                      <p className="text-sm text-muted-foreground">Search for invoices and clients</p>
-                      <p className="text-xs text-muted-foreground/70 mt-1">Type to start searching</p>
+                      <p className="text-sm text-muted-foreground">
+                        Search for invoices and clients
+                      </p>
+                      <p className="text-xs text-muted-foreground/70 mt-1">
+                        Type to start searching
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -228,19 +243,25 @@ export function GlobalSearch() {
             </CommandList>
 
             {/* Footer */}
-            <div className="flex items-center justify-between px-4 sm:px-5 md:px-6 py-2.5 border-t border-border/50 bg-muted/30 text-xs text-muted-foreground">
-              <div className="flex items-center gap-3">
-                <span className="flex items-center gap-1">
-                  <kbd className="px-1.5 py-0.5 rounded bg-muted border border-border font-mono">↑↓</kbd>
+            <div className="flex items-center justify-between px-4 sm:px-5 md:px-6 py-3 border-t border-border/50 bg-muted/30 text-xs text-muted-foreground">
+              <div className="flex items-center gap-4">
+                <span className="flex items-center gap-2">
+                  <kbd className="px-2 py-1 rounded bg-muted border border-border font-mono">
+                    ↑↓
+                  </kbd>
                   <span>Navigate</span>
                 </span>
-                <span className="flex items-center gap-1">
-                  <kbd className="px-1.5 py-0.5 rounded bg-muted border border-border font-mono">↵</kbd>
+                <span className="flex items-center gap-2">
+                  <kbd className="px-2 py-1 rounded bg-muted border border-border font-mono">
+                    ↵
+                  </kbd>
                   <span>Select</span>
                 </span>
               </div>
-              <span className="flex items-center gap-1">
-                <kbd className="px-1.5 py-0.5 rounded bg-muted border border-border font-mono">Esc</kbd>
+              <span className="flex items-center gap-2">
+                <kbd className="px-2 py-1 rounded bg-muted border border-border font-mono">
+                  Esc
+                </kbd>
                 <span>Close</span>
               </span>
             </div>

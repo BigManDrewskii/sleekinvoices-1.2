@@ -1,11 +1,23 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useId } from "react";
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { toast } from "sonner";
 import { useLocation } from "wouter";
 import { ArrowLeft, Plus, Trash2 } from "lucide-react";
@@ -17,24 +29,42 @@ import { InvoiceFormCalculations } from "@/components/invoices/InvoiceFormCalcul
 export default function CreateRecurringInvoice() {
   const [, setLocation] = useLocation();
   const [clientId, setClientId] = useState<number | undefined>();
-  const [frequency, setFrequency] = useState<"weekly" | "monthly" | "yearly">("monthly");
-  const [startDate, setStartDate] = useState(new Date().toISOString().split("T")[0]);
+  const [frequency, setFrequency] = useState<"weekly" | "monthly" | "yearly">(
+    "monthly"
+  );
+  const [startDate, setStartDate] = useState(
+    new Date().toISOString().split("T")[0]
+  );
   const [endDate, setEndDate] = useState("");
   const [invoiceNumberPrefix, setInvoiceNumberPrefix] = useState("INV");
   const [lineItems, setLineItems] = useState<LineItem[]>([
-    { id: crypto.randomUUID(), description: "", quantity: 1, rate: 0 }
+    { id: crypto.randomUUID(), description: "", quantity: 1, rate: 0 },
   ]);
   const [taxRate, setTaxRate] = useState(0);
-  const [discountType, setDiscountType] = useState<"percentage" | "fixed">("percentage");
+  const [discountType, setDiscountType] = useState<"percentage" | "fixed">(
+    "percentage"
+  );
   const [discountValue, setDiscountValue] = useState(0);
   const [notes, setNotes] = useState("");
   const [paymentTerms, setPaymentTerms] = useState("Net 30");
 
+  // Form field IDs
+  const ids = {
+    invoiceNumberPrefix: useId(),
+    startDate: useId(),
+    endDate: useId(),
+    paymentTerms: useId(),
+    notes: useId(),
+  };
+
   const createMutation = trpc.recurringInvoices.create.useMutation();
 
   const calculations = useMemo(() => {
-    const subtotal = lineItems.reduce((sum, item) => sum + (item.quantity * item.rate), 0);
-    
+    const subtotal = lineItems.reduce(
+      (sum, item) => sum + item.quantity * item.rate,
+      0
+    );
+
     let discountAmount = 0;
     if (discountValue > 0) {
       if (discountType === "percentage") {
@@ -43,16 +73,19 @@ export default function CreateRecurringInvoice() {
         discountAmount = discountValue;
       }
     }
-    
+
     const afterDiscount = subtotal - discountAmount;
     const taxAmount = (afterDiscount * taxRate) / 100;
     const total = afterDiscount + taxAmount;
-    
+
     return { subtotal, discountAmount, taxAmount, total };
   }, [lineItems, taxRate, discountType, discountValue]);
 
   const handleAddLineItem = () => {
-    setLineItems([...lineItems, { id: crypto.randomUUID(), description: "", quantity: 1, rate: 0 }]);
+    setLineItems([
+      ...lineItems,
+      { id: crypto.randomUUID(), description: "", quantity: 1, rate: 0 },
+    ]);
   };
 
   const handleRemoveLineItem = (index: number) => {
@@ -77,7 +110,11 @@ export default function CreateRecurringInvoice() {
       return;
     }
 
-    if (lineItems.some(item => !item.description || item.quantity <= 0 || item.rate <= 0)) {
+    if (
+      lineItems.some(
+        item => !item.description || item.quantity <= 0 || item.rate <= 0
+      )
+    ) {
       toast.error("Please fill in all line items");
       return;
     }
@@ -119,130 +156,190 @@ export default function CreateRecurringInvoice() {
         </Button>
       }
     >
-
       <form onSubmit={handleSubmit} className="space-y-6">
-        <Card className="p-6">
-          <h2 className="text-lg font-semibold mb-4">Schedule Settings</h2>
-          
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="frequency">Frequency</Label>
-              <Select value={frequency} onValueChange={(v: any) => setFrequency(v)}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="weekly">Weekly</SelectItem>
-                  <SelectItem value="monthly">Monthly</SelectItem>
-                  <SelectItem value="yearly">Yearly</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+        <Card>
+          <CardHeader>
+            <CardTitle>Schedule Settings</CardTitle>
+            <CardDescription>
+              Configure how often this invoice should be generated and sent
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="frequency">Frequency</Label>
+                <Select
+                  value={frequency}
+                  onValueChange={(v: any) => setFrequency(v)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select frequency" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="weekly">Weekly</SelectItem>
+                    <SelectItem value="monthly">Monthly</SelectItem>
+                    <SelectItem value="yearly">Yearly</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
 
-            <div>
-              <Label htmlFor="invoiceNumberPrefix">Invoice Number Prefix</Label>
-              <Input
-                id="invoiceNumberPrefix"
-                value={invoiceNumberPrefix}
-                onChange={(e) => setInvoiceNumberPrefix(e.target.value)}
-                placeholder="INV"
-                required
-              />
-            </div>
+              <div className="space-y-2">
+                <Label htmlFor={ids.invoiceNumberPrefix}>
+                  Invoice Number Prefix
+                </Label>
+                <Input
+                  id={ids.invoiceNumberPrefix}
+                  value={invoiceNumberPrefix}
+                  onChange={e => setInvoiceNumberPrefix(e.target.value)}
+                  placeholder="INV"
+                  required
+                />
+              </div>
 
-            <div>
-              <Label htmlFor="startDate">Start Date</Label>
-              <Input
-                id="startDate"
-                type="date"
-                value={startDate}
-                onChange={(e) => setStartDate(e.target.value)}
-                required
-              />
-            </div>
+              <div className="space-y-2">
+                <Label htmlFor={ids.startDate}>Start Date</Label>
+                <Input
+                  id={ids.startDate}
+                  type="date"
+                  value={startDate}
+                  onChange={e => setStartDate(e.target.value)}
+                  required
+                />
+              </div>
 
-            <div>
-              <Label htmlFor="endDate">End Date (Optional)</Label>
-              <Input
-                id="endDate"
-                type="date"
-                value={endDate}
-                onChange={(e) => setEndDate(e.target.value)}
-              />
+              <div className="space-y-2">
+                <Label htmlFor={ids.endDate}>End Date (Optional)</Label>
+                <Input
+                  id={ids.endDate}
+                  type="date"
+                  value={endDate}
+                  onChange={e => setEndDate(e.target.value)}
+                  placeholder="Leave blank for no end date"
+                />
+              </div>
             </div>
-          </div>
+          </CardContent>
         </Card>
 
-        <Card className="p-6">
-          <h2 className="text-lg font-semibold mb-4">Client</h2>
-          <ClientSelector value={clientId ?? null} onChange={(v) => setClientId(v ?? undefined)} />
+        <Card>
+          <CardHeader>
+            <CardTitle>Client</CardTitle>
+            <CardDescription>
+              Select the client who will receive these recurring invoices
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <ClientSelector
+              value={clientId ?? null}
+              onChange={v => setClientId(v ?? undefined)}
+            />
+          </CardContent>
         </Card>
 
-        <Card className="p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold">Line Items</h2>
-            <Button type="button" variant="outline" size="sm" onClick={handleAddLineItem}>
-              <Plus className="w-4 h-4 mr-2" />
-              Add Item
-            </Button>
-          </div>
+        <Card>
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle>Line Items</CardTitle>
+                <CardDescription>
+                  Products or services to include on each invoice
+                </CardDescription>
+              </div>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={handleAddLineItem}
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Add Item
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="hidden md:grid grid-cols-12 gap-4 text-sm font-medium text-muted-foreground pb-2 border-b">
+              <div className="col-span-5">Description</div>
+              <div className="col-span-2">Quantity</div>
+              <div className="col-span-2">Rate</div>
+              <div className="col-span-2 text-right">Amount</div>
+              <div className="col-span-1"></div>
+            </div>
 
-          <div className="space-y-2">
-            {lineItems.map((item, index) => (
-              <LineItemRow
-                key={item.id}
-                item={item}
-                onChange={(updatedItem) => handleLineItemChange(index, updatedItem)}
-                onDelete={() => handleRemoveLineItem(index)}
-                canDelete={lineItems.length > 1}
-              />
-            ))}
-          </div>
+            <div className="space-y-3">
+              {lineItems.map((item, index) => (
+                <LineItemRow
+                  key={item.id}
+                  item={item}
+                  onChange={updatedItem =>
+                    handleLineItemChange(index, updatedItem)
+                  }
+                  onDelete={() => handleRemoveLineItem(index)}
+                  canDelete={lineItems.length > 1}
+                />
+              ))}
+            </div>
+          </CardContent>
         </Card>
 
-        <InvoiceFormCalculations
-          subtotal={calculations.subtotal}
-          taxRate={taxRate}
-          onTaxRateChange={setTaxRate}
-          discountType={discountType}
-          onDiscountTypeChange={setDiscountType}
-          discountValue={discountValue}
-          onDiscountValueChange={setDiscountValue}
-          discountAmount={calculations.discountAmount}
-          taxAmount={calculations.taxAmount}
-          total={calculations.total}
-        />
+        <Card>
+          <CardHeader>
+            <CardTitle>Totals</CardTitle>
+            <CardDescription>
+              Tax, discounts, and calculations for each invoice
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <InvoiceFormCalculations
+              subtotal={calculations.subtotal}
+              taxRate={taxRate}
+              onTaxRateChange={setTaxRate}
+              discountType={discountType}
+              onDiscountTypeChange={setDiscountType}
+              discountValue={discountValue}
+              onDiscountValueChange={setDiscountValue}
+              discountAmount={calculations.discountAmount}
+              taxAmount={calculations.taxAmount}
+              total={calculations.total}
+            />
+          </CardContent>
+        </Card>
 
-        <Card className="p-6">
-          <h2 className="text-lg font-semibold mb-4">Additional Information</h2>
-          
-          <div className="space-y-4">
-            <div>
-              <Label htmlFor="paymentTerms">Payment Terms</Label>
+        <Card>
+          <CardHeader>
+            <CardTitle>Additional Information</CardTitle>
+            <CardDescription>
+              Payment terms and notes to include on each invoice
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor={ids.paymentTerms}>Payment Terms</Label>
               <Input
-                id="paymentTerms"
+                id={ids.paymentTerms}
                 value={paymentTerms}
-                onChange={(e) => setPaymentTerms(e.target.value)}
+                onChange={e => setPaymentTerms(e.target.value)}
                 placeholder="Net 30"
               />
             </div>
 
-            <div>
-              <Label htmlFor="notes">Notes</Label>
+            <div className="space-y-2">
+              <Label htmlFor={ids.notes}>Notes</Label>
               <Textarea
-                id="notes"
+                id={ids.notes}
                 value={notes}
-                onChange={(e) => setNotes(e.target.value)}
+                onChange={e => setNotes(e.target.value)}
                 placeholder="Additional notes for the invoice..."
                 rows={3}
               />
             </div>
-          </div>
+          </CardContent>
         </Card>
 
-        <div className="flex gap-3">
+        <div className="flex gap-3 pt-4">
           <Button type="submit" disabled={createMutation.isPending}>
-            {createMutation.isPending ? "Creating..." : "Create Recurring Invoice"}
+            {createMutation.isPending
+              ? "Creating..."
+              : "Create Recurring Invoice"}
           </Button>
           <Button
             type="button"
