@@ -1,7 +1,5 @@
 @import "tailwindcss";
 @import "tw-animate-css";
-@import "./styles/design-system.css";
-@import "./styles/responsive.css";
 
 /* SUSE Mono - For numerical displays (Normal: 400, Bold: 700) */
 @import url("https://fonts.googleapis.com/css2?family=SUSE+Mono:wght@400;700&display=swap");
@@ -20,6 +18,24 @@
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
+
+  /* Figma Design Tokens */
+  --nav-bg: rgba(17, 29, 34, 0.95);
+  --nav-shadow-primary: 0px 1.5px 2.25px -0.38px rgba(0, 0, 0, 0.03);
+  --nav-shadow-secondary: 0px 4px 6px -1.2px rgba(0, 0, 0, 0.3);
+  --nav-border-color: #374d58;
+  --nav-border-radius: 16px;
+  --nav-backdrop-blur: 8px;
+  --nav-font-family: "Ubuntu", var(--font-body);
+  --nav-font-size: 14px;
+  --nav-text-color: #94a3b8;
+  --nav-link-active-bg: #252f33;
+  --nav-link-text: #f1f6f9;
+  --nav-link-mobile-bg: #a3b1b8;
+  --nav-button-bg: rgba(255, 255, 255, 0.1);
+  --nav-button-border: rgba(95, 111, 255, 0.5);
+  --nav-button-height: 44px;
+  --nav-button-radius: 8px;
 
   /* Colors */
   --color-background: var(--background);
@@ -228,6 +244,138 @@
     min-width: 0;
   }
 
+  /* ========================================
+     Page Layout System - CRITICAL
+     ======================================== */
+
+  /* Main page wrapper - outermost container for all pages */
+  .page-wrapper {
+    @apply min-h-screen w-full;
+  }
+
+  /* Page content area - main content container with responsive padding */
+  .page-content {
+    @apply w-full max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8;
+  }
+
+  /* Vertical section stacking - consistent gap between major sections */
+  .section-stack {
+    @apply space-y-6 sm:space-y-8;
+  }
+
+  /* Page header component */
+  .page-header {
+    @apply mb-6 sm:mb-8;
+  }
+
+  .page-header-title {
+    @apply text-2xl sm:text-3xl font-bold text-foreground tracking-tight;
+  }
+
+  .page-header-subtitle {
+    @apply text-sm sm:text-base text-muted-foreground mt-1;
+  }
+
+  /* ========================================
+     Navigation System
+     ======================================== */
+
+  /* ========================================
+     Touch & Interaction
+     ======================================== */
+
+  /* Ensures minimum 44x44px touch targets for mobile accessibility (WCAG 2.5.5) */
+  .touch-target {
+    @apply min-h-[44px] min-w-[44px];
+  }
+
+  /* ========================================
+     Typography & Content
+     ======================================== */
+
+  /* Invoice number display with numeric font */
+  .invoice-number {
+    font-family: var(--font-numeric);
+    font-weight: 400;
+    font-feature-settings:
+      "tnum" 1,
+      "lnum" 1;
+    letter-spacing: -0.025em; /* tracking-tight */
+  }
+
+  /* Metric value display with bold numeric font */
+  .metric-value {
+    font-family: var(--font-numeric);
+    font-weight: 700;
+    font-feature-settings:
+      "tnum" 1,
+      "lnum" 1;
+    font-size: 1.875rem; /* text-3xl */
+    letter-spacing: -0.025em; /* tracking-tight */
+  }
+
+  /* Markdown content styling */
+  .markdown-content {
+    /* Note: prose classes require @tailwindcss/typography plugin */
+    max-width: none;
+  }
+
+  .markdown-content h1 {
+    @apply text-2xl font-bold mb-4 mt-6;
+  }
+
+  .markdown-content h2 {
+    @apply text-xl font-semibold mb-3 mt-5;
+  }
+
+  .markdown-content h3 {
+    @apply text-lg font-semibold mb-2 mt-4;
+  }
+
+  .markdown-content p {
+    @apply mb-4 leading-relaxed;
+  }
+
+  .markdown-content ul,
+  .markdown-content ol {
+    @apply mb-4 ml-6;
+  }
+
+  .markdown-content li {
+    @apply mb-2;
+  }
+
+  .markdown-content code {
+    @apply bg-muted px-1.5 py-0.5 rounded text-sm font-mono;
+  }
+
+  .markdown-content pre {
+    @apply bg-muted p-4 rounded-lg overflow-x-auto mb-4;
+  }
+
+  .markdown-content blockquote {
+    @apply border-l-4 border-primary pl-4 italic my-4;
+  }
+
+  /* ========================================
+     Animations
+     ======================================== */
+
+  /* Subtle bounce animation for mascot/success images */
+  @keyframes bounce-subtle {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-8px);
+    }
+  }
+
+  .animate-bounce-subtle {
+    animation: bounce-subtle 2s ease-in-out infinite;
+  }
+
   /* Status badges for invoices - tweakcn style */
   .status-draft {
     @apply bg-slate-500/10 text-slate-400;
@@ -280,6 +428,12 @@
     font-feature-settings:
       "tnum" 1,
       "lnum" 1;
+  }
+
+  /* Apply numeric font to all numbers */
+  .font-numeric,
+  .font-numeric-bold {
+    font-family: var(--font-numeric) !important;
   }
 
   /* Apply to all numerical contexts */

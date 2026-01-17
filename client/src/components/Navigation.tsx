@@ -13,28 +13,34 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import { UserAvatar } from "@/components/UserAvatar";
 import {
   Menu,
   User,
+  Users,
   Settings,
   LogOut,
+  LayoutDashboard,
   FileText,
-  X,
-  FileCheck,
   RefreshCw,
   CreditCard,
   Receipt,
   Package,
   BarChart3,
   ChevronDown,
-  Users,
   LayoutTemplate,
-  LayoutDashboard,
+  LayoutDashboard as LayoutDashboardIcon,
   Sparkles,
   Mail,
   Search,
   BookOpen,
+  FileCheck,
 } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import { Plus } from "@phosphor-icons/react";
@@ -45,10 +51,13 @@ import { toast } from "sonner";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { useKeyboardShortcuts } from "@/contexts/KeyboardShortcutsContext";
 import { cn } from "@/lib/utils";
+import { useScreenSize } from "@/hooks/useScreenSize";
 
 // Navigation structure with grouped items and icons
 const navigationConfig = {
-  direct: [{ href: "/dashboard", label: "Dashboard", icon: LayoutDashboard }],
+  direct: [
+    { href: "/dashboard", label: "Dashboard", icon: LayoutDashboardIcon },
+  ],
   billing: {
     label: "Billing",
     items: [
@@ -112,42 +121,12 @@ const navigationConfig = {
   docs: { href: "/docs", label: "Docs", icon: BookOpen },
 };
 
-// Custom hook for scroll-based navbar effects
-function useScrollEffect() {
-  const [scrolled, setScrolled] = useState(false);
-  const [scrollDirection, setScrollDirection] = useState<"up" | "down">("up");
-  const [lastScrollY, setLastScrollY] = useState(0);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      const currentScrollY = window.scrollY;
-
-      // Determine if scrolled past threshold
-      setScrolled(currentScrollY > 10);
-
-      // Determine scroll direction
-      if (currentScrollY > lastScrollY && currentScrollY > 50) {
-        setScrollDirection("down");
-      } else {
-        setScrollDirection("up");
-      }
-
-      setLastScrollY(currentScrollY);
-    };
-
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, [lastScrollY]);
-
-  return { scrolled, scrollDirection };
-}
-
 export function Navigation() {
   const [location, setLocation] = useLocation();
   const { user } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const { scrolled, scrollDirection } = useScrollEffect();
   const { setSearchOpen } = useKeyboardShortcuts();
+  const size = useScreenSize();
 
   const logout = trpc.auth.logout.useMutation({
     onSuccess: () => {
@@ -173,20 +152,40 @@ export function Navigation() {
     [location]
   );
 
+  // Search Button with ⌘K badge
+  const SearchButton = () => (
+    <Button
+      type="button"
+      variant="outline"
+      size="sm"
+      onClick={() => setSearchOpen(true)}
+      className="h-11 min-w-[44px] w-11 lg:w-auto rounded-[8.4px] px-3 lg:px-4 gap-2 text-[var(--nav-text-color)] border border-[rgba(55,77,88,0.3)] hover:bg-accent/30 hover:border-accent/50 transition-all"
+      aria-label="Open search (⌘K)"
+    >
+      <Search className="h-4 w-4 flex-shrink-0" />
+      <span className="text-sm font-medium hidden lg:inline">Search</span>
+      <span className="h-5 rounded px-1.5 bg-[rgba(25,39,48,0.5)] border border-[rgba(55,77,88,0.5)] text-[7.5px] font-medium font-sans hidden lg:inline-block">
+        ⌘K
+      </span>
+    </Button>
+  );
+
   // Quick Actions Menu with enhanced styling
   const QuickActionsMenu = () => (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button
+          type="button"
           size="sm"
           variant="outline"
-          className="navbar-quick-action h-11 min-w-[44px] min-h-[44px] gap-1.5 px-2 sm:px-3 w-11 sm:w-auto group relative overflow-hidden border-primary/50 hover:border-primary hover:bg-primary/10 text-primary transition-all duration-200"
+          className="h-11 min-w-[44px] w-11 lg:w-auto rounded-[8.4px] px-3 lg:px-4 gap-2 text-[var(--nav-text-color)] border-[var(--nav-button-border)] hover:bg-accent/30 transition-all"
         >
           <Plus
             weight="bold"
-            className="h-4 w-4 flex-shrink-0 transition-transform duration-200 group-hover:rotate-90"
+            className="h-4 w-4 flex-shrink-0"
           />
-          <span className="hidden md:inline">New</span>
+          <span className="text-sm font-medium hidden lg:inline">New</span>
+          <ChevronDown className="h-3 w-3 opacity-60 hidden lg:inline" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent
@@ -265,597 +264,433 @@ export function Navigation() {
     </DropdownMenu>
   );
 
-  // Desktop & Tablet Navigation - unified snappy UX with DropdownMenu
-  // Shows at lg (1024px+) for full nav, tablet gets hamburger menu for better UX
-  const DesktopTabletNav = () => (
-    <div className="navbar-desktop-tablet-nav">
-      <Link
-        href="/dashboard"
-        className={cn(
-          "flex items-center gap-1.5 px-2.5 lg:px-3 xl:px-4 py-2 text-sm font-medium rounded-lg transition-all min-h-[40px]",
-          isActive("/dashboard")
-            ? "bg-accent text-foreground"
-            : "text-muted-foreground hover:bg-accent/50 hover:text-foreground"
-        )}
-      >
-        <NavigationIcon
-          icon={LayoutDashboard}
-          isActive={isActive("/dashboard")}
-          className="h-4 w-4 flex-shrink-0"
-        />
-        <span className="whitespace-nowrap">Dashboard</span>
-      </Link>
-
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <button
-            className={cn(
-              "flex items-center gap-1.5 px-2.5 lg:px-3 xl:px-4 py-2 text-sm font-medium rounded-lg transition-all min-h-[40px]",
-              isGroupActive(navigationConfig.billing.items)
-                ? "bg-accent text-foreground"
-                : "text-muted-foreground hover:bg-accent/50 hover:text-foreground"
-            )}
-          >
-            <NavigationIcon
-              icon={FileText}
-              isActive={isGroupActive(navigationConfig.billing.items)}
-              className="h-4 w-4 flex-shrink-0"
-            />
-            <span className="whitespace-nowrap">Billing</span>
-            <ChevronDown className="h-3 w-3 opacity-60" aria-hidden="true" />
-          </button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="start" className="w-48">
-          {navigationConfig.billing.items.map(item => (
-            <DropdownMenuItem key={item.href} asChild>
-              <Link href={item.href} className="flex items-center gap-2">
-                <NavigationIcon
-                  icon={item.icon}
-                  isActive={isActive(item.href)}
-                  className="h-4 w-4"
-                />
-                {item.label}
-              </Link>
-            </DropdownMenuItem>
-          ))}
-        </DropdownMenuContent>
-      </DropdownMenu>
-
-      <Link
-        href="/clients"
-        className={cn(
-          "flex items-center gap-1.5 px-2.5 lg:px-3 xl:px-4 py-2 text-sm font-medium rounded-lg transition-all min-h-[40px]",
-          isActive("/clients")
-            ? "bg-accent text-foreground"
-            : "text-muted-foreground hover:bg-accent/50 hover:text-foreground"
-        )}
-      >
-        <NavigationIcon
-          icon={Users}
-          isActive={isActive("/clients")}
-          className="h-4 w-4 flex-shrink-0"
-        />
-        <span className="whitespace-nowrap">Clients</span>
-      </Link>
-
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <button
-            className={cn(
-              "flex items-center gap-1.5 px-2.5 lg:px-3 xl:px-4 py-2 text-sm font-medium rounded-lg transition-all min-h-[40px]",
-              isGroupActive(navigationConfig.finances.items)
-                ? "bg-accent text-foreground"
-                : "text-muted-foreground hover:bg-accent/50 hover:text-foreground"
-            )}
-          >
-            <NavigationIcon
-              icon={BarChart3}
-              isActive={isGroupActive(navigationConfig.finances.items)}
-              className="h-4 w-4 flex-shrink-0"
-            />
-            <span className="whitespace-nowrap">Finances</span>
-            <ChevronDown className="h-3 w-3 opacity-60" aria-hidden="true" />
-          </button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="start" className="w-48">
-          {navigationConfig.finances.items.map(item => (
-            <DropdownMenuItem key={item.href} asChild>
-              <Link href={item.href} className="flex items-center gap-2">
-                <NavigationIcon
-                  icon={item.icon}
-                  isActive={isActive(item.href)}
-                  className="h-4 w-4"
-                />
-                {item.label}
-              </Link>
-            </DropdownMenuItem>
-          ))}
-        </DropdownMenuContent>
-      </DropdownMenu>
-
-      <Link
-        href="/templates"
-        className={cn(
-          "flex items-center gap-1.5 px-2.5 lg:px-3 xl:px-4 py-2 text-sm font-medium rounded-lg transition-all min-h-[40px]",
-          isActive("/templates")
-            ? "bg-accent text-foreground"
-            : "text-muted-foreground hover:bg-accent/50 hover:text-foreground"
-        )}
-      >
-        <NavigationIcon
-          icon={LayoutTemplate}
-          isActive={isActive("/templates")}
-          className="h-4 w-4 flex-shrink-0"
-        />
-        <span className="whitespace-nowrap">Templates</span>
-      </Link>
-
-      <Link
-        href="/docs"
-        className={cn(
-          "flex items-center gap-1.5 px-2.5 lg:px-3 xl:px-4 py-2 text-sm font-medium rounded-lg transition-all min-h-[40px]",
-          isActive("/docs")
-            ? "bg-accent text-foreground"
-            : "text-muted-foreground hover:bg-accent/50 hover:text-foreground"
-        )}
-      >
-        <NavigationIcon
-          icon={BookOpen}
-          isActive={isActive("/docs")}
-          className="h-4 w-4 flex-shrink-0"
-        />
-        <span className="whitespace-nowrap">Docs</span>
-      </Link>
-    </div>
-  );
-
-  // Mobile Navigation with improved animations
-  const MobileNav = () => {
-    const [billingOpen, setBillingOpen] = useState(false);
-    const [financesOpen, setFinancesOpen] = useState(false);
-
-    return (
-      <div className="flex flex-col gap-1">
-        {/* Dashboard */}
+  // Desktop Layout (≥1024px): Full navigation + all actions
+  const DesktopNav = () => (
+    <>
+      {/* Navigation Links */}
+      <div className="flex items-center gap-1">
         <Link
           href="/dashboard"
           className={cn(
-            "flex items-center gap-3 px-4 py-3 text-base font-medium rounded-lg transition-all duration-200 min-h-[48px]",
+            "flex items-center gap-2 px-3 py-2.5 text-sm font-medium rounded-[10.4px] min-h-[40px] transition-all duration-200 active:scale-[0.98]",
             isActive("/dashboard")
-              ? "bg-accent text-foreground shadow-sm"
-              : "text-muted-foreground hover:text-foreground hover:bg-accent/50"
+              ? `bg-white/5 text-[var(--nav-text-color)] hover:bg-white/10 hover:shadow-sm`
+              : `text-[var(--nav-text-color)]/80 hover:text-[var(--nav-text-color)] hover:bg-accent/20 hover:shadow-sm`
           )}
-          onClick={() => setMobileMenuOpen(false)}
         >
-          <NavigationIcon
-            icon={LayoutDashboard}
-            isActive={isActive("/dashboard")}
-            className="h-5 w-5"
-          />
-          Dashboard
+          <LayoutDashboardIcon className="h-4 w-4 flex-shrink-0" />
+          <span className="whitespace-nowrap">Dashboard</span>
         </Link>
 
-        {/* Billing Section */}
-        <div className="space-y-1">
-          <button
-            onClick={() => setBillingOpen(!billingOpen)}
-            className={cn(
-              "w-full flex items-center justify-between px-4 py-3 text-base font-medium rounded-lg transition-all duration-200 min-h-[48px]",
-              isGroupActive(navigationConfig.billing.items)
-                ? "bg-accent/50 text-foreground"
-                : "text-muted-foreground hover:text-foreground hover:bg-accent/50"
-            )}
-            aria-expanded={billingOpen}
-            aria-controls="billing-submenu"
-            aria-label="Billing menu"
-          >
-            <span className="flex items-center gap-3">
-              <NavigationIcon
-                icon={FileText}
-                isActive={isGroupActive(navigationConfig.billing.items)}
-                className="h-5 w-5"
-              />
-              Billing
-            </span>
-            <ChevronDown
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button
+              type="button"
               className={cn(
-                "h-4 w-4 transition-transform duration-300 ease-out",
-                billingOpen && "rotate-180"
+                "flex items-center gap-2 px-3 py-2.5 text-sm font-medium rounded-[10.4px] min-h-[40px] transition-all duration-200 active:scale-[0.98]",
+                isGroupActive(navigationConfig.billing.items)
+                  ? `bg-white/5 text-[var(--nav-text-color)] hover:bg-white/10 hover:shadow-sm`
+                  : `text-[var(--nav-text-color)]/80 hover:text-[var(--nav-text-color)] hover:bg-accent/20 hover:shadow-sm`
               )}
-            />
-          </button>
-          <div
-            id="billing-submenu"
-            className={cn(
-              "ml-4 space-y-1 overflow-hidden transition-all duration-300 ease-out",
-              billingOpen ? "max-h-96 opacity-100" : "max-h-0 opacity-0"
-            )}
-          >
-            {navigationConfig.billing.items.map((item, index) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={cn(
-                  "flex items-center gap-3 px-4 py-3 text-sm rounded-lg transition-all duration-200 min-h-[48px]",
-                  isActive(item.href)
-                    ? "bg-accent text-foreground shadow-sm"
-                    : "text-muted-foreground hover:text-foreground hover:bg-accent/50"
-                )}
-                style={{
-                  transitionDelay: billingOpen ? `${index * 50}ms` : "0ms",
-                  transform: billingOpen ? "translateX(0)" : "translateX(-8px)",
-                  opacity: billingOpen ? 1 : 0,
-                }}
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                <NavigationIcon
-                  icon={item.icon}
-                  isActive={isActive(item.href)}
-                  className="h-4 w-4"
-                />
-                {item.label}
-              </Link>
+            >
+              <FileText className="h-4 w-4 flex-shrink-0" />
+              <span className="whitespace-nowrap">Billing</span>
+              <ChevronDown className="h-3 w-3 opacity-60" />
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="start" className="w-48">
+            {navigationConfig.billing.items.map(item => (
+              <DropdownMenuItem key={item.href} asChild>
+                <Link href={item.href} className="flex items-center gap-2">
+                  <NavigationIcon
+                    icon={item.icon}
+                    isActive={isActive(item.href)}
+                    className="h-4 w-4"
+                  />
+                  {item.label}
+                </Link>
+              </DropdownMenuItem>
             ))}
-          </div>
-        </div>
+          </DropdownMenuContent>
+        </DropdownMenu>
 
-        {/* Clients */}
         <Link
           href="/clients"
           className={cn(
-            "flex items-center gap-3 px-4 py-3 text-base font-medium rounded-lg transition-all duration-200 min-h-[48px]",
+            "flex items-center gap-2 px-3 py-2.5 text-sm font-medium rounded-[10.4px] min-h-[40px] transition-all duration-200 active:scale-[0.98]",
             isActive("/clients")
-              ? "bg-accent text-foreground shadow-sm"
-              : "text-muted-foreground hover:text-foreground hover:bg-accent/50"
+              ? `bg-white/5 text-[var(--nav-text-color)] hover:bg-white/10 hover:shadow-sm`
+              : `text-[var(--nav-text-color)]/80 hover:text-[var(--nav-text-color)] hover:bg-accent/20 hover:shadow-sm`
           )}
-          onClick={() => setMobileMenuOpen(false)}
         >
-          <NavigationIcon
-            icon={Users}
-            isActive={isActive("/clients")}
-            className="h-5 w-5"
-          />
-          Clients
+          <Users className="h-4 w-4" />
+          <span className="whitespace-nowrap">Clients</span>
         </Link>
 
-        {/* Finances Section */}
-        <div className="space-y-1">
-          <button
-            onClick={() => setFinancesOpen(!financesOpen)}
-            className={cn(
-              "w-full flex items-center justify-between px-4 py-3 text-base font-medium rounded-lg transition-all duration-200 min-h-[48px]",
-              isGroupActive(navigationConfig.finances.items)
-                ? "bg-accent/50 text-foreground"
-                : "text-muted-foreground hover:text-foreground hover:bg-accent/50"
-            )}
-            aria-expanded={financesOpen}
-            aria-controls="finances-submenu"
-            aria-label="Finances menu"
-          >
-            <span className="flex items-center gap-3">
-              <NavigationIcon
-                icon={BarChart3}
-                isActive={isGroupActive(navigationConfig.finances.items)}
-                className="h-5 w-5"
-              />
-              Finances
-            </span>
-            <ChevronDown
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button
+              type="button"
               className={cn(
-                "h-4 w-4 transition-transform duration-300 ease-out",
-                financesOpen && "rotate-180"
+                "flex items-center gap-2 px-3 py-2.5 text-sm font-medium rounded-[10.4px] min-h-[40px] transition-all duration-200 active:scale-[0.98]",
+                isGroupActive(navigationConfig.finances.items)
+                  ? `bg-white/5 text-[var(--nav-text-color)] hover:bg-white/10 hover:shadow-sm`
+                  : `text-[var(--nav-text-color)]/80 hover:text-[var(--nav-text-color)] hover:bg-accent/20 hover:shadow-sm`
               )}
-            />
-          </button>
-          <div
-            id="finances-submenu"
-            className={cn(
-              "ml-4 space-y-1 overflow-hidden transition-all duration-300 ease-out",
-              financesOpen ? "max-h-96 opacity-100" : "max-h-0 opacity-0"
-            )}
-          >
-            {navigationConfig.finances.items.map((item, index) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={cn(
-                  "flex items-center gap-3 px-4 py-3 text-sm rounded-lg transition-all duration-200 min-h-[48px]",
-                  isActive(item.href)
-                    ? "bg-accent text-foreground shadow-sm"
-                    : "text-muted-foreground hover:text-foreground hover:bg-accent/50"
-                )}
-                style={{
-                  transitionDelay: financesOpen ? `${index * 50}ms` : "0ms",
-                  transform: financesOpen
-                    ? "translateX(0)"
-                    : "translateX(-8px)",
-                  opacity: financesOpen ? 1 : 0,
-                }}
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                <NavigationIcon
-                  icon={item.icon}
-                  isActive={isActive(item.href)}
-                  className="h-4 w-4"
-                />
-                {item.label}
-              </Link>
+            >
+              <BarChart3 className="h-4 w-4 flex-shrink-0" />
+              <span className="whitespace-nowrap">Finances</span>
+              <ChevronDown className="h-3 w-3 opacity-60" />
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="start" className="w-48">
+            {navigationConfig.finances.items.map(item => (
+              <DropdownMenuItem key={item.href} asChild>
+                <Link href={item.href} className="flex items-center gap-2">
+                  <NavigationIcon
+                    icon={item.icon}
+                    isActive={isActive(item.href)}
+                    className="h-4 w-4"
+                  />
+                  {item.label}
+                </Link>
+              </DropdownMenuItem>
             ))}
-          </div>
-        </div>
+          </DropdownMenuContent>
+        </DropdownMenu>
 
-        {/* Templates */}
         <Link
           href="/templates"
           className={cn(
-            "flex items-center gap-3 px-4 py-3 text-base font-medium rounded-lg transition-all duration-200 min-h-[48px]",
+            "flex items-center gap-2 px-3 py-2.5 text-sm font-medium rounded-[10.4px] min-h-[40px] transition-all duration-200 active:scale-[0.98]",
             isActive("/templates")
-              ? "bg-accent text-foreground shadow-sm"
-              : "text-muted-foreground hover:text-foreground hover:bg-accent/50"
+              ? `bg-white/5 text-[var(--nav-text-color)] hover:bg-white/10 hover:shadow-sm`
+              : `text-[var(--nav-text-color)]/80 hover:text-[var(--nav-text-color)] hover:bg-accent/20 hover:shadow-sm`
           )}
-          onClick={() => setMobileMenuOpen(false)}
         >
-          <NavigationIcon
-            icon={LayoutTemplate}
-            isActive={isActive("/templates")}
-            className="h-5 w-5"
-          />
-          Templates
+          <LayoutTemplate className="h-4 w-4 flex-shrink-0" />
+          <span className="whitespace-nowrap">Templates</span>
         </Link>
 
-        {/* Docs */}
         <Link
           href="/docs"
           className={cn(
-            "flex items-center gap-3 px-4 py-3 text-base font-medium rounded-lg transition-all duration-200 min-h-[48px]",
+            "flex items-center gap-2 px-3 py-2.5 text-sm font-medium rounded-[10.4px] min-h-[40px] transition-all duration-200 active:scale-[0.98]",
             isActive("/docs")
-              ? "bg-accent text-foreground shadow-sm"
-              : "text-muted-foreground hover:text-foreground hover:bg-accent/50"
+              ? `bg-white/5 text-[var(--nav-text-color)] hover:bg-white/10 hover:shadow-sm`
+              : `text-[var(--nav-text-color)]/80 hover:text-[var(--nav-text-color)] hover:bg-accent/20 hover:shadow-sm`
           )}
-          onClick={() => setMobileMenuOpen(false)}
         >
-          <NavigationIcon
-            icon={BookOpen}
-            isActive={isActive("/docs")}
-            className="h-5 w-5"
-          />
-          Docs
+          <BookOpen className="h-4 w-4 flex-shrink-0" />
+          <span className="whitespace-nowrap">Docs</span>
         </Link>
       </div>
-    );
-  };
+
+      {/* Action Buttons */}
+      <div className="flex items-center gap-2 pl-4 border-l border-[rgba(55,77,88,0.3)]">
+        <SearchButton />
+        <QuickActionsMenu />
+
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button
+              type="button"
+              className="h-11 w-11 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-[14.4px] border-[var(--nav-button-border)] transition-all duration-200"
+            >
+              <div className="relative">
+                <span className="text-[#94a3b8] font-semibold text-lg leading-6">
+                  LD
+                </span>
+              </div>
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-60" sideOffset={8}>
+            <div className="px-3 py-3 border-b border-[rgba(36,38,40,0.5)]">
+              <div className="flex items-center gap-3">
+                {user && <UserAvatar user={user} size="md" bordered />}
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium truncate text-[#94a3b8]">
+                    {user?.name || "-"}
+                  </p>
+                  <p className="text-xs text-muted-foreground truncate">
+                    {user?.email || "-"}
+                  </p>
+                </div>
+              </div>
+            </div>
+            <DropdownMenuSeparator />
+            <div className="py-1">
+              <DropdownMenuItem asChild className="h-11 gap-3 cursor-pointer">
+                <Link href="/settings" className="flex items-center gap-2">
+                  <Settings className="h-4 w-4 text-muted-foreground" />
+                  <span>Settings</span>
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild className="h-11 gap-3 cursor-pointer">
+                <Link href="/subscription" className="flex items-center gap-2">
+                  <Sparkles className="h-4 w-4 text-muted-foreground" />
+                  <span>Subscription</span>
+                </Link>
+              </DropdownMenuItem>
+            </div>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem
+              className="h-11 gap-3 cursor-pointer text-destructive focus:text-destructive focus:bg-destructive/10"
+              onClick={() => logout.mutate()}
+            >
+              <LogOut className="h-4 w-4" />
+              <span>Log Out</span>
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+    </>
+  );
+
+  // Tablet Layout (768px-1024px): Search + New + User only (no nav links, logo in main nav)
+  const TabletNav = () => (
+    <div className="flex items-center gap-2">
+      <SearchButton />
+      <QuickActionsMenu />
+
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <button
+            type="button"
+            className="h-11 w-11 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-[14.4px] border-[var(--nav-button-border)] transition-all duration-200"
+          >
+            <div className="relative">
+              <span className="text-[#94a3b8] font-semibold text-lg leading-6">
+                LD
+              </span>
+            </div>
+          </button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" className="w-60" sideOffset={8}>
+          <div className="px-3 py-3 border-b border-[rgba(36,38,40,0.5)]">
+            <div className="flex items-center gap-3">
+              {user && <UserAvatar user={user} size="md" bordered />}
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium truncate text-[#94a3b8]">
+                  {user?.name || "-"}
+                </p>
+                <p className="text-xs text-muted-foreground truncate">
+                  {user?.email || "-"}
+                </p>
+              </div>
+            </div>
+          </div>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem
+            onClick={() => logout.mutate()}
+            className="h-11 gap-3 cursor-pointer text-destructive focus:text-destructive focus:bg-destructive/10"
+          >
+            <LogOut className="h-4 w-4" />
+            <span>Log Out</span>
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </div>
+  );
+
+  // Mobile Layout (<768px): Hamburger + Search + New + User (logo in main nav, nav links in hamburger)
+  const MobileNav = () => (
+    <div className="flex items-center gap-2">
+          <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
+            <SheetTrigger asChild>
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                className="h-11 w-11 min-w-[44px] min-h-[44px] text-[var(--nav-text-color)]"
+              >
+                <Menu className="h-5 w-5" />
+              </Button>
+            </SheetTrigger>
+            <SheetContent
+              side="right"
+              className="w-80 max-w-[85vw] p-0"
+              hideCloseButton
+            >
+              <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
+              <div className="flex flex-col h-full">
+                <Accordion type="single" collapsible className="border-0">
+                  <AccordionItem value="billing">
+                    <AccordionTrigger className="h-14 px-4 flex items-center justify-between hover:bg-accent/50 transition-colors">
+                      <div className="flex items-center gap-3">
+                        <FileText className="h-5 w-5" />
+                        <span className="font-medium text-[var(--nav-text-color)]">
+                          Billing
+                        </span>
+                        <ChevronDown className="h-4 w-4 opacity-60" />
+                      </div>
+                    </AccordionTrigger>
+                    <AccordionContent className="border-t border-[rgba(36,38,40,0.5)] bg-[rgba(17,29,34,0.95)]">
+                      <div className="space-y-1 px-4 py-2">
+                        {navigationConfig.billing.items.map(item => (
+                          <Link
+                            key={item.href}
+                            href={item.href}
+                            className="flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg hover:bg-accent/50 transition-colors"
+                            onClick={() => setMobileMenuOpen(false)}
+                          >
+                            <NavigationIcon
+                              icon={item.icon}
+                              isActive={isActive(item.href)}
+                              className="h-4 w-4"
+                            />
+                            <span>{item.label}</span>
+                          </Link>
+                        ))}
+                      </div>
+                    </AccordionContent>
+                  </AccordionItem>
+
+                  <AccordionItem value="finances">
+                    <AccordionTrigger className="h-14 px-4 flex items-center justify-between hover:bg-accent/50 transition-colors">
+                      <div className="flex items-center gap-3">
+                        <BarChart3 className="h-5 w-5" />
+                        <span className="font-medium text-[var(--nav-text-color)]">
+                          Finances
+                        </span>
+                        <ChevronDown className="h-4 w-4 opacity-60" />
+                      </div>
+                    </AccordionTrigger>
+                    <AccordionContent className="border-t border-[rgba(36,38,40,0.5)] bg-[rgba(17,29,34,0.95)]">
+                      <div className="space-y-1 px-4 py-2">
+                        {navigationConfig.finances.items.map(item => (
+                          <Link
+                            key={item.href}
+                            href={item.href}
+                            className="flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg hover:bg-accent/50 transition-colors"
+                            onClick={() => setMobileMenuOpen(false)}
+                          >
+                            <NavigationIcon
+                              icon={item.icon}
+                              isActive={isActive(item.href)}
+                              className="h-4 w-4"
+                            />
+                            <span>{item.label}</span>
+                          </Link>
+                        ))}
+                      </div>
+                    </AccordionContent>
+                  </AccordionItem>
+
+                  <Link
+                    href="/clients"
+                    className="flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg hover:bg-accent/50 transition-colors"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    <Users className="h-5 w-5" />
+                    <span className="font-medium text-[var(--nav-text-color)]">
+                      Clients
+                    </span>
+                  </Link>
+
+                  <Link
+                    href="/templates"
+                    className="flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg hover:bg-accent/50 transition-colors"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    <LayoutTemplate className="h-5 w-5" />
+                    <span className="font-medium text-[var(--nav-text-color)]">
+                      Templates
+                    </span>
+                  </Link>
+
+                  <Link
+                    href="/docs"
+                    className="flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg hover:bg-accent/50 transition-colors"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    <BookOpen className="h-5 w-5" />
+                    <span className="font-medium text-[var(--nav-text-color)]">
+                      Docs
+                    </span>
+                  </Link>
+                </Accordion>
+              </div>
+            </SheetContent>
+          </Sheet>
+
+          <SearchButton />
+
+          <QuickActionsMenu />
+
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button
+                type="button"
+                className="h-11 w-11 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-[14.4px] border-[var(--nav-button-border)] transition-all duration-200"
+              >
+                <div className="relative">
+                  <span className="text-[#94a3b8] font-semibold text-lg leading-6">
+                    LD
+                  </span>
+                </div>
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-60" sideOffset={8}>
+              <div className="px-3 py-3 border-b border-[rgba(36,38,40,0.5)]">
+                <div className="flex items-center gap-3">
+                  {user && <UserAvatar user={user} size="md" bordered />}
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium truncate text-[#94a3b8]">
+                      {user?.name || "-"}
+                    </p>
+                    <p className="text-xs text-muted-foreground truncate">
+                      {user?.email || "-"}
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                onClick={() => logout.mutate()}
+                className="h-11 gap-3 cursor-pointer text-destructive focus:text-destructive focus:bg-destructive/10"
+              >
+                <LogOut className="h-4 w-4" />
+                <span>Log Out</span>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+  );
 
   return (
     <nav
-      className={cn(
-        "navbar-sticky transition-all duration-300",
-        scrolled && "scrolled"
-      )}
+      className="relative w-full border-b border-[var(--nav-border-color)] bg-[var(--nav-bg)] backdrop-blur-[var(--nav-backdrop-blur)] rounded-b-[22px]"
       role="navigation"
       aria-label="Main navigation"
     >
-      <div className="navbar-container">
-        <div className="navbar-inner">
-          {/* Logo - Dynamic sizing based on breakpoint */}
+      <div className="px-5 py-3">
+        <div className="flex items-center justify-between">
+          {/* Left: Logo - wide for desktop, monogram for tablet/mobile */}
           <Link
             href="/dashboard"
-            className="navbar-logo group relative"
+            className="flex items-center gap-2 transition-opacity hover:opacity-80"
             aria-label="SleekInvoices - Go to Dashboard"
           >
-            {/* Wide logo for desktop (lg+) */}
-            <img
-              src="/logos/wide/SleekInvoices-Logo-Wide.svg"
-              alt=""
-              role="presentation"
-              className="hidden lg:block navbar-logo-wide transition-all duration-150 ease-out group-hover:scale-[1.03] group-hover:brightness-110 group-active:scale-[0.98]"
-              style={{ height: "28px", width: "auto", maxWidth: "200px" }}
-            />
-            {/* Monogram icon for mobile and tablet (below lg) */}
-            <img
-              src="/logos/monogram/SleekInvoices-Monogram-White.svg"
-              alt=""
-              role="presentation"
-              className="lg:hidden navbar-logo-compact transition-all duration-150 ease-out group-hover:scale-110 group-hover:brightness-110 group-hover:drop-shadow-[0_0_8px_rgba(99,102,241,0.3)] group-active:scale-95"
-              style={{ height: "36px", width: "36px", maxWidth: "36px" }}
-            />
+            {size === "desktop" ? (
+              <img
+                src="/logos/wide/SleekInvoices-Logo-Wide.svg"
+                alt=""
+                className="h-7 w-auto"
+              />
+            ) : (
+              <img
+                src="/logos/monogram/SleekInvoices-Monogram-White.svg"
+                alt=""
+                className="h-9 w-9"
+              />
+            )}
           </Link>
 
-          {/* Desktop Navigation - Unified UX (1024px+) */}
-          <DesktopTabletNav />
-
-          {/* Right Side Actions */}
-          <div className="navbar-actions">
-            {/* Search Button - All viewports with improved touch targets */}
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setSearchOpen(true)}
-              className="h-11 min-h-[44px] min-w-[44px] gap-2 px-3 sm:px-4 text-muted-foreground hover:text-foreground hover:bg-accent/50"
-              aria-label="Open search (Cmd+K)"
-            >
-              <Search className="h-4 w-4 flex-shrink-0" />
-              <span className="hidden md:inline">Search</span>
-              <kbd className="hidden lg:inline-flex pointer-events-none h-5 select-none items-center gap-1 rounded border border-border/50 bg-muted/50 px-1.5 font-mono text-[10px] font-medium text-muted-foreground">
-                ⌘K
-              </kbd>
-            </Button>
-
-            {/* Quick Actions */}
-            <QuickActionsMenu />
-
-            {/* User Menu */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <button
-                  className="flex items-center justify-center rounded-xl h-10 w-10 sm:h-11 sm:w-11 min-w-[40px] min-h-[40px] sm:min-w-[44px] sm:min-h-[44px] hover:ring-2 hover:ring-primary/20 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary"
-                  aria-label="User menu"
-                >
-                  {user && <UserAvatar user={user} size="sm" bordered />}
-                </button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-60" sideOffset={8}>
-                <div className="px-3 py-3 border-b border-border/50">
-                  <div className="flex items-center gap-3">
-                    {user && <UserAvatar user={user} size="md" bordered />}
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium truncate">
-                        {user?.name}
-                      </p>
-                      <p className="text-xs text-muted-foreground truncate">
-                        {user?.email}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-                <div className="py-1">
-                  <DropdownMenuItem
-                    asChild
-                    className="h-11 gap-3 cursor-pointer"
-                  >
-                    <Link href="/settings">
-                      <Settings className="h-4 w-4 text-muted-foreground" />
-                      <span>Settings</span>
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    asChild
-                    className="h-11 gap-3 cursor-pointer"
-                  >
-                    <Link href="/subscription">
-                      <Sparkles className="h-4 w-4 text-muted-foreground" />
-                      <span>Subscription</span>
-                    </Link>
-                  </DropdownMenuItem>
-                </div>
-                <DropdownMenuSeparator />
-                <div className="py-1">
-                  <DropdownMenuItem
-                    className="h-11 gap-3 cursor-pointer text-destructive focus:text-destructive focus:bg-destructive/10"
-                    onClick={() => logout.mutate()}
-                  >
-                    <LogOut className="h-4 w-4" />
-                    <span>Log Out</span>
-                  </DropdownMenuItem>
-                </div>
-              </DropdownMenuContent>
-            </DropdownMenu>
-
-            {/* Mobile Menu - Visible below lg (1024px) for better tablet experience */}
-            <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
-              <SheetTrigger asChild className="lg:hidden">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-10 w-10 sm:h-11 sm:w-11 min-w-[40px] min-h-[40px] sm:min-w-[44px] sm:min-h-[44px] transition-all duration-200"
-                  aria-label="Open navigation menu"
-                >
-                  <Menu
-                    className={cn(
-                      "h-5 w-5 flex-shrink-0 transition-transform duration-300",
-                      mobileMenuOpen && "rotate-90"
-                    )}
-                  />
-                </Button>
-              </SheetTrigger>
-              <SheetContent
-                side="right"
-                className="navbar-mobile-menu w-80 max-w-[85vw] p-0"
-                hideCloseButton
-              >
-                <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
-                <div className="flex flex-col h-full">
-                  {/* Mobile Menu Header with close button and search */}
-                  <div className="flex items-center gap-3 p-4 border-b border-border/50">
-                    <SheetClose className="flex-shrink-0 rounded-full p-2 bg-accent/50 text-muted-foreground hover:text-foreground hover:bg-accent transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-ring">
-                      <X className="size-4" />
-                      <span className="sr-only">Close menu</span>
-                    </SheetClose>
-                    <Button
-                      variant="ghost"
-                      onClick={() => {
-                        setMobileMenuOpen(false);
-                        setTimeout(() => setSearchOpen(true), 150);
-                      }}
-                      className="flex-1 justify-start text-muted-foreground hover:text-foreground h-10"
-                      aria-label="Open search"
-                    >
-                      <Search className="mr-2 h-4 w-4" />
-                      <span>Search...</span>
-                    </Button>
-                  </div>
-
-                  {/* Mobile Navigation */}
-                  <div className="flex-1 overflow-y-auto p-4">
-                    <MobileNav />
-                  </div>
-
-                  {/* Mobile Menu Footer */}
-                  <div className="p-4 border-t border-border/50 bg-accent/20 space-y-1">
-                    <Link
-                      href="/settings"
-                      className="flex items-center gap-3 px-4 py-3 text-base font-medium text-muted-foreground hover:text-foreground hover:bg-accent rounded-lg transition-all duration-200 min-h-[48px]"
-                      onClick={() => setMobileMenuOpen(false)}
-                    >
-                      <Settings className="h-5 w-5" />
-                      Settings
-                    </Link>
-                    <Link
-                      href="/subscription"
-                      className="flex items-center gap-3 px-4 py-3 text-base font-medium text-muted-foreground hover:text-foreground hover:bg-accent rounded-lg transition-all duration-200 min-h-[48px]"
-                      onClick={() => setMobileMenuOpen(false)}
-                    >
-                      <Sparkles className="h-5 w-5 text-amber-500" />
-                      Subscription
-                    </Link>
-
-                    {/* Support Links */}
-                    <div className="pt-2 mt-2 border-t border-border/30">
-                      <div className="px-4 py-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                        Support
-                      </div>
-                      <a
-                        href="mailto:hello@sleekinvoices.com"
-                        className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-accent rounded-lg transition-all duration-200 min-h-[44px]"
-                      >
-                        <Mail className="h-4 w-4" />
-                        <div className="flex flex-col">
-                          <span className="font-medium">General Inquiries</span>
-                          <span className="text-xs text-muted-foreground">
-                            hello@sleekinvoices.com
-                          </span>
-                        </div>
-                      </a>
-                      <a
-                        href="mailto:support@sleekinvoices.com"
-                        className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-accent rounded-lg transition-all duration-200 min-h-[44px]"
-                      >
-                        <Mail className="h-4 w-4" />
-                        <div className="flex flex-col">
-                          <span className="font-medium">Technical Support</span>
-                          <span className="text-xs text-muted-foreground">
-                            support@sleekinvoices.com
-                          </span>
-                        </div>
-                      </a>
-                    </div>
-
-                    <div className="pt-2 mt-2 border-t border-border/30">
-                      <button
-                        onClick={() => {
-                          setMobileMenuOpen(false);
-                          logout.mutate();
-                        }}
-                        className="w-full flex items-center gap-3 px-4 py-3 text-base font-medium text-destructive hover:text-destructive hover:bg-destructive/10 rounded-lg transition-all duration-200 min-h-[48px]"
-                      >
-                        <LogOut className="h-5 w-5" />
-                        Log Out
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </SheetContent>
-            </Sheet>
-          </div>
+          {/* Center: Navigation based on screen size */}
+          {size === "desktop" && <DesktopNav />}
+          {size === "tablet" && <TabletNav />}
+          {size === "mobile" && <MobileNav />}
         </div>
       </div>
     </nav>
